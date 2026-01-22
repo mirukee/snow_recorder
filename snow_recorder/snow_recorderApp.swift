@@ -14,6 +14,14 @@ struct snow_recorderApp: App {
         WindowGroup {
             ContentView()
         }
-        .modelContainer(for: RunSession.self)
+        .modelContainer(for: RunSession.self, isAutosaveEnabled: true, isUndoEnabled: false) { result in
+            switch result {
+            case .success(let container):
+                print("✅ SwiftData 컨테이너 로드 성공")
+            case .failure(let error):
+                print("❌ SwiftData 오류: \(error)")
+            }
+        }
     }
 }
+

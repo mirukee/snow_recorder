@@ -131,87 +131,191 @@ struct DashboardView: View {
                 }
                 .offset(y: -20)
                 
+                // [Status Badge] 현재 상태 표시 (RIDING, PAUSED, ON_LIFT, RESTING)
+                HStack(spacing: 6) {
+                    Image(systemName: locationManager.currentState.iconName)
+                        .font(.system(size: 12))
+                    Text(locationManager.currentState.rawValue)
+                        .font(.system(size: 10, weight: .bold))
+                        .tracking(1)
+                }
+                .padding(.horizontal, 12)
+                .padding(.vertical, 6)
+                .background(Color.white.opacity(0.15))
+                .clipShape(Capsule())
+                .foregroundColor(.white)
+                .padding(.bottom, 8)
+                
                 // [Center Bottom] Location Badge
                 HStack(spacing: 8) {
-                    Image(systemName: "mountain.2.fill") // landscape 대용
+                    Image(systemName: "mountain.2.fill")
                         .font(.system(size: 14))
                         .foregroundColor(.black)
-                    Text("HIGH1 RESORT - VICTORIA 1 (ADVANCED)")
-                        .font(.system(size: 12, weight: .bold))
-                        .textCase(.uppercase)
-                        .foregroundColor(.black)
+                    
+                    if let slope = locationManager.currentSlope {
+                        Text("HIGH1 RESORT - \(slope.name) (\(slope.difficulty.rawValue))")
+                            .font(.system(size: 12, weight: .bold))
+                            .textCase(.uppercase)
+                            .foregroundColor(.black)
+                    } else {
+                        Text("HIGH1 RESORT - LOCATING...")
+                            .font(.system(size: 12, weight: .bold))
+                            .textCase(.uppercase)
+                            .foregroundColor(.black)
+                    }
                 }
                 .padding(.horizontal, 20)
                 .padding(.vertical, 10)
                 .background(neonGreen)
                 .clipShape(Capsule())
                 .shadow(color: neonGreen.opacity(0.3), radius: 10, x: 0, y: 0)
-                .padding(.bottom, 48)
+                .padding(.bottom, 24)
                 
-                // [Footer] Stats Grid
-                HStack(spacing: 16) {
-                    // Elapsed Time
-                    StatsReflectiveCard(
+                // [Footer] Stats Grid - 6개 메트릭
+                LazyVGrid(columns: [GridItem(.flexible()), GridItem(.flexible()), GridItem(.flexible())], spacing: 12) {
+                    // Row 1
+                    StatsCompactCard(
                         icon: "timer",
                         title: "ELAPSED",
                         value: recordManager.formattedElapsedTime(),
                         accentColor: neonGreen
                     )
                     
-                    // Runs (Dummy for MVP)
-                    StatsReflectiveCard(
+                    StatsCompactCard(
+                        icon: "arrow.down.right",
+                        title: "VERTICAL",
+                        value: "\(Int(locationManager.verticalDrop))m",
+                        accentColor: neonGreen
+                    )
+                    
+                    StatsCompactCard(
                         icon: "figure.skiing.downhill",
                         title: "RUNS",
-                        value: "15",
+                        value: "\(locationManager.runCount)",
+                        accentColor: neonGreen
+                    )
+                    
+                    // Row 2
+                    StatsCompactCard(
+                        icon: "point.topleft.down.to.point.bottomright.curvepath",
+                        title: "DISTANCE",
+                        value: formatDistance(locationManager.totalDistance),
+                        accentColor: neonGreen
+                    )
+                    
+                    StatsCompactCard(
+                        icon: "gauge.with.dots.needle.67percent",
+                        title: "MAX",
+                        value: "\(Int(locationManager.maxSpeed))km/h",
+                        accentColor: neonGreen
+                    )
+                    
+                    StatsCompactCard(
+                        icon: "speedometer",
+                        title: "AVG",
+                        value: "\(Int(locationManager.avgSpeed))km/h",
                         accentColor: neonGreen
                     )
                 }
-                .padding(.horizontal, 24)
-                .padding(.bottom, 32)
+                .padding(.horizontal, 16)
+                .padding(.bottom, 24)
                 
-                // [Bottom] Stop Button
-                Button(action: {
-                    if recordManager.isRecording {
-                        recordManager.stopRecording(context: context)
-                    } else {
-                        recordManager.startRecording()
+                // [Bottom] Control Buttons
+                if recordManager.isRecording {
+                    HStack(spacing: 40) {
+                        // Pause / Resume Button
+                        Button(action: {
+                            if recordManager.isPaused {
+                                recordManager.resumeRecording()
+                            } else {
+                                recordManager.pauseRecording()
+                            }
+                        }) {
+                            ZStack {
+                                Circle()
+                                    .fill(Color(white: 0.15))
+                                    .frame(width: 60, height: 60)
+                                    .overlay(
+                                        Circle().stroke(Color.white.opacity(0.2), lineWidth: 1)
+                                    )
+                                
+                                Image(systemName: recordManager.isPaused ? "play.fill" : "pause.fill")
+                                    .font(.system(size: 24))
+                                    .foregroundColor(.yellow)
+                            }
+                        }
+                        .overlay(
+                            Text(recordManager.isPaused ? "RESUME" : "PAUSE")
+                                .font(.system(size: 10, weight: .bold))
+                                .tracking(2)
+                                .foregroundColor(.white.opacity(0.4))
+                                .offset(y: 50)
+                        )
+                        
+                        // Stop Button
+                        Button(action: {
+                            recordManager.stopRecording(context: context)
+                        }) {
+                            ZStack {
+                                // Outer Glow
+                                Circle()
+                                    .stroke(Color.red.opacity(0.5), lineWidth: 1)
+                                    .scaleEffect(1.1)
+                                
+                                // Button Base
+                                Circle()
+                                    .fill(Color.white)
+                                    .frame(width: 80, height: 80)
+                                    .shadow(color: .white.opacity(0.2), radius: 15, x: 0, y: 0)
+                                
+                                // Stop Icon
+                                Rectangle()
+                                    .fill(Color.red)
+                                    .frame(width: 32, height: 32)
+                                    .cornerRadius(4)
+                            }
+                        }
+                        .overlay(
+                            Text("STOP")
+                                .font(.system(size: 10, weight: .bold))
+                                .tracking(2)
+                                .foregroundColor(.white.opacity(0.4))
+                                .offset(y: 60)
+                        )
                     }
-                }) {
-                    ZStack {
-                        // Outer Glow
-                        Circle()
-                            .stroke(Color.white.opacity(0.2), lineWidth: 1)
-                            .scaleEffect(1.25)
-                        
-                        // White Button Base
-                        Circle()
-                            .fill(Color.white)
-                            .frame(width: 80, height: 80)
-                            .shadow(color: .white.opacity(0.2), radius: 15, x: 0, y: 0)
-                        
-                        // Icon (Square = Stop, Circle = Start)
-                        if recordManager.isRecording {
-                            Rectangle()
+                    .padding(.bottom, 20)
+                } else {
+                    // Start Button
+                    Button(action: {
+                        recordManager.startRecording()
+                    }) {
+                        ZStack {
+                            // Outer Glow
+                            Circle()
+                                .stroke(Color.white.opacity(0.2), lineWidth: 1)
+                                .scaleEffect(1.25)
+                            
+                            // White Button Base
+                            Circle()
+                                .fill(Color.white)
+                                .frame(width: 80, height: 80)
+                                .shadow(color: .white.opacity(0.2), radius: 15, x: 0, y: 0)
+                            
+                            // Start Icon
+                            Circle()
                                 .fill(Color.black)
                                 .frame(width: 32, height: 32)
-                                .cornerRadius(4)
-                        } else {
-                            Circle()
-                                .fill(Color.black) // 시작 안했을 떈 검은 원으로
-                                .frame(width: 32, height: 32)
                         }
-                        
-                        // Text Label Below Button (Image Ref has "Stop Tracking", but keeping it simple inside button logic visually)
                     }
+                    .overlay(
+                        Text("START TRACKING")
+                            .font(.system(size: 10, weight: .bold))
+                            .tracking(2)
+                            .foregroundColor(.white.opacity(0.4))
+                            .offset(y: 60)
+                    )
+                    .padding(.bottom, 20)
                 }
-                .overlay(
-                    Text(recordManager.isRecording ? "STOP TRACKING" : "START TRACKING")
-                        .font(.system(size: 10, weight: .bold))
-                        .tracking(2)
-                        .foregroundColor(.white.opacity(0.4))
-                        .offset(y: 60)
-                )
-                .padding(.bottom, 20)
                 
                 // [Footer Info] Version
                 HStack {
@@ -318,4 +422,56 @@ struct CornerShape: Shape {
 
 #Preview {
     DashboardView()
+}
+
+// MARK: - 컴팩트 스탯 카드 (LazyVGrid용)
+struct StatsCompactCard: View {
+    let icon: String
+    let title: String
+    let value: String
+    let accentColor: Color
+    
+    var body: some View {
+        VStack(spacing: 6) {
+            // Icon + Title
+            HStack(spacing: 4) {
+                Image(systemName: icon)
+                    .font(.system(size: 10))
+                    .foregroundColor(accentColor)
+                Text(title)
+                    .font(.system(size: 8, weight: .bold))
+                    .tracking(1)
+                    .foregroundColor(.white.opacity(0.6))
+            }
+            
+            // Value
+            Text(value)
+                .font(.system(size: 18, weight: .bold))
+                .tracking(-0.5)
+                .foregroundColor(.white)
+                .minimumScaleFactor(0.7)
+                .lineLimit(1)
+        }
+        .frame(maxWidth: .infinity)
+        .padding(.vertical, 14)
+        .background(
+            Color.white.opacity(0.05)
+                .cornerRadius(14)
+        )
+        .overlay(
+            RoundedRectangle(cornerRadius: 14)
+                .stroke(Color.white.opacity(0.08), lineWidth: 1)
+        )
+    }
+}
+
+// MARK: - 헬퍼 함수
+
+/// 거리를 포맷팅 (m 또는 km)
+private func formatDistance(_ meters: Double) -> String {
+    if meters >= 1000 {
+        return String(format: "%.1fkm", meters / 1000)
+    } else {
+        return "\(Int(meters))m"
+    }
 }

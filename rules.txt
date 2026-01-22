@@ -17,6 +17,7 @@
 
 # 디자인 시스템 (Design System)
 - **디자인 소스:** 개발자는 AI(Stitch)가 생성한 구체적인 디자인 이미지 파일을 제공한다. 코딩 시 이 이미지를 픽셀 단위로 참고하여 UI를 구현해야 한다.
+- **Stitch 디자인 보존:** Stitch로 구현된 기존 UI 컴포넌트는 최대한 수정하지 않는다. 기능 추가 시 새로운 컴포넌트를 추가하거나, 기존 레이아웃을 해치지 않는 범위 내에서만 변경한다.
 - 컬러 팔레트: 리얼 블랙(#000000) 배경 + 네온 그린(#00FF00) 포인트.
 - 타이포그래피: SF Pro Heavy (타이틀), SF Pro Rounded (숫자).
 
@@ -27,6 +28,38 @@
 # 코딩 규칙 (Coding Rules)
 - **모든 주석과 설명은 '한국어'로 작성한다.**
 - GPS는 배터리 효율을 고려하여 트래킹 상태일 때만 정밀하게 수집한다.
+
+## 배터리 효율 가이드라인 (Battery Optimization)
+- **GPS 정확도 조절:**
+  - RIDING 상태: `kCLLocationAccuracyBestForNavigation` (최고 정확도)
+  - ON_LIFT 상태: `kCLLocationAccuracyHundredMeters` (저전력)
+  - RESTING 상태: GPS 업데이트 중지 또는 `kCLLocationAccuracyKilometer`
+- **업데이트 주기:**
+  - 활강 중: 1초 간격 (실시간 속도 필요)
+  - 리프트/휴식: 5~10초 간격으로 줄임
+- **배경 위치 업데이트:**
+  - `allowsBackgroundLocationUpdates = true` (필수, 주머니에 넣고 사용)
+  - `pausesLocationUpdatesAutomatically = false` (자동 일시정지 방지)
+- **불필요한 계산 최소화:**
+  - 상태 전환 체크는 위치 업데이트마다가 아닌 debounce 적용 (5초)
+  - 슬로프 폴리곤 체크는 50m 이상 이동 시에만 수행
+
+
+# 프로젝트 로드맵 (Roadmap)
+1. **한국형 로컬라이제이션 (Localization) & 정밀 트래킹:**
+   - **슬로프 인식 엔진 (New):** 국내 주요 스키장(하이원 등)의 슬로프 GPS 좌표 데이터베이스 구축 및 Geofencing 로직 구현. (현재 `LocationManager`는 단순 좌표만 수집 중)
+   - **Vertical(고도차) 측정 추가:** `LocationManager`에 고도(Altitude) 변화량을 누적하여 '총 하강 고도(Vertical Drop)'를 계산하는 로직 추가 필요. (현재는 거리/속도만 존재)
+   - **데이터 모델 확장:** `RunSession`에 `verticalDrop`, `detectedSlopeName` 필드 추가.
+
+2. **핵심 기능 #1 - 소셜 인증샷 (Shareable Overlay):**
+   - **SharePreviewView 고도화:** 현재 더미로 구현된 `SharePreviewView`를 실제 라이딩 데이터와 연동.
+   - **커스텀 사진 배경:** 사용자가 갤러리/카메라에서 선택한 사진을 배경으로 깔고, 그 위에 네온 스타일의 라이딩 지표(속도, 거리, 로고)를 합성(Compositing)하여 이미지로 저장/공유하는 기능 구현.
+   - **Instagram Story 공유:** `LinkPresentation` 또는 `UIPasteboard`를 활용한 인스타그램 스토리 직접 공유 지원.
+
+3. **핵심 기능 #2 - 랭킹 및 게이미피케이션 (Ranking & Gamification):**
+   - **프로필 연동 심화:** `ProfileView`의 더미 데이터를 실제 `RunSession` 누적 데이터(총 거리, 최고 속도 등)와 실시간 연동.
+   - **티어 산정 로직:** 단순 통계 표시를 넘어, 사용자의 활동량(거리, 횟수)에 따라 Bronze -> Silver -> Gold 등의 티어를 자동 계산하여 부여하는 로직 구현.
+   - **리더보드 백엔드:** 추후 CloudKit 또는 Firebase를 활용한 유저 간 경쟁 시스템 기획 (우선 로컬 랭킹/뱃지부터 완성).
 
 # 답변
 - 답변은 한국어로 한다.

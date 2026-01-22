@@ -9,8 +9,9 @@ struct HistoryView: View {
     @Query(sort: \RunSession.startTime, order: .reverse) private var sessions: [RunSession]
     
     var body: some View {
-        ZStack {
-            // 전체 배경
+        NavigationStack {
+            ZStack {
+                // 전체 배경
             Color.black.ignoresSafeArea()
             
             VStack(spacing: 0) {
@@ -52,17 +53,19 @@ struct HistoryView: View {
                             }
                             .padding(.top, 100)
                         } else {
-                            ForEach(Array(sessions.enumerated()), id: \.element.id) { index, session in
-                                HistoryCard(
-                                    date: formatDate(session.startTime),
-                                    location: session.locationName,
-                                    value: String(format: "%.1f", session.maxSpeed),
-                                    unit: "KM/H",
-                                    imageColor: colors[index % colors.count],
-                                    rotation: Double((index % 3) - 1) * 2.0, // -2, 0, 2 rotation
-                                    neonGreen: neonGreen
-                                )
-                            }
+                                ForEach(Array(sessions.enumerated()), id: \.element.id) { index, session in
+                                    NavigationLink(destination: RunDetailView(session: session)) {
+                                        HistoryCard(
+                                            date: formatDate(session.startTime),
+                                            location: session.locationName,
+                                            value: String(format: "%.1f", session.maxSpeed),
+                                            unit: "KM/H",
+                                            imageColor: colors[index % colors.count],
+                                            rotation: Double((index % 3) - 1) * 2.0, // -2, 0, 2 rotation
+                                            neonGreen: neonGreen
+                                        )
+                                    }
+                                }
                         }
                         
                         // End of Season
@@ -80,6 +83,7 @@ struct HistoryView: View {
             }
         }
         .ignoresSafeArea(.all, edges: .top) // 헤더가 상단까지 덮도록
+        }
     }
     
     // 카드 배경색 팔레트

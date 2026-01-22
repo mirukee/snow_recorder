@@ -7,10 +7,13 @@ class RecordManager: ObservableObject {
     static let shared = RecordManager()
     
     @Published var isRecording: Bool = false       // 현재 녹화 중 여부
+    @Published var isPaused: Bool = false          // 일시 정지 여부
     @Published var elapsedTime: TimeInterval = 0   // 경과 시간 (초)
     
     private var timer: Timer?
     private var startTime: Date?
+    private var pauseTime: Date?
+    private var totalPausedDuration: TimeInterval = 0
     
     private init() {}
     
@@ -28,8 +31,30 @@ class RecordManager: ObservableObject {
         // 1초 단위 타이머 시작
         timer = Timer.scheduledTimer(withTimeInterval: 1.0, repeats: true) { [weak self] _ in
             guard let self = self, let start = self.startTime else { return }
-            self.elapsedTime = Date().timeIntervalSince(start)
+            
+            if !self.isPaused {
+                self.elapsedTime = Date().timeIntervalSince(start) - self.totalPausedDuration
+            }
         }
+    }
+    
+    /// 녹화 일시 정지
+    func pauseRecording() {
+        guard isRecording && !isPaused else { return }
+        isPaused = true
+        pauseTime = Date()
+        LocationManager.shared.pauseTracking()
+    }
+    
+    /// 녹화 재개
+    func resumeRecording() {
+        guard isRecording && isPaused, let pauseStart = pauseTime else { return }
+        
+        // 정지된 시간 누적
+        totalPausedDuration += Date().timeIntervalSince(pauseStart)
+        pauseTime = nil
+        isPaused = false
+        LocationManager.shared.resumeTracking()
     }
     
     /// 녹화 종료 & 저장
@@ -38,8 +63,17 @@ class RecordManager: ObservableObject {
         
         let end = Date()
         let duration = elapsedTime
-        let distance = LocationManager.shared.totalDistance
-        let maxSpeed = LocationManager.shared.maxSpeed
+        
+        // LocationManager에서 메트릭 수집
+        let locationManager = LocationManager.shared
+        let distance = locationManager.totalDistance
+        let maxSpeed = locationManager.maxSpeed
+        let avgSpeed = locationManager.avgSpeed
+        let verticalDrop = locationManager.verticalDrop
+        let runCount = locationManager.runCount
+        let currentSlope = locationManager.currentSlope?.name
+        let sessionSlopes = locationManager.sessionSlopeCounts
+        let routeCoordinates = locationManager.routeCoordinates
         
         // 1. 데이터 저장
         let session = RunSession(
@@ -48,16 +82,26 @@ class RecordManager: ObservableObject {
             duration: duration,
             distance: distance,
             maxSpeed: maxSpeed,
-            locationName: "HIGH1 RESORT" // 추후 LocationManager에서 지오코딩으로 가져올 수 있음
+            avgSpeed: avgSpeed,
+            verticalDrop: verticalDrop,
+            runCount: runCount,
+            slopeName: currentSlope,
+            riddenSlopes: sessionSlopes,
+            locationName: "HIGH1 RESORT",
+            routeCoordinates: routeCoordinates
         )
         
         context.insert(session)
+        try? context.save()
         
         // 2. 상태 초기화
         isRecording = false
+        isPaused = false
         timer?.invalidate()
         timer = nil
         startTime = nil
+        pauseTime = nil
+        totalPausedDuration = 0
         
         // LocationManager 트래킹 종료
         LocationManager.shared.stopTracking()
