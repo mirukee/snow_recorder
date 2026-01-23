@@ -20,7 +20,13 @@ class GamificationService: ObservableObject {
         Badge(title: "Marathoner", description: "Ski a total of 100km.", iconName: "figure.walk", unlockCondition: { stats in stats.totalDistance >= 100.0 }),
         Badge(title: "Speed Demon", description: "Reach a speed of 80km/h.", iconName: "flame.fill", unlockCondition: { stats in stats.maxSpeed >= 80.0 }),
         Badge(title: "Century Club", description: "Complete 100 runs.", iconName: "100.circle.fill", unlockCondition: { stats in stats.totalRuns >= 100 }),
-        Badge(title: "Everest", description: "Ski 8,848m vertical drop (Mock).", iconName: "mountain.2.fill", unlockCondition: { _ in false }) // Vertical Logic not yet in UserStats
+        Badge(title: "Everest", description: "Ski 8,848m vertical drop.", iconName: "mountain.2.fill", unlockCondition: { stats in stats.totalVerticalDrop >= 8848.0 }),
+        
+        // New Badges
+        Badge(title: "High Flyer", description: "Ski 20,000m vertical drop.", iconName: "airplane.departure", unlockCondition: { stats in stats.totalVerticalDrop >= 20000.0 }),
+        Badge(title: "Early Bird", description: "Start skiing before 9 AM.", iconName: "sunrise.fill", unlockCondition: { _ in false }), // Needs session time check logic
+        Badge(title: "Night Owl", description: "Ski after 7 PM.", iconName: "moon.stars.fill", unlockCondition: { _ in false }), // Needs session time check logic
+        Badge(title: "Safe Rider", description: "Record 10 sessions without crashing (Mock).", iconName: "checkmark.shield.fill", unlockCondition: { stats in stats.totalRuns >= 50 }) // Placeholder
     ]
     
     private init() {
@@ -49,6 +55,7 @@ class GamificationService: ObservableObject {
             newStats.totalRuns += session.runCount
             newStats.totalDistance += (session.distance / 1000.0) // Convert m to km
             newStats.maxSpeed = max(newStats.maxSpeed, session.maxSpeed)
+            newStats.totalVerticalDrop += session.verticalDrop
             newStats.totalDuration += session.duration
             
             // 2. Calculate XP for this session

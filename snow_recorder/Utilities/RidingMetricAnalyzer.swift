@@ -40,6 +40,7 @@ final class RidingMetricAnalyzer: ObservableObject {
     private var maxGForce: Double = 0.0
     private var speedSum: Double = 0.0
     private var speedSampleCount: Int = 0
+    private var maxSpeed: Double = 0.0 // 추가: 이번 런의 최고 속도
     private var latestEdgeResult: RidingSessionResult?
     
     // MARK: - 상수 (튜닝 가능)
@@ -79,12 +80,21 @@ final class RidingMetricAnalyzer: ObservableObject {
     }
     
     /// 세션 분석 종료 (강제 종료용)
-    func stopSession() {
+    func stopSession(completion: @escaping (RidingSessionResult?) -> Void) {
         analysisQueue.async { [weak self] in
-            guard let self else { return }
+            guard let self else {
+                DispatchQueue.main.async { completion(nil) }
+                return
+            }
             self.stopMotionUpdates()
             self.finalizeSessionResult()
             self.setAnalyzing(false)
+            
+            // 결과 반환
+            let result = self.latestEdgeResult
+            DispatchQueue.main.async {
+                completion(result)
+            }
         }
     }
     
@@ -123,6 +133,9 @@ final class RidingMetricAnalyzer: ObservableObject {
             if self.isAnalyzingInternal && self.currentState == .riding {
                 self.speedSum += safeSpeed
                 self.speedSampleCount += 1
+                if safeSpeed > self.maxSpeed {
+                    self.maxSpeed = safeSpeed
+                }
             }
         }
     }
@@ -256,6 +269,7 @@ final class RidingMetricAnalyzer: ObservableObject {
         maxGForce = 0.0
         speedSum = 0.0
         speedSampleCount = 0
+        maxSpeed = 0.0
     }
     
     private func finalizeSessionResult() {
@@ -267,7 +281,8 @@ final class RidingMetricAnalyzer: ObservableObject {
             edgeScore: edgeScore,
             flowScore: flowScore,
             maxGForce: maxGForce,
-            averageSpeed: averageSpeed
+            averageSpeed: averageSpeed,
+            maxSpeed: maxSpeed
         )
         
         latestEdgeResult = result

@@ -5,6 +5,7 @@ import SwiftData
 struct ProfileView: View {
     @StateObject private var viewModel = MyPageViewModel()
     @State private var showSettings = false
+    @State private var showBadgeList = false
     @ObservedObject private var rankingService = RankingService.shared
     
     // SwiftData에서 모든 주행 기록 가져오기
@@ -203,9 +204,11 @@ struct ProfileView: View {
                                 .tracking(1)
                                 .foregroundColor(.gray)
                             Spacer()
-                            Text("View All")
-                                .font(.system(size: 12, weight: .bold))
-                                .foregroundColor(neonGreen)
+                            Button(action: { showBadgeList = true }) {
+                                Text("View All")
+                                    .font(.system(size: 12, weight: .bold))
+                                    .foregroundColor(neonGreen)
+                            }
                         }
                         .padding(.horizontal, 24)
                         
@@ -213,7 +216,7 @@ struct ProfileView: View {
                             HStack(spacing: 20) {
                                 Spacer().frame(width: 4) // Left Padding
                                 
-                                ForEach(viewModel.userProfile.badges) { badge in
+                                ForEach(viewModel.userProfile.badges.prefix(5)) { badge in // Show only first 5 recent
                                     HexBadge(
                                         icon: badge.iconName,
                                         title: badge.title,
@@ -226,6 +229,9 @@ struct ProfileView: View {
                                 Spacer().frame(width: 4) // Right Padding
                             }
                         }
+                    }
+                    .sheet(isPresented: $showBadgeList) {
+                        BadgeListView(badges: viewModel.userProfile.badges)
                     }
                     
                     // [Leaderboard] (Mini)

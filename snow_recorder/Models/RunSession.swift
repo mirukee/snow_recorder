@@ -1,5 +1,6 @@
 import Foundation
 import SwiftData
+import CoreLocation
 
 /// 스키/보드 주행 기록을 저장하는 데이터 모델
 @Model
@@ -20,6 +21,28 @@ final class RunSession {
     var routeSpeeds: [Double] = []   // GPS 경로별 속도 (km/h) - 히트맵용
     var runStartIndices: [Int] = [0] // 각 런의 시작 인덱스 (리프트 점선 연결용)
     var timelineEvents: [TimelineEvent] = [] // 타임라인 이벤트 목록
+    
+    // MARK: - Riding Metrics
+    var edgeScore: Int = 0          // 엣지 점수 (0-100) (세션 최고점)
+    var flowScore: Int = 0          // 플로우 점수 (0-100) (세션 최고점)
+    var maxGForce: Double = 0.0       // 최대 G-Force (세션 최고점)
+    
+    // 런별 상세 기록 (Run Metrics)
+    var runMetrics: [RunMetric] = []
+    
+    struct RunMetric: Codable, Identifiable {
+        var id: UUID = UUID()
+        var runNumber: Int
+        var slopeName: String
+        var startTime: Date
+        var endTime: Date
+        var duration: TimeInterval
+        var maxSpeed: Double
+        var avgSpeed: Double
+        var edgeScore: Int
+        var flowScore: Int
+        var maxGForce: Double
+    }
     
     // 타임라인 이벤트 구조체 (Nested Struct)
     struct TimelineEvent: Codable, Identifiable {
@@ -58,7 +81,10 @@ final class RunSession {
         routeCoordinates: [[Double]] = [],
         routeSpeeds: [Double] = [],
         runStartIndices: [Int] = [0],
-        timelineEvents: [TimelineEvent] = []
+        timelineEvents: [TimelineEvent] = [],
+        edgeScore: Int = 0,
+        flowScore: Int = 0,
+        maxGForce: Double = 0.0
     ) {
         self.id = UUID()
         self.startTime = startTime
@@ -76,6 +102,17 @@ final class RunSession {
         self.routeSpeeds = routeSpeeds
         self.runStartIndices = runStartIndices
         self.timelineEvents = timelineEvents
+        self.edgeScore = edgeScore
+        self.flowScore = flowScore
+        self.maxGForce = maxGForce
+    }
+    
+    // MARK: - Helper Properties
+    var coordinates: [CLLocationCoordinate2D] {
+        routeCoordinates.compactMap { coord in
+            guard coord.count >= 2 else { return nil }
+            return CLLocationCoordinate2D(latitude: coord[0], longitude: coord[1])
+        }
     }
 }
 

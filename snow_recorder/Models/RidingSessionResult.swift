@@ -10,4 +10,6 @@ struct RidingSessionResult {
     var maxGForce: Double
     /// 세션 평균 속도 (m/s 단위)
     var averageSpeed: Double
+    /// 세션 최고 속도 (m/s 단위)
+    var maxSpeed: Double
 }

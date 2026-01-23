@@ -166,8 +166,13 @@ class LocationManager: NSObject, ObservableObject, CLLocationManagerDelegate {
             // 리프트: 저전력 모드
             locationManager.desiredAccuracy = kCLLocationAccuracyHundredMeters
         case .resting:
-            // 휴식: 최저 전력
-            locationManager.desiredAccuracy = kCLLocationAccuracyHundredMeters
+            // 휴식: 기본적으론 최저 전력이지만, 슬로프 출발 지점 대기일 수 있으므로
+            // 슬로프 내부라면 중간 정확도 유지
+            if let loc = location, SlopeDatabase.shared.isInsideAnySlope(loc) {
+                locationManager.desiredAccuracy = kCLLocationAccuracyNearestTenMeters
+            } else {
+                locationManager.desiredAccuracy = kCLLocationAccuracyHundredMeters
+            }
         }
     }
     
@@ -499,33 +504,37 @@ class LocationManager: NSObject, ObservableObject, CLLocationManagerDelegate {
 
         
         // 3. 슬로프 인식 및 Start/Finish 감지 (배터리 최적화: 일정 거리 이동 시마다)
-        // Issue #1 수정: 리프트 탑승 중 오탐지 방지를 위해 RIDING 상태에서만 슬로프 인식 수행
-        if currentState == .riding && shouldCheckSlope(at: newLocation) {
+        // Issue #6 수정: 출발 지점 대기 중(Resting/Paused)에도 Start Point를 인식할 수 있도록 조건 완화
+        // 단, Finish Point는 활강 중에만 인식하는 것이 안전함.
+        if (currentState == .riding || currentState == .paused || currentState == .resting) && shouldCheckSlope(at: newLocation) {
+            
             // A. 슬로프 내부 판정 (Dwell Time)
             if let slope = SlopeDatabase.shared.findSlope(at: newLocation) {
+                // RESTING 상태라도 슬로프 안에 있다면 현재 슬로프로 갱신 (대기 중 위치 파악)
                 if currentSlope?.id != slope.id {
                     currentSlope = slope
                     print("📍 슬로프 인식: \(slope.name)")
                 }
+                
                 // RIDING 중이면 방문 카운트 증가
                 if currentState == .riding {
                     visitedSlopeCounts[slope.name, default: 0] += 1
                 }
             }
             
-            // B. Start/Finish 지점 통과 감지 (RIDING 중일 때만)
-            if currentState == .riding {
-                let checkSlopes = SlopeDatabase.shared.operatingSlopes
-                for slope in checkSlopes {
-                    // Start(Top) Check
-                    if let top = slope.topPoint,
-                       CLLocation(latitude: top.latitude, longitude: top.longitude).distance(from: newLocation) <= pointHitRadius {
-                        if !visitedSlopeStartHits.contains(slope.name) {
-                            print("🚩 Start Point Hit: \(slope.name)")
-                            visitedSlopeStartHits.insert(slope.name)
-                        }
+            // B. Start/Finish 지점 통과 감지
+            let checkSlopes = SlopeDatabase.shared.operatingSlopes
+            for slope in checkSlopes {
+                // Start(Top) Check: Riding, Paused, Resting 모두 허용 (출발 전 대기 포함)
+                if let top = slope.topPoint,
+                   CLLocation(latitude: top.latitude, longitude: top.longitude).distance(from: newLocation) <= pointHitRadius {
+                    if !visitedSlopeStartHits.contains(slope.name) {
+                        print("🚩 Start Point Hit: \(slope.name) (State: \(currentState))")
+                        visitedSlopeStartHits.insert(slope.name)
                     }
-                    // Finish(Bottom) Check
+                }
+                // Finish(Bottom) Check: Riding 상태에서만 허용 (오탐지 방지)
+                if currentState == .riding {
                     if let bottom = slope.bottomPoint,
                        CLLocation(latitude: bottom.latitude, longitude: bottom.longitude).distance(from: newLocation) <= pointHitRadius {
                         if !visitedSlopeFinishHits.contains(slope.name) {

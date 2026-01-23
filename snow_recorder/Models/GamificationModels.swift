@@ -117,6 +117,7 @@ struct UserStats: Codable {
     var totalRuns: Int = 0
     var totalDistance: Double = 0.0 // km
     var maxSpeed: Double = 0.0 // km/h
+    var totalVerticalDrop: Double = 0.0 // meters
     var totalDuration: TimeInterval = 0 // seconds
     var globalRanking: Int = 0
 }

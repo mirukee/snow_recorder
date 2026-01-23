@@ -82,16 +82,11 @@ struct DashboardView: View {
                     
                     Spacer()
                     
-                    // Battery (Dummy)
-                    HStack(spacing: 4) {
-                        Text("100%")
-                            .font(.system(size: 12, weight: .bold))
-                            .tracking(1.0)
-                            .foregroundColor(.white.opacity(0.8))
-                        Image(systemName: "battery.100")
-                            .font(.system(size: 18))
-                            .foregroundColor(.white.opacity(0.8))
-                    }
+                    // Designed Label
+                    Text("DESIGNED IN SEOUL")
+                        .font(.system(size: 10, weight: .semibold, design: .monospaced))
+                        .tracking(1.0)
+                        .foregroundColor(.white.opacity(0.5))
                 }
                 .padding(.horizontal, 24)
                 .padding(.top, 20)

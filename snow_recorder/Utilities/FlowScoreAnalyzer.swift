@@ -83,13 +83,21 @@ final class FlowScoreAnalyzer: ObservableObject {
     }
     
     /// 세션 분석 종료
-    func stopSession() {
+    func stopSession(completion: @escaping (Int) -> Void) {
         analysisQueue.async { [weak self] in
-            guard let self else { return }
+            guard let self else {
+                DispatchQueue.main.async { completion(0) }
+                return
+            }
             if self.activeTime > 0 {
                 self.finalizeSessionResult()
             }
             self.setAnalyzing(false)
+            
+            let result = self.latestFlowScore ?? 0
+            DispatchQueue.main.async {
+                completion(result)
+            }
         }
     }
     
