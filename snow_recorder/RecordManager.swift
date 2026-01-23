@@ -25,6 +25,10 @@ class RecordManager: ObservableObject {
         elapsedTime = 0
         startTime = Date()
         
+        // 라이딩 점수 분석 시작
+        RidingMetricAnalyzer.shared.startSession()
+        FlowScoreAnalyzer.shared.startSession()
+        
         // LocationManager 트래킹 시작
         LocationManager.shared.startTracking()
         
@@ -61,6 +65,9 @@ class RecordManager: ObservableObject {
     func stopRecording(context: ModelContext) {
         guard isRecording, let start = startTime else { return }
         
+        // LocationManager 트래킹 종료 (최종 데이터 확정)
+        LocationManager.shared.stopTracking()
+        
         let end = Date()
         let duration = elapsedTime
         
@@ -74,6 +81,8 @@ class RecordManager: ObservableObject {
         let currentSlope = locationManager.currentSlope?.name
         let sessionSlopes = locationManager.sessionSlopeCounts
         let routeCoordinates = locationManager.routeCoordinates
+        let routeSpeeds = locationManager.routeSpeeds
+        let runStartIndices = locationManager.runStartIndices
         
         // 1. 데이터 저장
         let session = RunSession(
@@ -88,11 +97,21 @@ class RecordManager: ObservableObject {
             slopeName: currentSlope,
             riddenSlopes: sessionSlopes,
             locationName: "HIGH1 RESORT",
-            routeCoordinates: routeCoordinates
+            routeCoordinates: routeCoordinates,
+            routeSpeeds: routeSpeeds,
+            runStartIndices: runStartIndices,
+            timelineEvents: locationManager.timelineEvents
         )
         
         context.insert(session)
         try? context.save()
+        
+        // 3. 랭킹 시스템 연동 (자동 업로드)
+        RankingService.shared.processRun(session: session)
+        
+        // 라이딩 점수 분석 종료
+        RidingMetricAnalyzer.shared.stopSession()
+        FlowScoreAnalyzer.shared.stopSession()
         
         // 2. 상태 초기화
         isRecording = false
@@ -102,9 +121,6 @@ class RecordManager: ObservableObject {
         startTime = nil
         pauseTime = nil
         totalPausedDuration = 0
-        
-        // LocationManager 트래킹 종료
-        LocationManager.shared.stopTracking()
     }
     
     /// 경과 시간을 "MM:ss" 또는 "HH:mm:ss" 형식의 문자열로 반환

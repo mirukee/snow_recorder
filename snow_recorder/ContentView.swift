@@ -23,8 +23,8 @@ struct ContentView: View {
                 HistoryView()
                     .tag(1)
                 
-                // 통계 탭 (추후 구현 예정, 현재는 Placeholder)
-                Color.black.ignoresSafeArea().tag(2)
+                RankingView()
+                    .tag(2)
                 
                 ProfileView()
                     .tag(3)
@@ -34,17 +34,17 @@ struct ContentView: View {
             // 2. Custom Floating Tab Bar
             HStack(spacing: 8) {
                 // Tab 0: Record (Dashboard)
-                TabButton(icon: "radiobutton.tracked", isSelected: selection == 0) {
+                TabButton(icon: "record.circle", isSelected: selection == 0) {
                     selection = 0
                 }
                 
                 // Tab 1: Feed (History)
-                TabButton(icon: "grid", isSelected: selection == 1) { // grid_view 대용
+                TabButton(icon: "list.bullet", isSelected: selection == 1) { // grid_view 대용
                     selection = 1
                 }
                 
-                // Tab 2: Stats (Placeholder)
-                TabButton(icon: "chart.bar", isSelected: selection == 2) {
+                // Tab 2: Ranking
+                TabButton(icon: "trophy", isSelected: selection == 2) {
                     selection = 2
                 }
                 

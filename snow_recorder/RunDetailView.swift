@@ -10,6 +10,12 @@ struct RunDetailView: View {
     // State for Share Preview
     @State private var showSharePreview = false
     
+    // State for GPX Export
+    @State private var gpxFileURL: IdentifiableURL?
+    @State private var showNoDataAlert = false
+    @State private var showFullScreenMap = false // Full Screen Map Overlay
+
+    
     // Theme Colors
     let primaryColor = Color(hex: "6bf906")
     let backgroundDark = Color(hex: "121212")
@@ -36,27 +42,42 @@ struct RunDetailView: View {
                             slopesRiddenSection
                         }
                         
+                        // Timeline
+                        if !session.timelineEvents.isEmpty {
+                            timelineSection
+                        }
+                        
                         // Metrics Grid
                         metricsGrid
                         
                         // Performance Profile (Chart)
                         chartSection
+                        
+                        // Bottom Share Button
+                        shareButton
                     }
-                    .padding(.bottom, 100)
+                    .padding(.bottom, 40) // End of content padding
+                }
                 }
             }
-            
-            // Floating Share Button
-            VStack {
-                Spacer()
-                shareButton
-            }
-        }
         .navigationBarHidden(true)
         .fullScreenCover(isPresented: $showSharePreview) {
             SharePreviewView(session: session)
         }
+        .fullScreenCover(isPresented: $showFullScreenMap) {
+            FullScreenMapView(coordinates: routeCoordinates, speeds: session.routeSpeeds, maxSpeed: session.maxSpeed, runStartIndices: session.runStartIndices, region: mapRegion)
         }
+        // GPX Export Sheet (item 기반으로 URL이 확실히 전달되도록)
+        .sheet(item: $gpxFileURL) { identifiableURL in
+            ShareSheet(activityItems: [identifiableURL.url])
+        }
+        // 좌표 데이터 없을 때 알림
+        .alert("GPX Export 불가", isPresented: $showNoDataAlert) {
+            Button("확인", role: .cancel) {}
+        } message: {
+            Text("이 세션에는 GPS 경로 데이터가 없습니다.")
+        }
+    }
 
     
     // MARK: - Subviews
@@ -77,8 +98,11 @@ struct RunDetailView: View {
                 .tracking(2)
                 .foregroundColor(primaryColor)
             
-            Button(action: { /* Share Action */ }) {
-                Image(systemName: "square.and.arrow.up")
+            Spacer()
+            
+            // GPX Export 버튼
+            Button(action: { exportGPX() }) {
+                Image(systemName: "arrow.down.doc")
                     .font(.system(size: 18, weight: .semibold))
                     .foregroundColor(.white)
                     .frame(width: 40, height: 40)
@@ -118,6 +142,27 @@ struct RunDetailView: View {
             }
             .padding(.horizontal)
         }
+        }
+
+    
+    private var timelineSection: some View {
+        VStack(alignment: .leading, spacing: 16) {
+            Text("TIMELINE")
+                .font(.system(size: 14, weight: .bold))
+                .tracking(2)
+                .foregroundColor(primaryColor)
+                .padding(.horizontal)
+            
+            VStack(spacing: 0) {
+                ForEach(Array(session.timelineEvents.enumerated()), id: \.element.id) { index, event in
+                    TimelineRow(event: event, isLast: index == session.timelineEvents.count - 1, primaryColor: primaryColor)
+                }
+            }
+            .padding(.horizontal)
+            .background(Color.white.opacity(0.05))
+            .cornerRadius(16)
+            .padding(.horizontal)
+        }
     }
     
     private var mapSection: some View {
@@ -125,9 +170,20 @@ struct RunDetailView: View {
             // Map with Route
             Map(coordinateRegion: .constant(mapRegion))
             .overlay(
-                MapRouteOverlay(coordinates: routeCoordinates, color: primaryColor)
+                // 히트맵 오버레이 (속도 데이터가 있을 경우 그라데이션, 없으면 단색)
+                Group {
+                    if !session.routeSpeeds.isEmpty {
+                        GradientRouteOverlay(coordinates: routeCoordinates, speeds: session.routeSpeeds, maxSpeed: session.maxSpeed)
+                    } else {
+                        MapRouteOverlay(coordinates: routeCoordinates, color: primaryColor)
+                    }
+                }
             )
             .disabled(true)
+            .onTapGesture {
+                // 전체 화면 지도 보기
+                showFullScreenMap = true
+            }
             .grayscale(0.8)
             .colorMultiply(Color(white: 0.7))
             
@@ -171,6 +227,10 @@ struct RunDetailView: View {
         )
         .padding(.horizontal)
         .shadow(color: .black.opacity(0.5), radius: 20)
+        .onTapGesture {
+            // 전체 화면 지도 보기
+            showFullScreenMap = true
+        }
     }
     
     // Convert stored coordinates to CLLocationCoordinate2D
@@ -445,6 +505,26 @@ struct RunDetailView: View {
         formatter.zeroFormattingBehavior = .pad
         return formatter.string(from: duration) ?? "00:00"
     }
+    
+    /// GPX 파일 생성 및 공유 시트 표시
+    private func exportGPX() {
+        // 좌표 데이터가 없으면 알림
+        guard !session.routeCoordinates.isEmpty else {
+            showNoDataAlert = true
+            return
+        }
+        
+        // GPX 파일 생성
+        if let url = GPXExporter.saveToFile(session: session) {
+            gpxFileURL = IdentifiableURL(url: url)
+        }
+    }
+}
+
+/// URL을 Identifiable로 래핑 (sheet(item:) 사용을 위해)
+struct IdentifiableURL: Identifiable {
+    let id = UUID()
+    let url: URL
 }
 
 // MARK: - Slope Card View
@@ -579,3 +659,405 @@ struct MapRouteOverlay: View {
     }
 }
 
+// MARK: - Gradient Route Overlay (Heatmap)
+
+struct GradientRouteOverlay: View {
+    let coordinates: [CLLocationCoordinate2D]
+    let speeds: [Double]
+    let maxSpeed: Double
+    
+    var body: some View {
+        GeometryReader { geometry in
+            Canvas { context, size in
+                guard coordinates.count >= 2 else { return }
+                
+                // Project all points once
+                let points = projectCoordinates(coordinates, to: size)
+                
+                // Draw segments
+                for i in 0..<(points.count - 1) {
+                    let startPoint = points[i]
+                    let endPoint = points[i+1]
+                    
+                    // Determine color based on speed at this segment
+                    // Use index i if runs 1:1, or ratio mapping if counts differ
+                    let speed = getSpeed(at: i, totalPoints: points.count)
+                    let color = speedToColor(speed)
+                    
+                    var path = Path()
+                    path.move(to: startPoint)
+                    path.addLine(to: endPoint)
+                    
+                    context.stroke(path, with: .color(color), style: StrokeStyle(lineWidth: 4, lineCap: .round, lineJoin: .round))
+                }
+            }
+        }
+    }
+    
+    // Safely get speed for a segment index
+    private func getSpeed(at index: Int, totalPoints: Int) -> Double {
+        if speeds.isEmpty { return 0 }
+        if speeds.count == totalPoints {
+            // Ideal 1:1 case (excluding last point speed if count matches point count)
+            return speeds[min(index, speeds.count - 1)]
+        } else {
+            // Ratio mapping if arrays differ (e.g. filtered coordinates vs raw speeds)
+            // Ideally they should match from RunSession logic, but safety first.
+            let ratio = Double(index) / Double(totalPoints - 1)
+            let speedIndex = Int(ratio * Double(speeds.count - 1))
+            return speeds[min(speedIndex, speeds.count - 1)]
+        }
+    }
+    
+    private func speedToColor(_ speed: Double) -> Color {
+        // 0 ~ MAX -> Green(Slow) ~ Yellow ~ Red(Fast)
+        // Adjust threshold: Green (<33%), Yellow (33-66%), Red (>66%) or Gradient
+        let ratio = maxSpeed > 0 ? speed / maxSpeed : 0
+        
+        // Custom HSB Interpolation for smoother gradient
+        // Hue: 0.33 (Green) -> 0.0 (Red)
+        // Saturation: 1.0
+        // Brightness: 1.0
+        let hue = 0.33 - (0.33 * min(max(ratio, 0), 1))
+        return Color(hue: hue, saturation: 1.0, brightness: 1.0)
+    }
+    
+    private func projectCoordinates(_ coords: [CLLocationCoordinate2D], to size: CGSize) -> [CGPoint] {
+        guard !coords.isEmpty else { return [] }
+        
+        let lats = coords.map { $0.latitude }
+        let lons = coords.map { $0.longitude }
+        let minLat = lats.min()!
+        let maxLat = lats.max()!
+        let minLon = lons.min()!
+        let maxLon = lons.max()!
+        
+        let latRange = max(maxLat - minLat, 0.001)
+        let lonRange = max(maxLon - minLon, 0.001)
+        
+        // Map padding
+        let padding: CGFloat = 0.1
+        let availableWidth = size.width * (1 - 2 * padding)
+        let availableHeight = size.height * (1 - 2 * padding)
+        
+        return coords.map { coord in
+            let normalizedX = CGFloat((coord.longitude - minLon) / lonRange)
+            let normalizedY = CGFloat((coord.latitude - minLat) / latRange)
+            
+            let x = padding * size.width + normalizedX * availableWidth
+            // Latitude increases upwards, screen Y increases downwards
+            let y = size.height - (padding * size.height + normalizedY * availableHeight)
+            
+            return CGPoint(x: x, y: y)
+        }
+    }
+}
+
+// MARK: - Full Screen Map View
+
+// MARK: - Full Screen Map View (MKMapView Wrapper)
+
+struct FullScreenMapView: View {
+    @Environment(\.dismiss) var dismiss
+    let coordinates: [CLLocationCoordinate2D]
+    let speeds: [Double]
+    let maxSpeed: Double
+    let runStartIndices: [Int]
+    @State var region: MKCoordinateRegion
+    
+    var body: some View {
+        ZStack {
+            Color.black.ignoresSafeArea()
+            
+            // MKMapView Wrapper
+            MapViewRepresentable(
+                region: region,
+                coordinates: coordinates,
+                lineColor: UIColor(red: 107/255, green: 249/255, blue: 6/255, alpha: 1.0), // Neon Green
+                runStartIndices: runStartIndices,
+                speeds: speeds,
+                maxSpeed: maxSpeed
+            )
+            .ignoresSafeArea()
+            
+            // Controls
+            VStack {
+                HStack {
+                    Button(action: { dismiss() }) {
+                        Image(systemName: "xmark.circle.fill")
+                            .font(.system(size: 30))
+                            .foregroundColor(.white)
+                            .shadow(radius: 5)
+                    }
+                    Spacer()
+                }
+                .padding()
+                .padding(.top, 40)
+                Spacer()
+            }
+        }
+    }
+}
+
+// SwiftUI Wrapper for MKMapView
+struct MapViewRepresentable: UIViewRepresentable {
+    let region: MKCoordinateRegion
+    let coordinates: [CLLocationCoordinate2D]
+    let lineColor: UIColor
+    let runStartIndices: [Int]
+    let speeds: [Double]
+    let maxSpeed: Double
+    
+    func makeUIView(context: Context) -> MKMapView {
+        let mapView = MKMapView()
+        mapView.delegate = context.coordinator
+        mapView.region = region
+        mapView.showsUserLocation = false
+        mapView.mapType = .standard // Simplified Map View
+        mapView.isPitchEnabled = true
+        
+        if coordinates.count >= 2 {
+            // Segmented Rendering Logic
+            let indices = runStartIndices + [coordinates.count] // Add end index sentinel
+            
+            for i in 0..<(indices.count - 1) {
+                let startIdx = indices[i]
+                let endIdx = indices[i+1]
+                
+                // 1. Solid Run Line (startIdx ~ endIdx)
+                let runSegment = Array(coordinates[startIdx..<endIdx])
+                if runSegment.count >= 2 {
+                    let runPolyline = RunPolyline(coordinates: runSegment, count: runSegment.count)
+                    
+                    // Safety: Extract speeds for this segment if available
+                    if speeds.count == coordinates.count {
+                         let paramStartIndex = max(0, min(startIdx, speeds.count - 1))
+                         let paramEndIndex = max(0, min(endIdx, speeds.count))
+                         if paramStartIndex < paramEndIndex {
+                            runPolyline.speeds = Array(speeds[paramStartIndex..<paramEndIndex])
+                         }
+                    } else if !speeds.isEmpty {
+                        // Fallback ratio-based mapping if counts differ
+                        let totalPoints = coordinates.count
+                        let segmentSpeeds = (startIdx..<endIdx).map { idx -> Double in
+                             let ratio = Double(idx) / Double(totalPoints - 1)
+                             let speedIndex = Int(ratio * Double(speeds.count - 1))
+                             return speeds[min(speedIndex, speeds.count - 1)]
+                        }
+                        runPolyline.speeds = segmentSpeeds
+                    }
+                    
+                    runPolyline.maxSpeed = maxSpeed
+                    mapView.addOverlay(runPolyline)
+                }
+                
+                // 2. Dotted Lift Line (Connect previous run's end to current run's start)
+                // Skip for the first run (i=0) as there's no previous run to connect from
+                if i > 0 {
+                    let prevEndIdx = indices[i] - 1 // End of previous run
+                    let currStartIdx = indices[i]   // Start of current run
+                    
+                    // Safety check
+                    if prevEndIdx >= 0 && currStartIdx < coordinates.count {
+                         let liftSegment = [coordinates[prevEndIdx], coordinates[currStartIdx]]
+                         let liftPolyline = LiftPolyline(coordinates: liftSegment, count: liftSegment.count)
+                         mapView.addOverlay(liftPolyline)
+                    }
+                }
+            }
+            
+            // Fallback for simple case (if only 1 run, indices might be just [0, count])
+            // The loop above handles it (i=0, loop runs once for solid line).
+        }
+        
+        // Add Start/End Pins (Annotate even if just 1 point)
+        if let start = coordinates.first {
+            let startAnnotation = MKPointAnnotation()
+            startAnnotation.coordinate = start
+            startAnnotation.title = "Start"
+            mapView.addAnnotation(startAnnotation)
+        }
+        
+        if let end = coordinates.last, coordinates.count > 1 {
+            let endAnnotation = MKPointAnnotation()
+            endAnnotation.coordinate = end
+            endAnnotation.title = "Finish"
+            mapView.addAnnotation(endAnnotation)
+        }
+        
+        return mapView
+    }
+    
+    func updateUIView(_ uiView: MKMapView, context: Context) {
+        // View updates if needed
+    }
+    
+    func makeCoordinator() -> Coordinator {
+        Coordinator(parent: self)
+    }
+    
+    class Coordinator: NSObject, MKMapViewDelegate {
+        var parent: MapViewRepresentable
+        
+        init(parent: MapViewRepresentable) {
+            self.parent = parent
+        }
+        
+        func mapView(_ mapView: MKMapView, rendererFor overlay: MKOverlay) -> MKOverlayRenderer {
+            if let runPolyline = overlay as? RunPolyline {
+                // If speeds are available, use Gradient Renderer
+                if let speeds = runPolyline.speeds, !speeds.isEmpty, runPolyline.maxSpeed > 0 {
+                    let renderer = MKGradientPolylineRenderer(polyline: runPolyline)
+                    renderer.lineWidth = 4
+                    
+                    // Generate colors for each point
+                    let colors = speeds.map { speed -> UIColor in
+                        let ratio = speed / runPolyline.maxSpeed
+                        // Green(0.33) -> Red(0.0)
+                        let hue = 0.33 - (0.33 * min(max(ratio, 0), 1.0))
+                        return UIColor(hue: hue, saturation: 1.0, brightness: 1.0, alpha: 1.0)
+                    }
+                    
+                    // Locations (0.0 to 1.0)
+                    let locations = speeds.indices.map { index -> CGFloat in
+                        // Safe division
+                        return CGFloat(Double(index) / Double(max(speeds.count - 1, 1)))
+                    }
+                    
+                    renderer.setColors(colors, locations: locations)
+                    return renderer
+                } else {
+                    // Fallback to solid color
+                    let renderer = MKPolylineRenderer(polyline: runPolyline)
+                    renderer.strokeColor = parent.lineColor
+                    renderer.lineWidth = 4
+                    return renderer
+                }
+            } else if let liftPolyline = overlay as? LiftPolyline {
+                let renderer = MKPolylineRenderer(polyline: liftPolyline)
+                renderer.strokeColor = .white
+                renderer.lineWidth = 2
+                renderer.lineDashPattern = [2, 4] // [Line, Gap]
+                renderer.alpha = 0.7
+                return renderer
+            }
+            return MKOverlayRenderer()
+        }
+        
+        func mapView(_ mapView: MKMapView, viewFor annotation: MKAnnotation) -> MKAnnotationView? {
+            let identifier = "Pin"
+            var annotationView = mapView.dequeueReusableAnnotationView(withIdentifier: identifier) as? MKMarkerAnnotationView
+            
+            if annotationView == nil {
+                annotationView = MKMarkerAnnotationView(annotation: annotation, reuseIdentifier: identifier)
+                annotationView?.canShowCallout = true
+            } else {
+                annotationView?.annotation = annotation
+            }
+            
+            if annotation.title == "Start" {
+                annotationView?.markerTintColor = .green
+                annotationView?.glyphImage = UIImage(systemName: "flag.fill")
+            } else if annotation.title == "Finish" {
+                annotationView?.markerTintColor = .red
+                annotationView?.glyphImage = UIImage(systemName: "flag.checkered")
+            }
+            
+            return annotationView
+        }
+    }
+}
+
+// Custom Polyline Classes to distinguish types
+class RunPolyline: MKPolyline {
+    var speeds: [Double]?
+    var maxSpeed: Double = 0.0
+}
+class LiftPolyline: MKPolyline {}
+// MARK: - Helper Views for Timeline
+
+struct TimelineRow: View {
+    let event: RunSession.TimelineEvent
+    let isLast: Bool
+    let primaryColor: Color
+    
+    var body: some View {
+        HStack(alignment: .top, spacing: 16) {
+            // Time Column
+            VStack(alignment: .trailing) {
+                Text(event.startTime.formatted(date: .omitted, time: .shortened))
+                    .font(.caption2)
+                    .foregroundColor(.gray)
+            }
+            .frame(width: 60, alignment: .trailing)
+            .padding(.top, 6)
+            
+            // Icon & Line Column
+            VStack(spacing: 0) {
+                ZStack {
+                    Circle()
+                        .fill(Color(hex: "1e1e1e"))
+                        .frame(width: 32, height: 32)
+                        .overlay(
+                            Image(systemName: iconName)
+                                .font(.system(size: 14))
+                                .foregroundColor(iconColor)
+                        )
+                        .overlay(
+                            Circle()
+                                .stroke(Color.gray.opacity(0.3), lineWidth: 1)
+                        )
+                }
+                
+                if !isLast {
+                    Rectangle()
+                        .fill(Color.gray.opacity(0.3))
+                        .frame(width: 2)
+                        .frame(minHeight: 30) // Minimum height for connector
+                }
+            }
+            
+            // Content Column
+            VStack(alignment: .leading, spacing: 4) {
+                Text(event.detail)
+                    .font(.subheadline)
+                    .fontWeight(.bold)
+                    .foregroundColor(.white)
+                
+                Text(formatDuration(event.duration))
+                    .font(.caption)
+                    .foregroundColor(.gray)
+                
+                Spacer().frame(height: 20)
+            }
+            .padding(.top, 4)
+            
+            Spacer()
+        }
+    }
+    
+    var iconName: String {
+        switch event.type {
+        case .riding: return "figure.skiing.downhill"
+        case .lift: return "cablecar"
+        case .rest: return "cup.and.saucer.fill"
+        case .pause: return "pause.circle.fill"
+        case .unknown: return "questionmark.circle"
+        }
+    }
+    
+    var iconColor: Color {
+        switch event.type {
+        case .riding: return primaryColor
+        case .lift: return .orange
+        case .rest: return .blue
+        case .pause: return .gray
+        case .unknown: return .gray
+        }
+    }
+    
+    func formatDuration(_ duration: TimeInterval) -> String {
+        let minutes = Int(duration) / 60
+        return minutes > 0 ? "\(minutes) min" : "< 1 min"
+    }
+}

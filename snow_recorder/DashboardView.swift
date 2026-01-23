@@ -221,101 +221,131 @@ struct DashboardView: View {
                 .padding(.bottom, 24)
                 
                 // [Bottom] Control Buttons
-                if recordManager.isRecording {
-                    HStack(spacing: 40) {
-                        // Pause / Resume Button
-                        Button(action: {
-                            if recordManager.isPaused {
-                                recordManager.resumeRecording()
-                            } else {
-                                recordManager.pauseRecording()
-                            }
-                        }) {
-                            ZStack {
-                                Circle()
-                                    .fill(Color(white: 0.15))
-                                    .frame(width: 60, height: 60)
-                                    .overlay(
-                                        Circle().stroke(Color.white.opacity(0.2), lineWidth: 1)
-                                    )
+                ZStack(alignment: .bottom) {
+                    if recordManager.isRecording {
+                        if recordManager.isPaused {
+                            // [Paused State] -> Resume OR Stop
+                            HStack(spacing: 40) {
+                                // Resume Button
+                                VStack(spacing: 12) {
+                                    Button(action: {
+                                        HapticManager.shared.impact(style: .medium)
+                                        recordManager.resumeRecording()
+                                    }) {
+                                        ZStack {
+                                            Circle()
+                                                .fill(Color(white: 0.15))
+                                                .frame(width: 80, height: 80)
+                                                .overlay(
+                                                    Circle().stroke(neonGreen.opacity(0.5), lineWidth: 2)
+                                                )
+                                            
+                                            Image(systemName: "play.fill")
+                                                .font(.system(size: 30))
+                                                .foregroundColor(neonGreen)
+                                        }
+                                    }
+                                    Text("RESUME")
+                                        .font(.system(size: 10, weight: .bold))
+                                        .tracking(2)
+                                        .foregroundColor(neonGreen.opacity(0.8))
+                                }
                                 
-                                Image(systemName: recordManager.isPaused ? "play.fill" : "pause.fill")
-                                    .font(.system(size: 24))
-                                    .foregroundColor(.yellow)
+                                // Stop Button
+                                VStack(spacing: 12) {
+                                    Button(action: {
+                                        HapticManager.shared.notification(type: .success)
+                                        recordManager.stopRecording(context: context)
+                                    }) {
+                                        ZStack {
+                                            // Outer Glow
+                                            Circle()
+                                                .stroke(Color.red.opacity(0.5), lineWidth: 1)
+                                                .scaleEffect(1.1)
+                                            
+                                            // Button Base
+                                            Circle()
+                                                .fill(Color.white)
+                                                .frame(width: 80, height: 80)
+                                                .shadow(color: .white.opacity(0.2), radius: 15, x: 0, y: 0)
+                                            
+                                            // Stop Icon
+                                            Rectangle()
+                                                .fill(Color.red)
+                                                .frame(width: 32, height: 32)
+                                                .cornerRadius(4)
+                                        }
+                                    }
+                                    Text("STOP")
+                                        .font(.system(size: 10, weight: .bold))
+                                        .tracking(2)
+                                        .foregroundColor(.white.opacity(0.4))
+                                }
+                            }
+
+                        } else {
+                            // [Recording State] -> Pause Only (Safety)
+                            VStack(spacing: 12) {
+                                Button(action: {
+                                    HapticManager.shared.impact(style: .heavy)
+                                    recordManager.pauseRecording()
+                                }) {
+                                    ZStack {
+                                        Circle()
+                                            .fill(Color(white: 0.15))
+                                            .frame(width: 80, height: 80)
+                                            .overlay(
+                                                Circle().stroke(Color.white.opacity(0.2), lineWidth: 1)
+                                            )
+                                        
+                                        Image(systemName: "pause.fill")
+                                            .font(.system(size: 30))
+                                            .foregroundColor(.yellow)
+                                    }
+                                }
+                                Text("PAUSE")
+                                    .font(.system(size: 10, weight: .bold))
+                                    .tracking(2)
+                                    .foregroundColor(.white.opacity(0.4))
                             }
                         }
-                        .overlay(
-                            Text(recordManager.isPaused ? "RESUME" : "PAUSE")
+                    } else {
+                        // Start Button
+                        VStack(spacing: 12) {
+                            Button(action: {
+                                HapticManager.shared.notification(type: .success)
+                                recordManager.startRecording()
+                            }) {
+                                ZStack {
+                                    // Outer Glow
+                                    Circle()
+                                        .stroke(Color.white.opacity(0.2), lineWidth: 1)
+                                        .scaleEffect(1.25)
+                                    
+                                    // White Button Base
+                                    Circle()
+                                        .fill(Color.white)
+                                        .frame(width: 80, height: 80)
+                                        .shadow(color: .white.opacity(0.2), radius: 15, x: 0, y: 0)
+                                    
+                                    // Start Icon
+                                    Circle()
+                                        .fill(Color.black)
+                                        .frame(width: 32, height: 32)
+                                }
+                            }
+                            Text("START TRACKING")
                                 .font(.system(size: 10, weight: .bold))
                                 .tracking(2)
                                 .foregroundColor(.white.opacity(0.4))
-                                .offset(y: 50)
-                        )
-                        
-                        // Stop Button
-                        Button(action: {
-                            recordManager.stopRecording(context: context)
-                        }) {
-                            ZStack {
-                                // Outer Glow
-                                Circle()
-                                    .stroke(Color.red.opacity(0.5), lineWidth: 1)
-                                    .scaleEffect(1.1)
-                                
-                                // Button Base
-                                Circle()
-                                    .fill(Color.white)
-                                    .frame(width: 80, height: 80)
-                                    .shadow(color: .white.opacity(0.2), radius: 15, x: 0, y: 0)
-                                
-                                // Stop Icon
-                                Rectangle()
-                                    .fill(Color.red)
-                                    .frame(width: 32, height: 32)
-                                    .cornerRadius(4)
-                            }
-                        }
-                        .overlay(
-                            Text("STOP")
-                                .font(.system(size: 10, weight: .bold))
-                                .tracking(2)
-                                .foregroundColor(.white.opacity(0.4))
-                                .offset(y: 60)
-                        )
-                    }
-                    .padding(.bottom, 20)
-                } else {
-                    // Start Button
-                    Button(action: {
-                        recordManager.startRecording()
-                    }) {
-                        ZStack {
-                            // Outer Glow
-                            Circle()
-                                .stroke(Color.white.opacity(0.2), lineWidth: 1)
-                                .scaleEffect(1.25)
-                            
-                            // White Button Base
-                            Circle()
-                                .fill(Color.white)
-                                .frame(width: 80, height: 80)
-                                .shadow(color: .white.opacity(0.2), radius: 15, x: 0, y: 0)
-                            
-                            // Start Icon
-                            Circle()
-                                .fill(Color.black)
-                                .frame(width: 32, height: 32)
                         }
                     }
-                    .overlay(
-                        Text("START TRACKING")
-                            .font(.system(size: 10, weight: .bold))
-                            .tracking(2)
-                            .foregroundColor(.white.opacity(0.4))
-                            .offset(y: 60)
-                    )
-                    .padding(.bottom, 20)
                 }
+                .frame(height: 140) // Fixed height container
+                
+                // Bottom Spacer to lift everything up
+                Spacer()
+                    .frame(height: 20) // Reduced from 50 since texts are now in layout
                 
                 // [Footer Info] Version
                 HStack {
@@ -336,7 +366,7 @@ struct DashboardView: View {
                         .foregroundColor(.white.opacity(0.2))
                 }
                 .padding(.horizontal, 24)
-                .padding(.bottom, 8)
+                .padding(.bottom, 110) // Footer itself has the padding now
             }
         }
         .onAppear {

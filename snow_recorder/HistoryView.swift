@@ -6,6 +6,7 @@ struct HistoryView: View {
     let neonGreen = Color(red: 107/255, green: 249/255, blue: 6/255)
     
     // SwiftData Query (최신순 정렬)
+    @Environment(\.modelContext) private var modelContext
     @Query(sort: \RunSession.startTime, order: .reverse) private var sessions: [RunSession]
     
     var body: some View {
@@ -24,6 +25,16 @@ struct HistoryView: View {
                     
                     Spacer()
                     
+                    // Test Data Button (Debug)
+                    Button(action: {
+                        RunSession.createMockSession(context: modelContext)
+                    }) {
+                        Image(systemName: "plus.circle.fill")
+                            .font(.system(size: 24))
+                            .foregroundColor(.white.opacity(0.5))
+                    }
+                    .padding(.trailing, 16)
+                    
                     // Profile Image (Dummy)
                     Circle()
                         .fill(Color.gray)
@@ -38,34 +49,57 @@ struct HistoryView: View {
                 .background(Color.black.opacity(0.8)) // 헤더 배경
                 
                 // [Feed List]
-                ScrollView(.vertical, showsIndicators: false) {
-                    VStack(spacing: 30) {
-                        if sessions.isEmpty {
-                            // Empty State
-                            VStack(spacing: 20) {
-                                Image(systemName: "figure.skiing.downhill")
-                                    .font(.system(size: 60))
-                                    .foregroundColor(.white.opacity(0.2))
-                                Text("NO RECORDS YET")
-                                    .font(.headline)
-                                    .foregroundColor(.gray)
-                                    .tracking(2)
-                            }
-                            .padding(.top, 100)
-                        } else {
-                                ForEach(Array(sessions.enumerated()), id: \.element.id) { index, session in
-                                    NavigationLink(destination: RunDetailView(session: session)) {
-                                        HistoryCard(
-                                            date: formatDate(session.startTime),
-                                            location: session.locationName,
-                                            value: String(format: "%.1f", session.maxSpeed),
-                                            unit: "KM/H",
-                                            imageColor: colors[index % colors.count],
-                                            rotation: Double((index % 3) - 1) * 2.0, // -2, 0, 2 rotation
-                                            neonGreen: neonGreen
-                                        )
-                                    }
+                List {
+                    if sessions.isEmpty {
+                        // Empty State
+                        VStack(spacing: 20) {
+                            Image(systemName: "figure.skiing.downhill")
+                                .font(.system(size: 60))
+                                .foregroundColor(.white.opacity(0.2))
+                            Text("NO RECORDS YET")
+                                .font(.headline)
+                                .foregroundColor(.gray)
+                                .tracking(2)
+                        }
+                        .frame(maxWidth: .infinity)
+                        .padding(.top, 100)
+                        .listRowBackground(Color.clear)
+                        .listRowSeparator(.hidden)
+                    } else {
+                        ForEach(Array(sessions.enumerated()), id: \.element.id) { index, session in
+                            ZStack {
+                                NavigationLink(destination: RunDetailView(session: session)) {
+                                    EmptyView()
                                 }
+                                .opacity(0) // Hide default arrow
+                                
+                                HistoryCard(
+                                    date: formatDate(session.startTime),
+                                    location: session.locationName,
+                                    value: String(format: "%.1f", session.maxSpeed),
+                                    unit: "KM/H",
+                                    imageColor: colors[index % colors.count],
+                                    rotation: Double((index % 3) - 1) * 2.0, // -2, 0, 2 rotation
+                                    neonGreen: neonGreen
+                                )
+                            }
+                            .listRowInsets(EdgeInsets(top: 10, leading: 16, bottom: 10, trailing: 16))
+                            .listRowBackground(Color.clear)
+                            .listRowSeparator(.hidden)
+                            .swipeActions(edge: .trailing, allowsFullSwipe: true) {
+                                Button(role: .destructive) {
+                                    deleteSession(session)
+                                } label: {
+                                    Label("Delete", systemImage: "trash")
+                                }
+                            }
+                            .contextMenu {
+                                Button(role: .destructive) {
+                                    deleteSession(session)
+                                } label: {
+                                    Label("삭제하기", systemImage: "trash")
+                                }
+                            }
                         }
                         
                         // End of Season
@@ -74,12 +108,16 @@ struct HistoryView: View {
                             .fontWeight(.bold)
                             .tracking(2)
                             .foregroundColor(.gray)
+                            .frame(maxWidth: .infinity)
                             .padding(.top, 20)
-                            .padding(.bottom, 100) // 탭바 공간 확보
+                            .padding(.bottom, 100)
+                            .listRowBackground(Color.clear)
+                            .listRowSeparator(.hidden)
                     }
-                    .padding(.horizontal, 16)
-                    .padding(.top, 10)
                 }
+                .listStyle(.plain)
+                .scrollContentBackground(.hidden) // Remove default list background
+                .background(Color.black)
             }
         }
         .ignoresSafeArea(.all, edges: .top) // 헤더가 상단까지 덮도록
@@ -94,6 +132,13 @@ struct HistoryView: View {
         let formatter = DateFormatter()
         formatter.dateFormat = "MMM d" // "DEC 24"
         return formatter.string(from: date).uppercased()
+    }
+    
+    // 삭제 함수
+    private func deleteSession(_ session: RunSession) {
+        withAnimation {
+            modelContext.delete(session)
+        }
     }
 }
 
@@ -171,20 +216,20 @@ struct HistoryCard: View {
                     HStack(alignment: .lastTextBaseline, spacing: 4) {
                         if isSession {
                             Text("SESSION:")
-                                .font(.system(size: 12, weight: .bold))
+                                .font(.system(size: 10, weight: .bold)) // Reduced
                                 .foregroundColor(.gray)
                             Text(value)
-                                .font(.system(size: 40, weight: .black))
+                                .font(.system(size: 32, weight: .black)) // Reduced from 40
                                 .italic()
-                                .foregroundColor(neonGreen) // #6bf906
+                                .foregroundColor(neonGreen)
                         } else {
                             Text(value)
-                                .font(.system(size: 60, weight: .black))
+                                .font(.system(size: 48, weight: .black)) // Reduced from 60
                                 .italic()
                                 .tracking(-2)
                                 .foregroundColor(neonGreen)
                             Text(unit)
-                                .font(.system(size: 20, weight: .bold))
+                                .font(.system(size: 16, weight: .bold)) // Reduced from 20
                                 .foregroundColor(.white)
                         }
                     }
@@ -192,11 +237,11 @@ struct HistoryCard: View {
                 }
                 .frame(maxWidth: .infinity, alignment: .leading)
             }
-            .padding(20)
+            .padding(16) // Reduced padding
         }
-        .frame(height: 500) // 4:5 Aspect Ratio
-        .clipShape(RoundedRectangle(cornerRadius: 30))
-        .shadow(color: neonGreen.opacity(0.05), radius: 20, x: 0, y: 10)
+        .frame(height: 220) // Reduced height from 500 to 220 (~2.5 items per screen)
+        .clipShape(RoundedRectangle(cornerRadius: 24))
+        .shadow(color: neonGreen.opacity(0.05), radius: 10, x: 0, y: 5)
     }
 }
 

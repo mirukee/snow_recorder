@@ -24,6 +24,9 @@ class LocationManager: NSObject, ObservableObject, CLLocationManagerDelegate {
     @Published var runCount: Int = 0                // 런 횟수
     @Published var sessionSlopeCounts: [String: Int] = [:] // 세션 동안 탄 슬로프별 횟수
     @Published var routeCoordinates: [[Double]] = [] // GPS 경로 좌표 [[lat, lon], ...]
+    @Published var routeSpeeds: [Double] = [] // GPS 경로별 속도 (km/h)
+    @Published var runStartIndices: [Int] = [0] // 각 런 시작 인덱스
+    @Published var timelineEvents: [RunSession.TimelineEvent] = [] // 타임라인 이벤트 목록
     
     // MARK: - Private Properties
     private var lastLocation: CLLocation?
@@ -36,6 +39,7 @@ class LocationManager: NSObject, ObservableObject, CLLocationManagerDelegate {
     private var visitedSlopeFinishHits: Set<String> = [] // 현재 런에서 종료점(Bottom)을 통과한 슬로프 이름
     private var altitudeHistory: [Double] = []          // 상태 판정 안정화를 위한 고도 기록 (최근 5~10초)
     private var outOfSlopeStartTime: Date?              // 슬로프 이탈 시점 기록
+    private var currentTimelineEventStart: Date?        // 현재 이벤트 시작 시간
     
     // MARK: - 상태 전환 임계값 (튜닝 가능)
     private let ridingSpeedThreshold: Double = 5.0      // 활강 판정 최소 속도 (km/h)
@@ -71,6 +75,7 @@ class LocationManager: NSObject, ObservableObject, CLLocationManagerDelegate {
         isTracking = true
         resetMetrics()
         currentState = .resting
+        currentTimelineEventStart = Date() // 첫 이벤트 시작 시간 기록
         updateLocationAccuracy(for: .resting)
         locationManager.startUpdatingLocation()
     }
@@ -108,6 +113,18 @@ class LocationManager: NSObject, ObservableObject, CLLocationManagerDelegate {
         
         // 평균 속도 최종 계산
         calculateAvgSpeed()
+        
+        // 마지막 이벤트 기록
+        if let start = currentTimelineEventStart {
+            let now = Date()
+            var detail = currentState.displayLabel
+            if currentState == .riding {
+               detail = currentSlope?.name ?? "알 수 없는 슬로프"
+            }
+            let event = RunSession.TimelineEvent(type: mapStateToEventType(currentState), startTime: start, endTime: now, detail: detail)
+            timelineEvents.append(event)
+        }
+        currentTimelineEventStart = nil
     }
     
     /// 메트릭 초기화
@@ -129,6 +146,10 @@ class LocationManager: NSObject, ObservableObject, CLLocationManagerDelegate {
         outOfSlopeStartTime = nil
         sessionSlopeCounts.removeAll()
         routeCoordinates.removeAll()
+        routeSpeeds.removeAll()
+        runStartIndices = [0]
+        timelineEvents.removeAll()
+        currentTimelineEventStart = nil
     }
     
     // MARK: - 상태 기반 GPS 정확도 조절 (배터리 최적화)
@@ -180,12 +201,23 @@ class LocationManager: NSObject, ObservableObject, CLLocationManagerDelegate {
         }
         
         // Robust Ascent Detection (리프트 탑승 감지)
-        // 로직: 최근 10초간 8m 이상 상승 (약 0.8m/s 이상 수직 상승)
+        // 로직: 최근 10초간 5m 이상 상승 (약 0.5m/s 이상 수직 상승)
+        // Issue #5 수정: 리프트 초기 저속 구간 대응을 위해 임계값 완화 (8m → 5m)
         let isClimbing: Bool
         if let first = altitudeHistory.first, let last = altitudeHistory.last, altitudeHistory.count >= 10 {
-            isClimbing = (last - first) > 8.0
+            isClimbing = (last - first) > 5.0
         } else {
             isClimbing = false
+        }
+        
+        // Robust Strong Descent (강력한 하강 감지 - 리프트 오인식 방지용)
+        // 로직: 최근 10초간 5m 이상 하강 (리프트 꿀렁임 무시 + 초보자 인식 가능)
+        // 10m(초보자 인식 불가) -> 5m(초보자 10km/h 인식 가능)로 완화
+        let isStrongDescent: Bool
+        if let first = altitudeHistory.first, let last = altitudeHistory.last, altitudeHistory.count >= 10 {
+            isStrongDescent = (first - last) > 5.0
+        } else {
+            isStrongDescent = false
         }
         
         // 슬로프 이탈 타이머 관리
@@ -254,14 +286,20 @@ class LocationManager: NSObject, ObservableObject, CLLocationManagerDelegate {
             return .paused
             
         case .onLift:
-            // ON_LIFT → RESTING: 리프트 정상 도착 (정지 + 리프트 라인 이탈)
-            if currentSpeedKmH < pauseSpeedThreshold && !isNearLift {
+            // ON_LIFT → RESTING: 리프트 정상 도착
+            // Issue #3/#4 수정: !isNearLift 조건 제거 (좌표 데이터 없음), !isClimbing 조건 추가
+            // 조건: 저속 + 상승 중이 아님 (리프트 하차 완료)
+            if currentSpeedKmH < pauseSpeedThreshold && !isClimbing {
                 if canChangeState() {
                     return .resting
                 }
+            } else {
+                // 속도 또는 상승 중이면 debounce 리셋
+                stateChangeTime = nil
             }
             // ON_LIFT → RIDING: 리프트에서 바로 활강 시작 (드문 경우)
-            if isInsideSlope && currentSpeedKmH > ridingSpeedThreshold && isDescending {
+            // 리프트의 일시적 하강 구간 오인식 방지를 위해 isStrongDescent(5m 하강) 적용
+            if isInsideSlope && currentSpeedKmH > ridingSpeedThreshold && isStrongDescent {
                 return .riding
             }
             return .onLift
@@ -282,10 +320,53 @@ class LocationManager: NSObject, ObservableObject, CLLocationManagerDelegate {
         // 상태가 변경되었을 때만 처리
         guard oldState != newState else { return }
         
+        // 타임라인 이벤트 기록
+        let now = Date()
+        if let start = currentTimelineEventStart {
+            var detail = oldState.displayLabel
+            if oldState == .riding {
+                // 이 시점에서는 아직 visitedSlopeCounts가 초기화되지 않았으므로 calculateBestSlope 호출 가능
+                // 다만 calculateBestSlope는 무거운 연산일 수 있으므로 주의.
+                // handleStateChange 내부 로직상 resting으로 갈때만 calculateBestSlope를 호출하긴 함.
+                // 여기서는 간단히 currentSlope 쓰거나 calculateBestSlope 사용
+                if let best = calculateBestSlope() {
+                    detail = best.name
+                } else {
+                    detail = "알 수 없는 슬로프"
+                }
+            } else if oldState == .onLift {
+                detail = "리프트 이동"
+            } else if oldState == .resting {
+                detail = "휴식"
+            }
+            
+            // RunSession.TimelineEvent 생성
+            // EventType 매핑 필요
+            let type = mapStateToEventType(oldState)
+            let event = RunSession.TimelineEvent(type: type, startTime: start, endTime: now, detail: detail)
+            timelineEvents.append(event)
+            print("⏱️ 타임라인 이벤트 추가: \(detail) (\(Int(now.timeIntervalSince(start)))초)")
+        }
+        currentTimelineEventStart = now
+        
         // GPS 정확도 조절
         updateLocationAccuracy(for: newState)
         
+        // 점수 분석기 상태 동기화
+        RidingMetricAnalyzer.shared.updateState(newState)
+        FlowScoreAnalyzer.shared.updateState(newState)
+        
         // 런 카운트: RIDING → (RESTING) 전환 시 +1
+        // NOTE: 리프트 탑승 로직 개선(점선 표시)을 위해, RIDING이 시작될 때 인덱스를 기록해야 함.
+        if newState == .riding {
+             // 새로운 런 시작: 현재 좌표 배열의 끝을 시작 인덱스로 기록
+             // (단, 첫 런(0)은 이미 초기화 시 들어가있으므로, 좌표가 쌓인 상태에서 다시 riding 될 때만 추가)
+             if !routeCoordinates.isEmpty {
+                 runStartIndices.append(routeCoordinates.count)
+                 print("🛤️ 새로운 런 시작 인덱스 기록: \(routeCoordinates.count)")
+             }
+        }
+
         if oldState == .riding && newState == .resting {
             runCount += 1
             // 런 종료 시, 방문했던 슬로프 중 가장 우선순위가 높은 슬로프를 최종 슬로프로 확정
@@ -382,6 +463,10 @@ class LocationManager: NSObject, ObservableObject, CLLocationManagerDelegate {
             currentState = newState
         }
         
+        // 점수 분석기 위치 업데이트 (상태는 내부에서 필터링)
+        RidingMetricAnalyzer.shared.updateLocation(newLocation)
+        FlowScoreAnalyzer.shared.updateLocation(newLocation)
+        
         // 2. RIDING 상태에서만 메트릭 측정
         if currentState == .riding, let previous = lastLocation {
             // 거리 누적
@@ -408,11 +493,14 @@ class LocationManager: NSObject, ObservableObject, CLLocationManagerDelegate {
             // GPS 경로 수집 (5m마다 - 배터리/데이터 최적화)
             if distance >= 5.0 || routeCoordinates.isEmpty {
                 routeCoordinates.append([newLocation.coordinate.latitude, newLocation.coordinate.longitude])
+                routeSpeeds.append(max(0, newLocation.speed * 3.6)) // 속도 함께 저장
             }
         }
+
         
         // 3. 슬로프 인식 및 Start/Finish 감지 (배터리 최적화: 일정 거리 이동 시마다)
-        if shouldCheckSlope(at: newLocation) {
+        // Issue #1 수정: 리프트 탑승 중 오탐지 방지를 위해 RIDING 상태에서만 슬로프 인식 수행
+        if currentState == .riding && shouldCheckSlope(at: newLocation) {
             // A. 슬로프 내부 판정 (Dwell Time)
             if let slope = SlopeDatabase.shared.findSlope(at: newLocation) {
                 if currentSlope?.id != slope.id {
@@ -470,6 +558,16 @@ class LocationManager: NSObject, ObservableObject, CLLocationManagerDelegate {
             print("위치 권한 미결정")
         @unknown default:
             break
+        }
+    }
+    // MARK: - Helper Methods
+    
+    private func mapStateToEventType(_ state: RidingState) -> RunSession.TimelineEvent.EventType {
+        switch state {
+        case .riding: return .riding
+        case .onLift: return .lift
+        case .resting: return .rest
+        case .paused: return .pause
         }
     }
 }

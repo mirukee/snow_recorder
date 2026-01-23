@@ -1,0 +1,5343 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<gpx version="1.1" xmlns="http://www.topografix.com/GPX/1/1" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:gte="http://www.gpstrackeditor.com/xmlschemas/General/1" xsi:schemaLocation="http://www.topografix.com/GPX/1/1 http://www.topografix.com/GPX/1/1/gpx.xsd" creator="Slopes" tracker="Slopes">
+  <metadata>
+    <link href="https://getslopes.com">
+      <text>Slopes</text>
+    </link>
+  </metadata>
+  <trk>
+    <name>2026년 1월 23일 - High 1</name>
+    <trkseg>
+      <trkpt lat="37.190081" lon="128.827809">
+        <ele>999.480132</ele>
+        <time>2026-01-23T15:27:21+09:00</time>
+        <hdop>0</hdop>
+        <vdop>1</vdop>
+        <ele>999.480132</ele>
+        <extensions>
+          <gte:gps speed="0.022240" azimuth="-1.000000"></gte:gps>
+        </extensions>
+      </trkpt>
+      <trkpt lat="37.190156" lon="128.827732">
+        <ele>997.930090</ele>
+        <time>2026-01-23T15:27:46+09:00</time>
+        <hdop>0</hdop>
+        <vdop>2</vdop>
+        <ele>997.930090</ele>
+        <extensions>
+          <gte:gps speed="3.006525" azimuth="306.300000"></gte:gps>
+        </extensions>
+      </trkpt>
+      <trkpt lat="37.190236" lon="128.827659">
+        <ele>998.237127</ele>
+        <time>2026-01-23T15:27:54+09:00</time>
+        <hdop>0</hdop>
+        <vdop>0</vdop>
+        <ele>998.237127</ele>
+        <extensions>
+          <gte:gps speed="2.135681" azimuth="307.200000"></gte:gps>
+        </extensions>
+      </trkpt>
+      <trkpt lat="37.190283" lon="128.827555">
+        <ele>997.479422</ele>
+        <time>2026-01-23T15:28:03+09:00</time>
+        <hdop>0</hdop>
+        <vdop>0</vdop>
+        <ele>997.479422</ele>
+        <extensions>
+          <gte:gps speed="2.787444" azimuth="289.100000"></gte:gps>
+        </extensions>
+      </trkpt>
+      <trkpt lat="37.190222" lon="128.827457">
+        <ele>996.146517</ele>
+        <time>2026-01-23T15:28:11+09:00</time>
+        <hdop>0</hdop>
+        <vdop>0</vdop>
+        <ele>996.146517</ele>
+        <extensions>
+          <gte:gps speed="2.477517" azimuth="216.400000"></gte:gps>
+        </extensions>
+      </trkpt>
+      <trkpt lat="37.190134" lon="128.827367">
+        <ele>995.847587</ele>
+        <time>2026-01-23T15:29:02+09:00</time>
+        <hdop>0</hdop>
+        <vdop>0</vdop>
+        <ele>995.847587</ele>
+        <extensions>
+          <gte:gps speed="1.177843" azimuth="-1.000000"></gte:gps>
+        </extensions>
+      </trkpt>
+      <trkpt lat="37.190092" lon="128.827267">
+        <ele>984.073330</ele>
+        <time>2026-01-23T15:29:15+09:00</time>
+        <hdop>0</hdop>
+        <vdop>0</vdop>
+        <ele>984.073330</ele>
+        <extensions>
+          <gte:gps speed="2.978624" azimuth="234.000000"></gte:gps>
+        </extensions>
+      </trkpt>
+      <trkpt lat="37.190047" lon="128.827167">
+        <ele>984.936641</ele>
+        <time>2026-01-23T15:29:28+09:00</time>
+        <hdop>0</hdop>
+        <vdop>0</vdop>
+        <ele>984.936641</ele>
+        <extensions>
+          <gte:gps speed="1.115196" azimuth="269.900000"></gte:gps>
+        </extensions>
+      </trkpt>
+      <trkpt lat="37.189941" lon="128.827069">
+        <ele>995.006999</ele>
+        <time>2026-01-23T15:29:33+09:00</time>
+        <hdop>0</hdop>
+        <vdop>0</vdop>
+        <ele>995.006999</ele>
+        <extensions>
+          <gte:gps speed="6.140609" azimuth="226.200000"></gte:gps>
+        </extensions>
+      </trkpt>
+      <trkpt lat="37.189894" lon="128.827015">
+        <ele>998.941031</ele>
+        <time>2026-01-23T15:29:39+09:00</time>
+        <hdop>0</hdop>
+        <vdop>1</vdop>
+        <ele>998.941031</ele>
+        <extensions>
+          <gte:gps speed="0.000000" azimuth="226.600000"></gte:gps>
+        </extensions>
+      </trkpt>
+      <trkpt lat="37.189894" lon="128.827015">
+        <ele>998.941031</ele>
+        <time>2026-01-23T15:29:39+09:00</time>
+        <hdop>0</hdop>
+        <vdop>1</vdop>
+        <ele>998.941031</ele>
+        <extensions>
+          <gte:gps speed="0.000000" azimuth="226.600000"></gte:gps>
+        </extensions>
+      </trkpt>
+      <trkpt lat="37.189803" lon="128.826898">
+        <ele>1006.080742</ele>
+        <time>2026-01-23T15:29:42+09:00</time>
+        <hdop>0</hdop>
+        <vdop>0</vdop>
+        <ele>1006.080742</ele>
+        <extensions>
+          <gte:gps speed="0.000000" azimuth="231.000000"></gte:gps>
+        </extensions>
+      </trkpt>
+      <trkpt lat="37.189647" lon="128.826685">
+        <ele>1019.046903</ele>
+        <time>2026-01-23T15:29:53+09:00</time>
+        <hdop>0</hdop>
+        <vdop>1</vdop>
+        <ele>1019.046903</ele>
+        <extensions>
+          <gte:gps speed="0.000000" azimuth="227.800000"></gte:gps>
+        </extensions>
+      </trkpt>
+      <trkpt lat="37.189587" lon="128.826600">
+        <ele>1021.613872</ele>
+        <time>2026-01-23T15:29:56+09:00</time>
+        <hdop>0</hdop>
+        <vdop>0</vdop>
+        <ele>1021.613872</ele>
+        <extensions>
+          <gte:gps speed="5.484469" azimuth="228.300000"></gte:gps>
+        </extensions>
+      </trkpt>
+      <trkpt lat="37.189563" lon="128.826568">
+        <ele>1022.522262</ele>
+        <time>2026-01-23T15:30:02+09:00</time>
+        <hdop>0</hdop>
+        <vdop>0</vdop>
+        <ele>1022.522262</ele>
+        <extensions>
+          <gte:gps speed="0.000000" azimuth="229.900000"></gte:gps>
+        </extensions>
+      </trkpt>
+      <trkpt lat="37.189563" lon="128.826568">
+        <ele>1022.522262</ele>
+        <time>2026-01-23T15:30:02+09:00</time>
+        <hdop>0</hdop>
+        <vdop>0</vdop>
+        <ele>1022.522262</ele>
+        <extensions>
+          <gte:gps speed="0.000000" azimuth="229.900000"></gte:gps>
+        </extensions>
+      </trkpt>
+      <trkpt lat="37.189359" lon="128.826291">
+        <ele>1031.112226</ele>
+        <time>2026-01-23T15:30:11+09:00</time>
+        <hdop>0</hdop>
+        <vdop>1</vdop>
+        <ele>1031.112226</ele>
+        <extensions>
+          <gte:gps speed="5.649360" azimuth="227.100000"></gte:gps>
+        </extensions>
+      </trkpt>
+      <trkpt lat="37.189308" lon="128.826220">
+        <ele>1034.118480</ele>
+        <time>2026-01-23T15:30:17+09:00</time>
+        <hdop>0</hdop>
+        <vdop>1</vdop>
+        <ele>1034.118480</ele>
+        <extensions>
+          <gte:gps speed="0.000000" azimuth="228.100000"></gte:gps>
+        </extensions>
+      </trkpt>
+      <trkpt lat="37.189308" lon="128.826220">
+        <ele>1034.118480</ele>
+        <time>2026-01-23T15:30:17+09:00</time>
+        <hdop>0</hdop>
+        <vdop>1</vdop>
+        <ele>1034.118480</ele>
+        <extensions>
+          <gte:gps speed="0.000000" azimuth="228.100000"></gte:gps>
+        </extensions>
+      </trkpt>
+      <trkpt lat="37.189131" lon="128.825979">
+        <ele>1043.501132</ele>
+        <time>2026-01-23T15:30:27+09:00</time>
+        <hdop>0</hdop>
+        <vdop>0</vdop>
+        <ele>1043.501132</ele>
+        <extensions>
+          <gte:gps speed="0.000000" azimuth="228.100000"></gte:gps>
+        </extensions>
+      </trkpt>
+      <trkpt lat="37.188983" lon="128.825774">
+        <ele>1052.723300</ele>
+        <time>2026-01-23T15:30:38+09:00</time>
+        <hdop>0</hdop>
+        <vdop>0</vdop>
+        <ele>1052.723300</ele>
+        <extensions>
+          <gte:gps speed="0.000000" azimuth="230.900000"></gte:gps>
+        </extensions>
+      </trkpt>
+      <trkpt lat="37.188837" lon="128.825576">
+        <ele>1061.892643</ele>
+        <time>2026-01-23T15:30:47+09:00</time>
+        <hdop>0</hdop>
+        <vdop>0</vdop>
+        <ele>1061.892643</ele>
+        <extensions>
+          <gte:gps speed="5.677722" azimuth="225.700000"></gte:gps>
+        </extensions>
+      </trkpt>
+      <trkpt lat="37.188776" lon="128.825489">
+        <ele>1063.240805</ele>
+        <time>2026-01-23T15:30:52+09:00</time>
+        <hdop>0</hdop>
+        <vdop>0</vdop>
+        <ele>1063.240805</ele>
+        <extensions>
+          <gte:gps speed="0.000000" azimuth="228.300000"></gte:gps>
+        </extensions>
+      </trkpt>
+      <trkpt lat="37.188709" lon="128.825397">
+        <ele>1065.022660</ele>
+        <time>2026-01-23T15:30:57+09:00</time>
+        <hdop>0</hdop>
+        <vdop>0</vdop>
+        <ele>1065.022660</ele>
+        <extensions>
+          <gte:gps speed="0.000000" azimuth="228.100000"></gte:gps>
+        </extensions>
+      </trkpt>
+      <trkpt lat="37.188629" lon="128.825290">
+        <ele>1067.342890</ele>
+        <time>2026-01-23T15:31:01+09:00</time>
+        <hdop>0</hdop>
+        <vdop>0</vdop>
+        <ele>1067.342890</ele>
+        <extensions>
+          <gte:gps speed="5.344499" azimuth="226.300000"></gte:gps>
+        </extensions>
+      </trkpt>
+      <trkpt lat="37.188552" lon="128.825184">
+        <ele>1070.750237</ele>
+        <time>2026-01-23T15:31:06+09:00</time>
+        <hdop>0</hdop>
+        <vdop>0</vdop>
+        <ele>1070.750237</ele>
+        <extensions>
+          <gte:gps speed="5.307301" azimuth="227.400000"></gte:gps>
+        </extensions>
+      </trkpt>
+      <trkpt lat="37.188488" lon="128.825097">
+        <ele>1073.684961</ele>
+        <time>2026-01-23T15:31:10+09:00</time>
+        <hdop>0</hdop>
+        <vdop>0</vdop>
+        <ele>1073.684961</ele>
+        <extensions>
+          <gte:gps speed="5.546850" azimuth="226.700000"></gte:gps>
+        </extensions>
+      </trkpt>
+      <trkpt lat="37.188426" lon="128.825010">
+        <ele>1077.003033</ele>
+        <time>2026-01-23T15:31:15+09:00</time>
+        <hdop>0</hdop>
+        <vdop>0</vdop>
+        <ele>1077.003033</ele>
+        <extensions>
+          <gte:gps speed="0.000000" azimuth="229.200000"></gte:gps>
+        </extensions>
+      </trkpt>
+      <trkpt lat="37.188023" lon="128.824454">
+        <ele>1096.406238</ele>
+        <time>2026-01-23T15:31:43+09:00</time>
+        <hdop>0</hdop>
+        <vdop>0</vdop>
+        <ele>1096.406238</ele>
+        <extensions>
+          <gte:gps speed="0.000000" azimuth="229.100000"></gte:gps>
+        </extensions>
+      </trkpt>
+      <trkpt lat="37.187716" lon="128.824031">
+        <ele>1120.585950</ele>
+        <time>2026-01-23T15:32:04+09:00</time>
+        <hdop>0</hdop>
+        <vdop>0</vdop>
+        <ele>1120.585950</ele>
+        <extensions>
+          <gte:gps speed="3.911498" azimuth="229.200000"></gte:gps>
+        </extensions>
+      </trkpt>
+      <trkpt lat="37.187637" lon="128.823924">
+        <ele>1123.598499</ele>
+        <time>2026-01-23T15:32:09+09:00</time>
+        <hdop>0</hdop>
+        <vdop>0</vdop>
+        <ele>1123.598499</ele>
+        <extensions>
+          <gte:gps speed="5.649139" azimuth="225.900000"></gte:gps>
+        </extensions>
+      </trkpt>
+      <trkpt lat="37.187565" lon="128.823822">
+        <ele>1126.361651</ele>
+        <time>2026-01-23T15:32:14+09:00</time>
+        <hdop>0</hdop>
+        <vdop>0</vdop>
+        <ele>1126.361651</ele>
+        <extensions>
+          <gte:gps speed="5.338095" azimuth="229.000000"></gte:gps>
+        </extensions>
+      </trkpt>
+      <trkpt lat="37.187505" lon="128.823737">
+        <ele>1126.437800</ele>
+        <time>2026-01-23T15:32:19+09:00</time>
+        <hdop>0</hdop>
+        <vdop>0</vdop>
+        <ele>1126.437800</ele>
+        <extensions>
+          <gte:gps speed="0.000000" azimuth="228.700000"></gte:gps>
+        </extensions>
+      </trkpt>
+      <trkpt lat="37.187286" lon="128.823440">
+        <ele>1129.815866</ele>
+        <time>2026-01-23T15:32:32+09:00</time>
+        <hdop>0</hdop>
+        <vdop>0</vdop>
+        <ele>1129.815866</ele>
+        <extensions>
+          <gte:gps speed="6.135782" azimuth="225.800000"></gte:gps>
+        </extensions>
+      </trkpt>
+      <trkpt lat="37.187260" lon="128.823402">
+        <ele>1130.527946</ele>
+        <time>2026-01-23T15:32:38+09:00</time>
+        <hdop>0</hdop>
+        <vdop>0</vdop>
+        <ele>1130.527946</ele>
+        <extensions>
+          <gte:gps speed="0.000000" azimuth="229.700000"></gte:gps>
+        </extensions>
+      </trkpt>
+      <trkpt lat="37.187260" lon="128.823402">
+        <ele>1130.527946</ele>
+        <time>2026-01-23T15:32:38+09:00</time>
+        <hdop>0</hdop>
+        <vdop>0</vdop>
+        <ele>1130.527946</ele>
+        <extensions>
+          <gte:gps speed="0.000000" azimuth="229.700000"></gte:gps>
+        </extensions>
+      </trkpt>
+      <trkpt lat="37.186768" lon="128.822726">
+        <ele>1142.949166</ele>
+        <time>2026-01-23T15:33:06+09:00</time>
+        <hdop>0</hdop>
+        <vdop>0</vdop>
+        <ele>1142.949166</ele>
+        <extensions>
+          <gte:gps speed="6.005834" azimuth="227.000000"></gte:gps>
+        </extensions>
+      </trkpt>
+      <trkpt lat="37.186742" lon="128.822687">
+        <ele>1144.292525</ele>
+        <time>2026-01-23T15:33:12+09:00</time>
+        <hdop>0</hdop>
+        <vdop>0</vdop>
+        <ele>1144.292525</ele>
+        <extensions>
+          <gte:gps speed="0.000000" azimuth="230.900000"></gte:gps>
+        </extensions>
+      </trkpt>
+      <trkpt lat="37.186742" lon="128.822687">
+        <ele>1144.292525</ele>
+        <time>2026-01-23T15:33:12+09:00</time>
+        <hdop>0</hdop>
+        <vdop>0</vdop>
+        <ele>1144.292525</ele>
+        <extensions>
+          <gte:gps speed="0.000000" azimuth="230.900000"></gte:gps>
+        </extensions>
+      </trkpt>
+      <trkpt lat="37.186576" lon="128.822460">
+        <ele>1151.625282</ele>
+        <time>2026-01-23T15:33:19+09:00</time>
+        <hdop>0</hdop>
+        <vdop>0</vdop>
+        <ele>1151.625282</ele>
+        <extensions>
+          <gte:gps speed="5.486095" azimuth="228.700000"></gte:gps>
+        </extensions>
+      </trkpt>
+      <trkpt lat="37.186507" lon="128.822366">
+        <ele>1157.524018</ele>
+        <time>2026-01-23T15:33:24+09:00</time>
+        <hdop>0</hdop>
+        <vdop>1</vdop>
+        <ele>1157.524018</ele>
+        <extensions>
+          <gte:gps speed="5.065811" azimuth="226.600000"></gte:gps>
+        </extensions>
+      </trkpt>
+      <trkpt lat="37.186497" lon="128.822350">
+        <ele>1158.592238</ele>
+        <time>2026-01-23T15:33:30+09:00</time>
+        <hdop>0</hdop>
+        <vdop>0</vdop>
+        <ele>1158.592238</ele>
+        <extensions>
+          <gte:gps speed="0.000000" azimuth="228.600000"></gte:gps>
+        </extensions>
+      </trkpt>
+      <trkpt lat="37.186497" lon="128.822350">
+        <ele>1158.592238</ele>
+        <time>2026-01-23T15:33:30+09:00</time>
+        <hdop>0</hdop>
+        <vdop>0</vdop>
+        <ele>1158.592238</ele>
+        <extensions>
+          <gte:gps speed="0.000000" azimuth="228.600000"></gte:gps>
+        </extensions>
+      </trkpt>
+      <trkpt lat="37.186358" lon="128.822157">
+        <ele>1170.442301</ele>
+        <time>2026-01-23T15:33:35+09:00</time>
+        <hdop>0</hdop>
+        <vdop>1</vdop>
+        <ele>1170.442301</ele>
+        <extensions>
+          <gte:gps speed="5.676320" azimuth="227.400000"></gte:gps>
+        </extensions>
+      </trkpt>
+      <trkpt lat="37.186291" lon="128.822067">
+        <ele>1176.608207</ele>
+        <time>2026-01-23T15:33:40+09:00</time>
+        <hdop>0</hdop>
+        <vdop>0</vdop>
+        <ele>1176.608207</ele>
+        <extensions>
+          <gte:gps speed="5.077772" azimuth="225.300000"></gte:gps>
+        </extensions>
+      </trkpt>
+      <trkpt lat="37.186200" lon="128.821941">
+        <ele>1180.216017</ele>
+        <time>2026-01-23T15:33:46+09:00</time>
+        <hdop>0</hdop>
+        <vdop>1</vdop>
+        <ele>1180.216017</ele>
+        <extensions>
+          <gte:gps speed="0.000000" azimuth="228.000000"></gte:gps>
+        </extensions>
+      </trkpt>
+      <trkpt lat="37.186200" lon="128.821941">
+        <ele>1180.216017</ele>
+        <time>2026-01-23T15:33:46+09:00</time>
+        <hdop>0</hdop>
+        <vdop>1</vdop>
+        <ele>1180.216017</ele>
+        <extensions>
+          <gte:gps speed="0.000000" azimuth="228.000000"></gte:gps>
+        </extensions>
+      </trkpt>
+      <trkpt lat="37.185473" lon="128.820951">
+        <ele>1221.893316</ele>
+        <time>2026-01-23T15:34:36+09:00</time>
+        <hdop>0</hdop>
+        <vdop>0</vdop>
+        <ele>1221.893316</ele>
+        <extensions>
+          <gte:gps speed="5.408178" azimuth="226.100000"></gte:gps>
+        </extensions>
+      </trkpt>
+      <trkpt lat="37.185414" lon="128.820865">
+        <ele>1224.582590</ele>
+        <time>2026-01-23T15:34:41+09:00</time>
+        <hdop>0</hdop>
+        <vdop>0</vdop>
+        <ele>1224.582590</ele>
+        <extensions>
+          <gte:gps speed="0.000000" azimuth="227.700000"></gte:gps>
+        </extensions>
+      </trkpt>
+      <trkpt lat="37.185190" lon="128.820554">
+        <ele>1235.179850</ele>
+        <time>2026-01-23T15:34:55+09:00</time>
+        <hdop>0</hdop>
+        <vdop>0</vdop>
+        <ele>1235.179850</ele>
+        <extensions>
+          <gte:gps speed="5.425289" azimuth="227.500000"></gte:gps>
+        </extensions>
+      </trkpt>
+      <trkpt lat="37.185133" lon="128.820474">
+        <ele>1237.760372</ele>
+        <time>2026-01-23T15:35:01+09:00</time>
+        <hdop>0</hdop>
+        <vdop>0</vdop>
+        <ele>1237.760372</ele>
+        <extensions>
+          <gte:gps speed="0.000000" azimuth="226.800000"></gte:gps>
+        </extensions>
+      </trkpt>
+      <trkpt lat="37.185133" lon="128.820474">
+        <ele>1237.760372</ele>
+        <time>2026-01-23T15:35:01+09:00</time>
+        <hdop>0</hdop>
+        <vdop>0</vdop>
+        <ele>1237.760372</ele>
+        <extensions>
+          <gte:gps speed="0.000000" azimuth="226.800000"></gte:gps>
+        </extensions>
+      </trkpt>
+      <trkpt lat="37.184681" lon="128.819855">
+        <ele>1261.134322</ele>
+        <time>2026-01-23T15:35:30+09:00</time>
+        <hdop>0</hdop>
+        <vdop>0</vdop>
+        <ele>1261.134322</ele>
+        <extensions>
+          <gte:gps speed="5.354221" azimuth="226.300000"></gte:gps>
+        </extensions>
+      </trkpt>
+      <trkpt lat="37.184647" lon="128.819805">
+        <ele>1262.063175</ele>
+        <time>2026-01-23T15:35:36+09:00</time>
+        <hdop>0</hdop>
+        <vdop>0</vdop>
+        <ele>1262.063175</ele>
+        <extensions>
+          <gte:gps speed="0.000000" azimuth="230.100000"></gte:gps>
+        </extensions>
+      </trkpt>
+      <trkpt lat="37.184647" lon="128.819805">
+        <ele>1262.063175</ele>
+        <time>2026-01-23T15:35:36+09:00</time>
+        <hdop>0</hdop>
+        <vdop>0</vdop>
+        <ele>1262.063175</ele>
+        <extensions>
+          <gte:gps speed="0.000000" azimuth="230.100000"></gte:gps>
+        </extensions>
+      </trkpt>
+      <trkpt lat="37.184522" lon="128.819630">
+        <ele>1267.361051</ele>
+        <time>2026-01-23T15:35:41+09:00</time>
+        <hdop>0</hdop>
+        <vdop>1</vdop>
+        <ele>1267.361051</ele>
+        <extensions>
+          <gte:gps speed="3.800085" azimuth="227.600000"></gte:gps>
+        </extensions>
+      </trkpt>
+      <trkpt lat="37.184458" lon="128.819540">
+        <ele>1269.767266</ele>
+        <time>2026-01-23T15:35:45+09:00</time>
+        <hdop>0</hdop>
+        <vdop>0</vdop>
+        <ele>1269.767266</ele>
+        <extensions>
+          <gte:gps speed="5.064001" azimuth="229.900000"></gte:gps>
+        </extensions>
+      </trkpt>
+      <trkpt lat="37.184397" lon="128.819455">
+        <ele>1272.564246</ele>
+        <time>2026-01-23T15:35:49+09:00</time>
+        <hdop>0</hdop>
+        <vdop>0</vdop>
+        <ele>1272.564246</ele>
+        <extensions>
+          <gte:gps speed="5.684843" azimuth="230.700000"></gte:gps>
+        </extensions>
+      </trkpt>
+      <trkpt lat="37.184322" lon="128.819354">
+        <ele>1276.741907</ele>
+        <time>2026-01-23T15:35:54+09:00</time>
+        <hdop>0</hdop>
+        <vdop>0</vdop>
+        <ele>1276.741907</ele>
+        <extensions>
+          <gte:gps speed="0.000000" azimuth="224.000000"></gte:gps>
+        </extensions>
+      </trkpt>
+      <trkpt lat="37.184322" lon="128.819354">
+        <ele>1276.741907</ele>
+        <time>2026-01-23T15:35:54+09:00</time>
+        <hdop>0</hdop>
+        <vdop>0</vdop>
+        <ele>1276.741907</ele>
+        <extensions>
+          <gte:gps speed="0.000000" azimuth="224.000000"></gte:gps>
+        </extensions>
+      </trkpt>
+      <trkpt lat="37.184248" lon="128.819253">
+        <ele>1280.717682</ele>
+        <time>2026-01-23T15:35:59+09:00</time>
+        <hdop>0</hdop>
+        <vdop>0</vdop>
+        <ele>1280.717682</ele>
+        <extensions>
+          <gte:gps speed="5.527933" azimuth="228.900000"></gte:gps>
+        </extensions>
+      </trkpt>
+      <trkpt lat="37.184175" lon="128.819150">
+        <ele>1284.715242</ele>
+        <time>2026-01-23T15:36:04+09:00</time>
+        <hdop>0</hdop>
+        <vdop>0</vdop>
+        <ele>1284.715242</ele>
+        <extensions>
+          <gte:gps speed="5.252273" azimuth="229.100000"></gte:gps>
+        </extensions>
+      </trkpt>
+      <trkpt lat="37.184099" lon="128.819049">
+        <ele>1288.668036</ele>
+        <time>2026-01-23T15:36:09+09:00</time>
+        <hdop>0</hdop>
+        <vdop>0</vdop>
+        <ele>1288.668036</ele>
+        <extensions>
+          <gte:gps speed="0.000000" azimuth="227.100000"></gte:gps>
+        </extensions>
+      </trkpt>
+      <trkpt lat="37.184099" lon="128.819049">
+        <ele>1288.668036</ele>
+        <time>2026-01-23T15:36:09+09:00</time>
+        <hdop>0</hdop>
+        <vdop>0</vdop>
+        <ele>1288.668036</ele>
+        <extensions>
+          <gte:gps speed="0.000000" azimuth="227.100000"></gte:gps>
+        </extensions>
+      </trkpt>
+      <trkpt lat="37.184027" lon="128.818948">
+        <ele>1292.385818</ele>
+        <time>2026-01-23T15:36:14+09:00</time>
+        <hdop>0</hdop>
+        <vdop>0</vdop>
+        <ele>1292.385818</ele>
+        <extensions>
+          <gte:gps speed="5.497683" azimuth="228.500000"></gte:gps>
+        </extensions>
+      </trkpt>
+      <trkpt lat="37.183975" lon="128.818876">
+        <ele>1295.591359</ele>
+        <time>2026-01-23T15:36:20+09:00</time>
+        <hdop>0</hdop>
+        <vdop>0</vdop>
+        <ele>1295.591359</ele>
+        <extensions>
+          <gte:gps speed="0.000000" azimuth="228.600000"></gte:gps>
+        </extensions>
+      </trkpt>
+      <trkpt lat="37.183975" lon="128.818876">
+        <ele>1295.591359</ele>
+        <time>2026-01-23T15:36:20+09:00</time>
+        <hdop>0</hdop>
+        <vdop>0</vdop>
+        <ele>1295.591359</ele>
+        <extensions>
+          <gte:gps speed="0.000000" azimuth="228.600000"></gte:gps>
+        </extensions>
+      </trkpt>
+      <trkpt lat="37.183883" lon="128.818752">
+        <ele>1300.799493</ele>
+        <time>2026-01-23T15:36:24+09:00</time>
+        <hdop>0</hdop>
+        <vdop>0</vdop>
+        <ele>1300.799493</ele>
+        <extensions>
+          <gte:gps speed="5.305192" azimuth="226.400000"></gte:gps>
+        </extensions>
+      </trkpt>
+      <trkpt lat="37.183810" lon="128.818653">
+        <ele>1305.112919</ele>
+        <time>2026-01-23T15:36:29+09:00</time>
+        <hdop>0</hdop>
+        <vdop>0</vdop>
+        <ele>1305.112919</ele>
+        <extensions>
+          <gte:gps speed="5.331825" azimuth="227.700000"></gte:gps>
+        </extensions>
+      </trkpt>
+      <trkpt lat="37.183744" lon="128.818563">
+        <ele>1310.198637</ele>
+        <time>2026-01-23T15:36:34+09:00</time>
+        <hdop>0</hdop>
+        <vdop>0</vdop>
+        <ele>1310.198637</ele>
+        <extensions>
+          <gte:gps speed="4.285802" azimuth="222.800000"></gte:gps>
+        </extensions>
+      </trkpt>
+      <trkpt lat="37.183671" lon="128.818462">
+        <ele>1311.829411</ele>
+        <time>2026-01-23T15:36:39+09:00</time>
+        <hdop>0</hdop>
+        <vdop>0</vdop>
+        <ele>1311.829411</ele>
+        <extensions>
+          <gte:gps speed="6.116735" azimuth="224.000000"></gte:gps>
+        </extensions>
+      </trkpt>
+      <trkpt lat="37.183594" lon="128.818356">
+        <ele>1315.829586</ele>
+        <time>2026-01-23T15:36:44+09:00</time>
+        <hdop>0</hdop>
+        <vdop>0</vdop>
+        <ele>1315.829586</ele>
+        <extensions>
+          <gte:gps speed="5.530393" azimuth="226.700000"></gte:gps>
+        </extensions>
+      </trkpt>
+      <trkpt lat="37.183534" lon="128.818272">
+        <ele>1318.781301</ele>
+        <time>2026-01-23T15:36:48+09:00</time>
+        <hdop>0</hdop>
+        <vdop>0</vdop>
+        <ele>1318.781301</ele>
+        <extensions>
+          <gte:gps speed="5.367942" azimuth="228.900000"></gte:gps>
+        </extensions>
+      </trkpt>
+      <trkpt lat="37.183460" lon="128.818168">
+        <ele>1323.474760</ele>
+        <time>2026-01-23T15:36:53+09:00</time>
+        <hdop>0</hdop>
+        <vdop>0</vdop>
+        <ele>1323.474760</ele>
+        <extensions>
+          <gte:gps speed="5.619242" azimuth="227.300000"></gte:gps>
+        </extensions>
+      </trkpt>
+      <trkpt lat="37.183401" lon="128.818082">
+        <ele>1327.724260</ele>
+        <time>2026-01-23T15:36:57+09:00</time>
+        <hdop>0</hdop>
+        <vdop>0</vdop>
+        <ele>1327.724260</ele>
+        <extensions>
+          <gte:gps speed="5.593880" azimuth="228.800000"></gte:gps>
+        </extensions>
+      </trkpt>
+      <trkpt lat="37.183329" lon="128.817986">
+        <ele>1331.621511</ele>
+        <time>2026-01-23T15:37:02+09:00</time>
+        <hdop>0</hdop>
+        <vdop>0</vdop>
+        <ele>1331.621511</ele>
+        <extensions>
+          <gte:gps speed="5.589829" azimuth="226.300000"></gte:gps>
+        </extensions>
+      </trkpt>
+      <trkpt lat="37.183259" lon="128.817889">
+        <ele>1335.091957</ele>
+        <time>2026-01-23T15:37:07+09:00</time>
+        <hdop>0</hdop>
+        <vdop>0</vdop>
+        <ele>1335.091957</ele>
+        <extensions>
+          <gte:gps speed="5.481163" azimuth="231.100000"></gte:gps>
+        </extensions>
+      </trkpt>
+      <trkpt lat="37.183180" lon="128.817788">
+        <ele>1338.686613</ele>
+        <time>2026-01-23T15:37:12+09:00</time>
+        <hdop>0</hdop>
+        <vdop>0</vdop>
+        <ele>1338.686613</ele>
+        <extensions>
+          <gte:gps speed="5.686766" azimuth="225.500000"></gte:gps>
+        </extensions>
+      </trkpt>
+      <trkpt lat="37.183119" lon="128.817695">
+        <ele>1342.171941</ele>
+        <time>2026-01-23T15:37:17+09:00</time>
+        <hdop>0</hdop>
+        <vdop>0</vdop>
+        <ele>1342.171941</ele>
+        <extensions>
+          <gte:gps speed="3.936815" azimuth="236.500000"></gte:gps>
+        </extensions>
+      </trkpt>
+      <trkpt lat="37.183052" lon="128.817605">
+        <ele>1341.135188</ele>
+        <time>2026-01-23T15:37:22+09:00</time>
+        <hdop>0</hdop>
+        <vdop>0</vdop>
+        <ele>1341.135188</ele>
+        <extensions>
+          <gte:gps speed="4.047714" azimuth="231.500000"></gte:gps>
+        </extensions>
+      </trkpt>
+      <trkpt lat="37.182981" lon="128.817507">
+        <ele>1339.785526</ele>
+        <time>2026-01-23T15:37:31+09:00</time>
+        <hdop>0</hdop>
+        <vdop>0</vdop>
+        <ele>1339.785526</ele>
+        <extensions>
+          <gte:gps speed="0.537207" azimuth="167.800000"></gte:gps>
+        </extensions>
+      </trkpt>
+      <trkpt lat="37.182998" lon="128.817392">
+        <ele>1342.578854</ele>
+        <time>2026-01-23T15:37:42+09:00</time>
+        <hdop>0</hdop>
+        <vdop>0</vdop>
+        <ele>1342.578854</ele>
+        <extensions>
+          <gte:gps speed="2.693584" azimuth="325.000000"></gte:gps>
+        </extensions>
+      </trkpt>
+      <trkpt lat="37.183075" lon="128.817311">
+        <ele>1343.410080</ele>
+        <time>2026-01-23T15:37:51+09:00</time>
+        <hdop>0</hdop>
+        <vdop>0</vdop>
+        <ele>1343.410080</ele>
+        <extensions>
+          <gte:gps speed="2.985156" azimuth="337.200000"></gte:gps>
+        </extensions>
+      </trkpt>
+      <trkpt lat="37.183163" lon="128.817342">
+        <ele>1343.039765</ele>
+        <time>2026-01-23T15:38:04+09:00</time>
+        <hdop>0</hdop>
+        <vdop>0</vdop>
+        <ele>1343.039765</ele>
+        <extensions>
+          <gte:gps speed="0.771477" azimuth="3.000000"></gte:gps>
+        </extensions>
+      </trkpt>
+      <trkpt lat="37.183202" lon="128.817453">
+        <ele>1342.555931</ele>
+        <time>2026-01-23T15:39:00+09:00</time>
+        <hdop>0</hdop>
+        <vdop>0</vdop>
+        <ele>1342.555931</ele>
+        <extensions>
+          <gte:gps speed="6.483650" azimuth="66.200000"></gte:gps>
+        </extensions>
+      </trkpt>
+      <trkpt lat="37.183260" lon="128.817554">
+        <ele>1337.336133</ele>
+        <time>2026-01-23T15:39:03+09:00</time>
+        <hdop>0</hdop>
+        <vdop>0</vdop>
+        <ele>1337.336133</ele>
+        <extensions>
+          <gte:gps speed="7.583614" azimuth="58.400000"></gte:gps>
+        </extensions>
+      </trkpt>
+      <trkpt lat="37.183334" lon="128.817648">
+        <ele>1333.509297</ele>
+        <time>2026-01-23T15:39:08+09:00</time>
+        <hdop>0</hdop>
+        <vdop>0</vdop>
+        <ele>1333.509297</ele>
+        <extensions>
+          <gte:gps speed="5.879854" azimuth="13.900000"></gte:gps>
+        </extensions>
+      </trkpt>
+      <trkpt lat="37.183431" lon="128.817687">
+        <ele>1328.102853</ele>
+        <time>2026-01-23T15:39:12+09:00</time>
+        <hdop>0</hdop>
+        <vdop>0</vdop>
+        <ele>1328.102853</ele>
+        <extensions>
+          <gte:gps speed="6.200761" azimuth="39.400000"></gte:gps>
+        </extensions>
+      </trkpt>
+      <trkpt lat="37.183458" lon="128.817835">
+        <ele>1325.142915</ele>
+        <time>2026-01-23T15:39:15+09:00</time>
+        <hdop>0</hdop>
+        <vdop>0</vdop>
+        <ele>1325.142915</ele>
+        <extensions>
+          <gte:gps speed="10.453859" azimuth="53.000000"></gte:gps>
+        </extensions>
+      </trkpt>
+      <trkpt lat="37.183549" lon="128.817887">
+        <ele>1320.885703</ele>
+        <time>2026-01-23T15:39:17+09:00</time>
+        <hdop>0</hdop>
+        <vdop>0</vdop>
+        <ele>1320.885703</ele>
+        <extensions>
+          <gte:gps speed="12.318101" azimuth="35.200000"></gte:gps>
+        </extensions>
+      </trkpt>
+      <trkpt lat="37.183588" lon="128.818053">
+        <ele>1311.110290</ele>
+        <time>2026-01-23T15:39:20+09:00</time>
+        <hdop>0</hdop>
+        <vdop>0</vdop>
+        <ele>1311.110290</ele>
+        <extensions>
+          <gte:gps speed="13.042153" azimuth="65.800000"></gte:gps>
+        </extensions>
+      </trkpt>
+      <trkpt lat="37.183655" lon="128.818130">
+        <ele>1308.089381</ele>
+        <time>2026-01-23T15:39:22+09:00</time>
+        <hdop>0</hdop>
+        <vdop>0</vdop>
+        <ele>1308.089381</ele>
+        <extensions>
+          <gte:gps speed="10.936364" azimuth="35.300000"></gte:gps>
+        </extensions>
+      </trkpt>
+      <trkpt lat="37.183762" lon="128.818192">
+        <ele>1303.855208</ele>
+        <time>2026-01-23T15:39:24+09:00</time>
+        <hdop>0</hdop>
+        <vdop>0</vdop>
+        <ele>1303.855208</ele>
+        <extensions>
+          <gte:gps speed="13.345280" azimuth="39.000000"></gte:gps>
+        </extensions>
+      </trkpt>
+      <trkpt lat="37.183753" lon="128.818324">
+        <ele>1298.496329</ele>
+        <time>2026-01-23T15:39:26+09:00</time>
+        <hdop>0</hdop>
+        <vdop>0</vdop>
+        <ele>1298.496329</ele>
+        <extensions>
+          <gte:gps speed="12.144354" azimuth="72.700000"></gte:gps>
+        </extensions>
+      </trkpt>
+      <trkpt lat="37.183839" lon="128.818415">
+        <ele>1295.086008</ele>
+        <time>2026-01-23T15:39:28+09:00</time>
+        <hdop>0</hdop>
+        <vdop>0</vdop>
+        <ele>1295.086008</ele>
+        <extensions>
+          <gte:gps speed="12.961583" azimuth="38.300000"></gte:gps>
+        </extensions>
+      </trkpt>
+      <trkpt lat="37.183907" lon="128.818531">
+        <ele>1291.309793</ele>
+        <time>2026-01-23T15:39:30+09:00</time>
+        <hdop>0</hdop>
+        <vdop>0</vdop>
+        <ele>1291.309793</ele>
+        <extensions>
+          <gte:gps speed="12.904147" azimuth="65.500000"></gte:gps>
+        </extensions>
+      </trkpt>
+      <trkpt lat="37.183854" lon="128.818628">
+        <ele>1287.711742</ele>
+        <time>2026-01-23T15:39:32+09:00</time>
+        <hdop>0</hdop>
+        <vdop>0</vdop>
+        <ele>1287.711742</ele>
+        <extensions>
+          <gte:gps speed="10.319725" azimuth="118.800000"></gte:gps>
+        </extensions>
+      </trkpt>
+      <trkpt lat="37.183795" lon="128.818768">
+        <ele>1284.540646</ele>
+        <time>2026-01-23T15:39:34+09:00</time>
+        <hdop>0</hdop>
+        <vdop>0</vdop>
+        <ele>1284.540646</ele>
+        <extensions>
+          <gte:gps speed="15.072320" azimuth="112.100000"></gte:gps>
+        </extensions>
+      </trkpt>
+      <trkpt lat="37.183802" lon="128.818882">
+        <ele>1283.738614</ele>
+        <time>2026-01-23T15:39:36+09:00</time>
+        <hdop>0</hdop>
+        <vdop>0</vdop>
+        <ele>1283.738614</ele>
+        <extensions>
+          <gte:gps speed="10.187909" azimuth="84.900000"></gte:gps>
+        </extensions>
+      </trkpt>
+      <trkpt lat="37.183876" lon="128.818995">
+        <ele>1279.241165</ele>
+        <time>2026-01-23T15:39:39+09:00</time>
+        <hdop>0</hdop>
+        <vdop>0</vdop>
+        <ele>1279.241165</ele>
+        <extensions>
+          <gte:gps speed="10.015775" azimuth="50.300000"></gte:gps>
+        </extensions>
+      </trkpt>
+      <trkpt lat="37.183957" lon="128.819109">
+        <ele>1276.269026</ele>
+        <time>2026-01-23T15:39:42+09:00</time>
+        <hdop>0</hdop>
+        <vdop>0</vdop>
+        <ele>1276.269026</ele>
+        <extensions>
+          <gte:gps speed="9.802250" azimuth="46.300000"></gte:gps>
+        </extensions>
+      </trkpt>
+      <trkpt lat="37.184025" lon="128.819227">
+        <ele>1272.370962</ele>
+        <time>2026-01-23T15:39:45+09:00</time>
+        <hdop>0</hdop>
+        <vdop>0</vdop>
+        <ele>1272.370962</ele>
+        <extensions>
+          <gte:gps speed="11.033393" azimuth="67.000000"></gte:gps>
+        </extensions>
+      </trkpt>
+      <trkpt lat="37.184006" lon="128.819381">
+        <ele>1266.101723</ele>
+        <time>2026-01-23T15:39:48+09:00</time>
+        <hdop>0</hdop>
+        <vdop>0</vdop>
+        <ele>1266.101723</ele>
+        <extensions>
+          <gte:gps speed="10.425217" azimuth="105.000000"></gte:gps>
+        </extensions>
+      </trkpt>
+      <trkpt lat="37.183947" lon="128.819493">
+        <ele>1260.892182</ele>
+        <time>2026-01-23T15:39:50+09:00</time>
+        <hdop>0</hdop>
+        <vdop>0</vdop>
+        <ele>1260.892182</ele>
+        <extensions>
+          <gte:gps speed="12.293569" azimuth="100.800000"></gte:gps>
+        </extensions>
+      </trkpt>
+      <trkpt lat="37.183963" lon="128.819641">
+        <ele>1255.937182</ele>
+        <time>2026-01-23T15:39:52+09:00</time>
+        <hdop>0</hdop>
+        <vdop>0</vdop>
+        <ele>1255.937182</ele>
+        <extensions>
+          <gte:gps speed="14.432547" azimuth="100.600000"></gte:gps>
+        </extensions>
+      </trkpt>
+      <trkpt lat="37.183936" lon="128.819762">
+        <ele>1251.396565</ele>
+        <time>2026-01-23T15:39:54+09:00</time>
+        <hdop>0</hdop>
+        <vdop>0</vdop>
+        <ele>1251.396565</ele>
+        <extensions>
+          <gte:gps speed="13.053170" azimuth="86.200000"></gte:gps>
+        </extensions>
+      </trkpt>
+      <trkpt lat="37.184003" lon="128.819843">
+        <ele>1247.876559</ele>
+        <time>2026-01-23T15:39:56+09:00</time>
+        <hdop>0</hdop>
+        <vdop>0</vdop>
+        <ele>1247.876559</ele>
+        <extensions>
+          <gte:gps speed="10.845797" azimuth="40.200000"></gte:gps>
+        </extensions>
+      </trkpt>
+      <trkpt lat="37.184075" lon="128.819974">
+        <ele>1241.528367</ele>
+        <time>2026-01-23T15:39:58+09:00</time>
+        <hdop>0</hdop>
+        <vdop>0</vdop>
+        <ele>1241.528367</ele>
+        <extensions>
+          <gte:gps speed="16.364066" azimuth="62.700000"></gte:gps>
+        </extensions>
+      </trkpt>
+      <trkpt lat="37.184067" lon="128.820129">
+        <ele>1234.592795</ele>
+        <time>2026-01-23T15:40:01+09:00</time>
+        <hdop>0</hdop>
+        <vdop>0</vdop>
+        <ele>1234.592795</ele>
+        <extensions>
+          <gte:gps speed="10.286028" azimuth="61.600000"></gte:gps>
+        </extensions>
+      </trkpt>
+      <trkpt lat="37.184165" lon="128.820148">
+        <ele>1233.822066</ele>
+        <time>2026-01-23T15:40:03+09:00</time>
+        <hdop>0</hdop>
+        <vdop>0</vdop>
+        <ele>1233.822066</ele>
+        <extensions>
+          <gte:gps speed="11.916952" azimuth="16.400000"></gte:gps>
+        </extensions>
+      </trkpt>
+      <trkpt lat="37.184214" lon="128.820347">
+        <ele>1224.767012</ele>
+        <time>2026-01-23T15:40:06+09:00</time>
+        <hdop>0</hdop>
+        <vdop>0</vdop>
+        <ele>1224.767012</ele>
+        <extensions>
+          <gte:gps speed="16.987167" azimuth="76.900000"></gte:gps>
+        </extensions>
+      </trkpt>
+      <trkpt lat="37.184315" lon="128.820419">
+        <ele>1220.901809</ele>
+        <time>2026-01-23T15:40:08+09:00</time>
+        <hdop>0</hdop>
+        <vdop>0</vdop>
+        <ele>1220.901809</ele>
+        <extensions>
+          <gte:gps speed="13.945562" azimuth="31.200000"></gte:gps>
+        </extensions>
+      </trkpt>
+      <trkpt lat="37.184364" lon="128.820552">
+        <ele>1213.551188</ele>
+        <time>2026-01-23T15:40:10+09:00</time>
+        <hdop>0</hdop>
+        <vdop>0</vdop>
+        <ele>1213.551188</ele>
+        <extensions>
+          <gte:gps speed="12.769949" azimuth="75.700000"></gte:gps>
+        </extensions>
+      </trkpt>
+      <trkpt lat="37.184345" lon="128.820683">
+        <ele>1207.874359</ele>
+        <time>2026-01-23T15:40:12+09:00</time>
+        <hdop>0</hdop>
+        <vdop>0</vdop>
+        <ele>1207.874359</ele>
+        <extensions>
+          <gte:gps speed="12.371991" azimuth="81.100000"></gte:gps>
+        </extensions>
+      </trkpt>
+      <trkpt lat="37.184423" lon="128.820809">
+        <ele>1208.298562</ele>
+        <time>2026-01-23T15:40:14+09:00</time>
+        <hdop>0</hdop>
+        <vdop>0</vdop>
+        <ele>1208.298562</ele>
+        <extensions>
+          <gte:gps speed="14.962088" azimuth="52.600000"></gte:gps>
+        </extensions>
+      </trkpt>
+      <trkpt lat="37.184431" lon="128.820931">
+        <ele>1201.280016</ele>
+        <time>2026-01-23T15:40:16+09:00</time>
+        <hdop>0</hdop>
+        <vdop>0</vdop>
+        <ele>1201.280016</ele>
+        <extensions>
+          <gte:gps speed="11.412507" azimuth="95.500000"></gte:gps>
+        </extensions>
+      </trkpt>
+      <trkpt lat="37.184407" lon="128.821073">
+        <ele>1198.561572</ele>
+        <time>2026-01-23T15:40:18+09:00</time>
+        <hdop>0</hdop>
+        <vdop>0</vdop>
+        <ele>1198.561572</ele>
+        <extensions>
+          <gte:gps speed="14.086771" azimuth="89.500000"></gte:gps>
+        </extensions>
+      </trkpt>
+      <trkpt lat="37.184471" lon="128.821182">
+        <ele>1196.616585</ele>
+        <time>2026-01-23T15:40:20+09:00</time>
+        <hdop>0</hdop>
+        <vdop>0</vdop>
+        <ele>1196.616585</ele>
+        <extensions>
+          <gte:gps speed="12.901004" azimuth="57.900000"></gte:gps>
+        </extensions>
+      </trkpt>
+      <trkpt lat="37.184461" lon="128.821315">
+        <ele>1191.334170</ele>
+        <time>2026-01-23T15:40:22+09:00</time>
+        <hdop>0</hdop>
+        <vdop>0</vdop>
+        <ele>1191.334170</ele>
+        <extensions>
+          <gte:gps speed="12.824213" azimuth="103.400000"></gte:gps>
+        </extensions>
+      </trkpt>
+      <trkpt lat="37.184463" lon="128.821446">
+        <ele>1188.529396</ele>
+        <time>2026-01-23T15:40:24+09:00</time>
+        <hdop>0</hdop>
+        <vdop>0</vdop>
+        <ele>1188.529396</ele>
+        <extensions>
+          <gte:gps speed="13.943826" azimuth="80.900000"></gte:gps>
+        </extensions>
+      </trkpt>
+      <trkpt lat="37.184530" lon="128.821570">
+        <ele>1184.620412</ele>
+        <time>2026-01-23T15:40:26+09:00</time>
+        <hdop>0</hdop>
+        <vdop>0</vdop>
+        <ele>1184.620412</ele>
+        <extensions>
+          <gte:gps speed="15.646148" azimuth="65.600000"></gte:gps>
+        </extensions>
+      </trkpt>
+      <trkpt lat="37.184509" lon="128.821698">
+        <ele>1181.344445</ele>
+        <time>2026-01-23T15:40:28+09:00</time>
+        <hdop>0</hdop>
+        <vdop>0</vdop>
+        <ele>1181.344445</ele>
+        <extensions>
+          <gte:gps speed="13.416878" azimuth="95.300000"></gte:gps>
+        </extensions>
+      </trkpt>
+      <trkpt lat="37.184607" lon="128.821777">
+        <ele>1177.325078</ele>
+        <time>2026-01-23T15:40:30+09:00</time>
+        <hdop>0</hdop>
+        <vdop>0</vdop>
+        <ele>1177.325078</ele>
+        <extensions>
+          <gte:gps speed="13.134306" azimuth="31.700000"></gte:gps>
+        </extensions>
+      </trkpt>
+      <trkpt lat="37.184696" lon="128.821855">
+        <ele>1172.647109</ele>
+        <time>2026-01-23T15:40:32+09:00</time>
+        <hdop>0</hdop>
+        <vdop>0</vdop>
+        <ele>1172.647109</ele>
+        <extensions>
+          <gte:gps speed="13.125049" azimuth="48.900000"></gte:gps>
+        </extensions>
+      </trkpt>
+      <trkpt lat="37.184700" lon="128.822008">
+        <ele>1168.691503</ele>
+        <time>2026-01-23T15:40:34+09:00</time>
+        <hdop>0</hdop>
+        <vdop>0</vdop>
+        <ele>1168.691503</ele>
+        <extensions>
+          <gte:gps speed="13.745457" azimuth="73.600000"></gte:gps>
+        </extensions>
+      </trkpt>
+      <trkpt lat="37.184788" lon="128.822090">
+        <ele>1166.013924</ele>
+        <time>2026-01-23T15:40:36+09:00</time>
+        <hdop>0</hdop>
+        <vdop>0</vdop>
+        <ele>1166.013924</ele>
+        <extensions>
+          <gte:gps speed="12.352633" azimuth="34.400000"></gte:gps>
+        </extensions>
+      </trkpt>
+      <trkpt lat="37.184889" lon="128.822140">
+        <ele>1162.845452</ele>
+        <time>2026-01-23T15:40:38+09:00</time>
+        <hdop>0</hdop>
+        <vdop>0</vdop>
+        <ele>1162.845452</ele>
+        <extensions>
+          <gte:gps speed="12.670128" azimuth="37.200000"></gte:gps>
+        </extensions>
+      </trkpt>
+      <trkpt lat="37.184893" lon="128.822276">
+        <ele>1159.051580</ele>
+        <time>2026-01-23T15:40:40+09:00</time>
+        <hdop>0</hdop>
+        <vdop>0</vdop>
+        <ele>1159.051580</ele>
+        <extensions>
+          <gte:gps speed="12.437894" azimuth="83.100000"></gte:gps>
+        </extensions>
+      </trkpt>
+      <trkpt lat="37.184974" lon="128.822380">
+        <ele>1155.560324</ele>
+        <time>2026-01-23T15:40:42+09:00</time>
+        <hdop>0</hdop>
+        <vdop>0</vdop>
+        <ele>1155.560324</ele>
+        <extensions>
+          <gte:gps speed="13.125083" azimuth="39.700000"></gte:gps>
+        </extensions>
+      </trkpt>
+      <trkpt lat="37.185064" lon="128.822427">
+        <ele>1153.534081</ele>
+        <time>2026-01-23T15:40:44+09:00</time>
+        <hdop>0</hdop>
+        <vdop>0</vdop>
+        <ele>1153.534081</ele>
+        <extensions>
+          <gte:gps speed="12.727622" azimuth="29.000000"></gte:gps>
+        </extensions>
+      </trkpt>
+      <trkpt lat="37.185106" lon="128.822600">
+        <ele>1149.040248</ele>
+        <time>2026-01-23T15:40:47+09:00</time>
+        <hdop>0</hdop>
+        <vdop>0</vdop>
+        <ele>1149.040248</ele>
+        <extensions>
+          <gte:gps speed="13.457498" azimuth="79.900000"></gte:gps>
+        </extensions>
+      </trkpt>
+      <trkpt lat="37.185176" lon="128.822687">
+        <ele>1145.989811</ele>
+        <time>2026-01-23T15:40:49+09:00</time>
+        <hdop>0</hdop>
+        <vdop>0</vdop>
+        <ele>1145.989811</ele>
+        <extensions>
+          <gte:gps speed="10.583254" azimuth="42.600000"></gte:gps>
+        </extensions>
+      </trkpt>
+      <trkpt lat="37.185304" lon="128.822710">
+        <ele>1142.716571</ele>
+        <time>2026-01-23T15:40:51+09:00</time>
+        <hdop>0</hdop>
+        <vdop>0</vdop>
+        <ele>1142.716571</ele>
+        <extensions>
+          <gte:gps speed="15.624436" azimuth="22.800000"></gte:gps>
+        </extensions>
+      </trkpt>
+      <trkpt lat="37.185342" lon="128.822812">
+        <ele>1137.575912</ele>
+        <time>2026-01-23T15:40:53+09:00</time>
+        <hdop>0</hdop>
+        <vdop>0</vdop>
+        <ele>1137.575912</ele>
+        <extensions>
+          <gte:gps speed="11.066265" azimuth="55.100000"></gte:gps>
+        </extensions>
+      </trkpt>
+      <trkpt lat="37.185420" lon="128.822912">
+        <ele>1134.255792</ele>
+        <time>2026-01-23T15:40:55+09:00</time>
+        <hdop>0</hdop>
+        <vdop>0</vdop>
+        <ele>1134.255792</ele>
+        <extensions>
+          <gte:gps speed="13.600937" azimuth="24.700000"></gte:gps>
+        </extensions>
+      </trkpt>
+      <trkpt lat="37.185519" lon="128.822985">
+        <ele>1127.967929</ele>
+        <time>2026-01-23T15:40:57+09:00</time>
+        <hdop>0</hdop>
+        <vdop>0</vdop>
+        <ele>1127.967929</ele>
+        <extensions>
+          <gte:gps speed="13.747546" azimuth="45.000000"></gte:gps>
+        </extensions>
+      </trkpt>
+      <trkpt lat="37.185542" lon="128.823123">
+        <ele>1123.590176</ele>
+        <time>2026-01-23T15:40:59+09:00</time>
+        <hdop>0</hdop>
+        <vdop>0</vdop>
+        <ele>1123.590176</ele>
+        <extensions>
+          <gte:gps speed="13.110751" azimuth="63.600000"></gte:gps>
+        </extensions>
+      </trkpt>
+      <trkpt lat="37.185636" lon="128.823171">
+        <ele>1120.651154</ele>
+        <time>2026-01-23T15:41:01+09:00</time>
+        <hdop>0</hdop>
+        <vdop>0</vdop>
+        <ele>1120.651154</ele>
+        <extensions>
+          <gte:gps speed="12.144256" azimuth="20.100000"></gte:gps>
+        </extensions>
+      </trkpt>
+      <trkpt lat="37.185761" lon="128.823226">
+        <ele>1117.593520</ele>
+        <time>2026-01-23T15:41:03+09:00</time>
+        <hdop>0</hdop>
+        <vdop>0</vdop>
+        <ele>1117.593520</ele>
+        <extensions>
+          <gte:gps speed="13.779986" azimuth="33.100000"></gte:gps>
+        </extensions>
+      </trkpt>
+      <trkpt lat="37.185769" lon="128.823360">
+        <ele>1112.096313</ele>
+        <time>2026-01-23T15:41:05+09:00</time>
+        <hdop>0</hdop>
+        <vdop>0</vdop>
+        <ele>1112.096313</ele>
+        <extensions>
+          <gte:gps speed="12.864920" azimuth="59.200000"></gte:gps>
+        </extensions>
+      </trkpt>
+      <trkpt lat="37.185853" lon="128.823432">
+        <ele>1110.731928</ele>
+        <time>2026-01-23T15:41:07+09:00</time>
+        <hdop>0</hdop>
+        <vdop>0</vdop>
+        <ele>1110.731928</ele>
+        <extensions>
+          <gte:gps speed="11.872164" azimuth="33.800000"></gte:gps>
+        </extensions>
+      </trkpt>
+      <trkpt lat="37.185940" lon="128.823519">
+        <ele>1107.150008</ele>
+        <time>2026-01-23T15:41:09+09:00</time>
+        <hdop>0</hdop>
+        <vdop>0</vdop>
+        <ele>1107.150008</ele>
+        <extensions>
+          <gte:gps speed="13.603192" azimuth="53.200000"></gte:gps>
+        </extensions>
+      </trkpt>
+      <trkpt lat="37.185962" lon="128.823681">
+        <ele>1102.774237</ele>
+        <time>2026-01-23T15:41:11+09:00</time>
+        <hdop>0</hdop>
+        <vdop>0</vdop>
+        <ele>1102.774237</ele>
+        <extensions>
+          <gte:gps speed="14.871211" azimuth="63.200000"></gte:gps>
+        </extensions>
+      </trkpt>
+      <trkpt lat="37.186054" lon="128.823747">
+        <ele>1101.835848</ele>
+        <time>2026-01-23T15:41:13+09:00</time>
+        <hdop>0</hdop>
+        <vdop>0</vdop>
+        <ele>1101.835848</ele>
+        <extensions>
+          <gte:gps speed="11.833440" azimuth="28.700000"></gte:gps>
+        </extensions>
+      </trkpt>
+      <trkpt lat="37.186141" lon="128.823805">
+        <ele>1098.331910</ele>
+        <time>2026-01-23T15:41:15+09:00</time>
+        <hdop>0</hdop>
+        <vdop>0</vdop>
+        <ele>1098.331910</ele>
+        <extensions>
+          <gte:gps speed="11.364567" azimuth="39.300000"></gte:gps>
+        </extensions>
+      </trkpt>
+      <trkpt lat="37.186123" lon="128.823963">
+        <ele>1094.958208</ele>
+        <time>2026-01-23T15:41:17+09:00</time>
+        <hdop>0</hdop>
+        <vdop>0</vdop>
+        <ele>1094.958208</ele>
+        <extensions>
+          <gte:gps speed="14.698736" azimuth="84.000000"></gte:gps>
+        </extensions>
+      </trkpt>
+      <trkpt lat="37.186188" lon="128.824060">
+        <ele>1093.501663</ele>
+        <time>2026-01-23T15:41:19+09:00</time>
+        <hdop>0</hdop>
+        <vdop>0</vdop>
+        <ele>1093.501663</ele>
+        <extensions>
+          <gte:gps speed="11.460755" azimuth="52.800000"></gte:gps>
+        </extensions>
+      </trkpt>
+      <trkpt lat="37.186246" lon="128.824157">
+        <ele>1088.896775</ele>
+        <time>2026-01-23T15:41:22+09:00</time>
+        <hdop>0</hdop>
+        <vdop>0</vdop>
+        <ele>1088.896775</ele>
+        <extensions>
+          <gte:gps speed="9.047738" azimuth="67.000000"></gte:gps>
+        </extensions>
+      </trkpt>
+      <trkpt lat="37.186302" lon="128.824309">
+        <ele>1084.429116</ele>
+        <time>2026-01-23T15:41:24+09:00</time>
+        <hdop>0</hdop>
+        <vdop>0</vdop>
+        <ele>1084.429116</ele>
+        <extensions>
+          <gte:gps speed="15.186236" azimuth="46.100000"></gte:gps>
+        </extensions>
+      </trkpt>
+      <trkpt lat="37.186348" lon="128.824464">
+        <ele>1078.213594</ele>
+        <time>2026-01-23T15:41:27+09:00</time>
+        <hdop>0</hdop>
+        <vdop>0</vdop>
+        <ele>1078.213594</ele>
+        <extensions>
+          <gte:gps speed="11.813764" azimuth="91.100000"></gte:gps>
+        </extensions>
+      </trkpt>
+      <trkpt lat="37.186390" lon="128.824604">
+        <ele>1072.129900</ele>
+        <time>2026-01-23T15:41:29+09:00</time>
+        <hdop>0</hdop>
+        <vdop>0</vdop>
+        <ele>1072.129900</ele>
+        <extensions>
+          <gte:gps speed="13.593195" azimuth="58.800000"></gte:gps>
+        </extensions>
+      </trkpt>
+      <trkpt lat="37.186482" lon="128.824712">
+        <ele>1070.324779</ele>
+        <time>2026-01-23T15:41:31+09:00</time>
+        <hdop>0</hdop>
+        <vdop>0</vdop>
+        <ele>1070.324779</ele>
+        <extensions>
+          <gte:gps speed="14.555917" azimuth="57.600000"></gte:gps>
+        </extensions>
+      </trkpt>
+      <trkpt lat="37.186468" lon="128.824903">
+        <ele>1063.928545</ele>
+        <time>2026-01-23T15:41:33+09:00</time>
+        <hdop>0</hdop>
+        <vdop>0</vdop>
+        <ele>1063.928545</ele>
+        <extensions>
+          <gte:gps speed="17.436082" azimuth="84.800000"></gte:gps>
+        </extensions>
+      </trkpt>
+      <trkpt lat="37.186545" lon="128.825013">
+        <ele>1059.701564</ele>
+        <time>2026-01-23T15:41:35+09:00</time>
+        <hdop>0</hdop>
+        <vdop>0</vdop>
+        <ele>1059.701564</ele>
+        <extensions>
+          <gte:gps speed="14.747763" azimuth="54.700000"></gte:gps>
+        </extensions>
+      </trkpt>
+      <trkpt lat="37.186558" lon="128.825178">
+        <ele>1054.312652</ele>
+        <time>2026-01-23T15:41:37+09:00</time>
+        <hdop>0</hdop>
+        <vdop>0</vdop>
+        <ele>1054.312652</ele>
+        <extensions>
+          <gte:gps speed="14.653946" azimuth="92.500000"></gte:gps>
+        </extensions>
+      </trkpt>
+      <trkpt lat="37.186604" lon="128.825327">
+        <ele>1053.435685</ele>
+        <time>2026-01-23T15:41:39+09:00</time>
+        <hdop>0</hdop>
+        <vdop>0</vdop>
+        <ele>1053.435685</ele>
+        <extensions>
+          <gte:gps speed="14.353145" azimuth="61.600000"></gte:gps>
+        </extensions>
+      </trkpt>
+      <trkpt lat="37.186698" lon="128.825446">
+        <ele>1051.312870</ele>
+        <time>2026-01-23T15:41:41+09:00</time>
+        <hdop>0</hdop>
+        <vdop>0</vdop>
+        <ele>1051.312870</ele>
+        <extensions>
+          <gte:gps speed="16.881876" azimuth="44.500000"></gte:gps>
+        </extensions>
+      </trkpt>
+      <trkpt lat="37.186814" lon="128.825520">
+        <ele>1048.874810</ele>
+        <time>2026-01-23T15:41:43+09:00</time>
+        <hdop>0</hdop>
+        <vdop>0</vdop>
+        <ele>1048.874810</ele>
+        <extensions>
+          <gte:gps speed="15.631518" azimuth="24.900000"></gte:gps>
+        </extensions>
+      </trkpt>
+      <trkpt lat="37.186944" lon="128.825580">
+        <ele>1046.440882</ele>
+        <time>2026-01-23T15:41:45+09:00</time>
+        <hdop>0</hdop>
+        <vdop>0</vdop>
+        <ele>1046.440882</ele>
+        <extensions>
+          <gte:gps speed="17.500275" azimuth="20.700000"></gte:gps>
+        </extensions>
+      </trkpt>
+      <trkpt lat="37.187044" lon="128.825605">
+        <ele>1043.848909</ele>
+        <time>2026-01-23T15:41:47+09:00</time>
+        <hdop>0</hdop>
+        <vdop>0</vdop>
+        <ele>1043.848909</ele>
+        <extensions>
+          <gte:gps speed="11.417068" azimuth="15.400000"></gte:gps>
+        </extensions>
+      </trkpt>
+      <trkpt lat="37.187166" lon="128.825687">
+        <ele>1039.453389</ele>
+        <time>2026-01-23T15:41:50+09:00</time>
+        <hdop>0</hdop>
+        <vdop>0</vdop>
+        <ele>1039.453389</ele>
+        <extensions>
+          <gte:gps speed="13.402908" azimuth="23.800000"></gte:gps>
+        </extensions>
+      </trkpt>
+      <trkpt lat="37.187311" lon="128.825781">
+        <ele>1036.999630</ele>
+        <time>2026-01-23T15:41:52+09:00</time>
+        <hdop>0</hdop>
+        <vdop>0</vdop>
+        <ele>1036.999630</ele>
+        <extensions>
+          <gte:gps speed="19.709017" azimuth="25.600000"></gte:gps>
+        </extensions>
+      </trkpt>
+      <trkpt lat="37.187476" lon="128.825791">
+        <ele>1034.547531</ele>
+        <time>2026-01-23T15:41:54+09:00</time>
+        <hdop>0</hdop>
+        <vdop>0</vdop>
+        <ele>1034.547531</ele>
+        <extensions>
+          <gte:gps speed="19.693486" azimuth="1.000000"></gte:gps>
+        </extensions>
+      </trkpt>
+      <trkpt lat="37.187604" lon="128.825889">
+        <ele>1031.652129</ele>
+        <time>2026-01-23T15:41:56+09:00</time>
+        <hdop>0</hdop>
+        <vdop>0</vdop>
+        <ele>1031.652129</ele>
+        <extensions>
+          <gte:gps speed="18.219224" azimuth="32.500000"></gte:gps>
+        </extensions>
+      </trkpt>
+      <trkpt lat="37.187749" lon="128.825974">
+        <ele>1028.859523</ele>
+        <time>2026-01-23T15:41:58+09:00</time>
+        <hdop>0</hdop>
+        <vdop>0</vdop>
+        <ele>1028.859523</ele>
+        <extensions>
+          <gte:gps speed="19.661426" azimuth="21.200000"></gte:gps>
+        </extensions>
+      </trkpt>
+      <trkpt lat="37.187880" lon="128.826070">
+        <ele>1025.731199</ele>
+        <time>2026-01-23T15:42:00+09:00</time>
+        <hdop>0</hdop>
+        <vdop>0</vdop>
+        <ele>1025.731199</ele>
+        <extensions>
+          <gte:gps speed="18.845698" azimuth="37.900000"></gte:gps>
+        </extensions>
+      </trkpt>
+      <trkpt lat="37.187986" lon="128.826168">
+        <ele>1024.237384</ele>
+        <time>2026-01-23T15:42:02+09:00</time>
+        <hdop>0</hdop>
+        <vdop>0</vdop>
+        <ele>1024.237384</ele>
+        <extensions>
+          <gte:gps speed="16.964970" azimuth="27.300000"></gte:gps>
+        </extensions>
+      </trkpt>
+      <trkpt lat="37.188077" lon="128.826298">
+        <ele>1023.135249</ele>
+        <time>2026-01-23T15:42:04+09:00</time>
+        <hdop>0</hdop>
+        <vdop>0</vdop>
+        <ele>1023.135249</ele>
+        <extensions>
+          <gte:gps speed="16.735959" azimuth="46.800000"></gte:gps>
+        </extensions>
+      </trkpt>
+      <trkpt lat="37.188194" lon="128.826402">
+        <ele>1020.349954</ele>
+        <time>2026-01-23T15:42:06+09:00</time>
+        <hdop>0</hdop>
+        <vdop>0</vdop>
+        <ele>1020.349954</ele>
+        <extensions>
+          <gte:gps speed="17.670182" azimuth="34.500000"></gte:gps>
+        </extensions>
+      </trkpt>
+      <trkpt lat="37.188323" lon="128.826520">
+        <ele>1017.995229</ele>
+        <time>2026-01-23T15:42:08+09:00</time>
+        <hdop>0</hdop>
+        <vdop>0</vdop>
+        <ele>1017.995229</ele>
+        <extensions>
+          <gte:gps speed="19.875689" azimuth="35.300000"></gte:gps>
+        </extensions>
+      </trkpt>
+      <trkpt lat="37.188461" lon="128.826635">
+        <ele>1015.599766</ele>
+        <time>2026-01-23T15:42:10+09:00</time>
+        <hdop>0</hdop>
+        <vdop>0</vdop>
+        <ele>1015.599766</ele>
+        <extensions>
+          <gte:gps speed="20.404315" azimuth="32.500000"></gte:gps>
+        </extensions>
+      </trkpt>
+      <trkpt lat="37.188600" lon="128.826745">
+        <ele>1012.910625</ele>
+        <time>2026-01-23T15:42:12+09:00</time>
+        <hdop>0</hdop>
+        <vdop>0</vdop>
+        <ele>1012.910625</ele>
+        <extensions>
+          <gte:gps speed="20.644115" azimuth="32.300000"></gte:gps>
+        </extensions>
+      </trkpt>
+      <trkpt lat="37.188750" lon="128.826862">
+        <ele>1010.523056</ele>
+        <time>2026-01-23T15:42:14+09:00</time>
+        <hdop>0</hdop>
+        <vdop>0</vdop>
+        <ele>1010.523056</ele>
+        <extensions>
+          <gte:gps speed="22.106337" azimuth="31.200000"></gte:gps>
+        </extensions>
+      </trkpt>
+      <trkpt lat="37.188824" lon="128.826932">
+        <ele>1009.229723</ele>
+        <time>2026-01-23T15:42:15+09:00</time>
+        <hdop>0</hdop>
+        <vdop>0</vdop>
+        <ele>1009.229723</ele>
+        <extensions>
+          <gte:gps speed="22.652776" azimuth="35.900000"></gte:gps>
+        </extensions>
+      </trkpt>
+      <trkpt lat="37.188969" lon="128.827043">
+        <ele>1006.795771</ele>
+        <time>2026-01-23T15:42:17+09:00</time>
+        <hdop>0</hdop>
+        <vdop>0</vdop>
+        <ele>1006.795771</ele>
+        <extensions>
+          <gte:gps speed="21.570059" azimuth="29.500000"></gte:gps>
+        </extensions>
+      </trkpt>
+      <trkpt lat="37.189092" lon="128.827177">
+        <ele>1004.119472</ele>
+        <time>2026-01-23T15:42:19+09:00</time>
+        <hdop>0</hdop>
+        <vdop>0</vdop>
+        <ele>1004.119472</ele>
+        <extensions>
+          <gte:gps speed="19.941909" azimuth="41.300000"></gte:gps>
+        </extensions>
+      </trkpt>
+      <trkpt lat="37.189237" lon="128.827308">
+        <ele>1001.959306</ele>
+        <time>2026-01-23T15:42:21+09:00</time>
+        <hdop>0</hdop>
+        <vdop>0</vdop>
+        <ele>1001.959306</ele>
+        <extensions>
+          <gte:gps speed="21.791737" azimuth="36.300000"></gte:gps>
+        </extensions>
+      </trkpt>
+      <trkpt lat="37.189311" lon="128.827376">
+        <ele>1001.245852</ele>
+        <time>2026-01-23T15:42:22+09:00</time>
+        <hdop>0</hdop>
+        <vdop>0</vdop>
+        <ele>1001.245852</ele>
+        <extensions>
+          <gte:gps speed="22.405505" azimuth="35.800000"></gte:gps>
+        </extensions>
+      </trkpt>
+      <trkpt lat="37.189466" lon="128.827473">
+        <ele>999.822035</ele>
+        <time>2026-01-23T15:42:24+09:00</time>
+        <hdop>0</hdop>
+        <vdop>0</vdop>
+        <ele>999.822035</ele>
+        <extensions>
+          <gte:gps speed="21.521944" azimuth="26.200000"></gte:gps>
+        </extensions>
+      </trkpt>
+      <trkpt lat="37.189620" lon="128.827573">
+        <ele>999.115767</ele>
+        <time>2026-01-23T15:42:26+09:00</time>
+        <hdop>0</hdop>
+        <vdop>0</vdop>
+        <ele>999.115767</ele>
+        <extensions>
+          <gte:gps speed="21.401235" azimuth="25.900000"></gte:gps>
+        </extensions>
+      </trkpt>
+      <trkpt lat="37.189775" lon="128.827583">
+        <ele>998.203444</ele>
+        <time>2026-01-23T15:42:28+09:00</time>
+        <hdop>0</hdop>
+        <vdop>0</vdop>
+        <ele>998.203444</ele>
+        <extensions>
+          <gte:gps speed="18.758605" azimuth="2.800000"></gte:gps>
+        </extensions>
+      </trkpt>
+      <trkpt lat="37.189903" lon="128.827585">
+        <ele>997.001511</ele>
+        <time>2026-01-23T15:42:30+09:00</time>
+        <hdop>0</hdop>
+        <vdop>0</vdop>
+        <ele>997.001511</ele>
+        <extensions>
+          <gte:gps speed="16.467037" azimuth="5.000000"></gte:gps>
+        </extensions>
+      </trkpt>
+      <trkpt lat="37.190022" lon="128.827593">
+        <ele>997.042907</ele>
+        <time>2026-01-23T15:42:32+09:00</time>
+        <hdop>0</hdop>
+        <vdop>0</vdop>
+        <ele>997.042907</ele>
+        <extensions>
+          <gte:gps speed="14.884791" azimuth="2.700000"></gte:gps>
+        </extensions>
+      </trkpt>
+      <trkpt lat="37.190132" lon="128.827574">
+        <ele>996.699625</ele>
+        <time>2026-01-23T15:42:34+09:00</time>
+        <hdop>0</hdop>
+        <vdop>0</vdop>
+        <ele>996.699625</ele>
+        <extensions>
+          <gte:gps speed="13.718021" azimuth="350.600000"></gte:gps>
+        </extensions>
+      </trkpt>
+      <trkpt lat="37.190210" lon="128.827498">
+        <ele>996.786311</ele>
+        <time>2026-01-23T15:42:37+09:00</time>
+        <hdop>0</hdop>
+        <vdop>0</vdop>
+        <ele>996.786311</ele>
+        <extensions>
+          <gte:gps speed="5.582934" azimuth="311.400000"></gte:gps>
+        </extensions>
+      </trkpt>
+      <trkpt lat="37.190209" lon="128.827494">
+        <ele>996.079524</ele>
+        <time>2026-01-23T15:42:43+09:00</time>
+        <hdop>0</hdop>
+        <vdop>0</vdop>
+        <ele>996.079524</ele>
+        <extensions>
+          <gte:gps speed="0.000000" azimuth="283.600000"></gte:gps>
+        </extensions>
+      </trkpt>
+      <trkpt lat="37.190209" lon="128.827494">
+        <ele>996.079524</ele>
+        <time>2026-01-23T15:42:43+09:00</time>
+        <hdop>0</hdop>
+        <vdop>0</vdop>
+        <ele>996.079524</ele>
+        <extensions>
+          <gte:gps speed="0.000000" azimuth="283.600000"></gte:gps>
+        </extensions>
+      </trkpt>
+      <trkpt lat="37.190175" lon="128.827389">
+        <ele>997.344393</ele>
+        <time>2026-01-23T15:43:24+09:00</time>
+        <hdop>0</hdop>
+        <vdop>0</vdop>
+        <ele>997.344393</ele>
+        <extensions>
+          <gte:gps speed="0.346063" azimuth="210.900000"></gte:gps>
+        </extensions>
+      </trkpt>
+      <trkpt lat="37.190147" lon="128.827335">
+        <ele>996.373505</ele>
+        <time>2026-01-23T15:44:25+09:00</time>
+        <hdop>0</hdop>
+        <vdop>0</vdop>
+        <ele>996.373505</ele>
+        <extensions>
+          <gte:gps speed="0.081111" azimuth="185.700000"></gte:gps>
+        </extensions>
+      </trkpt>
+      <trkpt lat="37.190124" lon="128.827213">
+        <ele>990.997005</ele>
+        <time>2026-01-23T15:44:45+09:00</time>
+        <hdop>0</hdop>
+        <vdop>0</vdop>
+        <ele>990.997005</ele>
+        <extensions>
+          <gte:gps speed="0.877769" azimuth="183.100000"></gte:gps>
+        </extensions>
+      </trkpt>
+      <trkpt lat="37.190032" lon="128.827116">
+        <ele>995.105138</ele>
+        <time>2026-01-23T15:44:50+09:00</time>
+        <hdop>0</hdop>
+        <vdop>0</vdop>
+        <ele>995.105138</ele>
+        <extensions>
+          <gte:gps speed="4.325584" azimuth="226.900000"></gte:gps>
+        </extensions>
+      </trkpt>
+      <trkpt lat="37.190011" lon="128.827089">
+        <ele>996.702044</ele>
+        <time>2026-01-23T15:44:56+09:00</time>
+        <hdop>0</hdop>
+        <vdop>1</vdop>
+        <ele>996.702044</ele>
+        <extensions>
+          <gte:gps speed="0.000000" azimuth="226.900000"></gte:gps>
+        </extensions>
+      </trkpt>
+      <trkpt lat="37.190011" lon="128.827089">
+        <ele>996.702044</ele>
+        <time>2026-01-23T15:44:56+09:00</time>
+        <hdop>0</hdop>
+        <vdop>1</vdop>
+        <ele>996.702044</ele>
+        <extensions>
+          <gte:gps speed="0.000000" azimuth="226.900000"></gte:gps>
+        </extensions>
+      </trkpt>
+      <trkpt lat="37.189808" lon="128.826832">
+        <ele>1013.953448</ele>
+        <time>2026-01-23T15:45:03+09:00</time>
+        <hdop>0</hdop>
+        <vdop>1</vdop>
+        <ele>1013.953448</ele>
+        <extensions>
+          <gte:gps speed="4.873416" azimuth="226.000000"></gte:gps>
+        </extensions>
+      </trkpt>
+      <trkpt lat="37.189744" lon="128.826747">
+        <ele>1019.513086</ele>
+        <time>2026-01-23T15:45:07+09:00</time>
+        <hdop>0</hdop>
+        <vdop>1</vdop>
+        <ele>1019.513086</ele>
+        <extensions>
+          <gte:gps speed="5.125559" azimuth="226.300000"></gte:gps>
+        </extensions>
+      </trkpt>
+      <trkpt lat="37.189669" lon="128.826656">
+        <ele>1023.485459</ele>
+        <time>2026-01-23T15:45:12+09:00</time>
+        <hdop>0</hdop>
+        <vdop>0</vdop>
+        <ele>1023.485459</ele>
+        <extensions>
+          <gte:gps speed="4.726884" azimuth="224.100000"></gte:gps>
+        </extensions>
+      </trkpt>
+      <trkpt lat="37.189607" lon="128.826571">
+        <ele>1024.988921</ele>
+        <time>2026-01-23T15:45:16+09:00</time>
+        <hdop>0</hdop>
+        <vdop>1</vdop>
+        <ele>1024.988921</ele>
+        <extensions>
+          <gte:gps speed="5.353255" azimuth="229.500000"></gte:gps>
+        </extensions>
+      </trkpt>
+      <trkpt lat="37.189512" lon="128.826447">
+        <ele>1028.376266</ele>
+        <time>2026-01-23T15:45:22+09:00</time>
+        <hdop>0</hdop>
+        <vdop>1</vdop>
+        <ele>1028.376266</ele>
+        <extensions>
+          <gte:gps speed="0.000000" azimuth="226.200000"></gte:gps>
+        </extensions>
+      </trkpt>
+      <trkpt lat="37.189512" lon="128.826447">
+        <ele>1028.376266</ele>
+        <time>2026-01-23T15:45:22+09:00</time>
+        <hdop>0</hdop>
+        <vdop>1</vdop>
+        <ele>1028.376266</ele>
+        <extensions>
+          <gte:gps speed="0.000000" azimuth="226.200000"></gte:gps>
+        </extensions>
+      </trkpt>
+      <trkpt lat="37.189452" lon="128.826362">
+        <ele>1030.881307</ele>
+        <time>2026-01-23T15:45:26+09:00</time>
+        <hdop>0</hdop>
+        <vdop>1</vdop>
+        <ele>1030.881307</ele>
+        <extensions>
+          <gte:gps speed="5.721991" azimuth="230.200000"></gte:gps>
+        </extensions>
+      </trkpt>
+      <trkpt lat="37.189456" lon="128.826367">
+        <ele>1030.844920</ele>
+        <time>2026-01-23T15:45:32+09:00</time>
+        <hdop>0</hdop>
+        <vdop>1</vdop>
+        <ele>1030.844920</ele>
+        <extensions>
+          <gte:gps speed="0.000000" azimuth="231.900000"></gte:gps>
+        </extensions>
+      </trkpt>
+      <trkpt lat="37.189456" lon="128.826367">
+        <ele>1030.844920</ele>
+        <time>2026-01-23T15:45:32+09:00</time>
+        <hdop>0</hdop>
+        <vdop>1</vdop>
+        <ele>1030.844920</ele>
+        <extensions>
+          <gte:gps speed="0.000000" azimuth="231.900000"></gte:gps>
+        </extensions>
+      </trkpt>
+      <trkpt lat="37.189347" lon="128.826225">
+        <ele>1034.684033</ele>
+        <time>2026-01-23T15:45:33+09:00</time>
+        <hdop>0</hdop>
+        <vdop>1</vdop>
+        <ele>1034.684033</ele>
+        <extensions>
+          <gte:gps speed="6.153192" azimuth="226.100000"></gte:gps>
+        </extensions>
+      </trkpt>
+      <trkpt lat="37.189259" lon="128.826103">
+        <ele>1040.341378</ele>
+        <time>2026-01-23T15:45:39+09:00</time>
+        <hdop>0</hdop>
+        <vdop>1</vdop>
+        <ele>1040.341378</ele>
+        <extensions>
+          <gte:gps speed="0.000000" azimuth="226.900000"></gte:gps>
+        </extensions>
+      </trkpt>
+      <trkpt lat="37.189259" lon="128.826103">
+        <ele>1040.341378</ele>
+        <time>2026-01-23T15:45:39+09:00</time>
+        <hdop>0</hdop>
+        <vdop>1</vdop>
+        <ele>1040.341378</ele>
+        <extensions>
+          <gte:gps speed="0.000000" azimuth="226.900000"></gte:gps>
+        </extensions>
+      </trkpt>
+      <trkpt lat="37.189199" lon="128.826019">
+        <ele>1043.884513</ele>
+        <time>2026-01-23T15:45:43+09:00</time>
+        <hdop>0</hdop>
+        <vdop>1</vdop>
+        <ele>1043.884513</ele>
+        <extensions>
+          <gte:gps speed="5.398989" azimuth="227.000000"></gte:gps>
+        </extensions>
+      </trkpt>
+      <trkpt lat="37.189124" lon="128.825918">
+        <ele>1048.737317</ele>
+        <time>2026-01-23T15:45:48+09:00</time>
+        <hdop>0</hdop>
+        <vdop>1</vdop>
+        <ele>1048.737317</ele>
+        <extensions>
+          <gte:gps speed="5.812630" azimuth="225.300000"></gte:gps>
+        </extensions>
+      </trkpt>
+      <trkpt lat="37.189131" lon="128.825927">
+        <ele>1048.391430</ele>
+        <time>2026-01-23T15:45:54+09:00</time>
+        <hdop>0</hdop>
+        <vdop>1</vdop>
+        <ele>1048.391430</ele>
+        <extensions>
+          <gte:gps speed="0.000000" azimuth="225.400000"></gte:gps>
+        </extensions>
+      </trkpt>
+      <trkpt lat="37.189131" lon="128.825927">
+        <ele>1048.391430</ele>
+        <time>2026-01-23T15:45:54+09:00</time>
+        <hdop>0</hdop>
+        <vdop>1</vdop>
+        <ele>1048.391430</ele>
+        <extensions>
+          <gte:gps speed="0.000000" azimuth="225.400000"></gte:gps>
+        </extensions>
+      </trkpt>
+      <trkpt lat="37.188862" lon="128.825572">
+        <ele>1061.885729</ele>
+        <time>2026-01-23T15:46:06+09:00</time>
+        <hdop>0</hdop>
+        <vdop>0</vdop>
+        <ele>1061.885729</ele>
+        <extensions>
+          <gte:gps speed="5.128331" azimuth="228.300000"></gte:gps>
+        </extensions>
+      </trkpt>
+      <trkpt lat="37.188786" lon="128.825471">
+        <ele>1063.234373</ele>
+        <time>2026-01-23T15:46:12+09:00</time>
+        <hdop>0</hdop>
+        <vdop>0</vdop>
+        <ele>1063.234373</ele>
+        <extensions>
+          <gte:gps speed="0.000000" azimuth="226.900000"></gte:gps>
+        </extensions>
+      </trkpt>
+      <trkpt lat="37.188786" lon="128.825471">
+        <ele>1063.234373</ele>
+        <time>2026-01-23T15:46:12+09:00</time>
+        <hdop>0</hdop>
+        <vdop>0</vdop>
+        <ele>1063.234373</ele>
+        <extensions>
+          <gte:gps speed="0.000000" azimuth="226.900000"></gte:gps>
+        </extensions>
+      </trkpt>
+      <trkpt lat="37.188764" lon="128.825440">
+        <ele>1063.848160</ele>
+        <time>2026-01-23T15:47:13+09:00</time>
+        <hdop>0</hdop>
+        <vdop>0</vdop>
+        <ele>1063.848160</ele>
+        <extensions>
+          <gte:gps speed="0.000000" azimuth="230.300000"></gte:gps>
+        </extensions>
+      </trkpt>
+      <trkpt lat="37.187724" lon="128.824032">
+        <ele>1116.230941</ele>
+        <time>2026-01-23T15:47:23+09:00</time>
+        <hdop>0</hdop>
+        <vdop>0</vdop>
+        <ele>1116.230941</ele>
+        <extensions>
+          <gte:gps speed="3.953651" azimuth="224.500000"></gte:gps>
+        </extensions>
+      </trkpt>
+      <trkpt lat="37.187638" lon="128.823902">
+        <ele>1120.973093</ele>
+        <time>2026-01-23T15:47:29+09:00</time>
+        <hdop>0</hdop>
+        <vdop>0</vdop>
+        <ele>1120.973093</ele>
+        <extensions>
+          <gte:gps speed="5.370533" azimuth="228.300000"></gte:gps>
+        </extensions>
+      </trkpt>
+      <trkpt lat="37.187631" lon="128.823889">
+        <ele>1122.080429</ele>
+        <time>2026-01-23T15:47:35+09:00</time>
+        <hdop>0</hdop>
+        <vdop>0</vdop>
+        <ele>1122.080429</ele>
+        <extensions>
+          <gte:gps speed="0.000000" azimuth="227.000000"></gte:gps>
+        </extensions>
+      </trkpt>
+      <trkpt lat="37.187631" lon="128.823889">
+        <ele>1122.080429</ele>
+        <time>2026-01-23T15:47:35+09:00</time>
+        <hdop>0</hdop>
+        <vdop>0</vdop>
+        <ele>1122.080429</ele>
+        <extensions>
+          <gte:gps speed="0.000000" azimuth="227.000000"></gte:gps>
+        </extensions>
+      </trkpt>
+      <trkpt lat="37.187568" lon="128.823802">
+        <ele>1126.068137</ele>
+        <time>2026-01-23T15:48:09+09:00</time>
+        <hdop>0</hdop>
+        <vdop>0</vdop>
+        <ele>1126.068137</ele>
+        <extensions>
+          <gte:gps speed="2.058026" azimuth="223.700000"></gte:gps>
+        </extensions>
+      </trkpt>
+      <trkpt lat="37.187491" lon="128.823694">
+        <ele>1127.070286</ele>
+        <time>2026-01-23T15:48:19+09:00</time>
+        <hdop>0</hdop>
+        <vdop>0</vdop>
+        <ele>1127.070286</ele>
+        <extensions>
+          <gte:gps speed="3.662536" azimuth="228.100000"></gte:gps>
+        </extensions>
+      </trkpt>
+      <trkpt lat="37.187424" lon="128.823600">
+        <ele>1127.087443</ele>
+        <time>2026-01-23T15:48:24+09:00</time>
+        <hdop>0</hdop>
+        <vdop>0</vdop>
+        <ele>1127.087443</ele>
+        <extensions>
+          <gte:gps speed="5.407315" azimuth="228.900000"></gte:gps>
+        </extensions>
+      </trkpt>
+      <trkpt lat="37.187335" lon="128.823474">
+        <ele>1129.285526</ele>
+        <time>2026-01-23T15:48:30+09:00</time>
+        <hdop>0</hdop>
+        <vdop>0</vdop>
+        <ele>1129.285526</ele>
+        <extensions>
+          <gte:gps speed="0.000000" azimuth="229.900000"></gte:gps>
+        </extensions>
+      </trkpt>
+      <trkpt lat="37.187335" lon="128.823474">
+        <ele>1129.285526</ele>
+        <time>2026-01-23T15:48:30+09:00</time>
+        <hdop>0</hdop>
+        <vdop>0</vdop>
+        <ele>1129.285526</ele>
+        <extensions>
+          <gte:gps speed="0.000000" azimuth="229.900000"></gte:gps>
+        </extensions>
+      </trkpt>
+      <trkpt lat="37.187273" lon="128.823392">
+        <ele>1129.641209</ele>
+        <time>2026-01-23T15:48:34+09:00</time>
+        <hdop>0</hdop>
+        <vdop>0</vdop>
+        <ele>1129.641209</ele>
+        <extensions>
+          <gte:gps speed="5.371224" azimuth="227.300000"></gte:gps>
+        </extensions>
+      </trkpt>
+      <trkpt lat="37.187282" lon="128.823403">
+        <ele>1129.535761</ele>
+        <time>2026-01-23T15:48:39+09:00</time>
+        <hdop>0</hdop>
+        <vdop>1</vdop>
+        <ele>1129.535761</ele>
+        <extensions>
+          <gte:gps speed="0.000000" azimuth="227.300000"></gte:gps>
+        </extensions>
+      </trkpt>
+      <trkpt lat="37.187282" lon="128.823403">
+        <ele>1129.535761</ele>
+        <time>2026-01-23T15:48:39+09:00</time>
+        <hdop>0</hdop>
+        <vdop>1</vdop>
+        <ele>1129.535761</ele>
+        <extensions>
+          <gte:gps speed="0.000000" azimuth="227.300000"></gte:gps>
+        </extensions>
+      </trkpt>
+      <trkpt lat="37.187133" lon="128.823199">
+        <ele>1131.932689</ele>
+        <time>2026-01-23T15:48:44+09:00</time>
+        <hdop>0</hdop>
+        <vdop>0</vdop>
+        <ele>1131.932689</ele>
+        <extensions>
+          <gte:gps speed="0.000000" azimuth="226.800000"></gte:gps>
+        </extensions>
+      </trkpt>
+      <trkpt lat="37.186906" lon="128.822892">
+        <ele>1137.294496</ele>
+        <time>2026-01-23T15:48:59+09:00</time>
+        <hdop>0</hdop>
+        <vdop>0</vdop>
+        <ele>1137.294496</ele>
+        <extensions>
+          <gte:gps speed="0.000000" azimuth="228.700000"></gte:gps>
+        </extensions>
+      </trkpt>
+      <trkpt lat="37.186785" lon="128.822724">
+        <ele>1141.789301</ele>
+        <time>2026-01-23T15:49:06+09:00</time>
+        <hdop>0</hdop>
+        <vdop>0</vdop>
+        <ele>1141.789301</ele>
+        <extensions>
+          <gte:gps speed="5.712073" azimuth="227.000000"></gte:gps>
+        </extensions>
+      </trkpt>
+      <trkpt lat="37.186749" lon="128.822674">
+        <ele>1143.128990</ele>
+        <time>2026-01-23T15:49:12+09:00</time>
+        <hdop>0</hdop>
+        <vdop>0</vdop>
+        <ele>1143.128990</ele>
+        <extensions>
+          <gte:gps speed="0.000000" azimuth="229.200000"></gte:gps>
+        </extensions>
+      </trkpt>
+      <trkpt lat="37.186749" lon="128.822674">
+        <ele>1143.128990</ele>
+        <time>2026-01-23T15:49:12+09:00</time>
+        <hdop>0</hdop>
+        <vdop>0</vdop>
+        <ele>1143.128990</ele>
+        <extensions>
+          <gte:gps speed="0.000000" azimuth="229.200000"></gte:gps>
+        </extensions>
+      </trkpt>
+      <trkpt lat="37.186590" lon="128.822465">
+        <ele>1148.653508</ele>
+        <time>2026-01-23T15:49:19+09:00</time>
+        <hdop>0</hdop>
+        <vdop>0</vdop>
+        <ele>1148.653508</ele>
+        <extensions>
+          <gte:gps speed="5.420224" azimuth="223.100000"></gte:gps>
+        </extensions>
+      </trkpt>
+      <trkpt lat="37.186549" lon="128.822411">
+        <ele>1152.158768</ele>
+        <time>2026-01-23T15:49:25+09:00</time>
+        <hdop>0</hdop>
+        <vdop>0</vdop>
+        <ele>1152.158768</ele>
+        <extensions>
+          <gte:gps speed="0.000000" azimuth="225.200000"></gte:gps>
+        </extensions>
+      </trkpt>
+      <trkpt lat="37.186549" lon="128.822411">
+        <ele>1152.158768</ele>
+        <time>2026-01-23T15:49:25+09:00</time>
+        <hdop>0</hdop>
+        <vdop>0</vdop>
+        <ele>1152.158768</ele>
+        <extensions>
+          <gte:gps speed="0.000000" azimuth="225.200000"></gte:gps>
+        </extensions>
+      </trkpt>
+      <trkpt lat="37.186467" lon="128.822299">
+        <ele>1158.898416</ele>
+        <time>2026-01-23T15:49:28+09:00</time>
+        <hdop>0</hdop>
+        <vdop>0</vdop>
+        <ele>1158.898416</ele>
+        <extensions>
+          <gte:gps speed="4.969056" azimuth="228.600000"></gte:gps>
+        </extensions>
+      </trkpt>
+      <trkpt lat="37.186383" lon="128.822180">
+        <ele>1166.600603</ele>
+        <time>2026-01-23T15:49:34+09:00</time>
+        <hdop>0</hdop>
+        <vdop>0</vdop>
+        <ele>1166.600603</ele>
+        <extensions>
+          <gte:gps speed="0.000000" azimuth="227.200000"></gte:gps>
+        </extensions>
+      </trkpt>
+      <trkpt lat="37.186383" lon="128.822180">
+        <ele>1166.600603</ele>
+        <time>2026-01-23T15:49:34+09:00</time>
+        <hdop>0</hdop>
+        <vdop>0</vdop>
+        <ele>1166.600603</ele>
+        <extensions>
+          <gte:gps speed="0.000000" azimuth="227.200000"></gte:gps>
+        </extensions>
+      </trkpt>
+      <trkpt lat="37.186315" lon="128.822090">
+        <ele>1172.877599</ele>
+        <time>2026-01-23T15:49:39+09:00</time>
+        <hdop>0</hdop>
+        <vdop>0</vdop>
+        <ele>1172.877599</ele>
+        <extensions>
+          <gte:gps speed="4.485321" azimuth="223.500000"></gte:gps>
+        </extensions>
+      </trkpt>
+      <trkpt lat="37.186226" lon="128.821966">
+        <ele>1175.957978</ele>
+        <time>2026-01-23T15:49:45+09:00</time>
+        <hdop>0</hdop>
+        <vdop>0</vdop>
+        <ele>1175.957978</ele>
+        <extensions>
+          <gte:gps speed="0.000000" azimuth="226.000000"></gte:gps>
+        </extensions>
+      </trkpt>
+      <trkpt lat="37.186226" lon="128.821966">
+        <ele>1175.957978</ele>
+        <time>2026-01-23T15:49:45+09:00</time>
+        <hdop>0</hdop>
+        <vdop>0</vdop>
+        <ele>1175.957978</ele>
+        <extensions>
+          <gte:gps speed="0.000000" azimuth="226.000000"></gte:gps>
+        </extensions>
+      </trkpt>
+      <trkpt lat="37.185944" lon="128.821578">
+        <ele>1191.038431</ele>
+        <time>2026-01-23T15:50:04+09:00</time>
+        <hdop>0</hdop>
+        <vdop>0</vdop>
+        <ele>1191.038431</ele>
+        <extensions>
+          <gte:gps speed="5.298902" azimuth="226.200000"></gte:gps>
+        </extensions>
+      </trkpt>
+      <trkpt lat="37.185951" lon="128.821587">
+        <ele>1190.622355</ele>
+        <time>2026-01-23T15:50:10+09:00</time>
+        <hdop>0</hdop>
+        <vdop>0</vdop>
+        <ele>1190.622355</ele>
+        <extensions>
+          <gte:gps speed="0.000000" azimuth="226.100000"></gte:gps>
+        </extensions>
+      </trkpt>
+      <trkpt lat="37.185951" lon="128.821587">
+        <ele>1190.622355</ele>
+        <time>2026-01-23T15:50:10+09:00</time>
+        <hdop>0</hdop>
+        <vdop>0</vdop>
+        <ele>1190.622355</ele>
+        <extensions>
+          <gte:gps speed="0.000000" azimuth="226.100000"></gte:gps>
+        </extensions>
+      </trkpt>
+      <trkpt lat="37.185788" lon="128.821359">
+        <ele>1200.479765</ele>
+        <time>2026-01-23T15:50:15+09:00</time>
+        <hdop>0</hdop>
+        <vdop>0</vdop>
+        <ele>1200.479765</ele>
+        <extensions>
+          <gte:gps speed="4.378870" azimuth="228.000000"></gte:gps>
+        </extensions>
+      </trkpt>
+      <trkpt lat="37.185728" lon="128.821272">
+        <ele>1204.886259</ele>
+        <time>2026-01-23T15:50:19+09:00</time>
+        <hdop>0</hdop>
+        <vdop>0</vdop>
+        <ele>1204.886259</ele>
+        <extensions>
+          <gte:gps speed="5.641204" azimuth="228.400000"></gte:gps>
+        </extensions>
+      </trkpt>
+      <trkpt lat="37.185655" lon="128.821174">
+        <ele>1209.381774</ele>
+        <time>2026-01-23T15:50:24+09:00</time>
+        <hdop>0</hdop>
+        <vdop>0</vdop>
+        <ele>1209.381774</ele>
+        <extensions>
+          <gte:gps speed="5.278087" azimuth="226.400000"></gte:gps>
+        </extensions>
+      </trkpt>
+      <trkpt lat="37.185573" lon="128.821058">
+        <ele>1215.810050</ele>
+        <time>2026-01-23T15:50:30+09:00</time>
+        <hdop>0</hdop>
+        <vdop>0</vdop>
+        <ele>1215.810050</ele>
+        <extensions>
+          <gte:gps speed="0.000000" azimuth="225.900000"></gte:gps>
+        </extensions>
+      </trkpt>
+      <trkpt lat="37.185573" lon="128.821058">
+        <ele>1215.810050</ele>
+        <time>2026-01-23T15:50:30+09:00</time>
+        <hdop>0</hdop>
+        <vdop>0</vdop>
+        <ele>1215.810050</ele>
+        <extensions>
+          <gte:gps speed="0.000000" azimuth="225.900000"></gte:gps>
+        </extensions>
+      </trkpt>
+      <trkpt lat="37.185488" lon="128.820945">
+        <ele>1222.021705</ele>
+        <time>2026-01-23T15:50:36+09:00</time>
+        <hdop>0</hdop>
+        <vdop>0</vdop>
+        <ele>1222.021705</ele>
+        <extensions>
+          <gte:gps speed="4.896490" azimuth="225.400000"></gte:gps>
+        </extensions>
+      </trkpt>
+      <trkpt lat="37.185451" lon="128.820893">
+        <ele>1222.940074</ele>
+        <time>2026-01-23T15:50:42+09:00</time>
+        <hdop>0</hdop>
+        <vdop>0</vdop>
+        <ele>1222.940074</ele>
+        <extensions>
+          <gte:gps speed="0.000000" azimuth="225.700000"></gte:gps>
+        </extensions>
+      </trkpt>
+      <trkpt lat="37.185451" lon="128.820893">
+        <ele>1222.940074</ele>
+        <time>2026-01-23T15:50:42+09:00</time>
+        <hdop>0</hdop>
+        <vdop>0</vdop>
+        <ele>1222.940074</ele>
+        <extensions>
+          <gte:gps speed="0.000000" azimuth="225.700000"></gte:gps>
+        </extensions>
+      </trkpt>
+      <trkpt lat="37.185338" lon="128.820738">
+        <ele>1227.283472</ele>
+        <time>2026-01-23T15:50:46+09:00</time>
+        <hdop>0</hdop>
+        <vdop>0</vdop>
+        <ele>1227.283472</ele>
+        <extensions>
+          <gte:gps speed="5.564542" azimuth="228.100000"></gte:gps>
+        </extensions>
+      </trkpt>
+      <trkpt lat="37.185344" lon="128.820746">
+        <ele>1227.014108</ele>
+        <time>2026-01-23T15:50:52+09:00</time>
+        <hdop>0</hdop>
+        <vdop>0</vdop>
+        <ele>1227.014108</ele>
+        <extensions>
+          <gte:gps speed="0.000000" azimuth="228.300000"></gte:gps>
+        </extensions>
+      </trkpt>
+      <trkpt lat="37.185344" lon="128.820746">
+        <ele>1227.014108</ele>
+        <time>2026-01-23T15:50:52+09:00</time>
+        <hdop>0</hdop>
+        <vdop>0</vdop>
+        <ele>1227.014108</ele>
+        <extensions>
+          <gte:gps speed="0.000000" azimuth="228.300000"></gte:gps>
+        </extensions>
+      </trkpt>
+      <trkpt lat="37.185068" lon="128.820370">
+        <ele>1238.568675</ele>
+        <time>2026-01-23T15:51:04+09:00</time>
+        <hdop>0</hdop>
+        <vdop>0</vdop>
+        <ele>1238.568675</ele>
+        <extensions>
+          <gte:gps speed="5.727279" azimuth="227.700000"></gte:gps>
+        </extensions>
+      </trkpt>
+      <trkpt lat="37.185033" lon="128.820324">
+        <ele>1239.957133</ele>
+        <time>2026-01-23T15:51:10+09:00</time>
+        <hdop>0</hdop>
+        <vdop>0</vdop>
+        <ele>1239.957133</ele>
+        <extensions>
+          <gte:gps speed="0.000000" azimuth="227.100000"></gte:gps>
+        </extensions>
+      </trkpt>
+      <trkpt lat="37.185033" lon="128.820324">
+        <ele>1239.957133</ele>
+        <time>2026-01-23T15:51:10+09:00</time>
+        <hdop>0</hdop>
+        <vdop>0</vdop>
+        <ele>1239.957133</ele>
+        <extensions>
+          <gte:gps speed="0.000000" azimuth="227.100000"></gte:gps>
+        </extensions>
+      </trkpt>
+      <trkpt lat="37.184701" lon="128.819866">
+        <ele>1259.687752</ele>
+        <time>2026-01-23T15:51:29+09:00</time>
+        <hdop>0</hdop>
+        <vdop>0</vdop>
+        <ele>1259.687752</ele>
+        <extensions>
+          <gte:gps speed="5.960791" azimuth="226.700000"></gte:gps>
+        </extensions>
+      </trkpt>
+      <trkpt lat="37.184625" lon="128.819764">
+        <ele>1261.253943</ele>
+        <time>2026-01-23T15:51:35+09:00</time>
+        <hdop>0</hdop>
+        <vdop>0</vdop>
+        <ele>1261.253943</ele>
+        <extensions>
+          <gte:gps speed="0.000000" azimuth="226.200000"></gte:gps>
+        </extensions>
+      </trkpt>
+      <trkpt lat="37.184625" lon="128.819764">
+        <ele>1261.253943</ele>
+        <time>2026-01-23T15:51:35+09:00</time>
+        <hdop>0</hdop>
+        <vdop>0</vdop>
+        <ele>1261.253943</ele>
+        <extensions>
+          <gte:gps speed="0.000000" azimuth="226.200000"></gte:gps>
+        </extensions>
+      </trkpt>
+      <trkpt lat="37.183713" lon="128.818519">
+        <ele>1304.273062</ele>
+        <time>2026-01-23T15:52:36+09:00</time>
+        <hdop>0</hdop>
+        <vdop>0</vdop>
+        <ele>1304.273062</ele>
+        <extensions>
+          <gte:gps speed="5.389482" azimuth="228.800000"></gte:gps>
+        </extensions>
+      </trkpt>
+      <trkpt lat="37.183653" lon="128.818429">
+        <ele>1307.954444</ele>
+        <time>2026-01-23T15:52:41+09:00</time>
+        <hdop>0</hdop>
+        <vdop>0</vdop>
+        <ele>1307.954444</ele>
+        <extensions>
+          <gte:gps speed="0.000000" azimuth="228.200000"></gte:gps>
+        </extensions>
+      </trkpt>
+      <trkpt lat="37.183388" lon="128.818073">
+        <ele>1321.906228</ele>
+        <time>2026-01-23T15:52:58+09:00</time>
+        <hdop>0</hdop>
+        <vdop>0</vdop>
+        <ele>1321.906228</ele>
+        <extensions>
+          <gte:gps speed="5.476181" azimuth="225.700000"></gte:gps>
+        </extensions>
+      </trkpt>
+      <trkpt lat="37.183317" lon="128.817973">
+        <ele>1326.383995</ele>
+        <time>2026-01-23T15:53:03+09:00</time>
+        <hdop>0</hdop>
+        <vdop>0</vdop>
+        <ele>1326.383995</ele>
+        <extensions>
+          <gte:gps speed="5.311531" azimuth="227.700000"></gte:gps>
+        </extensions>
+      </trkpt>
+      <trkpt lat="37.183233" lon="128.817853">
+        <ele>1331.748231</ele>
+        <time>2026-01-23T15:53:09+09:00</time>
+        <hdop>0</hdop>
+        <vdop>0</vdop>
+        <ele>1331.748231</ele>
+        <extensions>
+          <gte:gps speed="0.000000" azimuth="227.000000"></gte:gps>
+        </extensions>
+      </trkpt>
+      <trkpt lat="37.183233" lon="128.817853">
+        <ele>1331.748231</ele>
+        <time>2026-01-23T15:53:09+09:00</time>
+        <hdop>0</hdop>
+        <vdop>0</vdop>
+        <ele>1331.748231</ele>
+        <extensions>
+          <gte:gps speed="0.000000" azimuth="227.000000"></gte:gps>
+        </extensions>
+      </trkpt>
+      <trkpt lat="37.183166" lon="128.817754">
+        <ele>1336.722189</ele>
+        <time>2026-01-23T15:53:14+09:00</time>
+        <hdop>0</hdop>
+        <vdop>0</vdop>
+        <ele>1336.722189</ele>
+        <extensions>
+          <gte:gps speed="4.896846" azimuth="227.000000"></gte:gps>
+        </extensions>
+      </trkpt>
+      <trkpt lat="37.183098" lon="128.817660">
+        <ele>1337.473108</ele>
+        <time>2026-01-23T15:53:19+09:00</time>
+        <hdop>0</hdop>
+        <vdop>0</vdop>
+        <ele>1337.473108</ele>
+        <extensions>
+          <gte:gps speed="5.167432" azimuth="225.800000"></gte:gps>
+        </extensions>
+      </trkpt>
+      <trkpt lat="37.183027" lon="128.817558">
+        <ele>1338.074595</ele>
+        <time>2026-01-23T15:53:25+09:00</time>
+        <hdop>0</hdop>
+        <vdop>0</vdop>
+        <ele>1338.074595</ele>
+        <extensions>
+          <gte:gps speed="0.000000" azimuth="231.800000"></gte:gps>
+        </extensions>
+      </trkpt>
+      <trkpt lat="37.183027" lon="128.817558">
+        <ele>1338.074595</ele>
+        <time>2026-01-23T15:53:25+09:00</time>
+        <hdop>0</hdop>
+        <vdop>0</vdop>
+        <ele>1338.074595</ele>
+        <extensions>
+          <gte:gps speed="0.000000" azimuth="231.800000"></gte:gps>
+        </extensions>
+      </trkpt>
+      <trkpt lat="37.182973" lon="128.817468">
+        <ele>1337.657268</ele>
+        <time>2026-01-23T15:53:34+09:00</time>
+        <hdop>0</hdop>
+        <vdop>0</vdop>
+        <ele>1337.657268</ele>
+        <extensions>
+          <gte:gps speed="1.188934" azimuth="211.400000"></gte:gps>
+        </extensions>
+      </trkpt>
+      <trkpt lat="37.182874" lon="128.817452">
+        <ele>1337.154762</ele>
+        <time>2026-01-23T15:53:41+09:00</time>
+        <hdop>0</hdop>
+        <vdop>0</vdop>
+        <ele>1337.154762</ele>
+        <extensions>
+          <gte:gps speed="2.762247" azimuth="177.600000"></gte:gps>
+        </extensions>
+      </trkpt>
+      <trkpt lat="37.182779" lon="128.817455">
+        <ele>1336.377687</ele>
+        <time>2026-01-23T15:53:50+09:00</time>
+        <hdop>0</hdop>
+        <vdop>0</vdop>
+        <ele>1336.377687</ele>
+        <extensions>
+          <gte:gps speed="2.364940" azimuth="169.200000"></gte:gps>
+        </extensions>
+      </trkpt>
+      <trkpt lat="37.182695" lon="128.817500">
+        <ele>1337.003524</ele>
+        <time>2026-01-23T15:53:59+09:00</time>
+        <hdop>0</hdop>
+        <vdop>0</vdop>
+        <ele>1337.003524</ele>
+        <extensions>
+          <gte:gps speed="2.504006" azimuth="148.700000"></gte:gps>
+        </extensions>
+      </trkpt>
+      <trkpt lat="37.182606" lon="128.817547">
+        <ele>1337.042010</ele>
+        <time>2026-01-23T15:54:09+09:00</time>
+        <hdop>0</hdop>
+        <vdop>0</vdop>
+        <ele>1337.042010</ele>
+        <extensions>
+          <gte:gps speed="2.235216" azimuth="157.500000"></gte:gps>
+        </extensions>
+      </trkpt>
+      <trkpt lat="37.182524" lon="128.817594">
+        <ele>1338.411482</ele>
+        <time>2026-01-23T15:55:04+09:00</time>
+        <hdop>0</hdop>
+        <vdop>0</vdop>
+        <ele>1338.411482</ele>
+        <extensions>
+          <gte:gps speed="1.334679" azimuth="163.200000"></gte:gps>
+        </extensions>
+      </trkpt>
+      <trkpt lat="37.182433" lon="128.817638">
+        <ele>1336.775745</ele>
+        <time>2026-01-23T15:55:09+09:00</time>
+        <hdop>0</hdop>
+        <vdop>0</vdop>
+        <ele>1336.775745</ele>
+        <extensions>
+          <gte:gps speed="7.632697" azimuth="170.000000"></gte:gps>
+        </extensions>
+      </trkpt>
+      <trkpt lat="37.182355" lon="128.817742">
+        <ele>1335.048824</ele>
+        <time>2026-01-23T15:55:12+09:00</time>
+        <hdop>0</hdop>
+        <vdop>0</vdop>
+        <ele>1335.048824</ele>
+        <extensions>
+          <gte:gps speed="9.029738" azimuth="126.200000"></gte:gps>
+        </extensions>
+      </trkpt>
+      <trkpt lat="37.182262" lon="128.817817">
+        <ele>1330.496929</ele>
+        <time>2026-01-23T15:55:15+09:00</time>
+        <hdop>0</hdop>
+        <vdop>0</vdop>
+        <ele>1330.496929</ele>
+        <extensions>
+          <gte:gps speed="11.191690" azimuth="152.300000"></gte:gps>
+        </extensions>
+      </trkpt>
+      <trkpt lat="37.182152" lon="128.817828">
+        <ele>1327.863247</ele>
+        <time>2026-01-23T15:55:17+09:00</time>
+        <hdop>0</hdop>
+        <vdop>0</vdop>
+        <ele>1327.863247</ele>
+        <extensions>
+          <gte:gps speed="13.029727" azimuth="175.600000"></gte:gps>
+        </extensions>
+      </trkpt>
+      <trkpt lat="37.182055" lon="128.817843">
+        <ele>1325.126440</ele>
+        <time>2026-01-23T15:55:19+09:00</time>
+        <hdop>0</hdop>
+        <vdop>0</vdop>
+        <ele>1325.126440</ele>
+        <extensions>
+          <gte:gps speed="13.107708" azimuth="169.800000"></gte:gps>
+        </extensions>
+      </trkpt>
+      <trkpt lat="37.181927" lon="128.817891">
+        <ele>1322.735629</ele>
+        <time>2026-01-23T15:55:21+09:00</time>
+        <hdop>0</hdop>
+        <vdop>0</vdop>
+        <ele>1322.735629</ele>
+        <extensions>
+          <gte:gps speed="16.162929" azimuth="161.200000"></gte:gps>
+        </extensions>
+      </trkpt>
+      <trkpt lat="37.181861" lon="128.818018">
+        <ele>1320.785174</ele>
+        <time>2026-01-23T15:55:23+09:00</time>
+        <hdop>0</hdop>
+        <vdop>0</vdop>
+        <ele>1320.785174</ele>
+        <extensions>
+          <gte:gps speed="13.817636" azimuth="119.900000"></gte:gps>
+        </extensions>
+      </trkpt>
+      <trkpt lat="37.181906" lon="128.818158">
+        <ele>1316.963447</ele>
+        <time>2026-01-23T15:55:26+09:00</time>
+        <hdop>0</hdop>
+        <vdop>0</vdop>
+        <ele>1316.963447</ele>
+        <extensions>
+          <gte:gps speed="10.883471" azimuth="67.500000"></gte:gps>
+        </extensions>
+      </trkpt>
+      <trkpt lat="37.181935" lon="128.818282">
+        <ele>1313.189347</ele>
+        <time>2026-01-23T15:55:28+09:00</time>
+        <hdop>0</hdop>
+        <vdop>0</vdop>
+        <ele>1313.189347</ele>
+        <extensions>
+          <gte:gps speed="13.259666" azimuth="80.500000"></gte:gps>
+        </extensions>
+      </trkpt>
+      <trkpt lat="37.181858" lon="128.818388">
+        <ele>1307.749977</ele>
+        <time>2026-01-23T15:55:30+09:00</time>
+        <hdop>0</hdop>
+        <vdop>0</vdop>
+        <ele>1307.749977</ele>
+        <extensions>
+          <gte:gps speed="13.015137" azimuth="133.200000"></gte:gps>
+        </extensions>
+      </trkpt>
+      <trkpt lat="37.181757" lon="128.818408">
+        <ele>1307.013729</ele>
+        <time>2026-01-23T15:55:32+09:00</time>
+        <hdop>0</hdop>
+        <vdop>0</vdop>
+        <ele>1307.013729</ele>
+        <extensions>
+          <gte:gps speed="11.436156" azimuth="167.300000"></gte:gps>
+        </extensions>
+      </trkpt>
+      <trkpt lat="37.181683" lon="128.818532">
+        <ele>1303.727663</ele>
+        <time>2026-01-23T15:55:35+09:00</time>
+        <hdop>0</hdop>
+        <vdop>0</vdop>
+        <ele>1303.727663</ele>
+        <extensions>
+          <gte:gps speed="11.063223" azimuth="100.800000"></gte:gps>
+        </extensions>
+      </trkpt>
+      <trkpt lat="37.181686" lon="128.818666">
+        <ele>1300.322554</ele>
+        <time>2026-01-23T15:55:37+09:00</time>
+        <hdop>0</hdop>
+        <vdop>0</vdop>
+        <ele>1300.322554</ele>
+        <extensions>
+          <gte:gps speed="14.168958" azimuth="99.500000"></gte:gps>
+        </extensions>
+      </trkpt>
+      <trkpt lat="37.181608" lon="128.818744">
+        <ele>1296.804943</ele>
+        <time>2026-01-23T15:55:39+09:00</time>
+        <hdop>0</hdop>
+        <vdop>0</vdop>
+        <ele>1296.804943</ele>
+        <extensions>
+          <gte:gps speed="11.606458" azimuth="144.800000"></gte:gps>
+        </extensions>
+      </trkpt>
+      <trkpt lat="37.181505" lon="128.818835">
+        <ele>1291.746450</ele>
+        <time>2026-01-23T15:55:41+09:00</time>
+        <hdop>0</hdop>
+        <vdop>0</vdop>
+        <ele>1291.746450</ele>
+        <extensions>
+          <gte:gps speed="14.568974" azimuth="131.200000"></gte:gps>
+        </extensions>
+      </trkpt>
+      <trkpt lat="37.181530" lon="128.818971">
+        <ele>1289.031686</ele>
+        <time>2026-01-23T15:55:43+09:00</time>
+        <hdop>0</hdop>
+        <vdop>0</vdop>
+        <ele>1289.031686</ele>
+        <extensions>
+          <gte:gps speed="13.471891" azimuth="78.200000"></gte:gps>
+        </extensions>
+      </trkpt>
+      <trkpt lat="37.181506" lon="128.819115">
+        <ele>1286.890578</ele>
+        <time>2026-01-23T15:55:45+09:00</time>
+        <hdop>0</hdop>
+        <vdop>0</vdop>
+        <ele>1286.890578</ele>
+        <extensions>
+          <gte:gps speed="13.667222" azimuth="110.500000"></gte:gps>
+        </extensions>
+      </trkpt>
+      <trkpt lat="37.181427" lon="128.819233">
+        <ele>1282.963184</ele>
+        <time>2026-01-23T15:55:47+09:00</time>
+        <hdop>0</hdop>
+        <vdop>0</vdop>
+        <ele>1282.963184</ele>
+        <extensions>
+          <gte:gps speed="14.515426" azimuth="103.400000"></gte:gps>
+        </extensions>
+      </trkpt>
+      <trkpt lat="37.181453" lon="128.819355">
+        <ele>1281.086672</ele>
+        <time>2026-01-23T15:55:49+09:00</time>
+        <hdop>0</hdop>
+        <vdop>0</vdop>
+        <ele>1281.086672</ele>
+        <extensions>
+          <gte:gps speed="13.386977" azimuth="88.900000"></gte:gps>
+        </extensions>
+      </trkpt>
+      <trkpt lat="37.181358" lon="128.819485">
+        <ele>1277.410623</ele>
+        <time>2026-01-23T15:55:51+09:00</time>
+        <hdop>0</hdop>
+        <vdop>0</vdop>
+        <ele>1277.410623</ele>
+        <extensions>
+          <gte:gps speed="16.315524" azimuth="126.700000"></gte:gps>
+        </extensions>
+      </trkpt>
+      <trkpt lat="37.181361" lon="128.819646">
+        <ele>1274.036859</ele>
+        <time>2026-01-23T15:55:53+09:00</time>
+        <hdop>0</hdop>
+        <vdop>0</vdop>
+        <ele>1274.036859</ele>
+        <extensions>
+          <gte:gps speed="15.719665" azimuth="79.100000"></gte:gps>
+        </extensions>
+      </trkpt>
+      <trkpt lat="37.181451" lon="128.819717">
+        <ele>1272.069805</ele>
+        <time>2026-01-23T15:55:55+09:00</time>
+        <hdop>0</hdop>
+        <vdop>0</vdop>
+        <ele>1272.069805</ele>
+        <extensions>
+          <gte:gps speed="13.401678" azimuth="34.900000"></gte:gps>
+        </extensions>
+      </trkpt>
+      <trkpt lat="37.181472" lon="128.819855">
+        <ele>1266.247946</ele>
+        <time>2026-01-23T15:55:57+09:00</time>
+        <hdop>0</hdop>
+        <vdop>0</vdop>
+        <ele>1266.247946</ele>
+        <extensions>
+          <gte:gps speed="13.291242" azimuth="89.200000"></gte:gps>
+        </extensions>
+      </trkpt>
+      <trkpt lat="37.181481" lon="128.819988">
+        <ele>1260.119234</ele>
+        <time>2026-01-23T15:55:59+09:00</time>
+        <hdop>0</hdop>
+        <vdop>0</vdop>
+        <ele>1260.119234</ele>
+        <extensions>
+          <gte:gps speed="14.211719" azimuth="72.600000"></gte:gps>
+        </extensions>
+      </trkpt>
+      <trkpt lat="37.181565" lon="128.820047">
+        <ele>1256.923321</ele>
+        <time>2026-01-23T15:56:01+09:00</time>
+        <hdop>0</hdop>
+        <vdop>0</vdop>
+        <ele>1256.923321</ele>
+        <extensions>
+          <gte:gps speed="11.647293" azimuth="32.400000"></gte:gps>
+        </extensions>
+      </trkpt>
+      <trkpt lat="37.181641" lon="128.820140">
+        <ele>1253.273230</ele>
+        <time>2026-01-23T15:56:03+09:00</time>
+        <hdop>0</hdop>
+        <vdop>0</vdop>
+        <ele>1253.273230</ele>
+        <extensions>
+          <gte:gps speed="12.759751" azimuth="55.700000"></gte:gps>
+        </extensions>
+      </trkpt>
+      <trkpt lat="37.181658" lon="128.820279">
+        <ele>1250.392523</ele>
+        <time>2026-01-23T15:56:05+09:00</time>
+        <hdop>0</hdop>
+        <vdop>0</vdop>
+        <ele>1250.392523</ele>
+        <extensions>
+          <gte:gps speed="13.358583" azimuth="57.700000"></gte:gps>
+        </extensions>
+      </trkpt>
+      <trkpt lat="37.181741" lon="128.820390">
+        <ele>1245.543226</ele>
+        <time>2026-01-23T15:56:07+09:00</time>
+        <hdop>0</hdop>
+        <vdop>0</vdop>
+        <ele>1245.543226</ele>
+        <extensions>
+          <gte:gps speed="16.348175" azimuth="57.900000"></gte:gps>
+        </extensions>
+      </trkpt>
+      <trkpt lat="37.181723" lon="128.820512">
+        <ele>1238.807936</ele>
+        <time>2026-01-23T15:56:09+09:00</time>
+        <hdop>0</hdop>
+        <vdop>0</vdop>
+        <ele>1238.807936</ele>
+        <extensions>
+          <gte:gps speed="12.316797" azimuth="101.800000"></gte:gps>
+        </extensions>
+      </trkpt>
+      <trkpt lat="37.181728" lon="128.820646">
+        <ele>1234.123281</ele>
+        <time>2026-01-23T15:56:11+09:00</time>
+        <hdop>0</hdop>
+        <vdop>0</vdop>
+        <ele>1234.123281</ele>
+        <extensions>
+          <gte:gps speed="13.188319" azimuth="75.300000"></gte:gps>
+        </extensions>
+      </trkpt>
+      <trkpt lat="37.181807" lon="128.820760">
+        <ele>1231.690516</ele>
+        <time>2026-01-23T15:56:13+09:00</time>
+        <hdop>0</hdop>
+        <vdop>0</vdop>
+        <ele>1231.690516</ele>
+        <extensions>
+          <gte:gps speed="15.229317" azimuth="52.900000"></gte:gps>
+        </extensions>
+      </trkpt>
+      <trkpt lat="37.181778" lon="128.820900">
+        <ele>1225.336344</ele>
+        <time>2026-01-23T15:56:15+09:00</time>
+        <hdop>0</hdop>
+        <vdop>0</vdop>
+        <ele>1225.336344</ele>
+        <extensions>
+          <gte:gps speed="13.575886" azimuth="100.200000"></gte:gps>
+        </extensions>
+      </trkpt>
+      <trkpt lat="37.181807" lon="128.821064">
+        <ele>1221.580544</ele>
+        <time>2026-01-23T15:56:17+09:00</time>
+        <hdop>0</hdop>
+        <vdop>0</vdop>
+        <ele>1221.580544</ele>
+        <extensions>
+          <gte:gps speed="15.482959" azimuth="75.000000"></gte:gps>
+        </extensions>
+      </trkpt>
+      <trkpt lat="37.181906" lon="128.821175">
+        <ele>1219.657694</ele>
+        <time>2026-01-23T15:56:19+09:00</time>
+        <hdop>0</hdop>
+        <vdop>0</vdop>
+        <ele>1219.657694</ele>
+        <extensions>
+          <gte:gps speed="16.157355" azimuth="58.600000"></gte:gps>
+        </extensions>
+      </trkpt>
+      <trkpt lat="37.181889" lon="128.821323">
+        <ele>1214.734686</ele>
+        <time>2026-01-23T15:56:21+09:00</time>
+        <hdop>0</hdop>
+        <vdop>0</vdop>
+        <ele>1214.734686</ele>
+        <extensions>
+          <gte:gps speed="14.848875" azimuth="87.800000"></gte:gps>
+        </extensions>
+      </trkpt>
+      <trkpt lat="37.181951" lon="128.821429">
+        <ele>1214.178884</ele>
+        <time>2026-01-23T15:56:23+09:00</time>
+        <hdop>0</hdop>
+        <vdop>0</vdop>
+        <ele>1214.178884</ele>
+        <extensions>
+          <gte:gps speed="12.482977" azimuth="50.600000"></gte:gps>
+        </extensions>
+      </trkpt>
+      <trkpt lat="37.182054" lon="128.821483">
+        <ele>1212.067572</ele>
+        <time>2026-01-23T15:56:25+09:00</time>
+        <hdop>0</hdop>
+        <vdop>0</vdop>
+        <ele>1212.067572</ele>
+        <extensions>
+          <gte:gps speed="13.849378" azimuth="31.900000"></gte:gps>
+        </extensions>
+      </trkpt>
+      <trkpt lat="37.182128" lon="128.821582">
+        <ele>1207.290219</ele>
+        <time>2026-01-23T15:56:27+09:00</time>
+        <hdop>0</hdop>
+        <vdop>0</vdop>
+        <ele>1207.290219</ele>
+        <extensions>
+          <gte:gps speed="12.027671" azimuth="51.400000"></gte:gps>
+        </extensions>
+      </trkpt>
+      <trkpt lat="37.182145" lon="128.821742">
+        <ele>1205.399155</ele>
+        <time>2026-01-23T15:56:30+09:00</time>
+        <hdop>0</hdop>
+        <vdop>0</vdop>
+        <ele>1205.399155</ele>
+        <extensions>
+          <gte:gps speed="12.409397" azimuth="63.100000"></gte:gps>
+        </extensions>
+      </trkpt>
+      <trkpt lat="37.182253" lon="128.821814">
+        <ele>1202.815053</ele>
+        <time>2026-01-23T15:56:32+09:00</time>
+        <hdop>0</hdop>
+        <vdop>0</vdop>
+        <ele>1202.815053</ele>
+        <extensions>
+          <gte:gps speed="14.640560" azimuth="29.500000"></gte:gps>
+        </extensions>
+      </trkpt>
+      <trkpt lat="37.182344" lon="128.821877">
+        <ele>1200.342077</ele>
+        <time>2026-01-23T15:56:34+09:00</time>
+        <hdop>0</hdop>
+        <vdop>0</vdop>
+        <ele>1200.342077</ele>
+        <extensions>
+          <gte:gps speed="14.066781" azimuth="32.900000"></gte:gps>
+        </extensions>
+      </trkpt>
+      <trkpt lat="37.182372" lon="128.822031">
+        <ele>1196.470800</ele>
+        <time>2026-01-23T15:56:36+09:00</time>
+        <hdop>0</hdop>
+        <vdop>0</vdop>
+        <ele>1196.470800</ele>
+        <extensions>
+          <gte:gps speed="15.335115" azimuth="74.200000"></gte:gps>
+        </extensions>
+      </trkpt>
+      <trkpt lat="37.182466" lon="128.822130">
+        <ele>1192.924470</ele>
+        <time>2026-01-23T15:56:38+09:00</time>
+        <hdop>0</hdop>
+        <vdop>0</vdop>
+        <ele>1192.924470</ele>
+        <extensions>
+          <gte:gps speed="14.487287" azimuth="37.200000"></gte:gps>
+        </extensions>
+      </trkpt>
+      <trkpt lat="37.182580" lon="128.822161">
+        <ele>1190.774990</ele>
+        <time>2026-01-23T15:56:40+09:00</time>
+        <hdop>0</hdop>
+        <vdop>0</vdop>
+        <ele>1190.774990</ele>
+        <extensions>
+          <gte:gps speed="13.989173" azimuth="13.900000"></gte:gps>
+        </extensions>
+      </trkpt>
+      <trkpt lat="37.182661" lon="128.822276">
+        <ele>1186.722100</ele>
+        <time>2026-01-23T15:56:42+09:00</time>
+        <hdop>0</hdop>
+        <vdop>0</vdop>
+        <ele>1186.722100</ele>
+        <extensions>
+          <gte:gps speed="14.403854" azimuth="58.000000"></gte:gps>
+        </extensions>
+      </trkpt>
+      <trkpt lat="37.182671" lon="128.822417">
+        <ele>1183.225319</ele>
+        <time>2026-01-23T15:56:44+09:00</time>
+        <hdop>0</hdop>
+        <vdop>0</vdop>
+        <ele>1183.225319</ele>
+        <extensions>
+          <gte:gps speed="14.546694" azimuth="68.400000"></gte:gps>
+        </extensions>
+      </trkpt>
+      <trkpt lat="37.182711" lon="128.822524">
+        <ele>1178.823071</ele>
+        <time>2026-01-23T15:56:46+09:00</time>
+        <hdop>0</hdop>
+        <vdop>0</vdop>
+        <ele>1178.823071</ele>
+        <extensions>
+          <gte:gps speed="12.731722" azimuth="65.900000"></gte:gps>
+        </extensions>
+      </trkpt>
+      <trkpt lat="37.182803" lon="128.822538">
+        <ele>1178.270189</ele>
+        <time>2026-01-23T15:56:47+09:00</time>
+        <hdop>0</hdop>
+        <vdop>0</vdop>
+        <ele>1178.270189</ele>
+        <extensions>
+          <gte:gps speed="15.702279" azimuth="28.900000"></gte:gps>
+        </extensions>
+      </trkpt>
+      <trkpt lat="37.182861" lon="128.822669">
+        <ele>1173.943932</ele>
+        <time>2026-01-23T15:56:49+09:00</time>
+        <hdop>0</hdop>
+        <vdop>0</vdop>
+        <ele>1173.943932</ele>
+        <extensions>
+          <gte:gps speed="13.790160" azimuth="68.000000"></gte:gps>
+        </extensions>
+      </trkpt>
+      <trkpt lat="37.182801" lon="128.822824">
+        <ele>1167.328535</ele>
+        <time>2026-01-23T15:56:51+09:00</time>
+        <hdop>0</hdop>
+        <vdop>0</vdop>
+        <ele>1167.328535</ele>
+        <extensions>
+          <gte:gps speed="17.314683" azimuth="105.800000"></gte:gps>
+        </extensions>
+      </trkpt>
+      <trkpt lat="37.182851" lon="128.822947">
+        <ele>1164.943541</ele>
+        <time>2026-01-23T15:56:53+09:00</time>
+        <hdop>0</hdop>
+        <vdop>0</vdop>
+        <ele>1164.943541</ele>
+        <extensions>
+          <gte:gps speed="13.288424" azimuth="64.300000"></gte:gps>
+        </extensions>
+      </trkpt>
+      <trkpt lat="37.182940" lon="128.823017">
+        <ele>1162.095465</ele>
+        <time>2026-01-23T15:56:55+09:00</time>
+        <hdop>0</hdop>
+        <vdop>0</vdop>
+        <ele>1162.095465</ele>
+        <extensions>
+          <gte:gps speed="11.872973" azimuth="39.800000"></gte:gps>
+        </extensions>
+      </trkpt>
+      <trkpt lat="37.182956" lon="128.823133">
+        <ele>1157.180331</ele>
+        <time>2026-01-23T15:56:57+09:00</time>
+        <hdop>0</hdop>
+        <vdop>0</vdop>
+        <ele>1157.180331</ele>
+        <extensions>
+          <gte:gps speed="10.959552" azimuth="90.300000"></gte:gps>
+        </extensions>
+      </trkpt>
+      <trkpt lat="37.182899" lon="128.823266">
+        <ele>1154.854837</ele>
+        <time>2026-01-23T15:56:59+09:00</time>
+        <hdop>0</hdop>
+        <vdop>0</vdop>
+        <ele>1154.854837</ele>
+        <extensions>
+          <gte:gps speed="14.316735" azimuth="107.100000"></gte:gps>
+        </extensions>
+      </trkpt>
+      <trkpt lat="37.182926" lon="128.823380">
+        <ele>1150.745080</ele>
+        <time>2026-01-23T15:57:01+09:00</time>
+        <hdop>0</hdop>
+        <vdop>0</vdop>
+        <ele>1150.745080</ele>
+        <extensions>
+          <gte:gps speed="9.907420" azimuth="70.600000"></gte:gps>
+        </extensions>
+      </trkpt>
+      <trkpt lat="37.183017" lon="128.823513">
+        <ele>1146.725682</ele>
+        <time>2026-01-23T15:57:04+09:00</time>
+        <hdop>0</hdop>
+        <vdop>0</vdop>
+        <ele>1146.725682</ele>
+        <extensions>
+          <gte:gps speed="12.192155" azimuth="48.700000"></gte:gps>
+        </extensions>
+      </trkpt>
+      <trkpt lat="37.183043" lon="128.823647">
+        <ele>1142.582526</ele>
+        <time>2026-01-23T15:57:06+09:00</time>
+        <hdop>0</hdop>
+        <vdop>0</vdop>
+        <ele>1142.582526</ele>
+        <extensions>
+          <gte:gps speed="11.952494" azimuth="88.000000"></gte:gps>
+        </extensions>
+      </trkpt>
+      <trkpt lat="37.183002" lon="128.823800">
+        <ele>1136.443488</ele>
+        <time>2026-01-23T15:57:08+09:00</time>
+        <hdop>0</hdop>
+        <vdop>0</vdop>
+        <ele>1136.443488</ele>
+        <extensions>
+          <gte:gps speed="15.138274" azimuth="92.700000"></gte:gps>
+        </extensions>
+      </trkpt>
+      <trkpt lat="37.183009" lon="128.823939">
+        <ele>1132.841377</ele>
+        <time>2026-01-23T15:57:10+09:00</time>
+        <hdop>0</hdop>
+        <vdop>0</vdop>
+        <ele>1132.841377</ele>
+        <extensions>
+          <gte:gps speed="12.573166" azimuth="86.300000"></gte:gps>
+        </extensions>
+      </trkpt>
+      <trkpt lat="37.183049" lon="128.823993">
+        <ele>1131.832422</ele>
+        <time>2026-01-23T15:57:16+09:00</time>
+        <hdop>0</hdop>
+        <vdop>0</vdop>
+        <ele>1131.832422</ele>
+        <extensions>
+          <gte:gps speed="0.000000" azimuth="41.500000"></gte:gps>
+        </extensions>
+      </trkpt>
+      <trkpt lat="37.183049" lon="128.823993">
+        <ele>1131.832422</ele>
+        <time>2026-01-23T15:57:16+09:00</time>
+        <hdop>0</hdop>
+        <vdop>0</vdop>
+        <ele>1131.832422</ele>
+        <extensions>
+          <gte:gps speed="0.000000" azimuth="41.500000"></gte:gps>
+        </extensions>
+      </trkpt>
+      <trkpt lat="37.183109" lon="128.824096">
+        <ele>1127.294650</ele>
+        <time>2026-01-23T15:57:23+09:00</time>
+        <hdop>0</hdop>
+        <vdop>0</vdop>
+        <ele>1127.294650</ele>
+        <extensions>
+          <gte:gps speed="5.293032" azimuth="46.900000"></gte:gps>
+        </extensions>
+      </trkpt>
+      <trkpt lat="37.183170" lon="128.824206">
+        <ele>1123.941692</ele>
+        <time>2026-01-23T15:57:27+09:00</time>
+        <hdop>0</hdop>
+        <vdop>0</vdop>
+        <ele>1123.941692</ele>
+        <extensions>
+          <gte:gps speed="6.931803" azimuth="50.800000"></gte:gps>
+        </extensions>
+      </trkpt>
+      <trkpt lat="37.183261" lon="128.824282">
+        <ele>1119.375052</ele>
+        <time>2026-01-23T15:57:30+09:00</time>
+        <hdop>0</hdop>
+        <vdop>0</vdop>
+        <ele>1119.375052</ele>
+        <extensions>
+          <gte:gps speed="8.191576" azimuth="32.300000"></gte:gps>
+        </extensions>
+      </trkpt>
+      <trkpt lat="37.183353" lon="128.824319">
+        <ele>1115.042511</ele>
+        <time>2026-01-23T15:57:32+09:00</time>
+        <hdop>0</hdop>
+        <vdop>0</vdop>
+        <ele>1115.042511</ele>
+        <extensions>
+          <gte:gps speed="10.980387" azimuth="16.400000"></gte:gps>
+        </extensions>
+      </trkpt>
+      <trkpt lat="37.183459" lon="128.824400">
+        <ele>1112.889547</ele>
+        <time>2026-01-23T15:57:35+09:00</time>
+        <hdop>0</hdop>
+        <vdop>0</vdop>
+        <ele>1112.889547</ele>
+        <extensions>
+          <gte:gps speed="11.623495" azimuth="19.000000"></gte:gps>
+        </extensions>
+      </trkpt>
+      <trkpt lat="37.183566" lon="128.824496">
+        <ele>1109.797067</ele>
+        <time>2026-01-23T15:57:37+09:00</time>
+        <hdop>0</hdop>
+        <vdop>0</vdop>
+        <ele>1109.797067</ele>
+        <extensions>
+          <gte:gps speed="15.382861" azimuth="32.100000"></gte:gps>
+        </extensions>
+      </trkpt>
+      <trkpt lat="37.183693" lon="128.824500">
+        <ele>1106.692148</ele>
+        <time>2026-01-23T15:57:39+09:00</time>
+        <hdop>0</hdop>
+        <vdop>0</vdop>
+        <ele>1106.692148</ele>
+        <extensions>
+          <gte:gps speed="14.979152" azimuth="358.500000"></gte:gps>
+        </extensions>
+      </trkpt>
+      <trkpt lat="37.183809" lon="128.824504">
+        <ele>1105.273853</ele>
+        <time>2026-01-23T15:57:41+09:00</time>
+        <hdop>0</hdop>
+        <vdop>0</vdop>
+        <ele>1105.273853</ele>
+        <extensions>
+          <gte:gps speed="14.904979" azimuth="12.700000"></gte:gps>
+        </extensions>
+      </trkpt>
+      <trkpt lat="37.183930" lon="128.824559">
+        <ele>1102.310985</ele>
+        <time>2026-01-23T15:57:43+09:00</time>
+        <hdop>0</hdop>
+        <vdop>0</vdop>
+        <ele>1102.310985</ele>
+        <extensions>
+          <gte:gps speed="17.211818" azimuth="9.000000"></gte:gps>
+        </extensions>
+      </trkpt>
+      <trkpt lat="37.184039" lon="128.824554">
+        <ele>1100.878187</ele>
+        <time>2026-01-23T15:57:45+09:00</time>
+        <hdop>0</hdop>
+        <vdop>0</vdop>
+        <ele>1100.878187</ele>
+        <extensions>
+          <gte:gps speed="13.806744" azimuth="6.800000"></gte:gps>
+        </extensions>
+      </trkpt>
+      <trkpt lat="37.184209" lon="128.824566">
+        <ele>1096.707519</ele>
+        <time>2026-01-23T15:57:47+09:00</time>
+        <hdop>0</hdop>
+        <vdop>0</vdop>
+        <ele>1096.707519</ele>
+        <extensions>
+          <gte:gps speed="19.806735" azimuth="5.400000"></gte:gps>
+        </extensions>
+      </trkpt>
+      <trkpt lat="37.184337" lon="128.824688">
+        <ele>1092.528371</ele>
+        <time>2026-01-23T15:57:49+09:00</time>
+        <hdop>0</hdop>
+        <vdop>0</vdop>
+        <ele>1092.528371</ele>
+        <extensions>
+          <gte:gps speed="19.208874" azimuth="35.400000"></gte:gps>
+        </extensions>
+      </trkpt>
+      <trkpt lat="37.184473" lon="128.824839">
+        <ele>1089.090364</ele>
+        <time>2026-01-23T15:57:51+09:00</time>
+        <hdop>0</hdop>
+        <vdop>0</vdop>
+        <ele>1089.090364</ele>
+        <extensions>
+          <gte:gps speed="22.610950" azimuth="37.700000"></gte:gps>
+        </extensions>
+      </trkpt>
+      <trkpt lat="37.184564" lon="128.824897">
+        <ele>1086.528498</ele>
+        <time>2026-01-23T15:57:52+09:00</time>
+        <hdop>0</hdop>
+        <vdop>0</vdop>
+        <ele>1086.528498</ele>
+        <extensions>
+          <gte:gps speed="23.915540" azimuth="28.700000"></gte:gps>
+        </extensions>
+      </trkpt>
+      <trkpt lat="37.184657" lon="128.824904">
+        <ele>1085.604726</ele>
+        <time>2026-01-23T15:57:53+09:00</time>
+        <hdop>0</hdop>
+        <vdop>0</vdop>
+        <ele>1085.604726</ele>
+        <extensions>
+          <gte:gps speed="22.622123" azimuth="11.600000"></gte:gps>
+        </extensions>
+      </trkpt>
+      <trkpt lat="37.184816" lon="128.824961">
+        <ele>1082.065996</ele>
+        <time>2026-01-23T15:57:55+09:00</time>
+        <hdop>0</hdop>
+        <vdop>0</vdop>
+        <ele>1082.065996</ele>
+        <extensions>
+          <gte:gps speed="20.266571" azimuth="22.500000"></gte:gps>
+        </extensions>
+      </trkpt>
+      <trkpt lat="37.184933" lon="128.825108">
+        <ele>1077.692666</ele>
+        <time>2026-01-23T15:57:57+09:00</time>
+        <hdop>0</hdop>
+        <vdop>0</vdop>
+        <ele>1077.692666</ele>
+        <extensions>
+          <gte:gps speed="20.758250" azimuth="34.700000"></gte:gps>
+        </extensions>
+      </trkpt>
+      <trkpt lat="37.185091" lon="128.825154">
+        <ele>1076.488251</ele>
+        <time>2026-01-23T15:57:59+09:00</time>
+        <hdop>0</hdop>
+        <vdop>0</vdop>
+        <ele>1076.488251</ele>
+        <extensions>
+          <gte:gps speed="20.448349" azimuth="10.000000"></gte:gps>
+        </extensions>
+      </trkpt>
+      <trkpt lat="37.185250" lon="128.825185">
+        <ele>1071.562034</ele>
+        <time>2026-01-23T15:58:01+09:00</time>
+        <hdop>0</hdop>
+        <vdop>0</vdop>
+        <ele>1071.562034</ele>
+        <extensions>
+          <gte:gps speed="19.693969" azimuth="15.200000"></gte:gps>
+        </extensions>
+      </trkpt>
+      <trkpt lat="37.185352" lon="128.825342">
+        <ele>1069.411861</ele>
+        <time>2026-01-23T15:58:03+09:00</time>
+        <hdop>0</hdop>
+        <vdop>0</vdop>
+        <ele>1069.411861</ele>
+        <extensions>
+          <gte:gps speed="19.293014" azimuth="44.200000"></gte:gps>
+        </extensions>
+      </trkpt>
+      <trkpt lat="37.185498" lon="128.825456">
+        <ele>1066.486238</ele>
+        <time>2026-01-23T15:58:05+09:00</time>
+        <hdop>0</hdop>
+        <vdop>0</vdop>
+        <ele>1066.486238</ele>
+        <extensions>
+          <gte:gps speed="20.942759" azimuth="29.100000"></gte:gps>
+        </extensions>
+      </trkpt>
+      <trkpt lat="37.185665" lon="128.825520">
+        <ele>1064.013836</ele>
+        <time>2026-01-23T15:58:07+09:00</time>
+        <hdop>0</hdop>
+        <vdop>0</vdop>
+        <ele>1064.013836</ele>
+        <extensions>
+          <gte:gps speed="21.202572" azimuth="16.100000"></gte:gps>
+        </extensions>
+      </trkpt>
+      <trkpt lat="37.185827" lon="128.825545">
+        <ele>1061.453425</ele>
+        <time>2026-01-23T15:58:09+09:00</time>
+        <hdop>0</hdop>
+        <vdop>0</vdop>
+        <ele>1061.453425</ele>
+        <extensions>
+          <gte:gps speed="20.546803" azimuth="8.400000"></gte:gps>
+        </extensions>
+      </trkpt>
+      <trkpt lat="37.185997" lon="128.825553">
+        <ele>1059.021509</ele>
+        <time>2026-01-23T15:58:11+09:00</time>
+        <hdop>0</hdop>
+        <vdop>0</vdop>
+        <ele>1059.021509</ele>
+        <extensions>
+          <gte:gps speed="20.885896" azimuth="1.400000"></gte:gps>
+        </extensions>
+      </trkpt>
+      <trkpt lat="37.186168" lon="128.825608">
+        <ele>1056.365184</ele>
+        <time>2026-01-23T15:58:13+09:00</time>
+        <hdop>0</hdop>
+        <vdop>0</vdop>
+        <ele>1056.365184</ele>
+        <extensions>
+          <gte:gps speed="21.638006" azimuth="18.400000"></gte:gps>
+        </extensions>
+      </trkpt>
+      <trkpt lat="37.186300" lon="128.825729">
+        <ele>1053.495260</ele>
+        <time>2026-01-23T15:58:15+09:00</time>
+        <hdop>0</hdop>
+        <vdop>0</vdop>
+        <ele>1053.495260</ele>
+        <extensions>
+          <gte:gps speed="20.369862" azimuth="33.500000"></gte:gps>
+        </extensions>
+      </trkpt>
+      <trkpt lat="37.186456" lon="128.825806">
+        <ele>1052.181793</ele>
+        <time>2026-01-23T15:58:17+09:00</time>
+        <hdop>0</hdop>
+        <vdop>0</vdop>
+        <ele>1052.181793</ele>
+        <extensions>
+          <gte:gps speed="20.712509" azimuth="20.600000"></gte:gps>
+        </extensions>
+      </trkpt>
+      <trkpt lat="37.186618" lon="128.825862">
+        <ele>1049.466353</ele>
+        <time>2026-01-23T15:58:19+09:00</time>
+        <hdop>0</hdop>
+        <vdop>0</vdop>
+        <ele>1049.466353</ele>
+        <extensions>
+          <gte:gps speed="21.415229" azimuth="17.000000"></gte:gps>
+        </extensions>
+      </trkpt>
+      <trkpt lat="37.186704" lon="128.825904">
+        <ele>1048.598367</ele>
+        <time>2026-01-23T15:58:20+09:00</time>
+        <hdop>0</hdop>
+        <vdop>0</vdop>
+        <ele>1048.598367</ele>
+        <extensions>
+          <gte:gps speed="22.373311" azimuth="19.300000"></gte:gps>
+        </extensions>
+      </trkpt>
+      <trkpt lat="37.186874" lon="128.825998">
+        <ele>1044.586457</ele>
+        <time>2026-01-23T15:58:22+09:00</time>
+        <hdop>0</hdop>
+        <vdop>0</vdop>
+        <ele>1044.586457</ele>
+        <extensions>
+          <gte:gps speed="23.581384" azimuth="23.200000"></gte:gps>
+        </extensions>
+      </trkpt>
+      <trkpt lat="37.186977" lon="128.826018">
+        <ele>1042.641561</ele>
+        <time>2026-01-23T15:58:23+09:00</time>
+        <hdop>0</hdop>
+        <vdop>0</vdop>
+        <ele>1042.641561</ele>
+        <extensions>
+          <gte:gps speed="24.870291" azimuth="13.900000"></gte:gps>
+        </extensions>
+      </trkpt>
+      <trkpt lat="37.187078" lon="128.826041">
+        <ele>1040.973555</ele>
+        <time>2026-01-23T15:58:24+09:00</time>
+        <hdop>0</hdop>
+        <vdop>0</vdop>
+        <ele>1040.973555</ele>
+        <extensions>
+          <gte:gps speed="25.420935" azimuth="10.800000"></gte:gps>
+        </extensions>
+      </trkpt>
+      <trkpt lat="37.187172" lon="128.826067">
+        <ele>1038.794576</ele>
+        <time>2026-01-23T15:58:25+09:00</time>
+        <hdop>0</hdop>
+        <vdop>0</vdop>
+        <ele>1038.794576</ele>
+        <extensions>
+          <gte:gps speed="24.725116" azimuth="12.400000"></gte:gps>
+        </extensions>
+      </trkpt>
+      <trkpt lat="37.187275" lon="128.826096">
+        <ele>1036.862095</ele>
+        <time>2026-01-23T15:58:26+09:00</time>
+        <hdop>0</hdop>
+        <vdop>0</vdop>
+        <ele>1036.862095</ele>
+        <extensions>
+          <gte:gps speed="25.479167" azimuth="14.000000"></gte:gps>
+        </extensions>
+      </trkpt>
+      <trkpt lat="37.187391" lon="128.826129">
+        <ele>1034.793436</ele>
+        <time>2026-01-23T15:58:27+09:00</time>
+        <hdop>0</hdop>
+        <vdop>0</vdop>
+        <ele>1034.793436</ele>
+        <extensions>
+          <gte:gps speed="27.587757" azimuth="12.800000"></gte:gps>
+        </extensions>
+      </trkpt>
+      <trkpt lat="37.187495" lon="128.826147">
+        <ele>1032.943833</ele>
+        <time>2026-01-23T15:58:28+09:00</time>
+        <hdop>0</hdop>
+        <vdop>0</vdop>
+        <ele>1032.943833</ele>
+        <extensions>
+          <gte:gps speed="26.780134" azimuth="6.900000"></gte:gps>
+        </extensions>
+      </trkpt>
+      <trkpt lat="37.187593" lon="128.826161">
+        <ele>1030.755026</ele>
+        <time>2026-01-23T15:58:29+09:00</time>
+        <hdop>0</hdop>
+        <vdop>0</vdop>
+        <ele>1030.755026</ele>
+        <extensions>
+          <gte:gps speed="25.482306" azimuth="6.500000"></gte:gps>
+        </extensions>
+      </trkpt>
+      <trkpt lat="37.187735" lon="128.826267">
+        <ele>1028.864260</ele>
+        <time>2026-01-23T15:58:31+09:00</time>
+        <hdop>0</hdop>
+        <vdop>0</vdop>
+        <ele>1028.864260</ele>
+        <extensions>
+          <gte:gps speed="20.766484" azimuth="31.500000"></gte:gps>
+        </extensions>
+      </trkpt>
+      <trkpt lat="37.187822" lon="128.826336">
+        <ele>1026.954084</ele>
+        <time>2026-01-23T15:58:32+09:00</time>
+        <hdop>0</hdop>
+        <vdop>0</vdop>
+        <ele>1026.954084</ele>
+        <extensions>
+          <gte:gps speed="23.521047" azimuth="31.000000"></gte:gps>
+        </extensions>
+      </trkpt>
+      <trkpt lat="37.188004" lon="128.826446">
+        <ele>1022.878461</ele>
+        <time>2026-01-23T15:58:34+09:00</time>
+        <hdop>0</hdop>
+        <vdop>0</vdop>
+        <ele>1022.878461</ele>
+        <extensions>
+          <gte:gps speed="25.639023" azimuth="25.600000"></gte:gps>
+        </extensions>
+      </trkpt>
+      <trkpt lat="37.188095" lon="128.826512">
+        <ele>1020.940321</ele>
+        <time>2026-01-23T15:58:35+09:00</time>
+        <hdop>0</hdop>
+        <vdop>0</vdop>
+        <ele>1020.940321</ele>
+        <extensions>
+          <gte:gps speed="25.928861" azimuth="27.500000"></gte:gps>
+        </extensions>
+      </trkpt>
+      <trkpt lat="37.188186" lon="128.826584">
+        <ele>1019.030445</ele>
+        <time>2026-01-23T15:58:36+09:00</time>
+        <hdop>0</hdop>
+        <vdop>0</vdop>
+        <ele>1019.030445</ele>
+        <extensions>
+          <gte:gps speed="26.297345" azimuth="29.600000"></gte:gps>
+        </extensions>
+      </trkpt>
+      <trkpt lat="37.188286" lon="128.826652">
+        <ele>1017.412309</ele>
+        <time>2026-01-23T15:58:37+09:00</time>
+        <hdop>0</hdop>
+        <vdop>0</vdop>
+        <ele>1017.412309</ele>
+        <extensions>
+          <gte:gps speed="27.322998" azimuth="29.000000"></gte:gps>
+        </extensions>
+      </trkpt>
+      <trkpt lat="37.188380" lon="128.826720">
+        <ele>1015.978178</ele>
+        <time>2026-01-23T15:58:38+09:00</time>
+        <hdop>0</hdop>
+        <vdop>0</vdop>
+        <ele>1015.978178</ele>
+        <extensions>
+          <gte:gps speed="27.161670" azimuth="29.800000"></gte:gps>
+        </extensions>
+      </trkpt>
+      <trkpt lat="37.188471" lon="128.826790">
+        <ele>1014.569486</ele>
+        <time>2026-01-23T15:58:39+09:00</time>
+        <hdop>0</hdop>
+        <vdop>0</vdop>
+        <ele>1014.569486</ele>
+        <extensions>
+          <gte:gps speed="26.616831" azimuth="31.400000"></gte:gps>
+        </extensions>
+      </trkpt>
+      <trkpt lat="37.188552" lon="128.826878">
+        <ele>1012.392739</ele>
+        <time>2026-01-23T15:58:40+09:00</time>
+        <hdop>0</hdop>
+        <vdop>0</vdop>
+        <ele>1012.392739</ele>
+        <extensions>
+          <gte:gps speed="26.503255" azimuth="38.700000"></gte:gps>
+        </extensions>
+      </trkpt>
+      <trkpt lat="37.188631" lon="128.826972">
+        <ele>1008.908704</ele>
+        <time>2026-01-23T15:58:41+09:00</time>
+        <hdop>0</hdop>
+        <vdop>0</vdop>
+        <ele>1008.908704</ele>
+        <extensions>
+          <gte:gps speed="26.645593" azimuth="40.900000"></gte:gps>
+        </extensions>
+      </trkpt>
+      <trkpt lat="37.188712" lon="128.827024">
+        <ele>1007.545783</ele>
+        <time>2026-01-23T15:58:42+09:00</time>
+        <hdop>0</hdop>
+        <vdop>0</vdop>
+        <ele>1007.545783</ele>
+        <extensions>
+          <gte:gps speed="23.703801" azimuth="32.100000"></gte:gps>
+        </extensions>
+      </trkpt>
+      <trkpt lat="37.188802" lon="128.827067">
+        <ele>1007.788404</ele>
+        <time>2026-01-23T15:58:43+09:00</time>
+        <hdop>0</hdop>
+        <vdop>0</vdop>
+        <ele>1007.788404</ele>
+        <extensions>
+          <gte:gps speed="23.141761" azimuth="26.500000"></gte:gps>
+        </extensions>
+      </trkpt>
+      <trkpt lat="37.188937" lon="128.827211">
+        <ele>1005.355738</ele>
+        <time>2026-01-23T15:58:45+09:00</time>
+        <hdop>0</hdop>
+        <vdop>0</vdop>
+        <ele>1005.355738</ele>
+        <extensions>
+          <gte:gps speed="22.040643" azimuth="42.400000"></gte:gps>
+        </extensions>
+      </trkpt>
+      <trkpt lat="37.189077" lon="128.827344">
+        <ele>1003.747918</ele>
+        <time>2026-01-23T15:58:47+09:00</time>
+        <hdop>0</hdop>
+        <vdop>0</vdop>
+        <ele>1003.747918</ele>
+        <extensions>
+          <gte:gps speed="21.907793" azimuth="35.000000"></gte:gps>
+        </extensions>
+      </trkpt>
+      <trkpt lat="37.189157" lon="128.827404">
+        <ele>1002.103953</ele>
+        <time>2026-01-23T15:58:48+09:00</time>
+        <hdop>0</hdop>
+        <vdop>0</vdop>
+        <ele>1002.103953</ele>
+        <extensions>
+          <gte:gps speed="22.896403" azimuth="33.300000"></gte:gps>
+        </extensions>
+      </trkpt>
+      <trkpt lat="37.189215" lon="128.827490">
+        <ele>1000.834054</ele>
+        <time>2026-01-23T15:58:49+09:00</time>
+        <hdop>0</hdop>
+        <vdop>0</vdop>
+        <ele>1000.834054</ele>
+        <extensions>
+          <gte:gps speed="22.326794" azimuth="44.300000"></gte:gps>
+        </extensions>
+      </trkpt>
+      <trkpt lat="37.189298" lon="128.827547">
+        <ele>1001.143013</ele>
+        <time>2026-01-23T15:58:50+09:00</time>
+        <hdop>0</hdop>
+        <vdop>0</vdop>
+        <ele>1001.143013</ele>
+        <extensions>
+          <gte:gps speed="22.628508" azimuth="33.900000"></gte:gps>
+        </extensions>
+      </trkpt>
+      <trkpt lat="37.189437" lon="128.827671">
+        <ele>998.680666</ele>
+        <time>2026-01-23T15:58:52+09:00</time>
+        <hdop>0</hdop>
+        <vdop>0</vdop>
+        <ele>998.680666</ele>
+        <extensions>
+          <gte:gps speed="21.733176" azimuth="35.800000"></gte:gps>
+        </extensions>
+      </trkpt>
+      <trkpt lat="37.189583" lon="128.827794">
+        <ele>997.275222</ele>
+        <time>2026-01-23T15:58:54+09:00</time>
+        <hdop>0</hdop>
+        <vdop>0</vdop>
+        <ele>997.275222</ele>
+        <extensions>
+          <gte:gps speed="21.624099" azimuth="34.400000"></gte:gps>
+        </extensions>
+      </trkpt>
+      <trkpt lat="37.189714" lon="128.827890">
+        <ele>995.530506</ele>
+        <time>2026-01-23T15:58:56+09:00</time>
+        <hdop>0</hdop>
+        <vdop>0</vdop>
+        <ele>995.530506</ele>
+        <extensions>
+          <gte:gps speed="18.838621" azimuth="31.100000"></gte:gps>
+        </extensions>
+      </trkpt>
+      <trkpt lat="37.189834" lon="128.827997">
+        <ele>993.917481</ele>
+        <time>2026-01-23T15:58:58+09:00</time>
+        <hdop>0</hdop>
+        <vdop>0</vdop>
+        <ele>993.917481</ele>
+        <extensions>
+          <gte:gps speed="18.446987" azimuth="34.100000"></gte:gps>
+        </extensions>
+      </trkpt>
+      <trkpt lat="37.189942" lon="128.828115">
+        <ele>993.345378</ele>
+        <time>2026-01-23T15:59:00+09:00</time>
+        <hdop>0</hdop>
+        <vdop>0</vdop>
+        <ele>993.345378</ele>
+        <extensions>
+          <gte:gps speed="17.585093" azimuth="42.400000"></gte:gps>
+        </extensions>
+      </trkpt>
+      <trkpt lat="37.190037" lon="128.828221">
+        <ele>993.115082</ele>
+        <time>2026-01-23T15:59:02+09:00</time>
+        <hdop>0</hdop>
+        <vdop>0</vdop>
+        <ele>993.115082</ele>
+        <extensions>
+          <gte:gps speed="15.788310" azimuth="41.300000"></gte:gps>
+        </extensions>
+      </trkpt>
+      <trkpt lat="37.190117" lon="128.828323">
+        <ele>992.593681</ele>
+        <time>2026-01-23T15:59:04+09:00</time>
+        <hdop>0</hdop>
+        <vdop>0</vdop>
+        <ele>992.593681</ele>
+        <extensions>
+          <gte:gps speed="14.028051" azimuth="44.200000"></gte:gps>
+        </extensions>
+      </trkpt>
+      <trkpt lat="37.190204" lon="128.828411">
+        <ele>992.780063</ele>
+        <time>2026-01-23T15:59:06+09:00</time>
+        <hdop>0</hdop>
+        <vdop>0</vdop>
+        <ele>992.780063</ele>
+        <extensions>
+          <gte:gps speed="13.621085" azimuth="36.000000"></gte:gps>
+        </extensions>
+      </trkpt>
+      <trkpt lat="37.190272" lon="128.828491">
+        <ele>992.272548</ele>
+        <time>2026-01-23T15:59:08+09:00</time>
+        <hdop>0</hdop>
+        <vdop>0</vdop>
+        <ele>992.272548</ele>
+        <extensions>
+          <gte:gps speed="11.877718" azimuth="41.100000"></gte:gps>
+        </extensions>
+      </trkpt>
+      <trkpt lat="37.190367" lon="128.828597">
+        <ele>991.326117</ele>
+        <time>2026-01-23T15:59:11+09:00</time>
+        <hdop>0</hdop>
+        <vdop>0</vdop>
+        <ele>991.326117</ele>
+        <extensions>
+          <gte:gps speed="10.113482" azimuth="44.400000"></gte:gps>
+        </extensions>
+      </trkpt>
+      <trkpt lat="37.190438" lon="128.828694">
+        <ele>990.323541</ele>
+        <time>2026-01-23T15:59:14+09:00</time>
+        <hdop>0</hdop>
+        <vdop>0</vdop>
+        <ele>990.323541</ele>
+        <extensions>
+          <gte:gps speed="7.737802" azimuth="43.400000"></gte:gps>
+        </extensions>
+      </trkpt>
+      <trkpt lat="37.190521" lon="128.828751">
+        <ele>989.629704</ele>
+        <time>2026-01-23T15:59:17+09:00</time>
+        <hdop>0</hdop>
+        <vdop>0</vdop>
+        <ele>989.629704</ele>
+        <extensions>
+          <gte:gps speed="7.604454" azimuth="30.200000"></gte:gps>
+        </extensions>
+      </trkpt>
+      <trkpt lat="37.190618" lon="128.828809">
+        <ele>988.855783</ele>
+        <time>2026-01-23T15:59:20+09:00</time>
+        <hdop>0</hdop>
+        <vdop>0</vdop>
+        <ele>988.855783</ele>
+        <extensions>
+          <gte:gps speed="9.068043" azimuth="26.600000"></gte:gps>
+        </extensions>
+      </trkpt>
+      <trkpt lat="37.190717" lon="128.828808">
+        <ele>988.733681</ele>
+        <time>2026-01-23T15:59:23+09:00</time>
+        <hdop>0</hdop>
+        <vdop>0</vdop>
+        <ele>988.733681</ele>
+        <extensions>
+          <gte:gps speed="7.848067" azimuth="13.900000"></gte:gps>
+        </extensions>
+      </trkpt>
+      <trkpt lat="37.190832" lon="128.828874">
+        <ele>985.280613</ele>
+        <time>2026-01-23T15:59:26+09:00</time>
+        <hdop>0</hdop>
+        <vdop>0</vdop>
+        <ele>985.280613</ele>
+        <extensions>
+          <gte:gps speed="11.616996" azimuth="30.400000"></gte:gps>
+        </extensions>
+      </trkpt>
+      <trkpt lat="37.190944" lon="128.828944">
+        <ele>982.885356</ele>
+        <time>2026-01-23T15:59:28+09:00</time>
+        <hdop>0</hdop>
+        <vdop>0</vdop>
+        <ele>982.885356</ele>
+        <extensions>
+          <gte:gps speed="14.328000" azimuth="20.800000"></gte:gps>
+        </extensions>
+      </trkpt>
+      <trkpt lat="37.191061" lon="128.829007">
+        <ele>979.738595</ele>
+        <time>2026-01-23T15:59:30+09:00</time>
+        <hdop>0</hdop>
+        <vdop>0</vdop>
+        <ele>979.738595</ele>
+        <extensions>
+          <gte:gps speed="16.016480" azimuth="28.800000"></gte:gps>
+        </extensions>
+      </trkpt>
+      <trkpt lat="37.191132" lon="128.829150">
+        <ele>977.214395</ele>
+        <time>2026-01-23T15:59:32+09:00</time>
+        <hdop>0</hdop>
+        <vdop>0</vdop>
+        <ele>977.214395</ele>
+        <extensions>
+          <gte:gps speed="17.083661" azimuth="48.400000"></gte:gps>
+        </extensions>
+      </trkpt>
+      <trkpt lat="37.191254" lon="128.829252">
+        <ele>973.642946</ele>
+        <time>2026-01-23T15:59:34+09:00</time>
+        <hdop>0</hdop>
+        <vdop>0</vdop>
+        <ele>973.642946</ele>
+        <extensions>
+          <gte:gps speed="17.112947" azimuth="29.400000"></gte:gps>
+        </extensions>
+      </trkpt>
+      <trkpt lat="37.191380" lon="128.829334">
+        <ele>972.827532</ele>
+        <time>2026-01-23T15:59:36+09:00</time>
+        <hdop>0</hdop>
+        <vdop>0</vdop>
+        <ele>972.827532</ele>
+        <extensions>
+          <gte:gps speed="17.671533" azimuth="35.900000"></gte:gps>
+        </extensions>
+      </trkpt>
+      <trkpt lat="37.191446" lon="128.829470">
+        <ele>968.588036</ele>
+        <time>2026-01-23T15:59:38+09:00</time>
+        <hdop>0</hdop>
+        <vdop>0</vdop>
+        <ele>968.588036</ele>
+        <extensions>
+          <gte:gps speed="17.376570" azimuth="52.500000"></gte:gps>
+        </extensions>
+      </trkpt>
+      <trkpt lat="37.191563" lon="128.829614">
+        <ele>967.032827</ele>
+        <time>2026-01-23T15:59:40+09:00</time>
+        <hdop>0</hdop>
+        <vdop>0</vdop>
+        <ele>967.032827</ele>
+        <extensions>
+          <gte:gps speed="19.883827" azimuth="39.100000"></gte:gps>
+        </extensions>
+      </trkpt>
+      <trkpt lat="37.191705" lon="128.829646">
+        <ele>966.721054</ele>
+        <time>2026-01-23T15:59:42+09:00</time>
+        <hdop>0</hdop>
+        <vdop>0</vdop>
+        <ele>966.721054</ele>
+        <extensions>
+          <gte:gps speed="17.412158" azimuth="14.900000"></gte:gps>
+        </extensions>
+      </trkpt>
+      <trkpt lat="37.191846" lon="128.829670">
+        <ele>964.416787</ele>
+        <time>2026-01-23T15:59:44+09:00</time>
+        <hdop>0</hdop>
+        <vdop>0</vdop>
+        <ele>964.416787</ele>
+        <extensions>
+          <gte:gps speed="18.448503" azimuth="6.300000"></gte:gps>
+        </extensions>
+      </trkpt>
+      <trkpt lat="37.191975" lon="128.829730">
+        <ele>962.264168</ele>
+        <time>2026-01-23T15:59:46+09:00</time>
+        <hdop>0</hdop>
+        <vdop>0</vdop>
+        <ele>962.264168</ele>
+        <extensions>
+          <gte:gps speed="18.014990" azimuth="24.500000"></gte:gps>
+        </extensions>
+      </trkpt>
+      <trkpt lat="37.192011" lon="128.829889">
+        <ele>957.081573</ele>
+        <time>2026-01-23T15:59:48+09:00</time>
+        <hdop>0</hdop>
+        <vdop>0</vdop>
+        <ele>957.081573</ele>
+        <extensions>
+          <gte:gps speed="15.709596" azimuth="71.300000"></gte:gps>
+        </extensions>
+      </trkpt>
+      <trkpt lat="37.192084" lon="128.830030">
+        <ele>956.096029</ele>
+        <time>2026-01-23T15:59:50+09:00</time>
+        <hdop>0</hdop>
+        <vdop>0</vdop>
+        <ele>956.096029</ele>
+        <extensions>
+          <gte:gps speed="16.885402" azimuth="54.200000"></gte:gps>
+        </extensions>
+      </trkpt>
+      <trkpt lat="37.192215" lon="128.830103">
+        <ele>953.371907</ele>
+        <time>2026-01-23T15:59:52+09:00</time>
+        <hdop>0</hdop>
+        <vdop>0</vdop>
+        <ele>953.371907</ele>
+        <extensions>
+          <gte:gps speed="17.725803" azimuth="33.700000"></gte:gps>
+        </extensions>
+      </trkpt>
+      <trkpt lat="37.192286" lon="128.830269">
+        <ele>950.974298</ele>
+        <time>2026-01-23T15:59:54+09:00</time>
+        <hdop>0</hdop>
+        <vdop>0</vdop>
+        <ele>950.974298</ele>
+        <extensions>
+          <gte:gps speed="18.320971" azimuth="57.200000"></gte:gps>
+        </extensions>
+      </trkpt>
+      <trkpt lat="37.192402" lon="128.830421">
+        <ele>947.892769</ele>
+        <time>2026-01-23T15:59:56+09:00</time>
+        <hdop>0</hdop>
+        <vdop>0</vdop>
+        <ele>947.892769</ele>
+        <extensions>
+          <gte:gps speed="20.291880" azimuth="42.000000"></gte:gps>
+        </extensions>
+      </trkpt>
+      <trkpt lat="37.192494" lon="128.830577">
+        <ele>944.009094</ele>
+        <time>2026-01-23T15:59:58+09:00</time>
+        <hdop>0</hdop>
+        <vdop>0</vdop>
+        <ele>944.009094</ele>
+        <extensions>
+          <gte:gps speed="19.059283" azimuth="59.700000"></gte:gps>
+        </extensions>
+      </trkpt>
+      <trkpt lat="37.192608" lon="128.830717">
+        <ele>940.970739</ele>
+        <time>2026-01-23T16:00:00+09:00</time>
+        <hdop>0</hdop>
+        <vdop>0</vdop>
+        <ele>940.970739</ele>
+        <extensions>
+          <gte:gps speed="19.771911" azimuth="41.000000"></gte:gps>
+        </extensions>
+      </trkpt>
+      <trkpt lat="37.192768" lon="128.830821">
+        <ele>937.577295</ele>
+        <time>2026-01-23T16:00:02+09:00</time>
+        <hdop>0</hdop>
+        <vdop>0</vdop>
+        <ele>937.577295</ele>
+        <extensions>
+          <gte:gps speed="22.434129" azimuth="27.100000"></gte:gps>
+        </extensions>
+      </trkpt>
+      <trkpt lat="37.192925" lon="128.830859">
+        <ele>934.531020</ele>
+        <time>2026-01-23T16:00:04+09:00</time>
+        <hdop>0</hdop>
+        <vdop>0</vdop>
+        <ele>934.531020</ele>
+        <extensions>
+          <gte:gps speed="19.856109" azimuth="12.600000"></gte:gps>
+        </extensions>
+      </trkpt>
+      <trkpt lat="37.193016" lon="128.830867">
+        <ele>933.393489</ele>
+        <time>2026-01-23T16:00:05+09:00</time>
+        <hdop>0</hdop>
+        <vdop>0</vdop>
+        <ele>933.393489</ele>
+        <extensions>
+          <gte:gps speed="21.355885" azimuth="6.800000"></gte:gps>
+        </extensions>
+      </trkpt>
+      <trkpt lat="37.193183" lon="128.830943">
+        <ele>929.713029</ele>
+        <time>2026-01-23T16:00:07+09:00</time>
+        <hdop>0</hdop>
+        <vdop>0</vdop>
+        <ele>929.713029</ele>
+        <extensions>
+          <gte:gps speed="21.985122" azimuth="24.500000"></gte:gps>
+        </extensions>
+      </trkpt>
+      <trkpt lat="37.193311" lon="128.831043">
+        <ele>926.561638</ele>
+        <time>2026-01-23T16:00:09+09:00</time>
+        <hdop>0</hdop>
+        <vdop>0</vdop>
+        <ele>926.561638</ele>
+        <extensions>
+          <gte:gps speed="19.049271" azimuth="21.300000"></gte:gps>
+        </extensions>
+      </trkpt>
+      <trkpt lat="37.193464" lon="128.831050">
+        <ele>924.905059</ele>
+        <time>2026-01-23T16:00:11+09:00</time>
+        <hdop>0</hdop>
+        <vdop>0</vdop>
+        <ele>924.905059</ele>
+        <extensions>
+          <gte:gps speed="19.034988" azimuth="3.800000"></gte:gps>
+        </extensions>
+      </trkpt>
+      <trkpt lat="37.193621" lon="128.831012">
+        <ele>922.296990</ele>
+        <time>2026-01-23T16:00:13+09:00</time>
+        <hdop>0</hdop>
+        <vdop>0</vdop>
+        <ele>922.296990</ele>
+        <extensions>
+          <gte:gps speed="18.851208" azimuth="346.700000"></gte:gps>
+        </extensions>
+      </trkpt>
+      <trkpt lat="37.193785" lon="128.830979">
+        <ele>918.816812</ele>
+        <time>2026-01-23T16:00:15+09:00</time>
+        <hdop>0</hdop>
+        <vdop>0</vdop>
+        <ele>918.816812</ele>
+        <extensions>
+          <gte:gps speed="20.822108" azimuth="348.400000"></gte:gps>
+        </extensions>
+      </trkpt>
+      <trkpt lat="37.193949" lon="128.830984">
+        <ele>916.237664</ele>
+        <time>2026-01-23T16:00:17+09:00</time>
+        <hdop>0</hdop>
+        <vdop>0</vdop>
+        <ele>916.237664</ele>
+        <extensions>
+          <gte:gps speed="20.325810" azimuth="6.900000"></gte:gps>
+        </extensions>
+      </trkpt>
+      <trkpt lat="37.194059" lon="128.831090">
+        <ele>912.672925</ele>
+        <time>2026-01-23T16:00:19+09:00</time>
+        <hdop>0</hdop>
+        <vdop>0</vdop>
+        <ele>912.672925</ele>
+        <extensions>
+          <gte:gps speed="18.280850" azimuth="33.400000"></gte:gps>
+        </extensions>
+      </trkpt>
+      <trkpt lat="37.194129" lon="128.831252">
+        <ele>909.495737</ele>
+        <time>2026-01-23T16:00:21+09:00</time>
+        <hdop>0</hdop>
+        <vdop>0</vdop>
+        <ele>909.495737</ele>
+        <extensions>
+          <gte:gps speed="18.772316" azimuth="58.300000"></gte:gps>
+        </extensions>
+      </trkpt>
+      <trkpt lat="37.194223" lon="128.831390">
+        <ele>907.753661</ele>
+        <time>2026-01-23T16:00:23+09:00</time>
+        <hdop>0</hdop>
+        <vdop>0</vdop>
+        <ele>907.753661</ele>
+        <extensions>
+          <gte:gps speed="18.367041" azimuth="48.300000"></gte:gps>
+        </extensions>
+      </trkpt>
+      <trkpt lat="37.194362" lon="128.831450">
+        <ele>905.702003</ele>
+        <time>2026-01-23T16:00:25+09:00</time>
+        <hdop>0</hdop>
+        <vdop>0</vdop>
+        <ele>905.702003</ele>
+        <extensions>
+          <gte:gps speed="17.826215" azimuth="18.000000"></gte:gps>
+        </extensions>
+      </trkpt>
+      <trkpt lat="37.194516" lon="128.831491">
+        <ele>903.175506</ele>
+        <time>2026-01-23T16:00:27+09:00</time>
+        <hdop>0</hdop>
+        <vdop>0</vdop>
+        <ele>903.175506</ele>
+        <extensions>
+          <gte:gps speed="19.762833" azimuth="13.900000"></gte:gps>
+        </extensions>
+      </trkpt>
+      <trkpt lat="37.194690" lon="128.831567">
+        <ele>900.254456</ele>
+        <time>2026-01-23T16:00:29+09:00</time>
+        <hdop>0</hdop>
+        <vdop>0</vdop>
+        <ele>900.254456</ele>
+        <extensions>
+          <gte:gps speed="22.892627" azimuth="18.400000"></gte:gps>
+        </extensions>
+      </trkpt>
+      <trkpt lat="37.194858" lon="128.831596">
+        <ele>897.241239</ele>
+        <time>2026-01-23T16:00:31+09:00</time>
+        <hdop>0</hdop>
+        <vdop>0</vdop>
+        <ele>897.241239</ele>
+        <extensions>
+          <gte:gps speed="20.992779" azimuth="9.900000"></gte:gps>
+        </extensions>
+      </trkpt>
+      <trkpt lat="37.195010" lon="128.831662">
+        <ele>893.825604</ele>
+        <time>2026-01-23T16:00:33+09:00</time>
+        <hdop>0</hdop>
+        <vdop>0</vdop>
+        <ele>893.825604</ele>
+        <extensions>
+          <gte:gps speed="20.133816" azimuth="10.600000"></gte:gps>
+        </extensions>
+      </trkpt>
+      <trkpt lat="37.195159" lon="128.831727">
+        <ele>891.027514</ele>
+        <time>2026-01-23T16:00:35+09:00</time>
+        <hdop>0</hdop>
+        <vdop>0</vdop>
+        <ele>891.027514</ele>
+        <extensions>
+          <gte:gps speed="19.940882" azimuth="22.000000"></gte:gps>
+        </extensions>
+      </trkpt>
+      <trkpt lat="37.195310" lon="128.831812">
+        <ele>888.684276</ele>
+        <time>2026-01-23T16:00:37+09:00</time>
+        <hdop>0</hdop>
+        <vdop>0</vdop>
+        <ele>888.684276</ele>
+        <extensions>
+          <gte:gps speed="20.850078" azimuth="20.800000"></gte:gps>
+        </extensions>
+      </trkpt>
+      <trkpt lat="37.195463" lon="128.831844">
+        <ele>886.279838</ele>
+        <time>2026-01-23T16:00:39+09:00</time>
+        <hdop>0</hdop>
+        <vdop>0</vdop>
+        <ele>886.279838</ele>
+        <extensions>
+          <gte:gps speed="19.684124" azimuth="14.100000"></gte:gps>
+        </extensions>
+      </trkpt>
+      <trkpt lat="37.195557" lon="128.831851">
+        <ele>885.002312</ele>
+        <time>2026-01-23T16:00:40+09:00</time>
+        <hdop>0</hdop>
+        <vdop>0</vdop>
+        <ele>885.002312</ele>
+        <extensions>
+          <gte:gps speed="21.718296" azimuth="5.500000"></gte:gps>
+        </extensions>
+      </trkpt>
+      <trkpt lat="37.195700" lon="128.831831">
+        <ele>883.520671</ele>
+        <time>2026-01-23T16:00:42+09:00</time>
+        <hdop>0</hdop>
+        <vdop>0</vdop>
+        <ele>883.520671</ele>
+        <extensions>
+          <gte:gps speed="19.151172" azimuth="354.000000"></gte:gps>
+        </extensions>
+      </trkpt>
+      <trkpt lat="37.195863" lon="128.831812">
+        <ele>880.369772</ele>
+        <time>2026-01-23T16:00:44+09:00</time>
+        <hdop>0</hdop>
+        <vdop>0</vdop>
+        <ele>880.369772</ele>
+        <extensions>
+          <gte:gps speed="20.390817" azimuth="352.900000"></gte:gps>
+        </extensions>
+      </trkpt>
+      <trkpt lat="37.195960" lon="128.831806">
+        <ele>878.886726</ele>
+        <time>2026-01-23T16:00:45+09:00</time>
+        <hdop>0</hdop>
+        <vdop>0</vdop>
+        <ele>878.886726</ele>
+        <extensions>
+          <gte:gps speed="22.791433" azimuth="355.800000"></gte:gps>
+        </extensions>
+      </trkpt>
+      <trkpt lat="37.196116" lon="128.831856">
+        <ele>874.471650</ele>
+        <time>2026-01-23T16:00:47+09:00</time>
+        <hdop>0</hdop>
+        <vdop>0</vdop>
+        <ele>874.471650</ele>
+        <extensions>
+          <gte:gps speed="20.946249" azimuth="17.700000"></gte:gps>
+        </extensions>
+      </trkpt>
+      <trkpt lat="37.196204" lon="128.831894">
+        <ele>873.776797</ele>
+        <time>2026-01-23T16:00:48+09:00</time>
+        <hdop>0</hdop>
+        <vdop>0</vdop>
+        <ele>873.776797</ele>
+        <extensions>
+          <gte:gps speed="22.083608" azimuth="15.700000"></gte:gps>
+        </extensions>
+      </trkpt>
+      <trkpt lat="37.196294" lon="128.831941">
+        <ele>871.783648</ele>
+        <time>2026-01-23T16:00:49+09:00</time>
+        <hdop>0</hdop>
+        <vdop>0</vdop>
+        <ele>871.783648</ele>
+        <extensions>
+          <gte:gps speed="23.596900" azimuth="15.800000"></gte:gps>
+        </extensions>
+      </trkpt>
+      <trkpt lat="37.196386" lon="128.831957">
+        <ele>870.162801</ele>
+        <time>2026-01-23T16:00:50+09:00</time>
+        <hdop>0</hdop>
+        <vdop>0</vdop>
+        <ele>870.162801</ele>
+        <extensions>
+          <gte:gps speed="23.063672" azimuth="10.300000"></gte:gps>
+        </extensions>
+      </trkpt>
+      <trkpt lat="37.196560" lon="128.832019">
+        <ele>866.463361</ele>
+        <time>2026-01-23T16:00:52+09:00</time>
+        <hdop>0</hdop>
+        <vdop>0</vdop>
+        <ele>866.463361</ele>
+        <extensions>
+          <gte:gps speed="22.470817" azimuth="19.900000"></gte:gps>
+        </extensions>
+      </trkpt>
+      <trkpt lat="37.196654" lon="128.832052">
+        <ele>864.526204</ele>
+        <time>2026-01-23T16:00:53+09:00</time>
+        <hdop>0</hdop>
+        <vdop>0</vdop>
+        <ele>864.526204</ele>
+        <extensions>
+          <gte:gps speed="23.479859" azimuth="12.800000"></gte:gps>
+        </extensions>
+      </trkpt>
+      <trkpt lat="37.196739" lon="128.832091">
+        <ele>863.403940</ele>
+        <time>2026-01-23T16:00:54+09:00</time>
+        <hdop>0</hdop>
+        <vdop>0</vdop>
+        <ele>863.403940</ele>
+        <extensions>
+          <gte:gps speed="22.920564" azimuth="16.000000"></gte:gps>
+        </extensions>
+      </trkpt>
+      <trkpt lat="37.196890" lon="128.832141">
+        <ele>859.712648</ele>
+        <time>2026-01-23T16:00:56+09:00</time>
+        <hdop>0</hdop>
+        <vdop>0</vdop>
+        <ele>859.712648</ele>
+        <extensions>
+          <gte:gps speed="18.678382" azimuth="10.500000"></gte:gps>
+        </extensions>
+      </trkpt>
+      <trkpt lat="37.197018" lon="128.832226">
+        <ele>857.463804</ele>
+        <time>2026-01-23T16:00:58+09:00</time>
+        <hdop>0</hdop>
+        <vdop>0</vdop>
+        <ele>857.463804</ele>
+        <extensions>
+          <gte:gps speed="18.038876" azimuth="32.100000"></gte:gps>
+        </extensions>
+      </trkpt>
+      <trkpt lat="37.197167" lon="128.832305">
+        <ele>854.950537</ele>
+        <time>2026-01-23T16:01:00+09:00</time>
+        <hdop>0</hdop>
+        <vdop>0</vdop>
+        <ele>854.950537</ele>
+        <extensions>
+          <gte:gps speed="20.166822" azimuth="21.900000"></gte:gps>
+        </extensions>
+      </trkpt>
+      <trkpt lat="37.197335" lon="128.832330">
+        <ele>851.668038</ele>
+        <time>2026-01-23T16:01:02+09:00</time>
+        <hdop>0</hdop>
+        <vdop>0</vdop>
+        <ele>851.668038</ele>
+        <extensions>
+          <gte:gps speed="20.672058" azimuth="3.800000"></gte:gps>
+        </extensions>
+      </trkpt>
+      <trkpt lat="37.197503" lon="128.832327">
+        <ele>849.965418</ele>
+        <time>2026-01-23T16:01:04+09:00</time>
+        <hdop>0</hdop>
+        <vdop>0</vdop>
+        <ele>849.965418</ele>
+        <extensions>
+          <gte:gps speed="21.604384" azimuth="359.600000"></gte:gps>
+        </extensions>
+      </trkpt>
+      <trkpt lat="37.197595" lon="128.832330">
+        <ele>848.807106</ele>
+        <time>2026-01-23T16:01:05+09:00</time>
+        <hdop>0</hdop>
+        <vdop>0</vdop>
+        <ele>848.807106</ele>
+        <extensions>
+          <gte:gps speed="22.563475" azimuth="0.000000"></gte:gps>
+        </extensions>
+      </trkpt>
+      <trkpt lat="37.197757" lon="128.832312">
+        <ele>846.760874</ele>
+        <time>2026-01-23T16:01:07+09:00</time>
+        <hdop>0</hdop>
+        <vdop>0</vdop>
+        <ele>846.760874</ele>
+        <extensions>
+          <gte:gps speed="20.246492" azimuth="356.900000"></gte:gps>
+        </extensions>
+      </trkpt>
+      <trkpt lat="37.197917" lon="128.832338">
+        <ele>844.666433</ele>
+        <time>2026-01-23T16:01:09+09:00</time>
+        <hdop>0</hdop>
+        <vdop>0</vdop>
+        <ele>844.666433</ele>
+        <extensions>
+          <gte:gps speed="20.380961" azimuth="8.700000"></gte:gps>
+        </extensions>
+      </trkpt>
+      <trkpt lat="37.198080" lon="128.832417">
+        <ele>841.679296</ele>
+        <time>2026-01-23T16:01:11+09:00</time>
+        <hdop>0</hdop>
+        <vdop>0</vdop>
+        <ele>841.679296</ele>
+        <extensions>
+          <gte:gps speed="21.200344" azimuth="26.100000"></gte:gps>
+        </extensions>
+      </trkpt>
+      <trkpt lat="37.198213" lon="128.832532">
+        <ele>839.509502</ele>
+        <time>2026-01-23T16:01:13+09:00</time>
+        <hdop>0</hdop>
+        <vdop>0</vdop>
+        <ele>839.509502</ele>
+        <extensions>
+          <gte:gps speed="20.248698" azimuth="29.000000"></gte:gps>
+        </extensions>
+      </trkpt>
+      <trkpt lat="37.198335" lon="128.832645">
+        <ele>836.720458</ele>
+        <time>2026-01-23T16:01:15+09:00</time>
+        <hdop>0</hdop>
+        <vdop>0</vdop>
+        <ele>836.720458</ele>
+        <extensions>
+          <gte:gps speed="18.727756" azimuth="30.700000"></gte:gps>
+        </extensions>
+      </trkpt>
+      <trkpt lat="37.198466" lon="128.832719">
+        <ele>833.658903</ele>
+        <time>2026-01-23T16:01:17+09:00</time>
+        <hdop>0</hdop>
+        <vdop>0</vdop>
+        <ele>833.658903</ele>
+        <extensions>
+          <gte:gps speed="18.068640" azimuth="24.900000"></gte:gps>
+        </extensions>
+      </trkpt>
+      <trkpt lat="37.198589" lon="128.832760">
+        <ele>831.165126</ele>
+        <time>2026-01-23T16:01:19+09:00</time>
+        <hdop>0</hdop>
+        <vdop>0</vdop>
+        <ele>831.165126</ele>
+        <extensions>
+          <gte:gps speed="16.936044" azimuth="19.500000"></gte:gps>
+        </extensions>
+      </trkpt>
+      <trkpt lat="37.198711" lon="128.832880">
+        <ele>828.181616</ele>
+        <time>2026-01-23T16:01:21+09:00</time>
+        <hdop>0</hdop>
+        <vdop>0</vdop>
+        <ele>828.181616</ele>
+        <extensions>
+          <gte:gps speed="18.516672" azimuth="34.500000"></gte:gps>
+        </extensions>
+      </trkpt>
+      <trkpt lat="37.198832" lon="128.832989">
+        <ele>825.185132</ele>
+        <time>2026-01-23T16:01:23+09:00</time>
+        <hdop>0</hdop>
+        <vdop>0</vdop>
+        <ele>825.185132</ele>
+        <extensions>
+          <gte:gps speed="18.504944" azimuth="40.800000"></gte:gps>
+        </extensions>
+      </trkpt>
+      <trkpt lat="37.198980" lon="128.833026">
+        <ele>822.918619</ele>
+        <time>2026-01-23T16:01:25+09:00</time>
+        <hdop>0</hdop>
+        <vdop>0</vdop>
+        <ele>822.918619</ele>
+        <extensions>
+          <gte:gps speed="18.544605" azimuth="7.900000"></gte:gps>
+        </extensions>
+      </trkpt>
+      <trkpt lat="37.199115" lon="128.833053">
+        <ele>821.614772</ele>
+        <time>2026-01-23T16:01:27+09:00</time>
+        <hdop>0</hdop>
+        <vdop>0</vdop>
+        <ele>821.614772</ele>
+        <extensions>
+          <gte:gps speed="16.266728" azimuth="20.200000"></gte:gps>
+        </extensions>
+      </trkpt>
+      <trkpt lat="37.199260" lon="128.833115">
+        <ele>819.269235</ele>
+        <time>2026-01-23T16:01:29+09:00</time>
+        <hdop>0</hdop>
+        <vdop>0</vdop>
+        <ele>819.269235</ele>
+        <extensions>
+          <gte:gps speed="18.875255" azimuth="13.600000"></gte:gps>
+        </extensions>
+      </trkpt>
+      <trkpt lat="37.199397" lon="128.833216">
+        <ele>816.174968</ele>
+        <time>2026-01-23T16:01:31+09:00</time>
+        <hdop>0</hdop>
+        <vdop>0</vdop>
+        <ele>816.174968</ele>
+        <extensions>
+          <gte:gps speed="19.879861" azimuth="27.900000"></gte:gps>
+        </extensions>
+      </trkpt>
+      <trkpt lat="37.199561" lon="128.833314">
+        <ele>813.055717</ele>
+        <time>2026-01-23T16:01:33+09:00</time>
+        <hdop>0</hdop>
+        <vdop>0</vdop>
+        <ele>813.055717</ele>
+        <extensions>
+          <gte:gps speed="22.565981" azimuth="27.300000"></gte:gps>
+        </extensions>
+      </trkpt>
+      <trkpt lat="37.199683" lon="128.833450">
+        <ele>810.636711</ele>
+        <time>2026-01-23T16:01:35+09:00</time>
+        <hdop>0</hdop>
+        <vdop>0</vdop>
+        <ele>810.636711</ele>
+        <extensions>
+          <gte:gps speed="21.056489" azimuth="34.200000"></gte:gps>
+        </extensions>
+      </trkpt>
+      <trkpt lat="37.199851" lon="128.833522">
+        <ele>808.867935</ele>
+        <time>2026-01-23T16:01:37+09:00</time>
+        <hdop>0</hdop>
+        <vdop>0</vdop>
+        <ele>808.867935</ele>
+        <extensions>
+          <gte:gps speed="21.754013" azimuth="21.100000"></gte:gps>
+        </extensions>
+      </trkpt>
+      <trkpt lat="37.200005" lon="128.833579">
+        <ele>806.432396</ele>
+        <time>2026-01-23T16:01:39+09:00</time>
+        <hdop>0</hdop>
+        <vdop>0</vdop>
+        <ele>806.432396</ele>
+        <extensions>
+          <gte:gps speed="19.650761" azimuth="23.500000"></gte:gps>
+        </extensions>
+      </trkpt>
+      <trkpt lat="37.200129" lon="128.833704">
+        <ele>804.490434</ele>
+        <time>2026-01-23T16:01:41+09:00</time>
+        <hdop>0</hdop>
+        <vdop>0</vdop>
+        <ele>804.490434</ele>
+        <extensions>
+          <gte:gps speed="19.471739" azimuth="32.100000"></gte:gps>
+        </extensions>
+      </trkpt>
+      <trkpt lat="37.200271" lon="128.833779">
+        <ele>802.312432</ele>
+        <time>2026-01-23T16:01:43+09:00</time>
+        <hdop>0</hdop>
+        <vdop>0</vdop>
+        <ele>802.312432</ele>
+        <extensions>
+          <gte:gps speed="19.701186" azimuth="24.800000"></gte:gps>
+        </extensions>
+      </trkpt>
+      <trkpt lat="37.200422" lon="128.833852">
+        <ele>799.543504</ele>
+        <time>2026-01-23T16:01:45+09:00</time>
+        <hdop>0</hdop>
+        <vdop>0</vdop>
+        <ele>799.543504</ele>
+        <extensions>
+          <gte:gps speed="19.579838" azimuth="14.800000"></gte:gps>
+        </extensions>
+      </trkpt>
+      <trkpt lat="37.200561" lon="128.833949">
+        <ele>795.821620</ele>
+        <time>2026-01-23T16:01:47+09:00</time>
+        <hdop>0</hdop>
+        <vdop>0</vdop>
+        <ele>795.821620</ele>
+        <extensions>
+          <gte:gps speed="20.220833" azimuth="28.100000"></gte:gps>
+        </extensions>
+      </trkpt>
+      <trkpt lat="37.200687" lon="128.834044">
+        <ele>792.459094</ele>
+        <time>2026-01-23T16:01:49+09:00</time>
+        <hdop>0</hdop>
+        <vdop>0</vdop>
+        <ele>792.459094</ele>
+        <extensions>
+          <gte:gps speed="19.348593" azimuth="38.800000"></gte:gps>
+        </extensions>
+      </trkpt>
+      <trkpt lat="37.200812" lon="128.834161">
+        <ele>789.464448</ele>
+        <time>2026-01-23T16:01:51+09:00</time>
+        <hdop>0</hdop>
+        <vdop>0</vdop>
+        <ele>789.464448</ele>
+        <extensions>
+          <gte:gps speed="19.417041" azimuth="37.600000"></gte:gps>
+        </extensions>
+      </trkpt>
+      <trkpt lat="37.200917" lon="128.834285">
+        <ele>786.692641</ele>
+        <time>2026-01-23T16:01:53+09:00</time>
+        <hdop>0</hdop>
+        <vdop>0</vdop>
+        <ele>786.692641</ele>
+        <extensions>
+          <gte:gps speed="17.560851" azimuth="38.200000"></gte:gps>
+        </extensions>
+      </trkpt>
+      <trkpt lat="37.201023" lon="128.834420">
+        <ele>783.937898</ele>
+        <time>2026-01-23T16:01:55+09:00</time>
+        <hdop>0</hdop>
+        <vdop>0</vdop>
+        <ele>783.937898</ele>
+        <extensions>
+          <gte:gps speed="19.360959" azimuth="48.200000"></gte:gps>
+        </extensions>
+      </trkpt>
+      <trkpt lat="37.201158" lon="128.834547">
+        <ele>780.838142</ele>
+        <time>2026-01-23T16:01:57+09:00</time>
+        <hdop>0</hdop>
+        <vdop>0</vdop>
+        <ele>780.838142</ele>
+        <extensions>
+          <gte:gps speed="21.147542" azimuth="38.300000"></gte:gps>
+        </extensions>
+      </trkpt>
+      <trkpt lat="37.201290" lon="128.834679">
+        <ele>777.543147</ele>
+        <time>2026-01-23T16:01:59+09:00</time>
+        <hdop>0</hdop>
+        <vdop>0</vdop>
+        <ele>777.543147</ele>
+        <extensions>
+          <gte:gps speed="20.588142" azimuth="32.700000"></gte:gps>
+        </extensions>
+      </trkpt>
+      <trkpt lat="37.201433" lon="128.834801">
+        <ele>774.180448</ele>
+        <time>2026-01-23T16:02:01+09:00</time>
+        <hdop>0</hdop>
+        <vdop>0</vdop>
+        <ele>774.180448</ele>
+        <extensions>
+          <gte:gps speed="21.401373" azimuth="29.600000"></gte:gps>
+        </extensions>
+      </trkpt>
+      <trkpt lat="37.201583" lon="128.834903">
+        <ele>771.624103</ele>
+        <time>2026-01-23T16:02:03+09:00</time>
+        <hdop>0</hdop>
+        <vdop>0</vdop>
+        <ele>771.624103</ele>
+        <extensions>
+          <gte:gps speed="21.061375" azimuth="24.900000"></gte:gps>
+        </extensions>
+      </trkpt>
+      <trkpt lat="37.201719" lon="128.835011">
+        <ele>768.901652</ele>
+        <time>2026-01-23T16:02:05+09:00</time>
+        <hdop>0</hdop>
+        <vdop>0</vdop>
+        <ele>768.901652</ele>
+        <extensions>
+          <gte:gps speed="19.811514" azimuth="27.600000"></gte:gps>
+        </extensions>
+      </trkpt>
+      <trkpt lat="37.201837" lon="128.835113">
+        <ele>766.690062</ele>
+        <time>2026-01-23T16:02:07+09:00</time>
+        <hdop>0</hdop>
+        <vdop>0</vdop>
+        <ele>766.690062</ele>
+        <extensions>
+          <gte:gps speed="18.050980" azimuth="28.700000"></gte:gps>
+        </extensions>
+      </trkpt>
+      <trkpt lat="37.201955" lon="128.835171">
+        <ele>766.452962</ele>
+        <time>2026-01-23T16:02:09+09:00</time>
+        <hdop>0</hdop>
+        <vdop>0</vdop>
+        <ele>766.452962</ele>
+        <extensions>
+          <gte:gps speed="16.171452" azimuth="28.600000"></gte:gps>
+        </extensions>
+      </trkpt>
+      <trkpt lat="37.202049" lon="128.835289">
+        <ele>764.590756</ele>
+        <time>2026-01-23T16:02:11+09:00</time>
+        <hdop>0</hdop>
+        <vdop>0</vdop>
+        <ele>764.590756</ele>
+        <extensions>
+          <gte:gps speed="16.533693" azimuth="44.000000"></gte:gps>
+        </extensions>
+      </trkpt>
+      <trkpt lat="37.202141" lon="128.835423">
+        <ele>763.059519</ele>
+        <time>2026-01-23T16:02:13+09:00</time>
+        <hdop>0</hdop>
+        <vdop>0</vdop>
+        <ele>763.059519</ele>
+        <extensions>
+          <gte:gps speed="17.564019" azimuth="46.900000"></gte:gps>
+        </extensions>
+      </trkpt>
+      <trkpt lat="37.202240" lon="128.835555">
+        <ele>761.874598</ele>
+        <time>2026-01-23T16:02:15+09:00</time>
+        <hdop>0</hdop>
+        <vdop>0</vdop>
+        <ele>761.874598</ele>
+        <extensions>
+          <gte:gps speed="17.816822" azimuth="50.700000"></gte:gps>
+        </extensions>
+      </trkpt>
+      <trkpt lat="37.202320" lon="128.835714">
+        <ele>760.338182</ele>
+        <time>2026-01-23T16:02:17+09:00</time>
+        <hdop>0</hdop>
+        <vdop>0</vdop>
+        <ele>760.338182</ele>
+        <extensions>
+          <gte:gps speed="18.259914" azimuth="54.100000"></gte:gps>
+        </extensions>
+      </trkpt>
+      <trkpt lat="37.202409" lon="128.835847">
+        <ele>758.969364</ele>
+        <time>2026-01-23T16:02:19+09:00</time>
+        <hdop>0</hdop>
+        <vdop>0</vdop>
+        <ele>758.969364</ele>
+        <extensions>
+          <gte:gps speed="17.811395" azimuth="54.300000"></gte:gps>
+        </extensions>
+      </trkpt>
+      <trkpt lat="37.202458" lon="128.836019">
+        <ele>757.447628</ele>
+        <time>2026-01-23T16:02:21+09:00</time>
+        <hdop>0</hdop>
+        <vdop>0</vdop>
+        <ele>757.447628</ele>
+        <extensions>
+          <gte:gps speed="18.273329" azimuth="70.000000"></gte:gps>
+        </extensions>
+      </trkpt>
+      <trkpt lat="37.202531" lon="128.836169">
+        <ele>756.020138</ele>
+        <time>2026-01-23T16:02:23+09:00</time>
+        <hdop>0</hdop>
+        <vdop>0</vdop>
+        <ele>756.020138</ele>
+        <extensions>
+          <gte:gps speed="16.834263" azimuth="56.900000"></gte:gps>
+        </extensions>
+      </trkpt>
+      <trkpt lat="37.202593" lon="128.836281">
+        <ele>754.394279</ele>
+        <time>2026-01-23T16:02:25+09:00</time>
+        <hdop>0</hdop>
+        <vdop>0</vdop>
+        <ele>754.394279</ele>
+        <extensions>
+          <gte:gps speed="14.332825" azimuth="66.600000"></gte:gps>
+        </extensions>
+      </trkpt>
+      <trkpt lat="37.202593" lon="128.836452">
+        <ele>751.690256</ele>
+        <time>2026-01-23T16:02:27+09:00</time>
+        <hdop>0</hdop>
+        <vdop>0</vdop>
+        <ele>751.690256</ele>
+        <extensions>
+          <gte:gps speed="16.571168" azimuth="83.200000"></gte:gps>
+        </extensions>
+      </trkpt>
+      <trkpt lat="37.202606" lon="128.836633">
+        <ele>748.001772</ele>
+        <time>2026-01-23T16:02:29+09:00</time>
+        <hdop>0</hdop>
+        <vdop>0</vdop>
+        <ele>748.001772</ele>
+        <extensions>
+          <gte:gps speed="18.656778" azimuth="90.400000"></gte:gps>
+        </extensions>
+      </trkpt>
+      <trkpt lat="37.202560" lon="128.836816">
+        <ele>744.441244</ele>
+        <time>2026-01-23T16:02:31+09:00</time>
+        <hdop>0</hdop>
+        <vdop>0</vdop>
+        <ele>744.441244</ele>
+        <extensions>
+          <gte:gps speed="18.863066" azimuth="100.600000"></gte:gps>
+        </extensions>
+      </trkpt>
+      <trkpt lat="37.202602" lon="128.836965">
+        <ele>743.626354</ele>
+        <time>2026-01-23T16:02:33+09:00</time>
+        <hdop>0</hdop>
+        <vdop>0</vdop>
+        <ele>743.626354</ele>
+        <extensions>
+          <gte:gps speed="15.165985" azimuth="69.500000"></gte:gps>
+        </extensions>
+      </trkpt>
+      <trkpt lat="37.202656" lon="128.837106">
+        <ele>741.727694</ele>
+        <time>2026-01-23T16:02:35+09:00</time>
+        <hdop>0</hdop>
+        <vdop>0</vdop>
+        <ele>741.727694</ele>
+        <extensions>
+          <gte:gps speed="15.475320" azimuth="55.500000"></gte:gps>
+        </extensions>
+      </trkpt>
+      <trkpt lat="37.202744" lon="128.837256">
+        <ele>739.493497</ele>
+        <time>2026-01-23T16:02:37+09:00</time>
+        <hdop>0</hdop>
+        <vdop>0</vdop>
+        <ele>739.493497</ele>
+        <extensions>
+          <gte:gps speed="18.491433" azimuth="51.900000"></gte:gps>
+        </extensions>
+      </trkpt>
+      <trkpt lat="37.202843" lon="128.837432">
+        <ele>737.084285</ele>
+        <time>2026-01-23T16:02:39+09:00</time>
+        <hdop>0</hdop>
+        <vdop>0</vdop>
+        <ele>737.084285</ele>
+        <extensions>
+          <gte:gps speed="21.191480" azimuth="53.700000"></gte:gps>
+        </extensions>
+      </trkpt>
+      <trkpt lat="37.202909" lon="128.837518">
+        <ele>735.467834</ele>
+        <time>2026-01-23T16:02:40+09:00</time>
+        <hdop>0</hdop>
+        <vdop>0</vdop>
+        <ele>735.467834</ele>
+        <extensions>
+          <gte:gps speed="22.807089" azimuth="48.300000"></gte:gps>
+        </extensions>
+      </trkpt>
+      <trkpt lat="37.203069" lon="128.837641">
+        <ele>732.413684</ele>
+        <time>2026-01-23T16:02:42+09:00</time>
+        <hdop>0</hdop>
+        <vdop>0</vdop>
+        <ele>732.413684</ele>
+        <extensions>
+          <gte:gps speed="23.813636" azimuth="32.100000"></gte:gps>
+        </extensions>
+      </trkpt>
+      <trkpt lat="37.203152" lon="128.837720">
+        <ele>730.698873</ele>
+        <time>2026-01-23T16:02:43+09:00</time>
+        <hdop>0</hdop>
+        <vdop>0</vdop>
+        <ele>730.698873</ele>
+        <extensions>
+          <gte:gps speed="25.114455" azimuth="35.800000"></gte:gps>
+        </extensions>
+      </trkpt>
+      <trkpt lat="37.203230" lon="128.837803">
+        <ele>729.055927</ele>
+        <time>2026-01-23T16:02:44+09:00</time>
+        <hdop>0</hdop>
+        <vdop>0</vdop>
+        <ele>729.055927</ele>
+        <extensions>
+          <gte:gps speed="25.187981" azimuth="39.300000"></gte:gps>
+        </extensions>
+      </trkpt>
+      <trkpt lat="37.203294" lon="128.837895">
+        <ele>727.504277</ele>
+        <time>2026-01-23T16:02:45+09:00</time>
+        <hdop>0</hdop>
+        <vdop>0</vdop>
+        <ele>727.504277</ele>
+        <extensions>
+          <gte:gps speed="24.272790" azimuth="47.100000"></gte:gps>
+        </extensions>
+      </trkpt>
+      <trkpt lat="37.203422" lon="128.838065">
+        <ele>724.762373</ele>
+        <time>2026-01-23T16:02:47+09:00</time>
+        <hdop>0</hdop>
+        <vdop>0</vdop>
+        <ele>724.762373</ele>
+        <extensions>
+          <gte:gps speed="23.748016" azimuth="43.700000"></gte:gps>
+        </extensions>
+      </trkpt>
+      <trkpt lat="37.203497" lon="128.838143">
+        <ele>723.945085</ele>
+        <time>2026-01-23T16:02:48+09:00</time>
+        <hdop>0</hdop>
+        <vdop>0</vdop>
+        <ele>723.945085</ele>
+        <extensions>
+          <gte:gps speed="23.984843" azimuth="39.800000"></gte:gps>
+        </extensions>
+      </trkpt>
+      <trkpt lat="37.203661" lon="128.838218">
+        <ele>721.890633</ele>
+        <time>2026-01-23T16:02:50+09:00</time>
+        <hdop>0</hdop>
+        <vdop>0</vdop>
+        <ele>721.890633</ele>
+        <extensions>
+          <gte:gps speed="21.633769" azimuth="23.000000"></gte:gps>
+        </extensions>
+      </trkpt>
+      <trkpt lat="37.203819" lon="128.838303">
+        <ele>718.937332</ele>
+        <time>2026-01-23T16:02:52+09:00</time>
+        <hdop>0</hdop>
+        <vdop>0</vdop>
+        <ele>718.937332</ele>
+        <extensions>
+          <gte:gps speed="21.428150" azimuth="29.200000"></gte:gps>
+        </extensions>
+      </trkpt>
+      <trkpt lat="37.203938" lon="128.838416">
+        <ele>716.503087</ele>
+        <time>2026-01-23T16:02:54+09:00</time>
+        <hdop>0</hdop>
+        <vdop>0</vdop>
+        <ele>716.503087</ele>
+        <extensions>
+          <gte:gps speed="18.339822" azimuth="30.100000"></gte:gps>
+        </extensions>
+      </trkpt>
+      <trkpt lat="37.204078" lon="128.838418">
+        <ele>716.168500</ele>
+        <time>2026-01-23T16:02:56+09:00</time>
+        <hdop>0</hdop>
+        <vdop>0</vdop>
+        <ele>716.168500</ele>
+        <extensions>
+          <gte:gps speed="15.299622" azimuth="359.400000"></gte:gps>
+        </extensions>
+      </trkpt>
+      <trkpt lat="37.204145" lon="128.838498">
+        <ele>713.944162</ele>
+        <time>2026-01-23T16:03:01+09:00</time>
+        <hdop>0</hdop>
+        <vdop>0</vdop>
+        <ele>713.944162</ele>
+        <extensions>
+          <gte:gps speed="3.814545" azimuth="70.400000"></gte:gps>
+        </extensions>
+      </trkpt>
+      <trkpt lat="37.204238" lon="128.838587">
+        <ele>714.449899</ele>
+        <time>2026-01-23T16:03:06+09:00</time>
+        <hdop>0</hdop>
+        <vdop>0</vdop>
+        <ele>714.449899</ele>
+        <extensions>
+          <gte:gps speed="6.842224" azimuth="35.800000"></gte:gps>
+        </extensions>
+      </trkpt>
+      <trkpt lat="37.204293" lon="128.838705">
+        <ele>713.562721</ele>
+        <time>2026-01-23T16:03:09+09:00</time>
+        <hdop>0</hdop>
+        <vdop>0</vdop>
+        <ele>713.562721</ele>
+        <extensions>
+          <gte:gps speed="8.485775" azimuth="56.200000"></gte:gps>
+        </extensions>
+      </trkpt>
+      <trkpt lat="37.204329" lon="128.838827">
+        <ele>712.561045</ele>
+        <time>2026-01-23T16:03:12+09:00</time>
+        <hdop>0</hdop>
+        <vdop>0</vdop>
+        <ele>712.561045</ele>
+        <extensions>
+          <gte:gps speed="7.875803" azimuth="71.900000"></gte:gps>
+        </extensions>
+      </trkpt>
+      <trkpt lat="37.204345" lon="128.838940">
+        <ele>711.873713</ele>
+        <time>2026-01-23T16:03:15+09:00</time>
+        <hdop>0</hdop>
+        <vdop>0</vdop>
+        <ele>711.873713</ele>
+        <extensions>
+          <gte:gps speed="6.155472" azimuth="74.400000"></gte:gps>
+        </extensions>
+      </trkpt>
+      <trkpt lat="37.204335" lon="128.839053">
+        <ele>713.057123</ele>
+        <time>2026-01-23T16:03:20+09:00</time>
+        <hdop>0</hdop>
+        <vdop>0</vdop>
+        <ele>713.057123</ele>
+        <extensions>
+          <gte:gps speed="3.592338" azimuth="90.300000"></gte:gps>
+        </extensions>
+      </trkpt>
+      <trkpt lat="37.204329" lon="128.839178">
+        <ele>712.539042</ele>
+        <time>2026-01-23T16:03:38+09:00</time>
+        <hdop>0</hdop>
+        <vdop>1</vdop>
+        <ele>712.539042</ele>
+        <extensions>
+          <gte:gps speed="2.478358" azimuth="112.100000"></gte:gps>
+        </extensions>
+      </trkpt>
+      <trkpt lat="37.204342" lon="128.839295">
+        <ele>710.262259</ele>
+        <time>2026-01-23T16:03:46+09:00</time>
+        <hdop>0</hdop>
+        <vdop>1</vdop>
+        <ele>710.262259</ele>
+        <extensions>
+          <gte:gps speed="2.226400" azimuth="61.000000"></gte:gps>
+        </extensions>
+      </trkpt>
+      <trkpt lat="37.204353" lon="128.839413">
+        <ele>710.553249</ele>
+        <time>2026-01-23T16:03:55+09:00</time>
+        <hdop>0</hdop>
+        <vdop>1</vdop>
+        <ele>710.553249</ele>
+        <extensions>
+          <gte:gps speed="2.750662" azimuth="64.000000"></gte:gps>
+        </extensions>
+      </trkpt>
+      <trkpt lat="37.204342" lon="128.839541">
+        <ele>710.189537</ele>
+        <time>2026-01-23T16:04:05+09:00</time>
+        <hdop>0</hdop>
+        <vdop>0</vdop>
+        <ele>710.189537</ele>
+        <extensions>
+          <gte:gps speed="2.829266" azimuth="113.200000"></gte:gps>
+        </extensions>
+      </trkpt>
+      <trkpt lat="37.204285" lon="128.839638">
+        <ele>708.838092</ele>
+        <time>2026-01-23T16:04:13+09:00</time>
+        <hdop>0</hdop>
+        <vdop>1</vdop>
+        <ele>708.838092</ele>
+        <extensions>
+          <gte:gps speed="2.120761" azimuth="124.600000"></gte:gps>
+        </extensions>
+      </trkpt>
+      <trkpt lat="37.204259" lon="128.839758">
+        <ele>708.404416</ele>
+        <time>2026-01-23T16:04:23+09:00</time>
+        <hdop>0</hdop>
+        <vdop>1</vdop>
+        <ele>708.404416</ele>
+        <extensions>
+          <gte:gps speed="2.450391" azimuth="67.300000"></gte:gps>
+        </extensions>
+      </trkpt>
+      <trkpt lat="37.204239" lon="128.839867">
+        <ele>708.127467</ele>
+        <time>2026-01-23T16:04:33+09:00</time>
+        <hdop>0</hdop>
+        <vdop>1</vdop>
+        <ele>708.127467</ele>
+        <extensions>
+          <gte:gps speed="1.394540" azimuth="109.100000"></gte:gps>
+        </extensions>
+      </trkpt>
+      <trkpt lat="37.204270" lon="128.839926">
+        <ele>715.206864</ele>
+        <time>2026-01-23T16:05:34+09:00</time>
+        <hdop>0</hdop>
+        <vdop>1</vdop>
+        <ele>715.206864</ele>
+        <extensions>
+          <gte:gps speed="0.000000" azimuth="-1.000000"></gte:gps>
+        </extensions>
+      </trkpt>
+      <trkpt lat="37.204284" lon="128.839897">
+        <ele>716.920984</ele>
+        <time>2026-01-23T16:06:22+09:00</time>
+        <hdop>0</hdop>
+        <vdop>1</vdop>
+        <ele>716.920984</ele>
+        <extensions>
+          <gte:gps speed="0.000000" azimuth="-1.000000"></gte:gps>
+        </extensions>
+      </trkpt>
+      <trkpt lat="37.204284" lon="128.839897">
+        <ele>716.920984</ele>
+        <time>2026-01-23T16:06:22+09:00</time>
+        <hdop>0</hdop>
+        <vdop>1</vdop>
+        <ele>716.920984</ele>
+        <extensions>
+          <gte:gps speed="0.000000" azimuth="-1.000000"></gte:gps>
+        </extensions>
+      </trkpt>
+    </trkseg>
+  </trk>
+</gpx>

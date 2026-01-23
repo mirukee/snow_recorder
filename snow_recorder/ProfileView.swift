@@ -4,6 +4,8 @@ import SwiftData
 /// 마이페이지 뷰 (Tab 3) - Gamified Profile Design
 struct ProfileView: View {
     @StateObject private var viewModel = MyPageViewModel()
+    @State private var showSettings = false
+    @ObservedObject private var rankingService = RankingService.shared
     
     // SwiftData에서 모든 주행 기록 가져오기
     @Query private var sessions: [RunSession]
@@ -59,7 +61,7 @@ struct ProfileView: View {
                         Spacer()
                         
                         // Settings Button
-                        Button(action: {}) {
+                        Button(action: { showSettings = true }) {
                             Circle()
                                 .fill(surfaceDark)
                                 .frame(width: 40, height: 40)
@@ -69,6 +71,9 @@ struct ProfileView: View {
                                 )
                                 .overlay(Circle().stroke(Color.white.opacity(0.1), lineWidth: 1))
                         }
+                    }
+                    .sheet(isPresented: $showSettings) {
+                        SettingsView(isRankingEnabled: $rankingService.isRankingEnabled)
                     }
                     .padding(.horizontal, 24)
                     .padding(.top, 20)
@@ -96,7 +101,7 @@ struct ProfileView: View {
                         VStack(alignment: .leading, spacing: 4) {
                             HStack(alignment: .top) {
                                 VStack(alignment: .leading, spacing: 0) {
-                                    Text(viewModel.userProfile.tier.tierName.rawValue.uppercased())
+                                    Text(viewModel.userProfile.tier.rawValue.uppercased())
                                         .font(.system(size: 32, weight: .black))
                                         .italic()
                                         .foregroundColor(.white)
@@ -424,6 +429,49 @@ struct GridPattern: Shape {
     }
 }
 
+    /// Settings Sheet
+    struct SettingsView: View {
+        @Environment(\.dismiss) var dismiss
+        @Binding var isRankingEnabled: Bool
+        
+        var body: some View {
+            NavigationView {
+                Form {
+                    Section(header: Text("PRIVACY & COMPETITION")) {
+                        Toggle(isOn: $isRankingEnabled) {
+                            VStack(alignment: .leading) {
+                                Text("Participate in Ranking")
+                                    .font(.system(size: 16, weight: .bold))
+                                Text("Upload your runs to the leaderboard automatically.")
+                                    .font(.caption)
+                                    .foregroundColor(.gray)
+                            }
+                        }
+                        .tint(Color(red: 107/255, green: 249/255, blue: 6/255))
+                    }
+                    
+                    Section(header: Text("APP INFO")) {
+                        HStack {
+                            Text("Version")
+                            Spacer()
+                            Text("1.0.0 (Beta)")
+                                .foregroundColor(.gray)
+                        }
+                    }
+                }
+                .navigationTitle("Settings")
+                .navigationBarTitleDisplayMode(.inline)
+                .toolbar {
+                    ToolbarItem(placement: .navigationBarTrailing) {
+                        Button("Done") { dismiss() }
+                    }
+                }
+            }
+            .preferredColorScheme(.dark)
+        }
+    }
+
 #Preview {
     ProfileView()
+        .modelContainer(for: RunSession.self, inMemory: true)
 }
