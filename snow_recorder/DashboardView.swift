@@ -14,6 +14,7 @@ struct DashboardView: View {
     
     // MARK: - State
     @State private var isBlinking = false // REC 점 깜빡임 상태
+    @State private var selectedRunMetric: RunSession.RunMetric?
     
     var body: some View {
         ZStack {
@@ -214,6 +215,12 @@ struct DashboardView: View {
                 }
                 .padding(.horizontal, 16)
                 .padding(.bottom, 24)
+
+                // [Run Stats] 런별 스탯 (세션 진행 중)
+                if recordManager.isRecording {
+                    runStatsSection
+                        .padding(.bottom, 16)
+                }
                 
                 // [Bottom] Control Buttons
                 ZStack(alignment: .bottom) {
@@ -372,7 +379,63 @@ struct DashboardView: View {
                 isBlinking = true
             }
         }
+        .fullScreenCover(item: $selectedRunMetric) { metric in
+            RunMetricDetailSheet(
+                metric: metric,
+                accentColor: neonGreen,
+                speedSeries: locationManager.completedRunSpeedSeries(for: metric.runNumber),
+                locationName: "HIGH1 RESORT"
+            )
+        }
     }
+
+    private var sortedRunMetrics: [RunSession.RunMetric] {
+        recordManager.currentRunMetrics.sorted { $0.runNumber < $1.runNumber }
+    }
+
+    private var runStatsSection: some View {
+        VStack(alignment: .leading, spacing: 8) {
+            HStack {
+                Text("RUN STATS")
+                    .font(.system(size: 10, weight: .bold))
+                    .tracking(2)
+                    .foregroundColor(.white.opacity(0.8))
+                Spacer()
+                Text("\(sortedRunMetrics.count) RUNS")
+                    .font(.system(size: 10, weight: .bold))
+                    .tracking(1)
+                    .foregroundColor(.white.opacity(0.4))
+            }
+            .padding(.horizontal, 16)
+            
+            if sortedRunMetrics.isEmpty {
+                Text("첫 런을 기다리는 중...")
+                    .font(.system(size: 12, weight: .medium))
+                    .foregroundColor(.white.opacity(0.5))
+                    .frame(maxWidth: .infinity, alignment: .leading)
+                    .padding(.vertical, 12)
+                    .padding(.horizontal, 16)
+                    .background(Color.white.opacity(0.05))
+                    .cornerRadius(12)
+                    .padding(.horizontal, 16)
+            } else {
+                ScrollView(.horizontal, showsIndicators: false) {
+                    HStack(spacing: 10) {
+                        ForEach(sortedRunMetrics) { metric in
+                            RunMiniStatCard(metric: metric, accentColor: neonGreen)
+                                .contentShape(Rectangle())
+                                .onTapGesture {
+                                    selectedRunMetric = metric
+                                }
+                        }
+                    }
+                    .padding(.horizontal, 16)
+                }
+            }
+        }
+    }
+
+    
 }
 
 /// 유리 질감과 반사 효과가 있는 스탯 카드
@@ -490,6 +553,61 @@ struct StatsCompactCard: View {
     }
 }
 
+// MARK: - 런 미니 스탯 카드
+struct RunMiniStatCard: View {
+    let metric: RunSession.RunMetric
+    let accentColor: Color
+    
+    var body: some View {
+        VStack(alignment: .leading, spacing: 6) {
+            HStack {
+                Text(formatRunTimeRange(metric.startTime, metric.endTime))
+                    .font(.system(size: 10, weight: .bold))
+                    .tracking(0.5)
+                    .foregroundColor(.white)
+                Spacer()
+                Text(formatRunDuration(metric.duration))
+                    .font(.system(size: 9, weight: .medium, design: .monospaced))
+                    .foregroundColor(.white.opacity(0.5))
+            }
+            
+            HStack(spacing: 6) {
+                RunStatChip(label: "EDGE", value: "\(metric.edgeScore)", accentColor: accentColor)
+                RunStatChip(label: "FLOW", value: "\(metric.flowScore)", accentColor: accentColor)
+            }
+        }
+        .padding(12)
+        .frame(width: 160)
+        .background(Color.white.opacity(0.06))
+        .cornerRadius(14)
+        .overlay(
+            RoundedRectangle(cornerRadius: 14)
+                .stroke(Color.white.opacity(0.08), lineWidth: 1)
+        )
+    }
+}
+
+struct RunStatChip: View {
+    let label: String
+    let value: String
+    let accentColor: Color
+    
+    var body: some View {
+        HStack(spacing: 4) {
+            Text(label)
+                .font(.system(size: 8, weight: .bold))
+                .foregroundColor(.white.opacity(0.4))
+            Text(value)
+                .font(.system(size: 10, weight: .bold, design: .monospaced))
+                .foregroundColor(accentColor)
+        }
+        .padding(.horizontal, 6)
+        .padding(.vertical, 4)
+        .background(Color.white.opacity(0.05))
+        .cornerRadius(6)
+    }
+}
+
 // MARK: - 헬퍼 함수
 
 /// 거리를 포맷팅 (m 또는 km)
@@ -499,4 +617,24 @@ private func formatDistance(_ meters: Double) -> String {
     } else {
         return "\(Int(meters))m"
     }
+}
+
+private func formatRunDuration(_ duration: TimeInterval) -> String {
+    let formatter = DateComponentsFormatter()
+    formatter.allowedUnits = [.minute, .second]
+    formatter.unitsStyle = .positional
+    formatter.zeroFormattingBehavior = .pad
+    return formatter.string(from: duration) ?? "00:00"
+}
+
+private func formatSpeedOneDecimal(_ value: Double) -> String {
+    String(format: "%.1f", value)
+}
+
+private func formatRunTimeRange(_ start: Date, _ end: Date) -> String {
+    let formatter = DateFormatter()
+    formatter.locale = Locale(identifier: "ko_KR")
+    formatter.timeZone = .current
+    formatter.dateFormat = "HH:mm"
+    return "\(formatter.string(from: start)) ~ \(formatter.string(from: end))"
 }

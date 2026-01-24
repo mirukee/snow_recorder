@@ -8,9 +8,16 @@ struct RankingView: View {
     let surfaceDark = Color(white: 0.05)
     let glassDark = Color.white.opacity(0.05)
     
+    // MARK: - Enums (Local)
+    enum RankingMode {
+        case technical
+        case mileage
+    }
+
     // MARK: - State
+    @State private var rankingMode: RankingMode = .technical // Default to Technical
     @State private var selectedScope: RankingScope = .individual
-    @State private var selectedResort: String = "All Resorts"
+    @State private var selectedResort: String = "전체"
     @State private var selectedSlope: String = "All Slopes" // New Slope Filter
     @State private var selectedMetric: RankingMetric = .runCount
     @State private var selectedCycle: RankingCycle = .season
@@ -20,11 +27,11 @@ struct RankingView: View {
     // MARK: - Models (Using RankingModels.swift)
     
     // Mock Data (Resorts)
-    let resorts = ["All Resorts", "High1", "Yongpyong", "Phoenix", "Vivaldi"]
+    let resorts = ["전체", "하이원", "용평", "휘닉스", "비발디"]
     
     // Slopes Data Helper
     var availableSlopes: [String] {
-        if selectedResort == "High1" {
+        if selectedResort == "하이원" {
             var slopes = ["All Slopes"]
             slopes.append(contentsOf: SlopeDatabase.shared.slopes.map { $0.name })
             return slopes
@@ -33,13 +40,11 @@ struct RankingView: View {
         }
     }
     
-    var filteredRankings: [LeaderboardEntry] {
-        let slopeFilter = selectedSlope == "All Slopes" ? nil : selectedSlope
-        return rankingService.getLeaderboard(cycle: selectedCycle, metric: selectedMetric, scope: selectedScope, slope: slopeFilter)
-    }
+    @State private var showingScoreInfo = false
     
     var body: some View {
         ZStack {
+            // ... (rest of background)
             // Background
             backgroundDark.ignoresSafeArea()
             
@@ -76,18 +81,29 @@ struct RankingView: View {
                         VStack(spacing: 0) {
                             headerView
                             
-                            scopeSwitcher
-                                .padding(.horizontal, 24)
-                                .padding(.bottom, 16)
+                            modeSwitcher
+                                .padding(.top, 10)
+                                .padding(.bottom, 20)
                             
                             // Filters Container
                             VStack(spacing: 16) {
-                                resortFilterScroll
-                                
-                                // Show Slope Filter only if a specific resort is selected (e.g., High1)
-                                if selectedResort != "All Resorts" {
-                                    slopeFilterScroll
+                                // Resort Filter (Only for Mileage Mode)
+                                if rankingMode == .mileage {
+                                    resortFilterScroll
                                         .transition(.move(edge: .top).combined(with: .opacity))
+                                    
+                                    // Show Slope Filter only if a specific resort is selected (e.g., High1)
+                                    if selectedResort != "전체" {
+                                        slopeFilterScroll
+                                            .transition(.move(edge: .top).combined(with: .opacity))
+                                    }
+                                } else {
+                                    // Technical Mode: Show Global Label or nothing (clean look)
+                                    Text("NATIONAL RANKING")
+                                        .font(.system(size: 10, weight: .bold))
+                                        .tracking(2)
+                                        .foregroundColor(neonGreen.opacity(0.7))
+                                        .padding(.bottom, 8)
                                 }
                                 
                                 metricTabs
@@ -111,15 +127,54 @@ struct RankingView: View {
                     }
                 }
             }
+            
+            if rankingService.isLoadingLeaderboard {
+                ProgressView()
+                    .progressViewStyle(CircularProgressViewStyle(tint: neonGreen))
+                    .scaleEffect(1.5)
+            }
+            
+            // Debug / Empty State
+            if let error = rankingService.lastErrorMessage {
+                VStack {
+                    Image(systemName: "exclamationmark.triangle.fill")
+                        .foregroundColor(.yellow)
+                    Text(error)
+                        .font(.caption)
+                        .foregroundColor(.white)
+                        .multilineTextAlignment(.center)
+                        .padding()
+                }
+                .background(Color.black.opacity(0.8))
+                .cornerRadius(10)
+            } else if rankingService.leaderboard.isEmpty && !rankingService.isLoadingLeaderboard {
+               Text("NO DATA FOUND")
+                   .font(.headline)
+                   .foregroundColor(.gray)
+                   .padding()
+            }
         }
         .preferredColorScheme(.dark)
         .onAppear {
-            // 앱 시작 시 또는 뷰 진입 시 기존 데이터를 기반으로 랭킹 통계 재계산
+            // 앱 시작 시 또는 뷰 진입 시 기존 데이터를 기반으로 랭킹 통계 재계산 및 로드
             rankingService.recalculateStats(from: sessions)
+            if rankingMode == .technical && (selectedMetric == .runCount || selectedMetric == .distance) {
+                 selectedMetric = .edge
+            }
+            rankingService.fetchLeaderboard(cycle: selectedCycle, metric: selectedMetric, scope: selectedScope)
         }
         .onChange(of: sessions) { _, newSessions in
             rankingService.recalculateStats(from: newSessions)
         }
+        // Filters Change Trigger
+        .onChange(of: selectedCycle) { _, _ in fetch() }
+        .onChange(of: selectedMetric) { _, _ in fetch() }
+        // .onChange(of: selectedScope) { _, _ in fetch() } // Removed
+        // .onChange(of: selectedResort) { ... } // Resort/Slope filtering not implemented in Firestore query yet
+    }
+    
+    private func fetch() {
+        rankingService.fetchLeaderboard(cycle: selectedCycle, metric: selectedMetric, scope: selectedScope)
     }
     
     // MARK: - Subviews
@@ -172,40 +227,6 @@ struct RankingView: View {
         .padding(.horizontal, 24)
         .padding(.top, 16)
         .padding(.bottom, 20)
-    }
-    
-    private var scopeSwitcher: some View {
-        HStack(spacing: 0) {
-            scopeButton(title: "INDIVIDUAL", scope: .individual)
-            scopeButton(title: "CREW", scope: .crew)
-        }
-        .padding(4)
-        .background(Color.white.opacity(0.05))
-        .cornerRadius(30)
-        .overlay(
-            RoundedRectangle(cornerRadius: 30)
-                .stroke(Color.white.opacity(0.1), lineWidth: 1)
-        )
-    }
-    
-    private func scopeButton(title: String, scope: RankingScope) -> some View {
-        Button(action: {
-            withAnimation(.spring()) {
-                selectedScope = scope
-            }
-        }) {
-            Text(title)
-                .font(.system(size: 14, weight: .bold))
-                .tracking(1)
-                .foregroundColor(selectedScope == scope ? .black : .gray)
-                .frame(maxWidth: .infinity)
-                .frame(height: 36)
-                .background(
-                    selectedScope == scope ? neonGreen : Color.clear
-                )
-                .cornerRadius(20)
-                .shadow(color: selectedScope == scope ? neonGreen.opacity(0.4) : .clear, radius: 5)
-        }
     }
     
     private var resortFilterScroll: some View {
@@ -270,14 +291,83 @@ struct RankingView: View {
         }
     }
     
+    private var modeSwitcher: some View {
+        HStack(spacing: 0) {
+            modeButton(title: "TECHNICAL", mode: .technical, icon: "flame.fill")
+            modeButton(title: "MILEAGE", mode: .mileage, icon: "figure.skiing.downhill")
+        }
+        .padding(4)
+        .background(Color.white.opacity(0.1))
+        .cornerRadius(16)
+        .padding(.horizontal, 24)
+    }
+    
+    private func modeButton(title: String, mode: RankingMode, icon: String) -> some View {
+        Button(action: {
+            withAnimation(.spring()) {
+                rankingMode = mode
+                // Set default metric for mode
+                if mode == .technical {
+                    selectedMetric = .edge
+                    selectedResort = "전체" // Reset resort filter for technical
+                    selectedSlope = "All Slopes"
+                } else {
+                    selectedMetric = .runCount
+                }
+            }
+        }) {
+            HStack(spacing: 6) {
+                Image(systemName: icon)
+                Text(title)
+            }
+            .font(.system(size: 14, weight: .heavy))
+            .foregroundColor(rankingMode == mode ? .black : .gray)
+            .frame(maxWidth: .infinity)
+            .frame(height: 44)
+            .background(
+                rankingMode == mode ? neonGreen : Color.clear
+            )
+            .cornerRadius(12)
+        }
+    }
+    
     private var metricTabs: some View {
         HStack(spacing: 20) {
-            metricTabButton(title: "RUNS", icon: "figure.run", metric: .runCount)
-            metricTabButton(title: "DIST", icon: "chart.xyaxis.line", metric: .distance)
-            metricTabButton(title: "EDGE", icon: "arrow.triangle.merge", metric: .edge)
-            metricTabButton(title: "FLOW", icon: "wind", metric: .flow)
+            if rankingMode == .technical {
+                HStack(spacing: 20) {
+                    metricTabButton(title: "EDGE SCORE", icon: "arrow.triangle.merge", metric: .edge)
+                    metricTabButton(title: "FLOW SCORE", icon: "wind", metric: .flow)
+                }
+                
+                // Info Button
+                Button(action: { showingScoreInfo = true }) {
+                    Image(systemName: "questionmark.circle.fill")
+                        .foregroundColor(neonGreen.opacity(0.8))
+                        .font(.system(size: 20))
+                }
+            } else {
+                metricTabButton(title: "RUNS", icon: "figure.run", metric: .runCount)
+                metricTabButton(title: "DISTANCE", icon: "chart.xyaxis.line", metric: .distance)
+            }
         }
         .padding(.horizontal, 24)
+        .alert(isPresented: $showingScoreInfo) {
+            Alert(
+                title: Text("테크니컬 스코어 가이드"),
+                message: Text("""
+                [EDGE SCORE]
+                "얼마나 날카롭게 베고 나갔는가?"
+                당신의 턴이 설면을 얼마나 견고하게 파고들었는지 분석한 '카빙(Carving) 완성도' 지표입니다.
+                - 분석 기준: 턴의 깊이, 엣징 각도(G-Force), 슬립 최소화
+                
+                [FLOW SCORE]
+                "얼마나 물 흐르듯 내려왔는가?"
+                주행의 리듬과 속도 유지를 분석한 '주행 안정성(Smoothness)' 지표입니다.
+                - 분석 기준: 속도 유지력, 턴 연결의 부드러움, 급제동 여부
+                """),
+                dismissButton: .default(Text("확인"))
+            )
+        }
     }
     
     private func metricTabButton(title: String, icon: String, metric: RankingMetric) -> some View {
@@ -300,9 +390,8 @@ struct RankingView: View {
     }
     
     private var podiumSection: some View {
-        let topThree = Array(filteredRankings.prefix(3))
+        let topThree = Array(rankingService.leaderboard.prefix(3))
         // Ensure we have at least 3 items for the podium to look good, otherwise handle gracefully
-        // For mock data, we have enough.
         
         return HStack(alignment: .bottom, spacing: 16) {
             // Rank 2 (Left)
@@ -400,7 +489,7 @@ struct RankingView: View {
     
     private var rankingListView: some View {
         LazyVStack(spacing: 12) {
-            let rankings = filteredRankings
+            let rankings = rankingService.leaderboard
             if rankings.count > 3 {
                 ForEach(3..<rankings.count, id: \.self) { index in
                     rankingRow(rank: index + 1, entry: rankings[index])
@@ -477,7 +566,7 @@ struct RankingView: View {
                 .fill(neonGreen)
                 .frame(width: 48, height: 48)
                 .overlay(
-                    Text(rankingService.myProfile.getRank(for: selectedMetric, cycle: selectedCycle).replacingOccurrences(of: "TOP ", with: "").replacingOccurrences(of: "%", with: ""))
+                    Text(rankingService.getMyRankString().replacingOccurrences(of: "RANK ", with: ""))
                         .font(.system(size: 18, weight: .black, design: .monospaced))
                         .foregroundColor(.black)
                 )
@@ -487,7 +576,7 @@ struct RankingView: View {
                 Text("YOU")
                     .font(.system(size: 14, weight: .heavy))
                     .foregroundColor(.white)
-                Text(rankingService.myProfile.getRank(for: selectedMetric, cycle: selectedCycle))
+                Text(rankingService.getMyRankString())
                     .font(.system(size: 10, weight: .bold))
                     .foregroundColor(neonGreen)
             }

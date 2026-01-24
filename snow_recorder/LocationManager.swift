@@ -40,6 +40,12 @@ class LocationManager: NSObject, ObservableObject, CLLocationManagerDelegate {
     private var altitudeHistory: [Double] = []          // 상태 판정 안정화를 위한 고도 기록 (최근 5~10초)
     private var outOfSlopeStartTime: Date?              // 슬로프 이탈 시점 기록
     private var currentTimelineEventStart: Date?        // 현재 이벤트 시작 시간
+    private var liftStationaryStartTime: Date?          // 리프트 정지/대기 시간 측정용
+    private var currentRunDistance: Double = 0.0        // 현재 런 거리 (m)
+    private var currentRunVerticalDrop: Double = 0.0    // 현재 런 하강 고도 (m)
+    private var completedRunDistances: [Double] = []    // 완료된 런 거리 기록
+    private var completedRunVerticalDrops: [Double] = [] // 완료된 런 하강 고도 기록
+    private var completedRunEndIndices: [Int] = []     // 완료된 런 종료 인덱스 (속도 그래프용)
     
     // MARK: - 상태 전환 임계값 (튜닝 가능)
     private let ridingSpeedThreshold: Double = 5.0      // 활강 판정 최소 속도 (km/h)
@@ -101,6 +107,11 @@ class LocationManager: NSObject, ObservableObject, CLLocationManagerDelegate {
         // 마지막 런이 진행 중이었다면 카운트 및 슬로프 확정
         if currentState == .riding {
             runCount += 1
+            completedRunDistances.append(currentRunDistance)
+            completedRunVerticalDrops.append(currentRunVerticalDrop)
+            completedRunEndIndices.append(routeSpeeds.count)
+            currentRunDistance = 0.0
+            currentRunVerticalDrop = 0.0
             if let bestSlope = calculateBestSlope() {
                 print("🏁 트래킹 종료로 인한 최종 슬로프 확정: \(bestSlope.name)")
                 currentSlope = bestSlope
@@ -126,6 +137,34 @@ class LocationManager: NSObject, ObservableObject, CLLocationManagerDelegate {
         }
         currentTimelineEventStart = nil
     }
+
+    // MARK: - Run Metrics Accessors
+
+    func completedRunDistance(for runNumber: Int) -> Double {
+        let index = runNumber - 1
+        guard index >= 0, index < completedRunDistances.count else { return 0.0 }
+        return completedRunDistances[index]
+    }
+
+    func completedRunVerticalDrop(for runNumber: Int) -> Double {
+        let index = runNumber - 1
+        guard index >= 0, index < completedRunVerticalDrops.count else { return 0.0 }
+        return completedRunVerticalDrops[index]
+    }
+
+    func completedRunSpeedSeries(for runNumber: Int) -> [Double] {
+        guard !routeSpeeds.isEmpty else { return [] }
+        let index = runNumber - 1
+        guard index >= 0 else { return [] }
+        
+        let startIndex = index < runStartIndices.count ? runStartIndices[index] : 0
+        let endIndex = index < completedRunEndIndices.count ? completedRunEndIndices[index] : routeSpeeds.count
+        
+        let safeStart = max(0, min(startIndex, routeSpeeds.count))
+        let safeEnd = max(safeStart, min(endIndex, routeSpeeds.count))
+        guard safeEnd > safeStart else { return [] }
+        return Array(routeSpeeds[safeStart..<safeEnd])
+    }
     
     /// 메트릭 초기화
     private func resetMetrics() {
@@ -150,6 +189,11 @@ class LocationManager: NSObject, ObservableObject, CLLocationManagerDelegate {
         runStartIndices = [0]
         timelineEvents.removeAll()
         currentTimelineEventStart = nil
+        currentRunDistance = 0.0
+        currentRunVerticalDrop = 0.0
+        completedRunDistances.removeAll()
+        completedRunVerticalDrops.removeAll()
+        completedRunEndIndices.removeAll()
     }
     
     // MARK: - 상태 기반 GPS 정확도 조절 (배터리 최적화)
@@ -166,13 +210,9 @@ class LocationManager: NSObject, ObservableObject, CLLocationManagerDelegate {
             // 리프트: 저전력 모드
             locationManager.desiredAccuracy = kCLLocationAccuracyHundredMeters
         case .resting:
-            // 휴식: 기본적으론 최저 전력이지만, 슬로프 출발 지점 대기일 수 있으므로
-            // 슬로프 내부라면 중간 정확도 유지
-            if let loc = location, SlopeDatabase.shared.isInsideAnySlope(loc) {
-                locationManager.desiredAccuracy = kCLLocationAccuracyNearestTenMeters
-            } else {
-                locationManager.desiredAccuracy = kCLLocationAccuracyHundredMeters
-            }
+            // 휴식: 리프트 탑승 대기 중일 수 있으므로 10m 정확도 유지
+            // 기존 100m 설정은 리프트 탑승 직후 저속 구간에서 위치 업데이트가 멈추는(Speed 0) 원인이 됨
+            locationManager.desiredAccuracy = kCLLocationAccuracyNearestTenMeters
         }
     }
     
@@ -252,8 +292,12 @@ class LocationManager: NSObject, ObservableObject, CLLocationManagerDelegate {
             }
             // RESTING → ON_LIFT: 리프트 라인 근처 OR 확실한 상승 중
             // (좌표 데이터가 없어도 물리적인 상승 트렌드로 감지)
-            if (isNearLift && altitudeChange < -1.0) || (currentSpeedKmH > 3.0 && isClimbing) {
+            // 리프트 탑승 로직 강화: 상승 트렌드가 확실하면 리프트로 간주
+            if isClimbing {
                 return .onLift
+            }
+            if isNearLift && altitudeChange < -1.0 {
+                 return .onLift
             }
             return .resting
             
@@ -291,22 +335,31 @@ class LocationManager: NSObject, ObservableObject, CLLocationManagerDelegate {
             return .paused
             
         case .onLift:
-            // ON_LIFT → RESTING: 리프트 정상 도착
-            // Issue #3/#4 수정: !isNearLift 조건 제거 (좌표 데이터 없음), !isClimbing 조건 추가
-            // 조건: 저속 + 상승 중이 아님 (리프트 하차 완료)
-            if currentSpeedKmH < pauseSpeedThreshold && !isClimbing {
-                if canChangeState() {
+            // ON_LIFT 상태 유지 (접착성 강화):
+            // 리프트가 도중에 멈추거나 완만해져도 계속 리프트로 간주.
+            // 오직 '활강(하강)'하거나 '완전히 내려서 쉴 때'만 해제.
+            
+            // 1. 활강 감지 (확실한 하강 + 속도) -> RIDING
+            if currentSpeedKmH > ridingSpeedThreshold && isStrongDescent {
+                liftStationaryStartTime = nil
+                return .riding
+            }
+            
+            // 2. 하차 후 대기 감지 (평지 + 저속) -> RESTING
+            // 리프트에서 내려서 짐 정리하거나 화장실 가는 경우.
+            // 단순히 리프트가 멈춘 것과 구별하기 위해 60초 이상 지속되어야 함.
+            if currentSpeedKmH < 1.5 && !isClimbing && !isStrongDescent {
+                if liftStationaryStartTime == nil {
+                    liftStationaryStartTime = Date()
+                } else if let start = liftStationaryStartTime, Date().timeIntervalSince(start) > 60.0 {
+                    liftStationaryStartTime = nil
                     return .resting
                 }
             } else {
-                // 속도 또는 상승 중이면 debounce 리셋
-                stateChangeTime = nil
+                // 다시 움직이면 타이머 리셋 (리프트 재가동)
+                liftStationaryStartTime = nil
             }
-            // ON_LIFT → RIDING: 리프트에서 바로 활강 시작 (드문 경우)
-            // 리프트의 일시적 하강 구간 오인식 방지를 위해 isStrongDescent(5m 하강) 적용
-            if isInsideSlope && currentSpeedKmH > ridingSpeedThreshold && isStrongDescent {
-                return .riding
-            }
+            
             return .onLift
         }
     }
@@ -364,6 +417,8 @@ class LocationManager: NSObject, ObservableObject, CLLocationManagerDelegate {
         // 런 카운트: RIDING → (RESTING) 전환 시 +1
         // NOTE: 리프트 탑승 로직 개선(점선 표시)을 위해, RIDING이 시작될 때 인덱스를 기록해야 함.
         if newState == .riding {
+             currentRunDistance = 0.0
+             currentRunVerticalDrop = 0.0
              // 새로운 런 시작: 현재 좌표 배열의 끝을 시작 인덱스로 기록
              // (단, 첫 런(0)은 이미 초기화 시 들어가있으므로, 좌표가 쌓인 상태에서 다시 riding 될 때만 추가)
              if !routeCoordinates.isEmpty {
@@ -374,6 +429,11 @@ class LocationManager: NSObject, ObservableObject, CLLocationManagerDelegate {
 
         if oldState == .riding && newState == .resting {
             runCount += 1
+            completedRunDistances.append(currentRunDistance)
+            completedRunVerticalDrops.append(currentRunVerticalDrop)
+            completedRunEndIndices.append(routeSpeeds.count)
+            currentRunDistance = 0.0
+            currentRunVerticalDrop = 0.0
             // 런 종료 시, 방문했던 슬로프 중 가장 우선순위가 높은 슬로프를 최종 슬로프로 확정
             if let bestSlope = calculateBestSlope() {
                 print("🏁 런 종료. 최종 슬로프 확정: \(bestSlope.name)")
@@ -472,40 +532,46 @@ class LocationManager: NSObject, ObservableObject, CLLocationManagerDelegate {
         RidingMetricAnalyzer.shared.updateLocation(newLocation)
         FlowScoreAnalyzer.shared.updateLocation(newLocation)
         
-        // 2. RIDING 상태에서만 메트릭 측정
-        if currentState == .riding, let previous = lastLocation {
-            // 거리 누적
+        // 2. 경로 및 메트릭 기록
+        if isTracking, let previous = lastLocation {
+            // 거리 누적 (RIDING 상태만)
             let distance = newLocation.distance(from: previous)
-            totalDistance += distance
-            
-            // Vertical Drop 누적 (하강만, 최소 1m 이상)
-            let altitudeDiff = previous.altitude - newLocation.altitude
-            if altitudeDiff > minVerticalDrop {
-                verticalDrop += altitudeDiff
+            if currentState == .riding {
+                totalDistance += distance
+                currentRunDistance += distance
+                
+                // Vertical Drop 누적 (하강만, 최소 1m 이상)
+                let altitudeDiff = previous.altitude - newLocation.altitude
+                if altitudeDiff > minVerticalDrop {
+                    verticalDrop += altitudeDiff
+                    currentRunVerticalDrop += altitudeDiff
+                }
+                
+                // 최고 속도 갱신
+                if speed > maxSpeed {
+                    maxSpeed = speed
+                }
+                
+                // 평균 속도 샘플 수집
+                if speed > ridingSpeedThreshold {
+                    speedSamples.append(speed)
+                    calculateAvgSpeed()
+                }
             }
             
-            // 최고 속도 갱신
-            if speed > maxSpeed {
-                maxSpeed = speed
-            }
+            // GPS 경로 수집 (상태별 거리 필터 차등 적용)
+            // Riding: 5m (정밀), Lift/Resting/Paused: 20m (배터리 절약)
+            let filterDistance: Double = (currentState == .riding) ? 5.0 : 20.0
             
-            // 평균 속도 샘플 수집
-            if speed > ridingSpeedThreshold {
-                speedSamples.append(speed)
-                calculateAvgSpeed()
-            }
-            
-            // GPS 경로 수집 (5m마다 - 배터리/데이터 최적화)
-            if distance >= 5.0 || routeCoordinates.isEmpty {
+            if distance >= filterDistance || routeCoordinates.isEmpty {
                 routeCoordinates.append([newLocation.coordinate.latitude, newLocation.coordinate.longitude])
-                routeSpeeds.append(max(0, newLocation.speed * 3.6)) // 속도 함께 저장
+                routeSpeeds.append(max(0, newLocation.speed * 3.6))
             }
         }
 
         
         // 3. 슬로프 인식 및 Start/Finish 감지 (배터리 최적화: 일정 거리 이동 시마다)
         // Issue #6 수정: 출발 지점 대기 중(Resting/Paused)에도 Start Point를 인식할 수 있도록 조건 완화
-        // 단, Finish Point는 활강 중에만 인식하는 것이 안전함.
         if (currentState == .riding || currentState == .paused || currentState == .resting) && shouldCheckSlope(at: newLocation) {
             
             // A. 슬로프 내부 판정 (Dwell Time)

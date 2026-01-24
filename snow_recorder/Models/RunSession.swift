@@ -17,14 +17,15 @@ final class RunSession {
     var slopeName: String?      // 주행한 슬로프 이름 (대표 슬로프)
     var riddenSlopes: [String: Int] // 세션 동안 탄 슬로프 목록 (이름: 횟수)
     var locationName: String    // 스키장 이름 (예: HIGH1 RESORT)
+    var countryCode: String = "UNKNOWN"     // 국가 코드 (예: KR, JP)
     var routeCoordinates: [[Double]] // GPS 경로 좌표 [[lat, lon], ...] - 지도 폴리라인용
     var routeSpeeds: [Double] = []   // GPS 경로별 속도 (km/h) - 히트맵용
     var runStartIndices: [Int] = [0] // 각 런의 시작 인덱스 (리프트 점선 연결용)
     var timelineEvents: [TimelineEvent] = [] // 타임라인 이벤트 목록
     
     // MARK: - Riding Metrics
-    var edgeScore: Int = 0          // 엣지 점수 (0-100) (세션 최고점)
-    var flowScore: Int = 0          // 플로우 점수 (0-100) (세션 최고점)
+    var edgeScore: Int = 0          // 엣지 점수 (0-1000) (세션 최고점)
+    var flowScore: Int = 0          // 플로우 점수 (0-1000) (세션 최고점)
     var maxGForce: Double = 0.0       // 최대 G-Force (세션 최고점)
     
     // 런별 상세 기록 (Run Metrics)
@@ -37,11 +38,93 @@ final class RunSession {
         var startTime: Date
         var endTime: Date
         var duration: TimeInterval
+        var distance: Double = 0.0
+        var verticalDrop: Double = 0.0
         var maxSpeed: Double
         var avgSpeed: Double
         var edgeScore: Int
         var flowScore: Int
         var maxGForce: Double
+        
+        enum CodingKeys: String, CodingKey {
+            case id
+            case runNumber
+            case slopeName
+            case startTime
+            case endTime
+            case duration
+            case distance
+            case verticalDrop
+            case maxSpeed
+            case avgSpeed
+            case edgeScore
+            case flowScore
+            case maxGForce
+        }
+        
+        init(
+            id: UUID = UUID(),
+            runNumber: Int,
+            slopeName: String,
+            startTime: Date,
+            endTime: Date,
+            duration: TimeInterval,
+            distance: Double = 0.0,
+            verticalDrop: Double = 0.0,
+            maxSpeed: Double,
+            avgSpeed: Double,
+            edgeScore: Int,
+            flowScore: Int,
+            maxGForce: Double
+        ) {
+            self.id = id
+            self.runNumber = runNumber
+            self.slopeName = slopeName
+            self.startTime = startTime
+            self.endTime = endTime
+            self.duration = duration
+            self.distance = distance
+            self.verticalDrop = verticalDrop
+            self.maxSpeed = maxSpeed
+            self.avgSpeed = avgSpeed
+            self.edgeScore = edgeScore
+            self.flowScore = flowScore
+            self.maxGForce = maxGForce
+        }
+        
+        init(from decoder: Decoder) throws {
+            let container = try decoder.container(keyedBy: CodingKeys.self)
+            id = try container.decodeIfPresent(UUID.self, forKey: .id) ?? UUID()
+            runNumber = try container.decode(Int.self, forKey: .runNumber)
+            slopeName = try container.decode(String.self, forKey: .slopeName)
+            startTime = try container.decode(Date.self, forKey: .startTime)
+            endTime = try container.decode(Date.self, forKey: .endTime)
+            duration = try container.decode(TimeInterval.self, forKey: .duration)
+            distance = try container.decodeIfPresent(Double.self, forKey: .distance) ?? 0.0
+            verticalDrop = try container.decodeIfPresent(Double.self, forKey: .verticalDrop) ?? 0.0
+            maxSpeed = try container.decode(Double.self, forKey: .maxSpeed)
+            avgSpeed = try container.decode(Double.self, forKey: .avgSpeed)
+            edgeScore = try container.decode(Int.self, forKey: .edgeScore)
+            flowScore = try container.decode(Int.self, forKey: .flowScore)
+            maxGForce = try container.decode(Double.self, forKey: .maxGForce)
+        }
+        
+        func encode(to encoder: Encoder) throws {
+            var container = encoder.container(keyedBy: CodingKeys.self)
+            try container.encode(id, forKey: .id)
+            try container.encode(runNumber, forKey: .runNumber)
+            try container.encode(slopeName, forKey: .slopeName)
+            try container.encode(startTime, forKey: .startTime)
+            try container.encode(endTime, forKey: .endTime)
+            try container.encode(duration, forKey: .duration)
+            try container.encode(distance, forKey: .distance)
+            try container.encode(verticalDrop, forKey: .verticalDrop)
+            try container.encode(maxSpeed, forKey: .maxSpeed)
+            try container.encode(avgSpeed, forKey: .avgSpeed)
+            try container.encode(edgeScore, forKey: .edgeScore)
+            try container.encode(flowScore, forKey: .flowScore)
+            try container.encode(maxGForce, forKey: .maxGForce)
+        }
     }
     
     // 타임라인 이벤트 구조체 (Nested Struct)
@@ -78,6 +161,7 @@ final class RunSession {
         slopeName: String? = nil,
         riddenSlopes: [String: Int] = [:],
         locationName: String = "HIGH1 RESORT",
+        countryCode: String = "UNKNOWN",
         routeCoordinates: [[Double]] = [],
         routeSpeeds: [Double] = [],
         runStartIndices: [Int] = [0],
@@ -98,6 +182,7 @@ final class RunSession {
         self.slopeName = slopeName
         self.riddenSlopes = riddenSlopes
         self.locationName = locationName
+        self.countryCode = countryCode
         self.routeCoordinates = routeCoordinates
         self.routeSpeeds = routeSpeeds
         self.runStartIndices = runStartIndices
@@ -226,6 +311,7 @@ extension RunSession {
             slopeName: "헤라 3",
             riddenSlopes: ["헤라 3": 1, "빅토리아 1": 1],
             locationName: "HIGH1 RESORT",
+            countryCode: "KR",
             routeCoordinates: currentCoordinates,
             routeSpeeds: currentSpeeds,
             runStartIndices: runStartIndices,

@@ -845,14 +845,16 @@ class SlopeDatabase {
     ]
     
     // MARK: - 리프트 데이터
-    // TODO: 리프트 경로 좌표 입력 필요
+    // TODO: 리프트 경로 좌표 입력 필요 (구글 어스나 현장 데이터로 보강해야 함)
+    // 현재는 이름만 있고 경로가 비어있어 isNearLiftLine()이 항상 false를 반환함.
     
     let liftLines: [LiftLine] = [
-        LiftLine(name: "MOUNTAIN TOP EXPRESS", koreanName: "마운틴탑 익스프레스", path: []),
-        LiftLine(name: "ZEUS EXPRESS", koreanName: "제우스 익스프레스", path: []),
+        LiftLine(name: "MOUNTAIN TOP EXPRESS", koreanName: "마운틴탑 익스프레스", path: []), // 곤돌라
+        LiftLine(name: "ZEUS EXPRESS", koreanName: "제우스 익스프레스", path: []), // 밸리 허브 -> 제우스 2 상단
         LiftLine(name: "VICTORIA EXPRESS", koreanName: "빅토리아 익스프레스", path: []),
         LiftLine(name: "APOLLO EXPRESS", koreanName: "아폴로 익스프레스", path: []),
-        LiftLine(name: "HERA EXPRESS", koreanName: "헤라 익스프레스", path: [])
+        LiftLine(name: "HERA EXPRESS", koreanName: "헤라 익스프레스", path: []), // 밸리 허브 -> 마운틴 탑
+        LiftLine(name: "VALLEY GONDOLA", koreanName: "밸리 곤돌라", path: []) // 스키하우스 -> 밸리 허브 -> 마운틴 탑
     ]
     
     // MARK: - 운영 중인 슬로프만 필터링

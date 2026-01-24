@@ -26,13 +26,15 @@
 - **데이터 흐름:** `LocationManager`(상태 인식) -> `RecordManager`(세션 기록) -> `SwiftData`(저장) -> `Views`(표시).
 - **배터리 최적화:**
     - `Riding`: 최고 정확도 (kCLLocationAccuracyBestForNavigation).
-    - `OnLift`: 저전력 (kCLLocationAccuracyHundredMeters).
-    - `Resting`: GPS 일시 중지 가능.
+    - `Paused`: 고정밀 (kCLLocationAccuracyNearestTenMeters).
+    - `OnLift`: 저전력 (kCLLocationAccuracyHundredMeters) + Sticky Logic.
+    - `Resting`: 고정밀 (kCLLocationAccuracyNearestTenMeters) - 빠른 리프트/이동 감지 목적.
 
 # 현재 개발 현황 (Implemented Features)
 - **1. 핵심 트래킹 엔진:**
     - GPS 기반 실시간 속도, 거리 측정.
-    - 상태 인식 알고리즘 (Riding / OnLift / Resting) 구현 완료.
+    - 상태 인식 알고리즘 (Riding / Paused / OnLift / Resting) 구현 완료.
+    - 타임라인 이벤트(Riding/Lift/Rest/Pause) 세분화 기록 및 시각화 데이터 구축.
     - Vertical Drop (하강 고도) 계산 로직 포함.
 - **2. 슬로프 인식 시스템:**
     - 하이원 리조트 주요 슬로프 좌표 DB 구축 (`SlopeDatabase`).
@@ -43,34 +45,37 @@
 - **4. 기록 관리 (History):**
     - `RunSession` 모델 기반 SwiftData 저장/로드.
     - GPX 파일 내보내기 및 공유 기능.
-    - 주행 경로 지도 시각화 (`MapRouteOverlay`).
+    - 주행 경로 지도 시각화 (`GradientPolyline` 히트맵 적용).
 - **5. 소셜 프리뷰 (Share):**
     - 주행 데이터 + 사진 합성 기능 (`SharePreviewView`).
-    - 커스텀 배경 이미지 핀치/줌 조절.
+    - **Instagram Story 공유 고도화:** 붙여넣기 보드를 이용한 스티커 공유 로직 구현 완료.
+    - 커스텀 배경 이미지 핀치/줌 조절 및 고해상도 이미지 (1080x1920) 내보내기.
+- **6. 게이미피케이션 (Gamification):**
+    - **랭킹 시스템 구현:** Technical Score(Edge/Flow) 및 Mileage 기반 랭킹 모드 스위칭 구현 완료.
+    - **티어(Tier) 시스템:** 누적 기록에 따른 등급(Bronze ~ Diamond) 및 XP 시스템 `ProfileView` 연동 완료.
 
 # 프로젝트 로드맵 (Roadmap)
-1. **[Next Step] 소셜 공유 기능 완성 (Social & Viral):**
-    - **Instagram Story 공유 고도화:** 현재 일반 공유 시트(`UIActivityViewController`) 방식을 넘어, 인스타그램 스토리에 스티커 형태로 바로 공유되도록 `LinkPresentation` 또는 Pasteboard 로직 강화.
-    - **합성 퀄리티 향상:** 워터마크 및 데이터 오버레이 디자인 다듬기.
+1. **[Next Step] 커뮤니티 및 멀티플레이어 (Community):**
+    - **글로벌 리더보드 연동:** 현재 로컬 기반 데이터 집계를 넘어, Firebase 등을 통한 실제 전 세계 사용자 간의 랭킹 경쟁 기능.
+    - **크루(Crew) 시스템:** 소모임 단위의 기록 합산 및 크루 랭킹전.
 
-2. **게이미피케이션 실계터 연동 (Gamification Real Data):**
-    - **랭킹 시스템 구현:** 현재 `RankingView`는 Mock Data로 동작 중. `RunSession` 데이터를 집계하여 로컬 랭킹(내 기록 순위) 우선 구현. 추후 친구 경쟁 기능 고려.
-    - **티어(Level) 시스템:** 누적 거리/횟수에 따른 티어(Bronze ~ Diamond) 자동 승급 로직 `ProfileView`에 정식 연동.
+2. **슬로프 데이터 확장 (Expansion):**
+    - 하이원 리조트 슬로프 데이터 보강 (Zeus, Apollo, Hera, Victoria 등 주요 슬로프 좌표 입력 완료).
+    - 용평, 휘닉스 파크 등 타 리조트 데이터베이스 구조 설계 및 추가.
 
-3. **슬로프 데이터 확장 (Expansion):**
-    - 하이원 리조트 잔여 슬로프 데이터 보강.
-    - 용평, 휘닉스 파크 등 타 리조트 데이터베이스 구조 설계.
-
-4. **안정화 및 테스트 (Stabilization):**
-    - **현장 테스트:** 실제 스키장에서 슬로프 인식 정확도 및 배터리 소모량 검증.
-    - **예외 처리:** GPS 신호 끊김, 터널 통과 시 데이터 보정 로직 강화.
+3. **안정화 및 고도화 (Optimization):**
+    - **워치 앱(watchOS) 연동:** 폰을 꺼내지 않고도 손목에서 실시간 속도 및 상태 확인.
+    - **현장 테스트:** 실제 스키장에서 슬로프 인식 정확도 및 배터리 소모량 검증/보정.
 
 # 이슈 및 해결 (Issues & Resolutions)
 - **SwiftData 마이그레이션 이슈 (2026-01-24):**
-    - 현상: `RunSession` 모델에 새 프로퍼티 추가 시 기존 데이터가 전부 유실됨.
-    - 원인: 새 프로퍼티에 Default Value를 지정하지 않아 마이그레이션 실패.
-    - 해결: 모델 변경 시 반드시 **Default Value (예: 0, 0.0, "")**를 지정할 것.
-
+    - 현상: 프로퍼티 추가 시 데이터 유실. 해결: Default Value 지정 필수.
+- **Edge/Flow Score 스케일 조정 (2026-01-24):**
+    - 현상: 기존 100점 만점으로 표시되던 점수가 변별력이 낮음.
+    - 해결: **1000점 만점**으로 스케일 상향 조정 및 UI(/1000) 업데이트 완료.
+- **전체 화면 지도 히트맵 에러 (2026-01-24):**
+    - 현상: `MKGradientPolyline` 타입 부재로 인한 컴파일 에러.
+    - 해결: `MKPolyline` 커스텀 서브클래스(`GradientPolyline`)를 생성하여 `MKGradientPolylineRenderer`와 연동 성공.
 
 # 답변
 - 답변은 한국어로 한다.

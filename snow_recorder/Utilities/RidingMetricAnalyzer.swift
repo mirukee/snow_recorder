@@ -56,9 +56,9 @@ final class RidingMetricAnalyzer: ObservableObject {
     private let tier3Weight: Double = 6.0
     private let edgeLogNormalizationTarget: Double = 260.0
     private let proCapThresholdG: Double = 1.7
-    private let proCapScore: Double = 94.0
+    private let proCapScore: Double = 940.0             // (was 94.0) 1000점 만점 스케일
     private let tier2RatioThreshold: Double = 0.25
-    private let tier2RatioScoreCap: Double = 79.0
+    private let tier2RatioScoreCap: Double = 790.0      // (was 79.0) 1000점 만점 스케일
     
     // MARK: - 초기화
     init() {
@@ -295,7 +295,7 @@ final class RidingMetricAnalyzer: ObservableObject {
         guard edgeRawScore > 0 else { return 0 }
         
         let normalized = log(1.0 + edgeRawScore) / log(1.0 + edgeLogNormalizationTarget)
-        var score = max(0.0, min(100.0, normalized * 100.0))
+        var score = max(0.0, min(1000.0, normalized * 1000.0))
         
         if maxGForce < proCapThresholdG {
             score = min(score, proCapScore)

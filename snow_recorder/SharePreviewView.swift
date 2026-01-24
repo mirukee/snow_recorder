@@ -8,6 +8,7 @@ struct SharePreviewView: View {
     // MARK: - State
     @State private var selectedItem: PhotosPickerItem?
     @State private var backgroundUIImage: UIImage?
+    @State private var selectedLayout: ShareLayout = .standard
     @State private var showShareSheet = false
     @State private var imageToShare: UIImage?
     @State private var showSaveToast = false
@@ -76,7 +77,12 @@ struct SharePreviewView: View {
                 
                 // Gradient overlay
                 LinearGradient(
-                    colors: [.black.opacity(0.3), .clear, .black.opacity(0.7)],
+                    colors: [
+                        .black.opacity(0.6), // Darker top
+                        .clear,
+                        .clear, // Push gradient down
+                        .black.opacity(0.9)  // Darker bottom
+                    ],
                     startPoint: .top,
                     endPoint: .bottom
                 )
@@ -88,7 +94,7 @@ struct SharePreviewView: View {
                     Spacer()
                     previewStatsView
                         .padding(.horizontal, 20)
-                        .padding(.bottom, 140)
+                        .padding(.bottom, 180) // Increased padding to clear Layout Selector
                 }
                 .allowsHitTesting(false)
                 
@@ -165,6 +171,8 @@ struct SharePreviewView: View {
                     
                     Spacer()
                     
+                    layoutSelector
+                    
                     HStack(spacing: 16) {
                         Button(action: shareToStory) {
                             HStack(spacing: 8) {
@@ -212,6 +220,62 @@ struct SharePreviewView: View {
         }
     }
     
+    // MARK: - Enums
+    enum ShareLayout: String, CaseIterable, Identifiable {
+        case standard = "Standard"
+        case photo = "Photo"
+        case minimal = "Minimal"
+        
+        var id: String { self.rawValue }
+        
+        var displayName: String {
+            switch self {
+            case .standard: return "기본"
+            case .photo: return "포토 포커스"
+            case .minimal: return "미니멀"
+            }
+        }
+        
+        var iconName: String {
+            switch self {
+            case .standard: return "rectangle.grid.1x2.fill"
+            case .photo: return "photo.fill"
+            case .minimal: return "list.bullet.below.rectangle"
+            }
+        }
+    }
+    
+    // MARK: - Layout Selector
+    var layoutSelector: some View {
+        HStack(spacing: 20) {
+            ForEach(ShareLayout.allCases) { layout in
+                Button(action: {
+                    withAnimation(.spring()) {
+                        selectedLayout = layout
+                    }
+                }) {
+                    VStack(spacing: 8) {
+                        ZStack {
+                            Circle()
+                                .fill(selectedLayout == layout ? primaryColor : Color.white.opacity(0.1))
+                                .frame(width: 48, height: 48)
+                            
+                            Image(systemName: layout.iconName)
+                                .font(.system(size: 20))
+                                .foregroundColor(selectedLayout == layout ? .black : .white)
+                        }
+                        
+                        Text(layout.displayName)
+                            .font(.system(size: 10, weight: .bold))
+                            .foregroundColor(selectedLayout == layout ? primaryColor : .gray)
+                    }
+                }
+            }
+        }
+        .padding(.vertical, 20)
+        .padding(.bottom, 10)
+    }
+    
     // MARK: - Brand Watermark
     var brandView: some View {
         HStack(spacing: 8) {
@@ -229,7 +293,20 @@ struct SharePreviewView: View {
     }
     
     // MARK: - Preview Stats (small, for screen)
+    @ViewBuilder
     var previewStatsView: some View {
+        switch selectedLayout {
+        case .standard:
+            previewStatsStandard
+        case .photo:
+            previewStatsPhoto
+        case .minimal:
+            previewStatsMinimal
+        }
+    }
+    
+    // [Standard Layout] - Original design
+    var previewStatsStandard: some View {
         VStack(alignment: .leading, spacing: 0) {
             // Runs
             Text("\(session.runCount) RUNS")
@@ -291,24 +368,143 @@ struct SharePreviewView: View {
                     .padding(.top, 4)
                 }
                 Spacer()
-                VStack(alignment: .trailing, spacing: 4) {
-                    HStack(alignment: .bottom, spacing: 2) {
-                        Rectangle().fill(Color.white).frame(width: 3, height: 32)
-                        Rectangle().fill(Color.white).frame(width: 2, height: 20)
-                        Rectangle().fill(Color.white).frame(width: 5, height: 28)
-                        Rectangle().fill(Color.white).frame(width: 2, height: 14)
-                        Rectangle().fill(Color.white).frame(width: 6, height: 32)
-                        Rectangle().fill(Color.white).frame(width: 2, height: 18)
-                        Rectangle().fill(primaryColor).frame(width: 3, height: 32)
-                    }
-                    Text("REC-025").font(.system(size: 9, design: .monospaced)).foregroundColor(.white.opacity(0.6))
-                }
+                decoBar(height: 32)
             }
         }
     }
     
+    // [Photo Layout] - Bottom focused, clear center
+    var previewStatsPhoto: some View {
+        VStack(spacing: 0) {
+            Spacer()
+            HStack(alignment: .bottom) {
+                VStack(alignment: .leading, spacing: 4) {
+                    Text("\(session.runCount) RUNS")
+                        .font(.system(size: 16, weight: .heavy))
+                        .foregroundColor(primaryColor)
+                    
+                    Text(String(format: "%.1f KM", session.distance / 1000.0))
+                        .font(.system(size: 36, weight: .black))
+                        .foregroundColor(.white)
+                        .shadow(color: .black, radius: 2)
+                    
+                    Text(session.locationName)
+                        .font(.system(size: 14, weight: .bold))
+                        .foregroundColor(.white.opacity(0.8))
+                        .shadow(color: .black, radius: 2)
+                }
+                
+                Spacer()
+                
+                VStack(alignment: .trailing, spacing: 0) {
+                     Text("MAX SPEED")
+                        .font(.system(size: 10, weight: .bold))
+                        .foregroundColor(.white.opacity(0.7))
+                    Text("\(String(format: "%.0f", session.maxSpeed))")
+                        .font(.system(size: 48, weight: .black)) // Space Grotesk
+                        .italic()
+                        .foregroundColor(.white)
+                        .shadow(color: primaryColor.opacity(0.5), radius: 10)
+                    Text("KM/H")
+                        .font(.system(size: 12, weight: .bold))
+                        .foregroundColor(primaryColor)
+                }
+            }
+            .padding(20)
+            .background(
+                LinearGradient(colors: [.clear, .black.opacity(0.8)], startPoint: .top, endPoint: .bottom)
+            )
+        }
+    }
+    
+    // [Minimal Layout] - Clean side stack
+    var previewStatsMinimal: some View {
+        HStack {
+            VStack(alignment: .leading, spacing: 16) {
+                Rectangle()
+                    .fill(primaryColor)
+                    .frame(width: 40, height: 4)
+                
+                VStack(alignment: .leading, spacing: 0) {
+                    Text("DISTANCE")
+                        .font(.system(size: 10, weight: .medium))
+                        .tracking(2)
+                        .foregroundColor(.white.opacity(0.6))
+                    Text(String(format: "%.1f KM", session.distance / 1000.0))
+                        .font(.system(size: 32, weight: .light)) // Thin font
+                        .foregroundColor(.white)
+                }
+                
+                VStack(alignment: .leading, spacing: 0) {
+                    Text("RUNS")
+                        .font(.system(size: 10, weight: .medium))
+                        .tracking(2)
+                        .foregroundColor(.white.opacity(0.6))
+                    Text("\(session.runCount)")
+                        .font(.system(size: 32, weight: .light))
+                        .foregroundColor(.white)
+                }
+                
+                VStack(alignment: .leading, spacing: 0) {
+                    Text("MAX SPEED")
+                        .font(.system(size: 10, weight: .medium))
+                        .tracking(2)
+                        .foregroundColor(.white.opacity(0.6))
+                    Text("\(Int(session.maxSpeed))")
+                        .font(.system(size: 32, weight: .light))
+                        .foregroundColor(.white)
+                    + Text(" KM/H").font(.system(size: 12)).foregroundColor(.gray)
+                }
+                
+                Spacer()
+                
+                VStack(alignment: .leading, spacing: 4) {
+                    Text(session.locationName.uppercased())
+                        .font(.system(size: 14, weight: .bold))
+                        .tracking(1)
+                        .foregroundColor(.white)
+                    Text(session.startTime.formatted(date: .numeric, time: .omitted))
+                        .font(.system(size: 10))
+                        .foregroundColor(.gray)
+                }
+            }
+            .padding(.vertical, 20)
+            .padding(.horizontal, 20)
+            .background(Color.black.opacity(0.4).blur(radius: 10))
+            .cornerRadius(0)
+            
+            Spacer()
+        }
+    }
+    
+    // Shared Deco Bar
+    func decoBar(height: CGFloat) -> some View {
+        HStack(alignment: .bottom, spacing: 2) {
+            Rectangle().fill(Color.white).frame(width: 3, height: height)
+            Rectangle().fill(Color.white).frame(width: 2, height: height * 0.6)
+            Rectangle().fill(Color.white).frame(width: 5, height: height * 0.9)
+            Rectangle().fill(Color.white).frame(width: 2, height: height * 0.4)
+            Rectangle().fill(Color.white).frame(width: 6, height: height)
+            Rectangle().fill(Color.white).frame(width: 2, height: height * 0.5)
+            Rectangle().fill(primaryColor).frame(width: 3, height: height)
+        }
+    }
+    
     // MARK: - Export Stats (large, for 1080x1920)
+    @ViewBuilder
     func exportStatsView() -> some View {
+        switch selectedLayout {
+        case .standard:
+            exportStatsStandard()
+        case .photo:
+            exportStatsPhoto()
+        case .minimal:
+            exportStatsMinimal()
+        }
+    }
+    
+    // Standard Export
+    func exportStatsStandard() -> some View {
         let s: CGFloat = 3.0 // Scale factor for export
         
         return VStack(alignment: .leading, spacing: 0) {
@@ -372,19 +568,114 @@ struct SharePreviewView: View {
                     .padding(.top, 4 * s)
                 }
                 Spacer()
-                VStack(alignment: .trailing, spacing: 4 * s) {
-                    HStack(alignment: .bottom, spacing: 2 * s) {
-                        Rectangle().fill(Color.white).frame(width: 3 * s, height: 32 * s)
-                        Rectangle().fill(Color.white).frame(width: 2 * s, height: 20 * s)
-                        Rectangle().fill(Color.white).frame(width: 5 * s, height: 28 * s)
-                        Rectangle().fill(Color.white).frame(width: 2 * s, height: 14 * s)
-                        Rectangle().fill(Color.white).frame(width: 6 * s, height: 32 * s)
-                        Rectangle().fill(Color.white).frame(width: 2 * s, height: 18 * s)
-                        Rectangle().fill(primaryColor).frame(width: 3 * s, height: 32 * s)
-                    }
-                    Text("REC-025").font(.system(size: 9 * s, design: .monospaced)).foregroundColor(.white.opacity(0.6))
+                decoBar(height: 32 * s)
+            }
+        }
+    }
+    
+    // Photo Export
+    func exportStatsPhoto() -> some View {
+        let s: CGFloat = 3.0
+        return VStack(spacing: 0) {
+            Spacer()
+            HStack(alignment: .bottom) {
+                VStack(alignment: .leading, spacing: 4 * s) {
+                    Text("\(session.runCount) RUNS")
+                        .font(.system(size: 16 * s, weight: .heavy))
+                        .foregroundColor(primaryColor)
+                    
+                    Text(String(format: "%.1f KM", session.distance / 1000.0))
+                        .font(.system(size: 36 * s, weight: .black))
+                        .foregroundColor(.white)
+                        .shadow(color: .black, radius: 2 * s)
+                    
+                    Text(session.locationName)
+                        .font(.system(size: 14 * s, weight: .bold))
+                        .foregroundColor(.white.opacity(0.8))
+                        .shadow(color: .black, radius: 2 * s)
+                }
+                
+                Spacer()
+                
+                VStack(alignment: .trailing, spacing: 0) {
+                     Text("MAX SPEED")
+                        .font(.system(size: 10 * s, weight: .bold))
+                        .foregroundColor(.white.opacity(0.7))
+                    Text("\(String(format: "%.0f", session.maxSpeed))")
+                        .font(.system(size: 48 * s, weight: .black))
+                        .italic()
+                        .foregroundColor(.white)
+                        .shadow(color: primaryColor.opacity(0.5), radius: 10 * s)
+                    Text("KM/H")
+                        .font(.system(size: 12 * s, weight: .bold))
+                        .foregroundColor(primaryColor)
                 }
             }
+            .padding(20 * s)
+            .background(
+                LinearGradient(colors: [.clear, .black.opacity(0.8)], startPoint: .top, endPoint: .bottom)
+            )
+        }
+    }
+    
+    // Minimal Export
+    func exportStatsMinimal() -> some View {
+        let s: CGFloat = 3.0
+        return HStack {
+            VStack(alignment: .leading, spacing: 16 * s) {
+                Rectangle()
+                    .fill(primaryColor)
+                    .frame(width: 40 * s, height: 4 * s)
+                
+                VStack(alignment: .leading, spacing: 0) {
+                    Text("DISTANCE")
+                        .font(.system(size: 10 * s, weight: .medium))
+                        .tracking(2 * s)
+                        .foregroundColor(.white.opacity(0.6))
+                    Text(String(format: "%.1f KM", session.distance / 1000.0))
+                        .font(.system(size: 32 * s, weight: .light))
+                        .foregroundColor(.white)
+                }
+                
+                VStack(alignment: .leading, spacing: 0) {
+                    Text("RUNS")
+                        .font(.system(size: 10 * s, weight: .medium))
+                        .tracking(2 * s)
+                        .foregroundColor(.white.opacity(0.6))
+                    Text("\(session.runCount)")
+                        .font(.system(size: 32 * s, weight: .light))
+                        .foregroundColor(.white)
+                }
+                
+                VStack(alignment: .leading, spacing: 0) {
+                    Text("MAX SPEED")
+                        .font(.system(size: 10 * s, weight: .medium))
+                        .tracking(2 * s)
+                        .foregroundColor(.white.opacity(0.6))
+                    Text("\(Int(session.maxSpeed))")
+                        .font(.system(size: 32 * s, weight: .light))
+                        .foregroundColor(.white)
+                    + Text(" KM/H").font(.system(size: 12 * s)).foregroundColor(.gray)
+                }
+                
+                Spacer()
+                
+                VStack(alignment: .leading, spacing: 4 * s) {
+                    Text(session.locationName.uppercased())
+                        .font(.system(size: 14 * s, weight: .bold))
+                        .tracking(1 * s)
+                        .foregroundColor(.white)
+                    Text(session.startTime.formatted(date: .numeric, time: .omitted))
+                        .font(.system(size: 10 * s))
+                        .foregroundColor(.gray)
+                }
+            }
+            .padding(.vertical, 20 * s)
+            .padding(.horizontal, 20 * s)
+            .background(Color.black.opacity(0.4).blur(radius: 10 * s))
+            .cornerRadius(0)
+            
+            Spacer()
         }
     }
     

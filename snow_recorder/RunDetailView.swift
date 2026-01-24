@@ -15,6 +15,7 @@ struct RunDetailView: View {
     @State private var showNoDataAlert = false
     @State private var showFullScreenMap = false
     @State private var isTimelineExpanded = false
+    @State private var selectedRunMetric: RunSession.RunMetric?
     
     // Theme Colors
     let primaryColor = Color(hex: "6bf906")
@@ -72,7 +73,12 @@ struct RunDetailView: View {
                         // 4. Metrics Grid (Bento)
                         metricsGrid
                         
-                        // 5. Timeline
+                        // 5. Run Metrics (Per Run)
+                        if !session.runMetrics.isEmpty {
+                            runMetricsSection
+                        }
+                        
+                        // 6. Timeline
                         if !session.timelineEvents.isEmpty {
                             timelineSection
                         }
@@ -91,6 +97,14 @@ struct RunDetailView: View {
         }
         .fullScreenCover(isPresented: $showFullScreenMap) {
             FullScreenMapView(coordinates: routeCoordinates, speeds: session.routeSpeeds, maxSpeed: session.maxSpeed, runStartIndices: session.runStartIndices, region: mapRegion)
+        }
+        .fullScreenCover(item: $selectedRunMetric) { metric in
+            RunMetricDetailSheet(
+                metric: metric,
+                accentColor: primaryColor,
+                speedSeries: runSpeedSeries(for: metric),
+                locationName: session.locationName
+            )
         }
         .sheet(item: $gpxFileURL) { identifiableURL in
             ShareSheet(activityItems: [identifiableURL.url])
@@ -112,14 +126,32 @@ struct RunDetailView: View {
     // MARK: - Subviews
     
     private var headerView: some View {
-        HStack {
-            Button(action: { dismiss() }) {
-                Image(systemName: "chevron.left")
-                    .font(.system(size: 20, weight: .semibold))
-                    .foregroundColor(.white)
-                    .frame(width: 40, height: 40)
-                    .background(Color.white.opacity(0.1))
-                    .clipShape(Circle())
+        ZStack {
+            HStack {
+                Button(action: { dismiss() }) {
+                    Image(systemName: "chevron.left")
+                        .font(.system(size: 20, weight: .semibold))
+                        .foregroundColor(.white)
+                        .frame(width: 40, height: 40)
+                        .background(Color.white.opacity(0.1))
+                        .clipShape(Circle())
+                }
+                
+                Spacer()
+                
+                Button(action: { exportGPX() }) {
+                    Image(systemName: "arrow.down.doc")
+                        .font(.system(size: 18, weight: .semibold))
+                        .foregroundColor(primaryColor)
+                        .frame(width: 40, height: 40)
+                        .background(primaryColor.opacity(0.1))
+                        .clipShape(Circle())
+                        .overlay(
+                            Circle()
+                                .stroke(primaryColor.opacity(0.3), lineWidth: 1)
+                        )
+                        .shadow(color: primaryColor.opacity(0.2), radius: 5)
+                }
             }
             
             Text("RUN DETAILS")
@@ -127,20 +159,6 @@ struct RunDetailView: View {
                 .tracking(2)
                 .foregroundColor(.white)
                 .shadow(color: primaryColor.opacity(0.5), radius: 5)
-            
-            Button(action: { exportGPX() }) {
-                Image(systemName: "arrow.down.doc")
-                    .font(.system(size: 18, weight: .semibold))
-                    .foregroundColor(primaryColor)
-                    .frame(width: 40, height: 40)
-                    .background(primaryColor.opacity(0.1))
-                    .clipShape(Circle())
-                    .overlay(
-                        Circle()
-                            .stroke(primaryColor.opacity(0.3), lineWidth: 1)
-                    )
-                    .shadow(color: primaryColor.opacity(0.2), radius: 5)
-            }
         }
         .padding(.horizontal)
         .padding(.vertical, 10)
@@ -173,7 +191,7 @@ struct RunDetailView: View {
                     .frame(width: 90, height: 90)
                 
                 // Progress Circle
-                RingGaugeView(progress: Double(score) / 100.0, color: primaryColor)
+                RingGaugeView(progress: Double(score) / 1000.0, color: primaryColor)
                     .frame(width: 90, height: 90)
                     
                 // Score Text
@@ -182,7 +200,7 @@ struct RunDetailView: View {
                         .font(.system(size: 28, weight: .bold)) // Space Grotesk feel
                         .foregroundColor(.white)
                         .shadow(color: primaryColor.opacity(0.5), radius: 8)
-                    Text("/100")
+                    Text("/1000")
                         .font(.system(size: 10, weight: .medium, design: .monospaced))
                         .foregroundColor(.gray)
                 }
@@ -219,6 +237,9 @@ struct RunDetailView: View {
         ZStack {
              // Map with Route
             Map(coordinateRegion: .constant(mapRegion))
+            .disabled(true)
+            .colorMultiply(Color(white: 0.6)) // Darken map
+            .grayscale(0.8)
             .overlay(
                 Group {
                     if !session.routeSpeeds.isEmpty {
@@ -228,9 +249,6 @@ struct RunDetailView: View {
                     }
                 }
             )
-            .disabled(true)
-            .colorMultiply(Color(white: 0.6)) // Darken map
-            .grayscale(0.8)
             
             // Gradient Overlay
              LinearGradient(
@@ -279,10 +297,10 @@ struct RunDetailView: View {
         .cornerRadius(16)
         .overlay(
             RoundedRectangle(cornerRadius: 16)
-                .stroke(Color.white.opacity(0.1), lineWidth: 1)
+                .stroke(primaryColor.opacity(0.5), lineWidth: 1.5)
         )
         .padding(.horizontal)
-        .shadow(color: .black.opacity(0.5), radius: 15)
+        .shadow(color: primaryColor.opacity(0.1), radius: 15)
         .onTapGesture {
             showFullScreenMap = true
         }
@@ -331,6 +349,81 @@ struct RunDetailView: View {
         }
         .padding(.horizontal)
     }
+
+    private var sortedRunMetrics: [RunSession.RunMetric] {
+        session.runMetrics.sorted { $0.runNumber < $1.runNumber }
+    }
+
+    private var runMetricsSection: some View {
+        VStack(alignment: .leading, spacing: 12) {
+            HStack {
+                Circle()
+                    .fill(primaryColor)
+                    .frame(width: 6, height: 6)
+                    .shadow(color: primaryColor, radius: 4)
+                Text("RUN STATS")
+                    .font(.system(size: 12, weight: .bold))
+                    .foregroundColor(.white)
+                    .tracking(2)
+            }
+            .padding(.horizontal)
+            
+            VStack(spacing: 10) {
+                ForEach(sortedRunMetrics) { metric in
+                    runMetricCard(metric)
+                }
+            }
+            .padding(.horizontal)
+        }
+    }
+
+    private func runMetricCard(_ metric: RunSession.RunMetric) -> some View {
+        VStack(alignment: .leading, spacing: 10) {
+            HStack {
+                Text(formatRunTimeRange(metric.startTime, metric.endTime))
+                    .font(.system(size: 12, weight: .bold))
+                    .tracking(0.5)
+                    .foregroundColor(.white)
+                
+                Spacer()
+                
+                Text(formatRunDuration(metric.duration))
+                    .font(.system(size: 11, weight: .medium, design: .monospaced))
+                    .foregroundColor(.gray)
+            }
+            
+            HStack(spacing: 8) {
+                runMetricChip(label: "EDGE", value: "\(metric.edgeScore)")
+                runMetricChip(label: "FLOW", value: "\(metric.flowScore)")
+            }
+        }
+        .padding(14)
+        .background(surfaceCard)
+        .cornerRadius(14)
+        .overlay(
+            RoundedRectangle(cornerRadius: 14)
+                .stroke(primaryColor.opacity(0.4), lineWidth: 1)
+        )
+        .contentShape(Rectangle())
+        .onTapGesture {
+            selectedRunMetric = metric
+        }
+    }
+
+    private func runMetricChip(label: String, value: String) -> some View {
+        HStack(spacing: 4) {
+            Text(label)
+                .font(.system(size: 9, weight: .bold))
+                .foregroundColor(.gray)
+            Text(value)
+                .font(.system(size: 11, weight: .bold, design: .monospaced))
+                .foregroundColor(primaryColor)
+        }
+        .padding(.horizontal, 8)
+        .padding(.vertical, 5)
+        .background(Color.white.opacity(0.04))
+        .cornerRadius(8)
+    }
     
     private func formatSessionDuration(_ duration: TimeInterval) -> String {
         let formatter = DateComponentsFormatter()
@@ -339,6 +432,39 @@ struct RunDetailView: View {
         formatter.zeroFormattingBehavior = .pad
         return formatter.string(from: duration) ?? "00:00"
     }
+
+    private func formatRunDuration(_ duration: TimeInterval) -> String {
+        let formatter = DateComponentsFormatter()
+        formatter.allowedUnits = [.minute, .second]
+        formatter.unitsStyle = .positional
+        formatter.zeroFormattingBehavior = .pad
+        return formatter.string(from: duration) ?? "00:00"
+    }
+
+    private func formatSpeedOneDecimal(_ value: Double) -> String {
+        String(format: "%.1f", value)
+    }
+
+    private func runSpeedSeries(for metric: RunSession.RunMetric) -> [Double] {
+        let speeds = session.routeSpeeds
+        let indices = session.runStartIndices
+        guard !speeds.isEmpty else { return [] }
+        let runNumber = max(1, metric.runNumber)
+        let startIndex = (runNumber - 1) < indices.count ? indices[runNumber - 1] : 0
+        let endIndex = runNumber < indices.count ? indices[runNumber] : speeds.count
+        let safeStart = max(0, min(startIndex, speeds.count))
+        let safeEnd = max(safeStart, min(endIndex, speeds.count))
+        guard safeEnd > safeStart else { return [] }
+        return Array(speeds[safeStart..<safeEnd])
+    }
+
+    private func formatRunTimeRange(_ start: Date, _ end: Date) -> String {
+        let formatter = DateFormatter()
+        formatter.locale = Locale(identifier: "ko_KR")
+        formatter.timeZone = .current
+        formatter.dateFormat = "HH:mm"
+        return "\(formatter.string(from: start)) ~ \(formatter.string(from: end))"
+    }
     
     private var verticalDropCard: some View {
         HStack {
@@ -346,10 +472,10 @@ struct RunDetailView: View {
                 HStack {
                     Image(systemName: "arrow.down.to.line")
                         .font(.caption)
-                        .foregroundColor(primaryColor)
+                        .foregroundColor(.gray)
                     Text("VERTICAL DROP")
                         .font(.system(size: 10, weight: .bold))
-                        .foregroundColor(primaryColor)
+                        .foregroundColor(.gray)
                         .tracking(2)
                 }
                 
@@ -382,9 +508,9 @@ struct RunDetailView: View {
         .cornerRadius(16)
         .overlay(
             RoundedRectangle(cornerRadius: 16)
-                .stroke(primaryColor.opacity(0.3), lineWidth: 1)
+                .stroke(Color.white.opacity(0.1), lineWidth: 1)
         )
-        .shadow(color: primaryColor.opacity(0.05), radius: 10)
+        .shadow(color: .black.opacity(0.2), radius: 10)
     }
     
     private func metricCardBento(title: String, value: String, unit: String, icon: String) -> some View {
@@ -710,7 +836,7 @@ struct SlopeCard: View {
     
     var body: some View {
         VStack(alignment: .leading) {
-            // Top Row: Dot and Badge
+            // Top Row: Dot & Badge
             HStack {
                 Circle()
                     .fill(difficultyInfo.color)
@@ -719,7 +845,6 @@ struct SlopeCard: View {
                 
                 Spacer()
                 
-                // Difficulty Badge
                 Text(difficultyInfo.label)
                     .font(.system(size: 10, weight: .bold))
                     .foregroundColor(difficultyInfo.color)
@@ -735,19 +860,20 @@ struct SlopeCard: View {
             
             Spacer()
             
-            // Slope Name
-            Text(name)
-                .font(.system(size: 16, weight: .bold)) // Larger font
-                .foregroundColor(.white)
-                .lineLimit(1)
-            
-            // Run Count
-            Text("x\(count) RUNS")
-                .font(.system(size: 10, weight: .medium))
-                .foregroundColor(.gray)
+            // Bottom Row: Name & Count
+            VStack(alignment: .leading, spacing: 2) {
+                Text(name)
+                    .font(.system(size: 14, weight: .bold))
+                    .foregroundColor(.white)
+                    .lineLimit(1)
+                
+                Text("x\(count) RUNS")
+                    .font(.system(size: 10, weight: .medium))
+                    .foregroundColor(.gray)
+            }
         }
         .padding(14)
-        .frame(width: 140, height: 110) // Larger square-ish frame
+        .frame(width: 140, height: 110)
         .background(Color(hex: "111111"))
         .cornerRadius(16)
         .overlay(
@@ -867,8 +993,6 @@ struct MapViewRepresentable: UIViewRepresentable {
         view.removeOverlays(overlays)
         
         // Add Polylines
-        
-        var startIdx = 0
         let sortedIndices = runStartIndices.sorted()
         
         for (i, startIndex) in sortedIndices.enumerated() {
@@ -877,9 +1001,34 @@ struct MapViewRepresentable: UIViewRepresentable {
             if endIndex > startIndex {
                 let segmentCoords = Array(coordinates[startIndex..<endIndex])
                 if segmentCoords.count > 1 {
-                    let polyline = MKPolyline(coordinates: segmentCoords, count: segmentCoords.count)
-                    polyline.title = "Run" 
-                    view.addOverlay(polyline)
+                    // Prepare Gradient Colors
+                    let segmentSpeeds: [Double]
+                    if !speeds.isEmpty {
+                        // Extract speeds for this segment (safely)
+                        let speedStartIndex = min(startIndex, speeds.count - 1)
+                        let speedEndIndex = min(endIndex, speeds.count)
+                        if speedEndIndex > speedStartIndex {
+                            segmentSpeeds = Array(speeds[speedStartIndex..<speedEndIndex])
+                        } else {
+                            segmentSpeeds = []
+                        }
+                    } else {
+                        segmentSpeeds = []
+                    }
+                    
+                    if !segmentSpeeds.isEmpty && segmentSpeeds.count == segmentCoords.count {
+                        let colors = segmentSpeeds.map { speedToUIColor($0, maxSpeed: maxSpeed) }
+                        // Use custom subclass to pass colors
+                        let polyline = GradientPolyline(coordinates: segmentCoords, count: segmentCoords.count)
+                        polyline.strokeColors = colors
+                        polyline.title = "Run"
+                        view.addOverlay(polyline)
+                    } else {
+                        // Fallback to solid color if speeds mismatch or empty
+                        let polyline = MKPolyline(coordinates: segmentCoords, count: segmentCoords.count)
+                        polyline.title = "Run"
+                        view.addOverlay(polyline)
+                    }
                 }
             }
             
@@ -912,6 +1061,13 @@ struct MapViewRepresentable: UIViewRepresentable {
         }
     }
     
+    // Helper for color calculation
+    func speedToUIColor(_ speed: Double, maxSpeed: Double) -> UIColor {
+        let ratio = maxSpeed > 0 ? speed / maxSpeed : 0
+        let hue = 0.33 - (0.33 * min(max(ratio, 0), 1))
+        return UIColor(hue: hue, saturation: 1.0, brightness: 1.0, alpha: 1.0)
+    }
+    
     func makeCoordinator() -> Coordinator {
         Coordinator(self)
     }
@@ -924,7 +1080,16 @@ struct MapViewRepresentable: UIViewRepresentable {
         }
         
         func mapView(_ mapView: MKMapView, rendererFor overlay: MKOverlay) -> MKOverlayRenderer {
-            if let polyline = overlay as? MKPolyline {
+            if let gradientPolyline = overlay as? GradientPolyline {
+                 let renderer = MKGradientPolylineRenderer(polyline: gradientPolyline)
+                 let count = gradientPolyline.strokeColors.count
+                 let locations = (0..<count).map { CGFloat($0) / CGFloat(max(1, count - 1)) }
+                 renderer.setColors(gradientPolyline.strokeColors, locations: locations)
+                 renderer.lineWidth = 4
+                 renderer.lineCap = .round
+                 renderer.lineJoin = .round
+                 return renderer
+            } else if let polyline = overlay as? MKPolyline {
                 let renderer = MKPolylineRenderer(polyline: polyline)
                 if polyline.title == "Lift" {
                     renderer.strokeColor = .white.withAlphaComponent(0.3)
@@ -943,4 +1108,9 @@ struct MapViewRepresentable: UIViewRepresentable {
             return nil
         }
     }
+}
+
+// Custom Subclass to hold colors
+class GradientPolyline: MKPolyline {
+    var strokeColors: [UIColor] = []
 }

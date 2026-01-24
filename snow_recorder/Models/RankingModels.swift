@@ -45,7 +45,7 @@ enum RankingMetric: String, CaseIterable, Identifiable {
 
 enum RankingScope: String, CaseIterable {
     case individual = "INDIVIDUAL"
-    case crew = "CREW"
+    // case crew = "CREW" // Removed for now
 }
 
 // MARK: - Models
@@ -54,18 +54,21 @@ enum RankingScope: String, CaseIterable {
 struct RankingProfile {
     var userId: String
     var userName: String
+    var countryCode: String = "KR"
+    var seasonId: String = "25_26"
+    var weeklyWeekId: String = ""
     
     // Season Totals
     var seasonRunCount: Int = 0
     var seasonDistance: Double = 0.0 // meters
-    var seasonBestEdge: Int = 0
-    var seasonBestFlow: Int = 0
+    var seasonBestEdge: Double = 0.0 // Changed to Double for Average
+    var seasonBestFlow: Double = 0.0 // Changed to Double for Average
     
     // Weekly Totals
     var weeklyRunCount: Int = 0
     var weeklyDistance: Double = 0.0 // meters
-    var weeklyBestEdge: Int = 0
-    var weeklyBestFlow: Int = 0
+    var weeklyBestEdge: Double = 0.0 // Changed to Double for Average
+    var weeklyBestFlow: Double = 0.0 // Changed to Double for Average
     
     // Helper to get value by metric/cycle
     func getValue(for metric: RankingMetric, cycle: RankingCycle) -> Double {
@@ -74,15 +77,15 @@ struct RankingProfile {
             switch metric {
             case .runCount: return Double(seasonRunCount)
             case .distance: return seasonDistance / 1000.0 // km 변환
-            case .edge: return Double(seasonBestEdge)
-            case .flow: return Double(seasonBestFlow)
+            case .edge: return seasonBestEdge
+            case .flow: return seasonBestFlow
             }
         case .weekly:
             switch metric {
             case .runCount: return Double(weeklyRunCount)
             case .distance: return weeklyDistance / 1000.0 // km 변환
-            case .edge: return Double(weeklyBestEdge)
-            case .flow: return Double(weeklyBestFlow)
+            case .edge: return weeklyBestEdge
+            case .flow: return weeklyBestFlow
             }
         }
     }
@@ -97,6 +100,7 @@ struct RankingProfile {
 /// 리더보드 항목 (타인 기록)
 struct LeaderboardEntry: Identifiable {
     let id = UUID()
+    let userId: String // Added for identification
     let rank: Int
     let userName: String
     let crewName: String?

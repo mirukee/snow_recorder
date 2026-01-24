@@ -3,6 +3,7 @@ import SwiftData
 
 /// 메인 진입점 뷰 (Custom Floating Tab Bar 적용)
 struct ContentView: View {
+    @StateObject private var authManager = AuthenticationManager.shared
     @State private var selection = 0
     
     // 네온 그린 컬러 (#6bf906)
@@ -14,6 +15,16 @@ struct ContentView: View {
     }
     
     var body: some View {
+        Group {
+            if authManager.user != nil || authManager.isGuest {
+                mainTabView
+            } else {
+                LoginView()
+            }
+        }
+    }
+    
+    var mainTabView: some View {
         ZStack(alignment: .bottom) {
             // 1. 메인 컨텐츠 (TabView)
             TabView(selection: $selection) {
@@ -64,6 +75,7 @@ struct ContentView: View {
             .padding(.bottom, 30) // 화면 하단에서 띄움
         }
     }
+    
 }
 
 /// 커스텀 탭 버튼

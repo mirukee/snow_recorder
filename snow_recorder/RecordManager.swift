@@ -9,6 +9,7 @@ class RecordManager: ObservableObject {
     @Published var isRecording: Bool = false       // 현재 녹화 중 여부
     @Published var isPaused: Bool = false          // 일시 정지 여부
     @Published var elapsedTime: TimeInterval = 0   // 경과 시간 (초)
+    @Published private(set) var currentRunMetrics: [RunSession.RunMetric] = [] // 세션 중 런별 스탯
     
     private var timer: Timer?
     private var startTime: Date?
@@ -28,6 +29,7 @@ class RecordManager: ObservableObject {
         elapsedTime = 0
         startTime = Date()
         tempRunMetrics = [] // 초기화
+        currentRunMetrics = []
         
         // 라이딩 점수 분석 시작
         RidingMetricAnalyzer.shared.startSession()
@@ -57,7 +59,7 @@ class RecordManager: ObservableObject {
     }
     
     // 런 분석 결과가 나오면 RunMetric으로 변환하여 임시 저장
-    private func recordRunMetric(result: RidingSessionResult) {
+    private func recordRunMetric(result: RidingSessionResult, isRetry: Bool = false) {
         // LocationManager의 현재(직전) 런 정보 가져오기
         let locationManager = LocationManager.shared
         
@@ -65,9 +67,15 @@ class RecordManager: ObservableObject {
         // TimelineEvents에는 [Run1(Finished), Run2(Active)] 가 들어있을 수 있음.
         // 따라서 '마지막'이 아니라 '마지막으로 완료된(endTime != nil)' Riding 이벤트를 찾아야 함.
         
-        guard let lastCompletedRidingEvent = locationManager.timelineEvents.reversed().first(where: { $0.type == .riding && $0.endTime != nil }),
+        let completedRidingEvents = locationManager.timelineEvents.filter { $0.type == .riding && $0.endTime != nil }
+        guard let lastCompletedRidingEvent = completedRidingEvents.last,
               let endTime = lastCompletedRidingEvent.endTime else {
-            // 아직 끝난 런이 없거나 매칭 실패
+            // 아직 끝난 런이 없거나 매칭 실패 → 짧게 재시도 (타임라인 이벤트가 늦게 추가될 수 있음)
+            if !isRetry {
+                DispatchQueue.main.asyncAfter(deadline: .now() + 0.4) { [weak self] in
+                    self?.recordRunMetric(result: result, isRetry: true)
+                }
+            }
             return
         }
         
@@ -81,24 +89,27 @@ class RecordManager: ObservableObject {
         // Flow Score (현재 시점의 값)
         let flowScore = FlowScoreAnalyzer.shared.latestFlowScore
         
+        // RidingSessionResult speed unit: m/s -> convert to km/h for UI consistency
+        let runDistance = locationManager.completedRunDistance(for: completedRidingEvents.count)
+        let runVerticalDrop = locationManager.completedRunVerticalDrop(for: completedRidingEvents.count)
+        
         let metric = RunSession.RunMetric(
-            runNumber: locationManager.runCount, // 단순히 현재 카운트 사용 (정확한 매칭은 복잡할 수 있음)
+            runNumber: completedRidingEvents.count, // 완료된 riding 이벤트 기준으로 런 번호 매칭
             slopeName: lastRidingEvent.detail,
             startTime: lastRidingEvent.startTime,
             endTime: endTime,
             duration: lastRidingEvent.duration,
-            maxSpeed: result.maxSpeed, // LocationManager.maxSpeed는 전체 세션 최대이므로, 이번 런의 maxSpeed가 필요함. (Analyzer에서 받아야 함) -> RidingSessionResult에 maxSpeed 추가 필요할지도? 일단 GForce만 있으므로... 
-            // FIXME: RidingSessionResult에 maxSpeed가 없음. 일단 전체 avg, max 사용하거나 Analyzer 수정 필요.
-            // 일단은 현재 구현된 Analyzer는 GForce, EdgeScore 만 줌.
-            // 임시로 LocationManager의 lastRunMaxSpeed 같은게 있다면 좋겠지만 없음.
-            // 여기서는 0.0 으로 두거나 추후 보완.
-            avgSpeed: result.averageSpeed, 
+            distance: runDistance,
+            verticalDrop: runVerticalDrop,
+            maxSpeed: result.maxSpeed * 3.6,
+            avgSpeed: result.averageSpeed * 3.6,
             edgeScore: result.edgeScore,
             flowScore: flowScore ?? 0,
             maxGForce: result.maxGForce
         )
         
         tempRunMetrics.append(metric)
+        currentRunMetrics = tempRunMetrics
         print("✅ Run Metric Recorded: Run #\(metric.runNumber), Slope: \(metric.slopeName), Edge: \(metric.edgeScore), Flow: \(metric.flowScore)")
     }
     
@@ -177,6 +188,7 @@ class RecordManager: ObservableObject {
                     slopeName: currentSlope,
                     riddenSlopes: sessionSlopes,
                     locationName: "HIGH1 RESORT",
+                    countryCode: resolveCountryCode(from: routeCoordinates),
                     routeCoordinates: routeCoordinates,
                     routeSpeeds: routeSpeeds,
                     runStartIndices: runStartIndices,
@@ -203,6 +215,7 @@ class RecordManager: ObservableObject {
                 self.pauseTime = nil
                 self.totalPausedDuration = 0
                 self.tempRunMetrics = []
+                self.currentRunMetrics = []
             }
         }
     }
@@ -218,5 +231,25 @@ class RecordManager: ObservableObject {
         } else {
             return String(format: "%02d:%02d", minutes, seconds)
         }
+    }
+    
+    // GPS 좌표 기반 국내(KR) 여부 판단
+    private func resolveCountryCode(from routeCoordinates: [[Double]]) -> String {
+        guard !routeCoordinates.isEmpty else { return "UNKNOWN" }
+        
+        for coord in routeCoordinates {
+            guard coord.count >= 2 else { continue }
+            let lat = coord[0]
+            let lon = coord[1]
+            if isDomesticCoordinate(lat: lat, lon: lon) {
+                return "KR"
+            }
+        }
+        return "UNKNOWN"
+    }
+    
+    private func isDomesticCoordinate(lat: Double, lon: Double) -> Bool {
+        // 한국 대략 바운딩 박스 (제주/독도 포함 여유 범위)
+        return lat >= 33.0 && lat <= 39.0 && lon >= 124.5 && lon <= 132.0
     }
 }
