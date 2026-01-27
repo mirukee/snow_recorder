@@ -15,6 +15,7 @@ struct GPXExporter {
         <?xml version="1.0" encoding="UTF-8"?>
         <gpx version="1.1" creator="Snow Record App"
              xmlns="http://www.topografix.com/GPX/1/1"
+             xmlns:snowrecord="https://snowrecord.app/gpx/1/0"
              xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
              xsi:schemaLocation="http://www.topografix.com/GPX/1/1 http://www.topografix.com/GPX/1/1/gpx.xsd">
           <metadata>
@@ -31,6 +32,32 @@ struct GPXExporter {
         
         // 각 좌표를 트랙포인트로 변환
         // routeCoordinates는 [[lat, lon], ...] 형식
+        let sortedEvents = session.timelineEvents.sorted { $0.startTime < $1.startTime }
+        var eventIndex = 0
+        var currentEvent: RunSession.TimelineEvent?
+        
+        func statusForTime(_ time: Date) -> String? {
+            guard !sortedEvents.isEmpty else { return nil }
+            
+            while eventIndex < sortedEvents.count {
+                let candidate = sortedEvents[eventIndex]
+                let candidateEnd = candidate.endTime ?? session.endTime
+                
+                if time < candidate.startTime {
+                    return nil
+                }
+                
+                if time <= candidateEnd {
+                    currentEvent = candidate
+                    return candidate.type.rawValue
+                }
+                
+                eventIndex += 1
+            }
+            
+            return currentEvent?.type.rawValue
+        }
+        
         for (index, coord) in session.routeCoordinates.enumerated() {
             guard coord.count >= 2 else { continue }
             let lat = coord[0]
@@ -45,21 +72,44 @@ struct GPXExporter {
                 : 0.0
             let pointTime = session.startTime.addingTimeInterval(session.duration * progress)
             
+            let speedValue: Double? = index < session.routeSpeeds.count ? session.routeSpeeds[index] : nil
+            let statusValue: String? = statusForTime(pointTime)
+            var extensions = ""
+            
+            if speedValue != nil || statusValue != nil {
+                extensions += "        <extensions>\n"
+                if let speed = speedValue {
+                    extensions += "          <snowrecord:speed>\(String(format: "%.1f", speed))</snowrecord:speed>\n"
+                }
+                if let status = statusValue {
+                    extensions += "          <snowrecord:status>\(status)</snowrecord:status>\n"
+                }
+                extensions += "        </extensions>\n"
+            }
+            
             if let ele = elevation {
-                gpx += """
+                var trackPoint = """
                       <trkpt lat="\(lat)" lon="\(lon)">
                         <ele>\(String(format: "%.1f", ele))</ele>
                         <time>\(dateFormatter.string(from: pointTime))</time>
+                """
+                trackPoint += extensions
+                trackPoint += """
                       </trkpt>
                 
                 """
+                gpx += trackPoint
             } else {
-                gpx += """
+                var trackPoint = """
                       <trkpt lat="\(lat)" lon="\(lon)">
                         <time>\(dateFormatter.string(from: pointTime))</time>
+                """
+                trackPoint += extensions
+                trackPoint += """
                       </trkpt>
                 
                 """
+                gpx += trackPoint
             }
         }
         

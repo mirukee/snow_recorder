@@ -35,7 +35,7 @@ struct snow_recorderApp: App {
         }
         .modelContainer(for: RunSession.self, isAutosaveEnabled: true, isUndoEnabled: false) { result in
             switch result {
-            case .success(let container):
+            case .success:
                 print("✅ SwiftData 컨테이너 로드 성공")
             case .failure(let error):
                 print("❌ SwiftData 오류: \(error)")
@@ -43,4 +43,3 @@ struct snow_recorderApp: App {
         }
     }
 }
-

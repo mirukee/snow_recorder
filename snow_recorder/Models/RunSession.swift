@@ -5,23 +5,31 @@ import CoreLocation
 /// 스키/보드 주행 기록을 저장하는 데이터 모델
 @Model
 final class RunSession {
-    var id: UUID
-    var startTime: Date
-    var endTime: Date
-    var duration: TimeInterval
-    var distance: Double        // 활강 거리 (m) - RIDING 상태에서만 측정됨
-    var maxSpeed: Double        // 최고 속도 (km/h)
-    var avgSpeed: Double        // 평균 속도 (km/h) - RIDING 상태에서만 측정됨
-    var verticalDrop: Double    // 총 하강 고도 (m)
-    var runCount: Int           // 런 횟수
+    var id: UUID = UUID()
+    var startTime: Date = Date()
+    var endTime: Date = Date()
+    var duration: TimeInterval = 0
+    var distance: Double = 0.0        // 활강 거리 (m) - RIDING 상태에서만 측정됨
+    var maxSpeed: Double = 0.0        // 최고 속도 (km/h)
+    var avgSpeed: Double = 0.0        // 평균 속도 (km/h) - RIDING 상태에서만 측정됨
+    var verticalDrop: Double = 0.0    // 총 하강 고도 (m)
+    var runCount: Int = 0           // 런 횟수
     var slopeName: String?      // 주행한 슬로프 이름 (대표 슬로프)
-    var riddenSlopes: [String: Int] // 세션 동안 탄 슬로프 목록 (이름: 횟수)
-    var locationName: String    // 스키장 이름 (예: HIGH1 RESORT)
+    var riddenSlopes: [String: Int] = [:] // 세션 동안 탄 슬로프 목록 (이름: 횟수)
+    var locationName: String = "HIGH1 RESORT"    // 스키장 이름 (예: HIGH1 RESORT)
     var countryCode: String = "UNKNOWN"     // 국가 코드 (예: KR, JP)
-    var routeCoordinates: [[Double]] // GPS 경로 좌표 [[lat, lon], ...] - 지도 폴리라인용
+    var routeCoordinates: [[Double]] = [] // GPS 경로 좌표 [[lat, lon], ...] - 지도 폴리라인용
     var routeSpeeds: [Double] = []   // GPS 경로별 속도 (km/h) - 히트맵용
     var runStartIndices: [Int] = [0] // 각 런의 시작 인덱스 (리프트 점선 연결용)
     var timelineEvents: [TimelineEvent] = [] // 타임라인 이벤트 목록
+    
+    // MARK: - 기압계 메트릭 (Optional)
+    var baroAvailable: Bool?
+    var baroVerticalDrop: Double?
+    var baroGain: Double?
+    var baroSampleCount: Int?
+    var baroBaselineAltitude: Double?
+    var baroDriftCorrection: Double?
     
     // MARK: - Riding Metrics
     var edgeScore: Int = 0          // 엣지 점수 (0-1000) (세션 최고점)
@@ -30,6 +38,13 @@ final class RunSession {
     
     // 런별 상세 기록 (Run Metrics)
     var runMetrics: [RunMetric] = []
+    
+    // MARK: - 분석 리포트 데이터
+    var analysisSamples: [AnalysisSample] = []
+    var analysisEvents: [AnalysisEvent] = []
+    var analysisSegments: [AnalysisSegment] = []
+    var flowBreakdown: FlowScoreBreakdown = RunSession.FlowScoreBreakdown.empty
+    var edgeBreakdown: EdgeScoreBreakdown = RunSession.EdgeScoreBreakdown.empty
     
     struct RunMetric: Codable, Identifiable {
         var id: UUID = UUID()
@@ -149,6 +164,112 @@ final class RunSession {
         }
     }
     
+    // MARK: - 분석 샘플 (1초 단위)
+    struct AnalysisSample: Codable, Identifiable {
+        var id: UUID = UUID()
+        var t: Double                 // 세션 시작 기준 초
+        var speedAvg: Double          // km/h
+        var speedMax: Double          // km/h
+        var speedStdDev: Double       // km/h
+        var gAvg: Double              // G
+        var gMax: Double              // G
+        var jerkPeak: Double          // G/s
+    }
+    
+    // MARK: - 이벤트 로그
+    struct AnalysisEvent: Codable, Identifiable {
+        enum EventType: String, Codable {
+            case hardBrake
+            case chatter
+            case quietPhase
+        }
+        
+        var id: UUID = UUID()
+        var t: Double                 // 세션 시작 기준 초
+        var type: EventType
+        var value: Double?            // 타입별 추가 값 (예: 브레이크 지속 시간)
+        var speed: Double?            // km/h
+    }
+    
+    // MARK: - 이벤트 구간 (10Hz)
+    struct AnalysisSegment: Codable, Identifiable {
+        var id: UUID = UUID()
+        var type: AnalysisEvent.EventType
+        var tStart: Double            // 세션 시작 기준 초
+        var interval: Double          // 샘플 간격(초)
+        var gSamples: [Double]        // G
+        var jerkSamples: [Double]     // G/s
+        var speedSamples: [Double]    // km/h
+    }
+    
+    // MARK: - 점수 구성요소 (Flow)
+    struct FlowScoreBreakdown: Codable {
+        var avgStability: Double?
+        var baseScore: Double?
+        var activeTime: Double?
+        var movingTime: Double?
+        var totalStopDuration: Double?
+        var stopPenalty: Double?
+        var hardBrakeCount: Int?
+        var brakePenalty: Double?
+        var chatterEventCount: Int?
+        var chatterPenalty: Double?
+        var quietEventCount: Int?
+        var quietBonus: Double?
+        var finalScore: Int?
+        var locationSampleCount: Int?
+        var locationSampleSkippedAccuracyCount: Int?
+        var locationSampleUsedCount: Int?
+        var stabilitySampleCount: Int?
+        
+        static let empty = FlowScoreBreakdown(
+            avgStability: 0.0,
+            baseScore: 0.0,
+            activeTime: 0.0,
+            movingTime: 0.0,
+            totalStopDuration: 0.0,
+            stopPenalty: 0.0,
+            hardBrakeCount: 0,
+            brakePenalty: 0.0,
+            chatterEventCount: 0,
+            chatterPenalty: 0.0,
+            quietEventCount: 0,
+            quietBonus: 0.0,
+            finalScore: 0,
+            locationSampleCount: 0,
+            locationSampleSkippedAccuracyCount: 0,
+            locationSampleUsedCount: 0,
+            stabilitySampleCount: 0
+        )
+    }
+    
+    // MARK: - 점수 구성요소 (Edge)
+    struct EdgeScoreBreakdown: Codable {
+        var edgeRawScore: Double?
+        var normalized: Double?
+        var rawScore: Double?
+        var finalScore: Int?
+        var maxGForce: Double?
+        var tieredTimeTotal: Double?
+        var tier2PlusTime: Double?
+        var tier2Ratio: Double?
+        var proCapApplied: Bool?
+        var tier2CapApplied: Bool?
+        
+        static let empty = EdgeScoreBreakdown(
+            edgeRawScore: 0.0,
+            normalized: 0.0,
+            rawScore: 0.0,
+            finalScore: 0,
+            maxGForce: 0.0,
+            tieredTimeTotal: 0.0,
+            tier2PlusTime: 0.0,
+            tier2Ratio: 0.0,
+            proCapApplied: false,
+            tier2CapApplied: false
+        )
+    }
+    
     init(
         startTime: Date,
         endTime: Date,
@@ -168,7 +289,18 @@ final class RunSession {
         timelineEvents: [TimelineEvent] = [],
         edgeScore: Int = 0,
         flowScore: Int = 0,
-        maxGForce: Double = 0.0
+        maxGForce: Double = 0.0,
+        baroAvailable: Bool? = nil,
+        baroVerticalDrop: Double? = nil,
+        baroGain: Double? = nil,
+        baroSampleCount: Int? = nil,
+        baroBaselineAltitude: Double? = nil,
+        baroDriftCorrection: Double? = nil,
+        analysisSamples: [AnalysisSample] = [],
+        analysisEvents: [AnalysisEvent] = [],
+        analysisSegments: [AnalysisSegment] = [],
+        flowBreakdown: FlowScoreBreakdown = .empty,
+        edgeBreakdown: EdgeScoreBreakdown = .empty
     ) {
         self.id = UUID()
         self.startTime = startTime
@@ -190,6 +322,17 @@ final class RunSession {
         self.edgeScore = edgeScore
         self.flowScore = flowScore
         self.maxGForce = maxGForce
+        self.baroAvailable = baroAvailable
+        self.baroVerticalDrop = baroVerticalDrop
+        self.baroGain = baroGain
+        self.baroSampleCount = baroSampleCount
+        self.baroBaselineAltitude = baroBaselineAltitude
+        self.baroDriftCorrection = baroDriftCorrection
+        self.analysisSamples = analysisSamples
+        self.analysisEvents = analysisEvents
+        self.analysisSegments = analysisSegments
+        self.flowBreakdown = flowBreakdown
+        self.edgeBreakdown = edgeBreakdown
     }
     
     // MARK: - Helper Properties

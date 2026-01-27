@@ -13,9 +13,21 @@ struct RunDetailView: View {
     // State for GPX Export
     @State private var gpxFileURL: IdentifiableURL?
     @State private var showNoDataAlert = false
+    @State private var analysisFileURL: IdentifiableURL?
+    @State private var showNoAnalysisAlert = false
+    @State private var showAnalysisExportError = false
+    @State private var analysisExportErrorMessage: String = ""
+    @State private var baroLogFileURL: IdentifiableURL?
+    @State private var showNoBaroLogAlert = false
     @State private var showFullScreenMap = false
     @State private var isTimelineExpanded = false
     @State private var selectedRunMetric: RunSession.RunMetric?
+    
+    private let timelineNoiseThreshold: TimeInterval = 40.0
+    private let timelineNoiseVerticalDrop: Double = 30.0
+#if DEBUG
+    @State private var showDebugSheet = false
+#endif
     
     // Theme Colors
     let primaryColor = Color(hex: "6bf906")
@@ -109,11 +121,37 @@ struct RunDetailView: View {
         .sheet(item: $gpxFileURL) { identifiableURL in
             ShareSheet(activityItems: [identifiableURL.url])
         }
+        .sheet(item: $analysisFileURL) { identifiableURL in
+            ShareSheet(activityItems: [identifiableURL.url])
+        }
+        .sheet(item: $baroLogFileURL) { identifiableURL in
+            ShareSheet(activityItems: [identifiableURL.url])
+        }
         .alert("GPX Export 불가", isPresented: $showNoDataAlert) {
             Button("확인", role: .cancel) {}
         } message: {
             Text("이 세션에는 GPS 경로 데이터가 없습니다.")
         }
+        .alert("분석 데이터 없음", isPresented: $showNoAnalysisAlert) {
+            Button("확인", role: .cancel) {}
+        } message: {
+            Text("분석 리포트 내보내기에 필요한 데이터가 없습니다.")
+        }
+        .alert("분석 내보내기 실패", isPresented: $showAnalysisExportError) {
+            Button("확인", role: .cancel) {}
+        } message: {
+            Text(analysisExportErrorMessage)
+        }
+        .alert("바리오 로그 없음", isPresented: $showNoBaroLogAlert) {
+            Button("확인", role: .cancel) {}
+        } message: {
+            Text("해당 세션에 저장된 바리오 로그 파일이 없습니다.")
+        }
+#if DEBUG
+        .sheet(isPresented: $showDebugSheet) {
+            AnalysisDebugView(session: session)
+        }
+#endif
         .alert(item: $selectedScoreInfo) { info in
             Alert(
                 title: Text(info.title),
@@ -139,18 +177,58 @@ struct RunDetailView: View {
                 
                 Spacer()
                 
-                Button(action: { exportGPX() }) {
-                    Image(systemName: "arrow.down.doc")
-                        .font(.system(size: 18, weight: .semibold))
-                        .foregroundColor(primaryColor)
-                        .frame(width: 40, height: 40)
-                        .background(primaryColor.opacity(0.1))
-                        .clipShape(Circle())
-                        .overlay(
-                            Circle()
-                                .stroke(primaryColor.opacity(0.3), lineWidth: 1)
-                        )
-                        .shadow(color: primaryColor.opacity(0.2), radius: 5)
+                HStack(spacing: 10) {
+#if DEBUG
+                    Button(action: { showDebugSheet = true }) {
+                        Image(systemName: "ladybug")
+                            .font(.system(size: 16, weight: .semibold))
+                            .foregroundColor(.white.opacity(0.6))
+                            .frame(width: 36, height: 36)
+                            .background(Color.white.opacity(0.08))
+                            .clipShape(Circle())
+                    }
+#endif
+                    Button(action: { exportAnalysis() }) {
+                        Image(systemName: "chart.bar.doc.horizontal")
+                            .font(.system(size: 18, weight: .semibold))
+                            .foregroundColor(primaryColor)
+                            .frame(width: 40, height: 40)
+                            .background(primaryColor.opacity(0.1))
+                            .clipShape(Circle())
+                            .overlay(
+                                Circle()
+                                    .stroke(primaryColor.opacity(0.3), lineWidth: 1)
+                            )
+                            .shadow(color: primaryColor.opacity(0.2), radius: 5)
+                    }
+                    
+                    Button(action: { exportBarometerLog() }) {
+                        Image(systemName: "waveform.path.ecg")
+                            .font(.system(size: 18, weight: .semibold))
+                            .foregroundColor(primaryColor)
+                            .frame(width: 40, height: 40)
+                            .background(primaryColor.opacity(0.1))
+                            .clipShape(Circle())
+                            .overlay(
+                                Circle()
+                                    .stroke(primaryColor.opacity(0.3), lineWidth: 1)
+                            )
+                            .shadow(color: primaryColor.opacity(0.2), radius: 5)
+                    }
+                    
+                    Button(action: { exportGPX() }) {
+                        Image(systemName: "arrow.down.doc")
+                            .font(.system(size: 18, weight: .semibold))
+                            .foregroundColor(primaryColor)
+                            .frame(width: 40, height: 40)
+                            .background(primaryColor.opacity(0.1))
+                            .clipShape(Circle())
+                            .overlay(
+                                Circle()
+                                    .stroke(primaryColor.opacity(0.3), lineWidth: 1)
+                            )
+                            .shadow(color: primaryColor.opacity(0.2), radius: 5)
+                    }
                 }
             }
             
@@ -457,6 +535,110 @@ struct RunDetailView: View {
         guard safeEnd > safeStart else { return [] }
         return Array(speeds[safeStart..<safeEnd])
     }
+    
+    // MARK: - Timeline Post-Processing (UI Only)
+    
+    private var displayTimelineEvents: [RunSession.TimelineEvent] {
+        normalizeTimelineEvents(
+            session.timelineEvents.map { event in
+                guard event.type == .pause else { return event }
+                var normalized = event
+                normalized.type = .rest
+                if normalized.detail.isEmpty {
+                    normalized.detail = "휴식"
+                }
+                return normalized
+            },
+            minRidingDuration: timelineNoiseThreshold,
+            maxVerticalDrop: timelineNoiseVerticalDrop,
+            runMetrics: session.runMetrics
+        )
+    }
+    
+    private func normalizeTimelineEvents(
+        _ events: [RunSession.TimelineEvent],
+        minRidingDuration: TimeInterval,
+        maxVerticalDrop: Double,
+        runMetrics: [RunSession.RunMetric]
+    ) -> [RunSession.TimelineEvent] {
+        let sorted = events.sorted { $0.startTime < $1.startTime }
+        guard sorted.count > 1 else { return sorted }
+        
+        let metricsByStartTime = Dictionary(uniqueKeysWithValues: runMetrics.map { ($0.startTime, $0) })
+        
+        var result: [RunSession.TimelineEvent] = []
+        var i = 0
+        var pendingStartTime: Date?
+        
+        while i < sorted.count {
+            var current = sorted[i]
+            if let pending = pendingStartTime {
+                current.startTime = pending
+                pendingStartTime = nil
+            }
+            
+            let duration = current.duration
+            let metric = metricsByStartTime[current.startTime]
+            let verticalDrop = metric?.verticalDrop ?? .infinity
+            let isShortRiding = current.type == .riding
+                && duration > 0
+                && duration <= minRidingDuration
+                && verticalDrop <= maxVerticalDrop
+            
+            if isShortRiding {
+                let prevIndex = result.count - 1
+                let next = (i + 1 < sorted.count) ? sorted[i + 1] : nil
+                
+                if let next {
+                    if prevIndex >= 0 {
+                        let prev = result[prevIndex]
+                        if prev.type == next.type {
+                            // 이전/다음이 같은 타입이면 하나로 합침
+                            var merged = prev
+                            merged.endTime = next.endTime ?? next.startTime
+                            result[prevIndex] = merged
+                            i += 2
+                            continue
+                        }
+                        // lift 우선 흡수
+                        if prev.type == .lift || next.type == .lift {
+                            if next.type == .lift {
+                                pendingStartTime = current.startTime
+                                i += 1
+                                continue
+                            } else {
+                                var merged = prev
+                                merged.endTime = current.endTime ?? current.startTime
+                                result[prevIndex] = merged
+                                i += 1
+                                continue
+                            }
+                        }
+                    }
+                    // 기본: 다음 이벤트로 흡수
+                    pendingStartTime = current.startTime
+                    i += 1
+                    continue
+                } else if prevIndex >= 0 {
+                    // 마지막에 짧은 riding이면 이전 이벤트로 흡수
+                    var merged = result[prevIndex]
+                    merged.endTime = current.endTime ?? current.startTime
+                    result[prevIndex] = merged
+                    i += 1
+                    continue
+                } else {
+                    // 단독 이벤트면 버림
+                    i += 1
+                    continue
+                }
+            }
+            
+            result.append(current)
+            i += 1
+        }
+        
+        return result
+    }
 
     private func formatRunTimeRange(_ start: Date, _ end: Date) -> String {
         let formatter = DateFormatter()
@@ -577,8 +759,8 @@ struct RunDetailView: View {
             
             // Summary Bar
             HStack(spacing: 0) {
-                let counts = Dictionary(grouping: session.timelineEvents, by: { $0.type }).mapValues { $0.count }
-                let total = Double(session.timelineEvents.count)
+                let counts = Dictionary(grouping: displayTimelineEvents, by: { $0.type }).mapValues { $0.count }
+                let total = max(Double(displayTimelineEvents.count), 1)
                 let rideP = Double(counts[.riding] ?? 0) / total
                 let liftP = Double(counts[.lift] ?? 0) / total
                 // Rest remains
@@ -604,13 +786,13 @@ struct RunDetailView: View {
             
             // Timeline List (Subway Style)
             VStack(spacing: 0) {
-                let eventsToShow = isTimelineExpanded ? session.timelineEvents : Array(session.timelineEvents.prefix(3))
+                let eventsToShow = isTimelineExpanded ? displayTimelineEvents : Array(displayTimelineEvents.prefix(3))
                 
                 ForEach(Array(eventsToShow.enumerated()), id: \.element.id) { index, event in
                     TimelineRowModern(event: event, isLast: index == eventsToShow.count - 1 && isTimelineExpanded, primaryColor: primaryColor)
                 }
                 
-                if !isTimelineExpanded && session.timelineEvents.count > 3 {
+                if !isTimelineExpanded && displayTimelineEvents.count > 3 {
                     // Fade out cue
                     Text("...")
                         .font(.caption)
@@ -669,6 +851,32 @@ struct RunDetailView: View {
         
         if let url = GPXExporter.saveToFile(session: session) {
             gpxFileURL = IdentifiableURL(url: url)
+        }
+    }
+    
+    private func exportBarometerLog() {
+        let url = BarometerLogExportService.existingURL(startTime: session.startTime)
+        if FileManager.default.fileExists(atPath: url.path) {
+            baroLogFileURL = IdentifiableURL(url: url)
+        } else {
+            showNoBaroLogAlert = true
+        }
+    }
+    
+    private func exportAnalysis() {
+        guard AnalysisExportService.hasAnalysisData(session: session) else {
+            showNoAnalysisAlert = true
+            return
+        }
+        
+        do {
+            let url = try AnalysisExportService.export(session: session)
+            analysisFileURL = IdentifiableURL(url: url)
+        } catch AnalysisExportError.noData {
+            showNoAnalysisAlert = true
+        } catch {
+            analysisExportErrorMessage = "예기치 못한 오류가 발생했습니다."
+            showAnalysisExportError = true
         }
     }
     

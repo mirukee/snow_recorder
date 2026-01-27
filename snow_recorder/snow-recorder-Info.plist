@@ -12,6 +12,8 @@
 	<string>앱이 백그라운드 상태일 때도 활강 경로를 정확히 기록하기 위해 위치 권한이 필요합니다.</string>
 	<key>NSPhotoLibraryAddUsageDescription</key>
 	<string>공유 이미지를 사진 앨범에 저장하기 위해 권한이 필요합니다.</string>
+	<key>NSMotionUsageDescription</key>
+	<string>활강 분석 및 주행 점수 계산을 위해 모션 데이터가 필요합니다.</string>
 	<key>CFBundleURLTypes</key>
 	<array>
 		<dict>

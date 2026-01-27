@@ -43,6 +43,15 @@ final class RidingMetricAnalyzer: ObservableObject {
     private var maxSpeed: Double = 0.0 // 추가: 이번 런의 최고 속도
     private var latestEdgeResult: RidingSessionResult?
     
+    // MARK: - 분석 리포트 (1초 샘플)
+    private let sampleInterval: TimeInterval = 1.0
+    private var sessionStartUptime: TimeInterval?
+    private var currentSampleIndex: Int = 0
+    private var sampleAccumulator = SampleAccumulator()
+    private var analysisSamples: [RunSession.AnalysisSample] = []
+    private var lastSmoothedMagnitude: Double?
+    private var latestEdgeBreakdown: RunSession.EdgeScoreBreakdown = .empty
+    
     // MARK: - 상수 (튜닝 가능)
     private let updateInterval: TimeInterval = 1.0 / 60.0
     private let speedGateMS: Double = 4.2
@@ -72,6 +81,11 @@ final class RidingMetricAnalyzer: ObservableObject {
         analysisQueue.async { [weak self] in
             guard let self else { return }
             self.resetSessionState()
+            self.sessionStartUptime = ProcessInfo.processInfo.systemUptime
+            self.currentSampleIndex = 0
+            self.sampleAccumulator = SampleAccumulator()
+            self.analysisSamples.removeAll()
+            self.lastSmoothedMagnitude = nil
             self.setAnalyzing(true)
             if self.currentState == .riding {
                 self.startMotionUpdatesIfNeeded()
@@ -116,7 +130,7 @@ final class RidingMetricAnalyzer: ObservableObject {
                     self.finalizeSessionResult()
                     self.resetMetricsForNextRun()
                 }
-            case .paused, .onLift:
+            case .onLift:
                 self.stopMotionUpdates()
                 self.resetSmoothing()
             }
@@ -210,6 +224,20 @@ final class RidingMetricAnalyzer: ObservableObject {
         // 스무딩: 단순 이동 평균
         let smoothedMagnitude = appendToSmoothing(rawMagnitude)
         
+        // 저크 계산 (G/s)
+        let jerk: Double
+        if let last = lastSmoothedMagnitude {
+            jerk = (smoothedMagnitude - last) / deltaTime
+        } else {
+            jerk = 0.0
+        }
+        lastSmoothedMagnitude = smoothedMagnitude
+        
+        // 1초 단위 샘플 누적
+        if let elapsed = elapsedTime() {
+            updateAnalysisSample(elapsed: elapsed, g: smoothedMagnitude, jerk: jerk, speedMS: currentSpeedMS)
+        }
+        
         // Flow Score 보정용 모션 샘플 전달
         FlowScoreAnalyzer.shared.updateMotionSample(magnitudeG: smoothedMagnitude, timestamp: timestamp)
         
@@ -252,6 +280,7 @@ final class RidingMetricAnalyzer: ObservableObject {
     
     private func resetSessionState() {
         resetMetricsForNextRun()
+        latestEdgeBreakdown = .empty
         DispatchQueue.main.async { [weak self] in
             self?.latestResult = nil
         }
@@ -277,6 +306,9 @@ final class RidingMetricAnalyzer: ObservableObject {
         let flowScore = FlowScoreAnalyzer.shared.latestFlowScore ?? 0
         let averageSpeed = speedSampleCount > 0 ? (speedSum / Double(speedSampleCount)) : 0.0
         
+        // 샘플 버킷 플러시
+        flushAnalysisSample()
+        
         let result = RidingSessionResult(
             edgeScore: edgeScore,
             flowScore: flowScore,
@@ -292,19 +324,38 @@ final class RidingMetricAnalyzer: ObservableObject {
     }
     
     private func calculateEdgeScore() -> Int {
-        guard edgeRawScore > 0 else { return 0 }
+        guard edgeRawScore > 0 else {
+            latestEdgeBreakdown = .empty
+            return 0
+        }
         
         let normalized = log(1.0 + edgeRawScore) / log(1.0 + edgeLogNormalizationTarget)
-        var score = max(0.0, min(1000.0, normalized * 1000.0))
+        let rawScore = max(0.0, min(1000.0, normalized * 1000.0))
+        var score = rawScore
         
-        if maxGForce < proCapThresholdG {
+        let proCapApplied = maxGForce < proCapThresholdG && score > proCapScore
+        if proCapApplied {
             score = min(score, proCapScore)
         }
         
         let tier2Ratio = tieredTimeTotal > 0 ? (tier2PlusTime / tieredTimeTotal) : 0.0
-        if tier2Ratio < tier2RatioThreshold {
+        let tier2CapApplied = tier2Ratio < tier2RatioThreshold && score > tier2RatioScoreCap
+        if tier2CapApplied {
             score = min(score, tier2RatioScoreCap)
         }
+        
+        latestEdgeBreakdown = RunSession.EdgeScoreBreakdown(
+            edgeRawScore: edgeRawScore,
+            normalized: normalized,
+            rawScore: rawScore,
+            finalScore: Int(score.rounded()),
+            maxGForce: maxGForce,
+            tieredTimeTotal: tieredTimeTotal,
+            tier2PlusTime: tier2PlusTime,
+            tier2Ratio: tier2Ratio,
+            proCapApplied: proCapApplied,
+            tier2CapApplied: tier2CapApplied
+        )
         
         return Int(score.rounded())
     }
@@ -335,10 +386,95 @@ final class RidingMetricAnalyzer: ObservableObject {
         }
     }
     
+    // MARK: - 분석 샘플 생성
+    
+    private func elapsedTime() -> TimeInterval? {
+        guard let start = sessionStartUptime else { return nil }
+        return ProcessInfo.processInfo.systemUptime - start
+    }
+    
+    private func updateAnalysisSample(elapsed: TimeInterval, g: Double, jerk: Double, speedMS: Double) {
+        let sampleIndex = Int(elapsed / sampleInterval)
+        if sampleIndex != currentSampleIndex {
+            flushAnalysisSample()
+            currentSampleIndex = sampleIndex
+        }
+        
+        // 속도 누적 (km/h)
+        let speedKmH = max(0.0, speedMS * 3.6)
+        sampleAccumulator.speedSum += speedKmH
+        sampleAccumulator.speedSumSq += speedKmH * speedKmH
+        sampleAccumulator.speedCount += 1
+        if speedKmH > sampleAccumulator.speedMax {
+            sampleAccumulator.speedMax = speedKmH
+        }
+        
+        // G 누적
+        sampleAccumulator.gSum += g
+        sampleAccumulator.gCount += 1
+        if g > sampleAccumulator.gMax {
+            sampleAccumulator.gMax = g
+        }
+        
+        // 저크 피크
+        let jerkAbs = abs(jerk)
+        if jerkAbs > sampleAccumulator.jerkPeak {
+            sampleAccumulator.jerkPeak = jerkAbs
+        }
+    }
+    
+    private func flushAnalysisSample() {
+        guard sampleAccumulator.speedCount > 0 || sampleAccumulator.gCount > 0 else { return }
+        
+        let speedAvg = sampleAccumulator.speedCount > 0 ? (sampleAccumulator.speedSum / Double(sampleAccumulator.speedCount)) : 0.0
+        let speedVar = sampleAccumulator.speedCount > 0
+            ? max(0.0, (sampleAccumulator.speedSumSq / Double(sampleAccumulator.speedCount)) - (speedAvg * speedAvg))
+            : 0.0
+        let speedStdDev = sqrt(speedVar)
+        
+        let gAvg = sampleAccumulator.gCount > 0 ? (sampleAccumulator.gSum / Double(sampleAccumulator.gCount)) : 0.0
+        
+        let t = Double(currentSampleIndex) * sampleInterval
+        let sample = RunSession.AnalysisSample(
+            t: t,
+            speedAvg: speedAvg,
+            speedMax: sampleAccumulator.speedMax,
+            speedStdDev: speedStdDev,
+            gAvg: gAvg,
+            gMax: sampleAccumulator.gMax,
+            jerkPeak: sampleAccumulator.jerkPeak
+        )
+        analysisSamples.append(sample)
+        
+        sampleAccumulator = SampleAccumulator()
+    }
+    
+    // MARK: - 외부 조회
+    
+    func exportAnalysisData() -> (samples: [RunSession.AnalysisSample], edgeBreakdown: RunSession.EdgeScoreBreakdown) {
+        return analysisQueue.sync {
+            (analysisSamples, latestEdgeBreakdown)
+        }
+    }
+    
     private func setAnalyzing(_ isAnalyzing: Bool) {
         isAnalyzingInternal = isAnalyzing
         DispatchQueue.main.async { [weak self] in
             self?.isAnalyzing = isAnalyzing
         }
     }
+}
+
+// MARK: - 분석 샘플 누적용 구조체
+private struct SampleAccumulator {
+    var speedSum: Double = 0.0
+    var speedSumSq: Double = 0.0
+    var speedCount: Int = 0
+    var speedMax: Double = 0.0
+    
+    var gSum: Double = 0.0
+    var gCount: Int = 0
+    var gMax: Double = 0.0
+    
+    var jerkPeak: Double = 0.0
 }

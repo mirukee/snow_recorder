@@ -1,0 +1,4305 @@
+{
+  "logs" : [
+    {
+      "note" : "세션 시작 - barometerAvailable: true, flag: true",
+      "timestamp" : "2026-01-27T13:04:09Z"
+    },
+    {
+      "note" : "바리오 업데이트 시작",
+      "timestamp" : "2026-01-27T13:04:09Z"
+    },
+    {
+      "note" : "바리오 베이스라인 설정(중앙값, N=5)",
+      "timestamp" : "2026-01-27T13:04:14Z"
+    },
+    {
+      "baroAltitude" : -0.1136474609375,
+      "recentDrop" : 0,
+      "recentGain" : 0,
+      "speed" : 0,
+      "state" : "RESTING",
+      "timestamp" : "2026-01-27T13:04:16Z",
+      "verticalSpeed" : 0
+    },
+    {
+      "baroAltitude" : -0.122894287109375,
+      "recentDrop" : 0.009246826171875,
+      "recentGain" : 0,
+      "speed" : 0,
+      "state" : "RESTING",
+      "timestamp" : "2026-01-27T13:04:17Z",
+      "verticalSpeed" : -0.008642572020876411
+    },
+    {
+      "baroAltitude" : -0.12685139973958334,
+      "recentDrop" : 0.013203938802083343,
+      "recentGain" : 0,
+      "speed" : 0,
+      "state" : "RESTING",
+      "timestamp" : "2026-01-27T13:04:18Z",
+      "verticalSpeed" : -0.0036997886620559087
+    },
+    {
+      "baroAltitude" : -0.129486083984375,
+      "recentDrop" : 0.015838623046875,
+      "recentGain" : 0,
+      "speed" : 0,
+      "state" : "RESTING",
+      "timestamp" : "2026-01-27T13:04:19Z",
+      "verticalSpeed" : -0.0024627383790646945
+    },
+    {
+      "baroAltitude" : -0.13265380859375,
+      "recentDrop" : 0.019006347656250006,
+      "recentGain" : 0,
+      "speed" : 0,
+      "state" : "RESTING",
+      "timestamp" : "2026-01-27T13:04:20Z",
+      "verticalSpeed" : -0.0029617856225308335
+    },
+    {
+      "baroAltitude" : -0.134765625,
+      "recentDrop" : 0.0211181640625,
+      "recentGain" : 0,
+      "speed" : 0,
+      "state" : "RESTING",
+      "timestamp" : "2026-01-27T13:04:21Z",
+      "verticalSpeed" : -0.0019742709099285654
+    },
+    {
+      "baroAltitude" : -0.13627406529017858,
+      "recentDrop" : 0.022626604352678575,
+      "recentGain" : 0,
+      "speed" : 0,
+      "state" : "RESTING",
+      "timestamp" : "2026-01-27T13:04:22Z",
+      "verticalSpeed" : -0.0014097586249913177
+    },
+    {
+      "baroAltitude" : -0.13707733154296875,
+      "recentDrop" : 0.02342987060546875,
+      "recentGain" : 0,
+      "speed" : 0,
+      "state" : "RESTING",
+      "timestamp" : "2026-01-27T13:04:23Z",
+      "verticalSpeed" : -0.0007510775761003027
+    },
+    {
+      "baroAltitude" : -0.1377020941840278,
+      "recentDrop" : 0.02405463324652779,
+      "recentGain" : 0,
+      "speed" : 0,
+      "state" : "RESTING",
+      "timestamp" : "2026-01-27T13:04:24Z",
+      "verticalSpeed" : -0.0005840055191295105
+    },
+    {
+      "baroAltitude" : -0.138201904296875,
+      "recentDrop" : 0.02455444335937501,
+      "recentGain" : 0,
+      "speed" : 0,
+      "state" : "RESTING",
+      "timestamp" : "2026-01-27T13:04:25Z",
+      "verticalSpeed" : -0.0004629075546585533
+    },
+    {
+      "baroAltitude" : -0.14136962890625,
+      "recentDrop" : 0.02772216796874999,
+      "recentGain" : 0,
+      "speed" : 0,
+      "state" : "RESTING",
+      "timestamp" : "2026-01-27T13:04:27Z",
+      "verticalSpeed" : -0.002962644509862751
+    },
+    {
+      "baroAltitude" : -0.14268798828125,
+      "recentDrop" : 0.02904052734375001,
+      "recentGain" : 0,
+      "speed" : 0,
+      "state" : "RESTING",
+      "timestamp" : "2026-01-27T13:04:28Z",
+      "verticalSpeed" : -0.0012319538017324559
+    },
+    {
+      "baroAltitude" : -0.143743896484375,
+      "recentDrop" : 0.020849609374999994,
+      "recentGain" : 0,
+      "speed" : 0,
+      "state" : "RESTING",
+      "timestamp" : "2026-01-27T13:04:29Z",
+      "verticalSpeed" : -0.000987058013059871
+    },
+    {
+      "baroAltitude" : -0.14427490234375,
+      "recentDrop" : 0.01742350260416667,
+      "recentGain" : 0,
+      "speed" : 0,
+      "state" : "RESTING",
+      "timestamp" : "2026-01-27T13:04:30Z",
+      "verticalSpeed" : -0.0004964267504743592
+    },
+    {
+      "baroAltitude" : -0.14375,
+      "recentDrop" : 0.014263916015624989,
+      "recentGain" : 0,
+      "speed" : 0,
+      "state" : "RESTING",
+      "timestamp" : "2026-01-27T13:04:31Z",
+      "verticalSpeed" : 0.0004906367625461795
+    },
+    {
+      "baroAltitude" : -0.14295654296875,
+      "recentDrop" : 0.010302734374999983,
+      "recentGain" : 0,
+      "speed" : 0,
+      "state" : "RESTING",
+      "timestamp" : "2026-01-27T13:04:32Z",
+      "verticalSpeed" : 0.0007418342230105697
+    },
+    {
+      "baroAltitude" : -0.1421630859375,
+      "recentDrop" : 0.007397460937499989,
+      "recentGain" : 0,
+      "speed" : 0,
+      "state" : "RESTING",
+      "timestamp" : "2026-01-27T13:04:33Z",
+      "verticalSpeed" : 0.0007418835862492056
+    },
+    {
+      "baroAltitude" : -0.141107177734375,
+      "recentDrop" : 0.00483311244419643,
+      "recentGain" : 0,
+      "speed" : 0,
+      "state" : "RESTING",
+      "timestamp" : "2026-01-27T13:04:34Z",
+      "verticalSpeed" : 0.0009867461684156852
+    },
+    {
+      "baroAltitude" : -0.139788818359375,
+      "recentDrop" : 0.002711486816406261,
+      "recentGain" : 0,
+      "speed" : 0,
+      "state" : "RESTING",
+      "timestamp" : "2026-01-27T13:04:35Z",
+      "verticalSpeed" : 0.0012212345874236374
+    },
+    {
+      "baroAltitude" : -0.138201904296875,
+      "recentDrop" : 0.000499810112847221,
+      "recentGain" : 0,
+      "speed" : 0,
+      "state" : "RESTING",
+      "timestamp" : "2026-01-27T13:04:36Z",
+      "verticalSpeed" : 0.001483342593081642
+    },
+    {
+      "baroAltitude" : -0.1363525390625,
+      "recentDrop" : 0,
+      "recentGain" : 0.001849365234375011,
+      "speed" : 0,
+      "state" : "RESTING",
+      "timestamp" : "2026-01-27T13:04:37Z",
+      "verticalSpeed" : 0.0017290671211649996
+    },
+    {
+      "baroAltitude" : -0.134503173828125,
+      "recentDrop" : 0,
+      "recentGain" : 0.006866455078125,
+      "speed" : 0,
+      "state" : "RESTING",
+      "timestamp" : "2026-01-27T13:04:38Z",
+      "verticalSpeed" : 0.0017286985396945775
+    },
+    {
+      "baroAltitude" : -0.13265380859375,
+      "recentDrop" : 0,
+      "recentGain" : 0.010034179687500006,
+      "speed" : 1.1431967496871949,
+      "state" : "RESTING",
+      "timestamp" : "2026-01-27T13:04:39Z",
+      "verticalSpeed" : 0.001728871539548857
+    },
+    {
+      "baroAltitude" : -0.13106689453125,
+      "recentDrop" : 0,
+      "recentGain" : 0.012677001953124989,
+      "speed" : 1.1431967496871949,
+      "state" : "RESTING",
+      "timestamp" : "2026-01-27T13:04:40Z",
+      "verticalSpeed" : 0.001483747657680512
+    },
+    {
+      "baroAltitude" : -0.129742431640625,
+      "recentDrop" : 0,
+      "recentGain" : 0.014532470703125022,
+      "speed" : 1.1431967496871949,
+      "state" : "RESTING",
+      "timestamp" : "2026-01-27T13:04:42Z",
+      "verticalSpeed" : 0.0012325365509921328
+    },
+    {
+      "baroAltitude" : -0.1286865234375,
+      "recentDrop" : 0,
+      "recentGain" : 0.015063476562499983,
+      "speed" : 0,
+      "state" : "RESTING",
+      "timestamp" : "2026-01-27T13:04:43Z",
+      "verticalSpeed" : 0.0009870616428777033
+    },
+    {
+      "baroAltitude" : -0.1273681640625,
+      "recentDrop" : 0,
+      "recentGain" : 0.015588378906249978,
+      "speed" : 0,
+      "state" : "RESTING",
+      "timestamp" : "2026-01-27T13:04:44Z",
+      "verticalSpeed" : 0.0012322751528504948
+    },
+    {
+      "baroAltitude" : -0.12657470703125,
+      "recentDrop" : 0,
+      "recentGain" : 0.015588378906249978,
+      "speed" : 0,
+      "state" : "RESTING",
+      "timestamp" : "2026-01-27T13:04:45Z",
+      "verticalSpeed" : 0.0006900748144361246
+    },
+    {
+      "baroAltitude" : -0.126043701171875,
+      "recentDrop" : 0,
+      "recentGain" : 0.015063476562500011,
+      "speed" : 0,
+      "state" : "RESTING",
+      "timestamp" : "2026-01-27T13:04:46Z",
+      "verticalSpeed" : 0.0004918087086709262
+    },
+    {
+      "baroAltitude" : -0.12578125,
+      "recentDrop" : 0,
+      "recentGain" : 0.014007568359375,
+      "speed" : 0,
+      "state" : "RESTING",
+      "timestamp" : "2026-01-27T13:04:47Z",
+      "verticalSpeed" : 0.00024534246592132974
+    },
+    {
+      "baroAltitude" : -0.125518798828125,
+      "recentDrop" : 0,
+      "recentGain" : 0.012683105468750011,
+      "speed" : 0,
+      "state" : "RESTING",
+      "timestamp" : "2026-01-27T13:04:48Z",
+      "verticalSpeed" : 0.00024534200113311244
+    },
+    {
+      "baroAltitude" : -0.124993896484375,
+      "recentDrop" : 0,
+      "recentGain" : 0.011358642578124994,
+      "speed" : 0,
+      "state" : "RESTING",
+      "timestamp" : "2026-01-27T13:04:49Z",
+      "verticalSpeed" : 0.0004906679812955067
+    },
+    {
+      "baroAltitude" : -0.124200439453125,
+      "recentDrop" : 0,
+      "recentGain" : 0.010302734374999983,
+      "speed" : 0,
+      "state" : "RESTING",
+      "timestamp" : "2026-01-27T13:04:50Z",
+      "verticalSpeed" : 0.000741649066058134
+    },
+    {
+      "baroAltitude" : -0.123406982421875,
+      "recentDrop" : 0,
+      "recentGain" : 0.009246826171875,
+      "speed" : 0,
+      "state" : "RESTING",
+      "timestamp" : "2026-01-27T13:04:51Z",
+      "verticalSpeed" : 0.0007418967343502535
+    },
+    {
+      "baroAltitude" : -0.12235107421875,
+      "recentDrop" : 0,
+      "recentGain" : 0.008715820312500011,
+      "speed" : 0,
+      "state" : "RESTING",
+      "timestamp" : "2026-01-27T13:04:52Z",
+      "verticalSpeed" : 0.0009914901276346635
+    },
+    {
+      "baroAltitude" : -0.120770263671875,
+      "recentDrop" : 0,
+      "recentGain" : 0.008972167968749986,
+      "speed" : 0,
+      "state" : "RESTING",
+      "timestamp" : "2026-01-27T13:04:53Z",
+      "verticalSpeed" : 0.0014710920124744549
+    },
+    {
+      "baroAltitude" : -0.119451904296875,
+      "recentDrop" : 0,
+      "recentGain" : 0.009234619140625011,
+      "speed" : 0,
+      "state" : "RESTING",
+      "timestamp" : "2026-01-27T13:04:54Z",
+      "verticalSpeed" : 0.0012326253844013092
+    },
+    {
+      "baroAltitude" : -0.118133544921875,
+      "recentDrop" : 0,
+      "recentGain" : 0.009234619140625011,
+      "speed" : 0,
+      "state" : "RESTING",
+      "timestamp" : "2026-01-27T13:04:56Z",
+      "verticalSpeed" : 0.0012257821244096982
+    },
+    {
+      "baroAltitude" : -0.116815185546875,
+      "recentDrop" : 0,
+      "recentGain" : 0.009759521484375006,
+      "speed" : 0,
+      "state" : "RESTING",
+      "timestamp" : "2026-01-27T13:04:57Z",
+      "verticalSpeed" : 0.001232920557494314
+    },
+    {
+      "baroAltitude" : -0.1149658203125,
+      "recentDrop" : 0,
+      "recentGain" : 0.011077880859375,
+      "speed" : 0,
+      "state" : "RESTING",
+      "timestamp" : "2026-01-27T13:04:58Z",
+      "verticalSpeed" : 0.0017293903613598363
+    },
+    {
+      "baroAltitude" : -0.113116455078125,
+      "recentDrop" : 0,
+      "recentGain" : 0.012664794921875014,
+      "speed" : 0,
+      "state" : "RESTING",
+      "timestamp" : "2026-01-27T13:04:59Z",
+      "verticalSpeed" : 0.001728832813856603
+    },
+    {
+      "baroAltitude" : -0.111529541015625,
+      "recentDrop" : 0,
+      "recentGain" : 0.013989257812500003,
+      "speed" : 0,
+      "state" : "RESTING",
+      "timestamp" : "2026-01-27T13:05:00Z",
+      "verticalSpeed" : 0.0014835049230253515
+    },
+    {
+      "baroAltitude" : -0.1104736328125,
+      "recentDrop" : 0,
+      "recentGain" : 0.014520263671875006,
+      "speed" : 0,
+      "state" : "RESTING",
+      "timestamp" : "2026-01-27T13:05:01Z",
+      "verticalSpeed" : 0.000986862372384786
+    },
+    {
+      "baroAltitude" : -0.109686279296875,
+      "recentDrop" : 0,
+      "recentGain" : 0.014514160156250011,
+      "speed" : 0,
+      "state" : "RESTING",
+      "timestamp" : "2026-01-27T13:05:02Z",
+      "verticalSpeed" : 0.0007361188632241986
+    },
+    {
+      "baroAltitude" : -0.109161376953125,
+      "recentDrop" : 0,
+      "recentGain" : 0.014245605468750006,
+      "speed" : 0,
+      "state" : "RESTING",
+      "timestamp" : "2026-01-27T13:05:03Z",
+      "verticalSpeed" : 0.0004907202583592181
+    },
+    {
+      "baroAltitude" : -0.109161376953125,
+      "recentDrop" : 0,
+      "recentGain" : 0.013189697265624994,
+      "speed" : 0,
+      "state" : "RESTING",
+      "timestamp" : "2026-01-27T13:05:04Z",
+      "verticalSpeed" : 0
+    },
+    {
+      "baroAltitude" : -0.109161376953125,
+      "recentDrop" : 0,
+      "recentGain" : 0.011608886718750003,
+      "speed" : 0,
+      "state" : "RESTING",
+      "timestamp" : "2026-01-27T13:05:05Z",
+      "verticalSpeed" : 0
+    },
+    {
+      "baroAltitude" : -0.109161376953125,
+      "recentDrop" : 0,
+      "recentGain" : 0.010290527343749994,
+      "speed" : 0,
+      "state" : "RESTING",
+      "timestamp" : "2026-01-27T13:05:06Z",
+      "verticalSpeed" : 0
+    },
+    {
+      "baroAltitude" : -0.108892822265625,
+      "recentDrop" : 0,
+      "recentGain" : 0.009240722656250006,
+      "speed" : 0,
+      "state" : "RESTING",
+      "timestamp" : "2026-01-27T13:05:07Z",
+      "verticalSpeed" : 0.0002511297942403398
+    },
+    {
+      "baroAltitude" : -0.1091552734375,
+      "recentDrop" : 0,
+      "recentGain" : 0.007659912109375,
+      "speed" : 0,
+      "state" : "RESTING",
+      "timestamp" : "2026-01-27T13:05:08Z",
+      "verticalSpeed" : -0.00024470561245705546
+    },
+    {
+      "baroAltitude" : -0.10836181640625,
+      "recentDrop" : 0,
+      "recentGain" : 0.006604003906249989,
+      "speed" : 0,
+      "state" : "RESTING",
+      "timestamp" : "2026-01-27T13:05:09Z",
+      "verticalSpeed" : 0.0007434482505956745
+    },
+    {
+      "baroAltitude" : -0.10386962890625,
+      "recentDrop" : 0,
+      "recentGain" : 0.009246826171875,
+      "speed" : 0.2264879286289215,
+      "state" : "RESTING",
+      "timestamp" : "2026-01-27T13:05:11Z",
+      "verticalSpeed" : 0.004184169548405672
+    },
+    {
+      "baroAltitude" : -0.0943603515625,
+      "recentDrop" : 0,
+      "recentGain" : 0.017169189453124997,
+      "speed" : 1.2036790665391457,
+      "state" : "RESTING",
+      "timestamp" : "2026-01-27T13:05:12Z",
+      "verticalSpeed" : 0.00888214469517177
+    },
+    {
+      "baroAltitude" : -0.079296875,
+      "recentDrop" : 0,
+      "recentGain" : 0.031176757812499997,
+      "speed" : 1.3008245080129368,
+      "state" : "RESTING",
+      "timestamp" : "2026-01-27T13:05:13Z",
+      "verticalSpeed" : 0.014080898170743324
+    },
+    {
+      "baroAltitude" : -0.059210205078125,
+      "recentDrop" : 0,
+      "recentGain" : 0.05047607421874999,
+      "speed" : 1.3530578015950052,
+      "state" : "RESTING",
+      "timestamp" : "2026-01-27T13:05:14Z",
+      "verticalSpeed" : 0.018778046008548568
+    },
+    {
+      "baroAltitude" : -0.0341064453125,
+      "recentDrop" : 0,
+      "recentGain" : 0.075054931640625,
+      "speed" : 0,
+      "state" : "RESTING",
+      "timestamp" : "2026-01-27T13:05:15Z",
+      "verticalSpeed" : 0.023254665496418366
+    },
+    {
+      "baroAltitude" : -0.00767822265625,
+      "recentDrop" : 0,
+      "recentGain" : 0.101483154296875,
+      "speed" : 3.783379751245531,
+      "state" : "RESTING",
+      "timestamp" : "2026-01-27T13:05:16Z",
+      "verticalSpeed" : 0.024696435561637375
+    },
+    {
+      "baroAltitude" : 0.01954345703125,
+      "recentDrop" : 0,
+      "recentGain" : 0.128704833984375,
+      "speed" : 3.8087185796514866,
+      "state" : "RESTING",
+      "timestamp" : "2026-01-27T13:05:17Z",
+      "verticalSpeed" : 0.025517947782701406
+    },
+    {
+      "baroAltitude" : 0.04649658203125,
+      "recentDrop" : 0,
+      "recentGain" : 0.155657958984375,
+      "speed" : 4.922962487449623,
+      "state" : "RESTING",
+      "timestamp" : "2026-01-27T13:05:18Z",
+      "verticalSpeed" : 0.025137844486137168
+    },
+    {
+      "note" : "휴식 구간 드리프트 보정: Δ0.08m, err=1.58m",
+      "timestamp" : "2026-01-27T13:05:19Z"
+    },
+    {
+      "baroAltitude" : -0.005663884911806472,
+      "recentDrop" : 0,
+      "recentGain" : 0.182073974609375,
+      "speed" : 2.947591948062142,
+      "state" : "RESTING",
+      "timestamp" : "2026-01-27T13:05:19Z",
+      "verticalSpeed" : 0.024927085570932983
+    },
+    {
+      "note" : "휴식 구간 드리프트 보정: Δ0.08m, err=1.58m",
+      "timestamp" : "2026-01-27T13:05:20Z"
+    },
+    {
+      "baroAltitude" : -0.05897645005509431,
+      "recentDrop" : 0,
+      "recentGain" : 0.20796508789062498,
+      "speed" : 1.5563193006282787,
+      "state" : "RESTING",
+      "timestamp" : "2026-01-27T13:05:20Z",
+      "verticalSpeed" : 0.02397341867274233
+    },
+    {
+      "note" : "휴식 구간 드리프트 보정: Δ0.08m, err=1.61m",
+      "timestamp" : "2026-01-27T13:05:21Z"
+    },
+    {
+      "baroAltitude" : -0.11689441539097664,
+      "recentDrop" : 0,
+      "recentGain" : 0.22963256835937498,
+      "speed" : 0.9782442839672022,
+      "state" : "RESTING",
+      "timestamp" : "2026-01-27T13:05:21Z",
+      "verticalSpeed" : 0.02099588720594325
+    },
+    {
+      "note" : "휴식 구간 드리프트 보정: Δ0.08m, err=1.65m",
+      "timestamp" : "2026-01-27T13:05:22Z"
+    },
+    {
+      "baroAltitude" : -0.18030667765050576,
+      "recentDrop" : 0,
+      "recentGain" : 0.24443359374999998,
+      "speed" : 1.5167410524723408,
+      "state" : "RESTING",
+      "timestamp" : "2026-01-27T13:05:22Z",
+      "verticalSpeed" : 0.01803820358915702
+    },
+    {
+      "note" : "휴식 구간 드리프트 보정: Δ0.09m, err=1.72m",
+      "timestamp" : "2026-01-27T13:05:23Z"
+    },
+    {
+      "baroAltitude" : -0.25199578878257556,
+      "recentDrop" : 0,
+      "recentGain" : 0.24919433593750007,
+      "speed" : 1.2676704522691222,
+      "state" : "RESTING",
+      "timestamp" : "2026-01-27T13:05:23Z",
+      "verticalSpeed" : 0.01333555693620956
+    },
+    {
+      "note" : "휴식 구간 드리프트 보정: Δ0.09m, err=1.77m",
+      "timestamp" : "2026-01-27T13:05:24Z"
+    },
+    {
+      "baroAltitude" : -0.3298885501403962,
+      "recentDrop" : 0,
+      "recentGain" : 0.2449645996093751,
+      "speed" : 1.4827706966054817,
+      "state" : "RESTING",
+      "timestamp" : "2026-01-27T13:05:24Z",
+      "verticalSpeed" : 0.010162907334033897
+    },
+    {
+      "note" : "휴식 구간 드리프트 보정: Δ0.09m, err=1.83m",
+      "timestamp" : "2026-01-27T13:05:25Z"
+    },
+    {
+      "baroAltitude" : -0.4156035529096801,
+      "recentDrop" : 0,
+      "recentGain" : 0.23069458007812504,
+      "speed" : 0.5277591627236334,
+      "state" : "RESTING",
+      "timestamp" : "2026-01-27T13:05:25Z",
+      "verticalSpeed" : 0.005395193954467174
+    },
+    {
+      "note" : "휴식 구간 드리프트 보정: Δ0.09m, err=1.87m",
+      "timestamp" : "2026-01-27T13:05:26Z"
+    },
+    {
+      "note" : "휴식 구간 드리프트 보정: Δ0.10m, err=1.94m",
+      "timestamp" : "2026-01-27T13:05:27Z"
+    },
+    {
+      "baroAltitude" : -0.6004368628056981,
+      "recentDrop" : 0,
+      "recentGain" : 0.2116638183593751,
+      "speed" : 2.743991271492968,
+      "state" : "RESTING",
+      "timestamp" : "2026-01-27T13:05:27Z",
+      "verticalSpeed" : 0.005679085727841321
+    },
+    {
+      "note" : "휴식 구간 드리프트 보정: Δ0.10m, err=1.96m",
+      "timestamp" : "2026-01-27T13:05:28Z"
+    },
+    {
+      "baroAltitude" : -0.6933877676526701,
+      "recentDrop" : 0,
+      "recentGain" : 0.19051513671874976,
+      "speed" : 3.7563502028171283,
+      "state" : "RESTING",
+      "timestamp" : "2026-01-27T13:05:28Z",
+      "verticalSpeed" : 0.004933559915270966
+    },
+    {
+      "note" : "휴식 구간 드리프트 보정: Δ0.10m, err=1.93m",
+      "timestamp" : "2026-01-27T13:05:29Z"
+    },
+    {
+      "baroAltitude" : -0.7847687760760186,
+      "recentDrop" : 0,
+      "recentGain" : 0.16857299804687498,
+      "speed" : 4.110611016978082,
+      "state" : "RESTING",
+      "timestamp" : "2026-01-27T13:05:29Z",
+      "verticalSpeed" : 0.004936208136607271
+    },
+    {
+      "note" : "휴식 구간 드리프트 보정: Δ0.10m, err=1.90m",
+      "timestamp" : "2026-01-27T13:05:30Z"
+    },
+    {
+      "baroAltitude" : -0.8755656668891995,
+      "recentDrop" : 0,
+      "recentGain" : 0.14584960937500002,
+      "speed" : 0.5726998588056686,
+      "state" : "RESTING",
+      "timestamp" : "2026-01-27T13:05:30Z",
+      "verticalSpeed" : 0.003953231414828551
+    },
+    {
+      "note" : "휴식 구간 드리프트 보정: Δ0.09m, err=1.86m",
+      "timestamp" : "2026-01-27T13:05:31Z"
+    },
+    {
+      "baroAltitude" : -0.964687265066798,
+      "recentDrop" : 0,
+      "recentGain" : 0.12313232421874998,
+      "speed" : 0,
+      "state" : "RESTING",
+      "timestamp" : "2026-01-27T13:05:31Z",
+      "verticalSpeed" : 0.0037071680344090393
+    },
+    {
+      "note" : "휴식 구간 드리프트 보정: Δ0.09m, err=1.82m",
+      "timestamp" : "2026-01-27T13:05:32Z"
+    },
+    {
+      "baroAltitude" : -1.054457494411063,
+      "recentDrop" : 0,
+      "recentGain" : 0.09882202148437491,
+      "speed" : 0,
+      "state" : "RESTING",
+      "timestamp" : "2026-01-27T13:05:32Z",
+      "verticalSpeed" : 0.0012331834189730538
+    },
+    {
+      "note" : "휴식 구간 드리프트 보정: Δ0.09m, err=1.77m",
+      "timestamp" : "2026-01-27T13:05:33Z"
+    },
+    {
+      "baroAltitude" : -1.1442303093374369,
+      "recentDrop" : 0,
+      "recentGain" : 0.07503662109374964,
+      "speed" : 0,
+      "state" : "RESTING",
+      "timestamp" : "2026-01-27T13:05:33Z",
+      "verticalSpeed" : -0.001237857373882889
+    },
+    {
+      "note" : "휴식 구간 드리프트 보정: Δ0.08m, err=1.54m",
+      "timestamp" : "2026-01-27T13:05:34Z"
+    },
+    {
+      "baroAltitude" : -1.2233759136150963,
+      "recentDrop" : 0,
+      "recentGain" : 0.05336303710937451,
+      "speed" : 0.8936908796322725,
+      "state" : "RESTING",
+      "timestamp" : "2026-01-27T13:05:34Z",
+      "verticalSpeed" : -0.0022258983631266317
+    },
+    {
+      "baroAltitude" : -1.2278681011150963,
+      "recentDrop" : 0,
+      "recentGain" : 0.03460083007812442,
+      "speed" : 1.674520551113579,
+      "state" : "RESTING",
+      "timestamp" : "2026-01-27T13:05:35Z",
+      "verticalSpeed" : -0.004159390467040596
+    },
+    {
+      "baroAltitude" : -1.2326288433025963,
+      "recentDrop" : 0,
+      "recentGain" : 0.019006347656249645,
+      "speed" : 2.609374451962084,
+      "state" : "RESTING",
+      "timestamp" : "2026-01-27T13:05:36Z",
+      "verticalSpeed" : -0.004450489474719434
+    },
+    {
+      "baroAltitude" : -1.239232847208846,
+      "recentDrop" : 0,
+      "recentGain" : 0.006585693359374867,
+      "speed" : 0,
+      "state" : "RESTING",
+      "timestamp" : "2026-01-27T13:05:37Z",
+      "verticalSpeed" : -0.006173316750329988
+    },
+    {
+      "baroAltitude" : -1.246367856974471,
+      "recentDrop" : 0.006622314453125,
+      "recentGain" : 0,
+      "speed" : 0,
+      "state" : "RESTING",
+      "timestamp" : "2026-01-27T13:05:38Z",
+      "verticalSpeed" : -0.006670639514440159
+    },
+    {
+      "baroAltitude" : -1.253502866740096,
+      "recentDrop" : 0.019036865234374867,
+      "recentGain" : 0,
+      "speed" : 2.0343107640028513,
+      "state" : "RESTING",
+      "timestamp" : "2026-01-27T13:05:39Z",
+      "verticalSpeed" : -0.006669106134221014
+    },
+    {
+      "baroAltitude" : -1.259581968302596,
+      "recentDrop" : 0.0303955078125,
+      "recentGain" : 0,
+      "speed" : 1.8812217521145884,
+      "state" : "RESTING",
+      "timestamp" : "2026-01-27T13:05:40Z",
+      "verticalSpeed" : -0.005683974064817365
+    },
+    {
+      "baroAltitude" : -1.265661069865096,
+      "recentDrop" : 0.04070434570312509,
+      "recentGain" : 0,
+      "speed" : 2.094055428995133,
+      "state" : "RESTING",
+      "timestamp" : "2026-01-27T13:05:42Z",
+      "verticalSpeed" : -0.005679970372268122
+    },
+    {
+      "baroAltitude" : -1.270153257365096,
+      "recentDrop" : 0.049163818359375,
+      "recentGain" : 0,
+      "speed" : 1.8591079977084934,
+      "state" : "RESTING",
+      "timestamp" : "2026-01-27T13:05:43Z",
+      "verticalSpeed" : -0.0042003279276908575
+    },
+    {
+      "baroAltitude" : -1.273589536661971,
+      "recentDrop" : 0.05391845703125009,
+      "recentGain" : 0,
+      "speed" : 1.8930288915685358,
+      "state" : "RESTING",
+      "timestamp" : "2026-01-27T13:05:44Z",
+      "verticalSpeed" : -0.003212911209243231
+    },
+    {
+      "baroAltitude" : -1.275701353068221,
+      "recentDrop" : 0.054705810546874956,
+      "recentGain" : 0,
+      "speed" : 2.4539396866598935,
+      "state" : "RESTING",
+      "timestamp" : "2026-01-27T13:05:45Z",
+      "verticalSpeed" : -0.001973658336916232
+    },
+    {
+      "baroAltitude" : -1.277025815958846,
+      "recentDrop" : 0.053649902343749556,
+      "recentGain" : 0,
+      "speed" : 4.763643560599573,
+      "state" : "RESTING",
+      "timestamp" : "2026-01-27T13:05:46Z",
+      "verticalSpeed" : -0.0012266497790341755
+    },
+    {
+      "baroAltitude" : -1.277819272990096,
+      "recentDrop" : 0.049951171874999645,
+      "recentGain" : 0,
+      "speed" : 6.135736968699921,
+      "state" : "RESTING",
+      "timestamp" : "2026-01-27T13:05:47Z",
+      "verticalSpeed" : -0.0007416532806569337
+    },
+    {
+      "baroAltitude" : -1.277819272990096,
+      "recentDrop" : 0.045190429687499645,
+      "recentGain" : 0,
+      "speed" : 6.925616487696272,
+      "state" : "RESTING",
+      "timestamp" : "2026-01-27T13:05:48Z",
+      "verticalSpeed" : 0
+    },
+    {
+      "baroAltitude" : -1.275963804240096,
+      "recentDrop" : 0.036730957031249956,
+      "recentGain" : 0,
+      "speed" : 3.1088589762072,
+      "state" : "RESTING",
+      "timestamp" : "2026-01-27T13:05:49Z",
+      "verticalSpeed" : 0.0017334316496276868
+    },
+    {
+      "baroAltitude" : -1.273320981974471,
+      "recentDrop" : 0.026953125000000133,
+      "recentGain" : 0,
+      "speed" : 0.7323789951593005,
+      "state" : "RESTING",
+      "timestamp" : "2026-01-27T13:05:50Z",
+      "verticalSpeed" : 0.0024716157623923475
+    },
+    {
+      "baroAltitude" : -1.270147153849471,
+      "recentDrop" : 0.016644287109375044,
+      "recentGain" : 0,
+      "speed" : 0.9562961880468123,
+      "state" : "RESTING",
+      "timestamp" : "2026-01-27T13:05:51Z",
+      "verticalSpeed" : 0.0029656762848042843
+    },
+    {
+      "baroAltitude" : -1.266448423380721,
+      "recentDrop" : 0.006866455078125,
+      "recentGain" : 0,
+      "speed" : 2.433575623799961,
+      "state" : "RESTING",
+      "timestamp" : "2026-01-27T13:05:52Z",
+      "verticalSpeed" : 0.003441323140123195
+    },
+    {
+      "baroAltitude" : -1.262218687052596,
+      "recentDrop" : 0,
+      "recentGain" : 0.003442382812500089,
+      "speed" : 2.341824593763665,
+      "state" : "RESTING",
+      "timestamp" : "2026-01-27T13:05:53Z",
+      "verticalSpeed" : 0.003954702640503159
+    },
+    {
+      "baroAltitude" : -1.256670591349471,
+      "recentDrop" : 0,
+      "recentGain" : 0.013482666015625089,
+      "speed" : 2.6860855142167055,
+      "state" : "RESTING",
+      "timestamp" : "2026-01-27T13:05:54Z",
+      "verticalSpeed" : 0.005184782401631557
+    },
+    {
+      "baroAltitude" : -1.251653501505721,
+      "recentDrop" : 0,
+      "recentGain" : 0.021936035156249867,
+      "speed" : 2.3164466219512807,
+      "state" : "RESTING",
+      "timestamp" : "2026-01-27T13:05:55Z",
+      "verticalSpeed" : 0.004668527803743828
+    },
+    {
+      "baroAltitude" : -1.247161314005721,
+      "recentDrop" : 0,
+      "recentGain" : 0.028540039062500133,
+      "speed" : 3.360606958704578,
+      "state" : "RESTING",
+      "timestamp" : "2026-01-27T13:05:57Z",
+      "verticalSpeed" : 0.004180035061393058
+    },
+    {
+      "baroAltitude" : -1.244518491740096,
+      "recentDrop" : 0,
+      "recentGain" : 0.03250732421874991,
+      "speed" : 3.5675130255876213,
+      "state" : "RESTING",
+      "timestamp" : "2026-01-27T13:05:58Z",
+      "verticalSpeed" : 0.002470922667195667
+    },
+    {
+      "baroAltitude" : -1.245049497599471,
+      "recentDrop" : 0,
+      "recentGain" : 0.03276977539062487,
+      "speed" : 4.413370556311383,
+      "state" : "RESTING",
+      "timestamp" : "2026-01-27T13:05:59Z",
+      "verticalSpeed" : -0.000496377571454052
+    },
+    {
+      "baroAltitude" : -1.251128599161971,
+      "recentDrop" : 0,
+      "recentGain" : 0.026690673828124956,
+      "speed" : 5.662290585387949,
+      "state" : "RESTING",
+      "timestamp" : "2026-01-27T13:06:00Z",
+      "verticalSpeed" : -0.005704337818968133
+    },
+    {
+      "baroAltitude" : -1.261168882365096,
+      "recentDrop" : 0,
+      "recentGain" : 0.014794921875000089,
+      "speed" : 0,
+      "state" : "RESTING",
+      "timestamp" : "2026-01-27T13:06:01Z",
+      "verticalSpeed" : -0.009349008255197378
+    },
+    {
+      "baroAltitude" : -1.273851987833846,
+      "recentDrop" : 0.0005310058593748224,
+      "recentGain" : 0,
+      "speed" : 6.136432324094557,
+      "state" : "RESTING",
+      "timestamp" : "2026-01-27T13:06:02Z",
+      "verticalSpeed" : -0.011854865433612173
+    },
+    {
+      "baroAltitude" : -1.287591001505721,
+      "recentDrop" : 0.017443847656249956,
+      "recentGain" : 0,
+      "speed" : 6.1067653301807665,
+      "state" : "RESTING",
+      "timestamp" : "2026-01-27T13:06:03Z",
+      "verticalSpeed" : -0.012843920960280782
+    },
+    {
+      "baroAltitude" : -1.301330015177596,
+      "recentDrop" : 0.034881591796875,
+      "recentGain" : 0,
+      "speed" : 3.780528293222163,
+      "state" : "RESTING",
+      "timestamp" : "2026-01-27T13:06:04Z",
+      "verticalSpeed" : -0.012153730381288792
+    },
+    {
+      "baroAltitude" : -1.311632749552596,
+      "recentDrop" : 0.04941406249999991,
+      "recentGain" : 0,
+      "speed" : 5.307595084830485,
+      "state" : "RESTING",
+      "timestamp" : "2026-01-27T13:06:05Z",
+      "verticalSpeed" : -0.010261615046480564
+    },
+    {
+      "baroAltitude" : -1.314269468302596,
+      "recentDrop" : 0.057598876953125044,
+      "recentGain" : 0,
+      "speed" : 5.372223915540242,
+      "state" : "RESTING",
+      "timestamp" : "2026-01-27T13:06:06Z",
+      "verticalSpeed" : -0.0024718629237213494
+    },
+    {
+      "baroAltitude" : -1.309514829630721,
+      "recentDrop" : 0.057861328125,
+      "recentGain" : 0,
+      "speed" : 5.405824556804238,
+      "state" : "RESTING",
+      "timestamp" : "2026-01-27T13:06:07Z",
+      "verticalSpeed" : 0.004403364569391498
+    },
+    {
+      "baroAltitude" : -1.2912775249432211,
+      "recentDrop" : 0.04411621093750018,
+      "recentGain" : 0,
+      "speed" : 5.434885285574905,
+      "state" : "RESTING",
+      "timestamp" : "2026-01-27T13:06:08Z",
+      "verticalSpeed" : 0.01701218932456915
+    },
+    {
+      "baroAltitude" : -1.255864927286971,
+      "recentDrop" : 0.011346435546875089,
+      "recentGain" : 0,
+      "speed" : 2.811410619038797,
+      "state" : "RESTING",
+      "timestamp" : "2026-01-27T13:06:09Z",
+      "verticalSpeed" : 0.033118417285564875
+    },
+    {
+      "baroAltitude" : -1.2104181499432212,
+      "recentDrop" : 0,
+      "recentGain" : 0.03463134765624987,
+      "speed" : 2.4715937792657625,
+      "state" : "RESTING",
+      "timestamp" : "2026-01-27T13:06:10Z",
+      "verticalSpeed" : 0.042467433037258306
+    },
+    {
+      "baroAltitude" : -1.156774351115096,
+      "recentDrop" : 0,
+      "recentGain" : 0.09435424804687487,
+      "speed" : 2.9043165078039705,
+      "state" : "RESTING",
+      "timestamp" : "2026-01-27T13:06:12Z",
+      "verticalSpeed" : 0.05015182737841169
+    },
+    {
+      "baroAltitude" : -1.093358823771346,
+      "recentDrop" : 0,
+      "recentGain" : 0.16781005859374987,
+      "speed" : 3.476763086457078,
+      "state" : "RESTING",
+      "timestamp" : "2026-01-27T13:06:13Z",
+      "verticalSpeed" : 0.05927000806209731
+    },
+    {
+      "baroAltitude" : -1.026507017130721,
+      "recentDrop" : 0,
+      "recentGain" : 0.247344970703125,
+      "speed" : 5.880667831603169,
+      "state" : "RESTING",
+      "timestamp" : "2026-01-27T13:06:14Z",
+      "verticalSpeed" : 0.0624959644063146
+    },
+    {
+      "baroAltitude" : -0.958599302286971,
+      "recentDrop" : 0,
+      "recentGain" : 0.32899169921875004,
+      "speed" : 3.512660862766018,
+      "state" : "RESTING",
+      "timestamp" : "2026-01-27T13:06:15Z",
+      "verticalSpeed" : 0.06348348346340363
+    },
+    {
+      "baroAltitude" : -0.8965021343182208,
+      "recentDrop" : 0,
+      "recentGain" : 0.40482788085937516,
+      "speed" : 4.0832533591838205,
+      "state" : "RESTING",
+      "timestamp" : "2026-01-27T13:06:16Z",
+      "verticalSpeed" : 0.058062355173988695
+    },
+    {
+      "baroAltitude" : -0.8444513530682208,
+      "recentDrop" : 0,
+      "recentGain" : 0.46718139648437507,
+      "speed" : 4.585998042347136,
+      "state" : "RESTING",
+      "timestamp" : "2026-01-27T13:06:17Z",
+      "verticalSpeed" : 0.048680352233108945
+    },
+    {
+      "baroAltitude" : -0.7995294780682207,
+      "recentDrop" : 0,
+      "recentGain" : 0.5147399902343752,
+      "speed" : 2.2351205211516554,
+      "state" : "RESTING",
+      "timestamp" : "2026-01-27T13:06:18Z",
+      "verticalSpeed" : 0.04196176414190701
+    },
+    {
+      "baroAltitude" : -0.7688837261150957,
+      "recentDrop" : 0,
+      "recentGain" : 0.5406311035156254,
+      "speed" : 0.8772921604611887,
+      "state" : "RESTING",
+      "timestamp" : "2026-01-27T13:06:19Z",
+      "verticalSpeed" : 0.028402731919187945
+    },
+    {
+      "baroAltitude" : -0.7535577983807207,
+      "recentDrop" : 0,
+      "recentGain" : 0.5377197265625004,
+      "speed" : 2.846454159537516,
+      "state" : "RESTING",
+      "timestamp" : "2026-01-27T13:06:20Z",
+      "verticalSpeed" : 0.014324086193734036
+    },
+    {
+      "note" : "휴식 구간 드리프트 보정: Δ0.09m, err=1.72m",
+      "timestamp" : "2026-01-27T13:06:21Z"
+    },
+    {
+      "baroAltitude" : -0.8302652685055338,
+      "recentDrop" : 0,
+      "recentGain" : 0.5118225097656253,
+      "speed" : 2.3993531087241253,
+      "state" : "RESTING",
+      "timestamp" : "2026-01-27T13:06:21Z",
+      "verticalSpeed" : 0.008896521408056999
+    },
+    {
+      "note" : "휴식 구간 드리프트 보정: Δ0.10m, err=1.96m",
+      "timestamp" : "2026-01-27T13:06:22Z"
+    },
+    {
+      "baroAltitude" : -0.9241405990041438,
+      "recentDrop" : 0,
+      "recentGain" : 0.4703369140625002,
+      "speed" : 1.6471442404766268,
+      "state" : "RESTING",
+      "timestamp" : "2026-01-27T13:06:22Z",
+      "verticalSpeed" : 0.003702962845003171
+    },
+    {
+      "note" : "휴식 구간 드리프트 보정: Δ0.10m, err=2.02m",
+      "timestamp" : "2026-01-27T13:06:23Z"
+    },
+    {
+      "baroAltitude" : -1.028665441973538,
+      "recentDrop" : 0,
+      "recentGain" : 0.4132568359375004,
+      "speed" : 1.944278022429649,
+      "state" : "RESTING",
+      "timestamp" : "2026-01-27T13:06:23Z",
+      "verticalSpeed" : -0.003196723429459765
+    },
+    {
+      "note" : "휴식 구간 드리프트 보정: Δ0.10m, err=1.96m",
+      "timestamp" : "2026-01-27T13:06:24Z"
+    },
+    {
+      "baroAltitude" : -1.1350009689436205,
+      "recentDrop" : 0,
+      "recentGain" : 0.34138183593750027,
+      "speed" : 1.0955617203237837,
+      "state" : "RESTING",
+      "timestamp" : "2026-01-27T13:06:24Z",
+      "verticalSpeed" : -0.007905302842104613
+    },
+    {
+      "note" : "휴식 구간 드리프트 보정: Δ0.09m, err=1.83m",
+      "timestamp" : "2026-01-27T13:06:25Z"
+    },
+    {
+      "baroAltitude" : -1.2372335289939353,
+      "recentDrop" : 0,
+      "recentGain" : 0.2636962890625001,
+      "speed" : 0.49274025964895335,
+      "state" : "RESTING",
+      "timestamp" : "2026-01-27T13:06:25Z",
+      "verticalSpeed" : -0.010129487575884775
+    },
+    {
+      "note" : "휴식 구간 드리프트 보정: Δ0.08m, err=1.60m",
+      "timestamp" : "2026-01-27T13:06:26Z"
+    },
+    {
+      "baroAltitude" : -1.327038300001518,
+      "recentDrop" : 0,
+      "recentGain" : 0.1860107421874999,
+      "speed" : 1.2130211604458356,
+      "state" : "RESTING",
+      "timestamp" : "2026-01-27T13:06:27Z",
+      "verticalSpeed" : -0.009139886313036541
+    },
+    {
+      "baroAltitude" : -1.3333798527358929,
+      "recentDrop" : 0,
+      "recentGain" : 0.11757202148437473,
+      "speed" : 3.1851285090661565,
+      "state" : "RESTING",
+      "timestamp" : "2026-01-27T13:06:28Z",
+      "verticalSpeed" : -0.0059263081636128055
+    },
+    {
+      "baroAltitude" : -1.337078583204643,
+      "recentDrop" : 0,
+      "recentGain" : 0.061822509765624645,
+      "speed" : 1.9204057532045906,
+      "state" : "RESTING",
+      "timestamp" : "2026-01-27T13:06:29Z",
+      "verticalSpeed" : -0.0034567769191690863
+    },
+    {
+      "baroAltitude" : -1.3317929386733929,
+      "recentDrop" : 0,
+      "recentGain" : 0.022186279296874556,
+      "speed" : 1.8594310935794223,
+      "state" : "RESTING",
+      "timestamp" : "2026-01-27T13:06:30Z",
+      "verticalSpeed" : 0.004889284488713325
+    },
+    {
+      "baroAltitude" : -1.3257199406265179,
+      "recentDrop" : 0.0023864746093755773,
+      "recentGain" : 0,
+      "speed" : 1.5784851553576553,
+      "state" : "RESTING",
+      "timestamp" : "2026-01-27T13:06:31Z",
+      "verticalSpeed" : 0.005660954559349737
+    },
+    {
+      "note" : "휴식 구간 드리프트 보정: Δ-0.08m, err=-1.68m",
+      "timestamp" : "2026-01-27T13:06:32Z"
+    },
+    {
+      "baroAltitude" : -1.2369960107009796,
+      "recentDrop" : 0.013226318359375266,
+      "recentGain" : 0,
+      "speed" : 2.1675535896094558,
+      "state" : "RESTING",
+      "timestamp" : "2026-01-27T13:06:32Z",
+      "verticalSpeed" : 0.004204566835317318
+    },
+    {
+      "note" : "휴식 구간 드리프트 보정: Δ-0.11m, err=-2.24m",
+      "timestamp" : "2026-01-27T13:06:33Z"
+    },
+    {
+      "baroAltitude" : -1.1229133570591296,
+      "recentDrop" : 0.020629882812500444,
+      "recentGain" : 0,
+      "speed" : 2.0747909907540416,
+      "state" : "RESTING",
+      "timestamp" : "2026-01-27T13:06:33Z",
+      "verticalSpeed" : 0.0019686722930530817
+    },
+    {
+      "note" : "휴식 구간 드리프트 보정: Δ-0.13m, err=-2.57m",
+      "timestamp" : "2026-01-27T13:06:34Z"
+    },
+    {
+      "baroAltitude" : -0.9944498311319672,
+      "recentDrop" : 0.024591064453124867,
+      "recentGain" : 0,
+      "speed" : 1.1210434844707873,
+      "state" : "RESTING",
+      "timestamp" : "2026-01-27T13:06:34Z",
+      "verticalSpeed" : 2.0748479399573623e-16
+    },
+    {
+      "note" : "휴식 구간 드리프트 보정: Δ-0.14m, err=-2.72m",
+      "timestamp" : "2026-01-27T13:06:35Z"
+    },
+    {
+      "baroAltitude" : -0.863966283171394,
+      "recentDrop" : 0.026440429687500155,
+      "recentGain" : 0,
+      "speed" : 0.45949084492227676,
+      "state" : "RESTING",
+      "timestamp" : "2026-01-27T13:06:35Z",
+      "verticalSpeed" : -0.0049422518549662765
+    },
+    {
+      "note" : "휴식 구간 드리프트 보정: Δ-0.14m, err=-2.78m",
+      "timestamp" : "2026-01-27T13:06:36Z"
+    },
+    {
+      "baroAltitude" : -0.732837680731653,
+      "recentDrop" : 0.025646972656250155,
+      "recentGain" : 0,
+      "speed" : 1.7466203369779338,
+      "state" : "RESTING",
+      "timestamp" : "2026-01-27T13:06:36Z",
+      "verticalSpeed" : -0.007166295037991165
+    },
+    {
+      "note" : "휴식 구간 드리프트 보정: Δ-0.14m, err=-2.77m",
+      "timestamp" : "2026-01-27T13:06:37Z"
+    },
+    {
+      "baroAltitude" : -0.6030260605091482,
+      "recentDrop" : 0.023272705078125178,
+      "recentGain" : 0,
+      "speed" : 1.504486737531276,
+      "state" : "RESTING",
+      "timestamp" : "2026-01-27T13:06:37Z",
+      "verticalSpeed" : -0.007906921810131032
+    },
+    {
+      "note" : "휴식 구간 드리프트 보정: Δ-0.13m, err=-2.59m",
+      "timestamp" : "2026-01-27T13:06:38Z"
+    },
+    {
+      "baroAltitude" : -0.48313624658642773,
+      "recentDrop" : 0.023272705078124678,
+      "recentGain" : 0,
+      "speed" : 0.8249049838053045,
+      "state" : "RESTING",
+      "timestamp" : "2026-01-27T13:06:38Z",
+      "verticalSpeed" : -0.009140141956670626
+    },
+    {
+      "note" : "휴식 구간 드리프트 보정: Δ-0.11m, err=-2.26m",
+      "timestamp" : "2026-01-27T13:06:39Z"
+    },
+    {
+      "baroAltitude" : -0.38358081152554857,
+      "recentDrop" : 0.030145263671874978,
+      "recentGain" : 0,
+      "speed" : 1.4125703730225536,
+      "state" : "RESTING",
+      "timestamp" : "2026-01-27T13:06:39Z",
+      "verticalSpeed" : -0.01235512146579759
+    },
+    {
+      "note" : "휴식 구간 드리프트 보정: Δ-0.09m, err=-1.84m",
+      "timestamp" : "2026-01-27T13:06:40Z"
+    },
+    {
+      "baroAltitude" : -0.31151643095331233,
+      "recentDrop" : 0.04626464843749972,
+      "recentGain" : 0,
+      "speed" : 2.2234617859111787,
+      "state" : "RESTING",
+      "timestamp" : "2026-01-27T13:06:40Z",
+      "verticalSpeed" : -0.018350276110027985
+    },
+    {
+      "note" : "휴식 구간 드리프트 보정: Δ-0.08m, err=-1.60m",
+      "timestamp" : "2026-01-27T13:06:41Z"
+    },
+    {
+      "baroAltitude" : -0.25046196344426824,
+      "recentDrop" : 0.07031249999999994,
+      "recentGain" : 0,
+      "speed" : 0.8132949182577137,
+      "state" : "RESTING",
+      "timestamp" : "2026-01-27T13:06:42Z",
+      "verticalSpeed" : -0.01754157699745526
+    },
+    {
+      "baroAltitude" : -0.2665752446942683,
+      "recentDrop" : 0.092498779296875,
+      "recentGain" : 0,
+      "speed" : 0.5926475824268731,
+      "state" : "RESTING",
+      "timestamp" : "2026-01-27T13:06:43Z",
+      "verticalSpeed" : -0.015059338593688585
+    },
+    {
+      "note" : "휴식 구간 드리프트 보정: Δ-0.08m, err=-1.57m",
+      "timestamp" : "2026-01-27T13:06:44Z"
+    },
+    {
+      "baroAltitude" : -0.200798627802949,
+      "recentDrop" : 0.10993041992187519,
+      "recentGain" : 0,
+      "speed" : 1.6848585068547486,
+      "state" : "RESTING",
+      "timestamp" : "2026-01-27T13:06:44Z",
+      "verticalSpeed" : -0.01212565683544329
+    },
+    {
+      "note" : "휴식 구간 드리프트 보정: Δ-0.08m, err=-1.68m",
+      "timestamp" : "2026-01-27T13:06:45Z"
+    },
+    {
+      "baroAltitude" : -0.1270982231945013,
+      "recentDrop" : 0.12234497070312486,
+      "recentGain" : 0,
+      "speed" : 0.5934572748291284,
+      "state" : "RESTING",
+      "timestamp" : "2026-01-27T13:06:45Z",
+      "verticalSpeed" : -0.009615190348852356
+    },
+    {
+      "note" : "휴식 구간 드리프트 보정: Δ-0.09m, err=-1.88m",
+      "timestamp" : "2026-01-27T13:06:46Z"
+    },
+    {
+      "baroAltitude" : -0.03560188911613161,
+      "recentDrop" : 0.12498168945312507,
+      "recentGain" : 0,
+      "speed" : 1.9560863183728587,
+      "state" : "RESTING",
+      "timestamp" : "2026-01-27T13:06:46Z",
+      "verticalSpeed" : -0.0024867924566485807
+    },
+    {
+      "note" : "휴식 구간 드리프트 보정: Δ-0.09m, err=-1.81m",
+      "timestamp" : "2026-01-27T13:06:47Z"
+    },
+    {
+      "baroAltitude" : 0.0526178274099622,
+      "recentDrop" : 0.12207031250000003,
+      "recentGain" : 0,
+      "speed" : 2.861240120174566,
+      "state" : "RESTING",
+      "timestamp" : "2026-01-27T13:06:47Z",
+      "verticalSpeed" : -0.002220336218710601
+    },
+    {
+      "note" : "휴식 구간 드리프트 보정: Δ-0.08m, err=-1.70m",
+      "timestamp" : "2026-01-27T13:06:48Z"
+    },
+    {
+      "baroAltitude" : 0.13215752840326758,
+      "recentDrop" : 0.11968383789062495,
+      "recentGain" : 0,
+      "speed" : 3.386935168105986,
+      "state" : "RESTING",
+      "timestamp" : "2026-01-27T13:06:48Z",
+      "verticalSpeed" : -0.00492147837263177
+    },
+    {
+      "note" : "휴식 구간 드리프트 보정: Δ-0.08m, err=-1.53m",
+      "timestamp" : "2026-01-27T13:06:49Z"
+    },
+    {
+      "baroAltitude" : 0.2035100238309469,
+      "recentDrop" : 0.11651000976562487,
+      "recentGain" : 0,
+      "speed" : 2.1474334924230036,
+      "state" : "RESTING",
+      "timestamp" : "2026-01-27T13:06:49Z",
+      "verticalSpeed" : -0.004908076510699747
+    },
+    {
+      "baroAltitude" : 0.19743702578407193,
+      "recentDrop" : 0.11280517578125002,
+      "recentGain" : 0,
+      "speed" : 2.7981040648951767,
+      "state" : "RESTING",
+      "timestamp" : "2026-01-27T13:06:50Z",
+      "verticalSpeed" : -0.005674744169223732
+    },
+    {
+      "baroAltitude" : 0.18528492617469694,
+      "recentDrop" : 0.1117431640624999,
+      "recentGain" : 0,
+      "speed" : 1.0073057535242027,
+      "state" : "RESTING",
+      "timestamp" : "2026-01-27T13:06:51Z",
+      "verticalSpeed" : -0.011363623189375135
+    },
+    {
+      "baroAltitude" : 0.16864063906532195,
+      "recentDrop" : 0.10856933593750001,
+      "recentGain" : 0,
+      "speed" : 3.337136036475949,
+      "state" : "RESTING",
+      "timestamp" : "2026-01-27T13:06:52Z",
+      "verticalSpeed" : -0.015552763586796386
+    },
+    {
+      "baroAltitude" : 0.145648695705947,
+      "recentDrop" : 0.11279907226562488,
+      "recentGain" : 0,
+      "speed" : 2.899742826097751,
+      "state" : "RESTING",
+      "timestamp" : "2026-01-27T13:06:53Z",
+      "verticalSpeed" : -0.021503833654974026
+    },
+    {
+      "baroAltitude" : 0.11632130312782199,
+      "recentDrop" : 0.12601318359374983,
+      "recentGain" : 0,
+      "speed" : 1.8710717248289286,
+      "state" : "RESTING",
+      "timestamp" : "2026-01-27T13:06:54Z",
+      "verticalSpeed" : -0.027285509087313607
+    },
+    {
+      "baroAltitude" : 0.08064625429969696,
+      "recentDrop" : 0.1487426757812499,
+      "recentGain" : 0,
+      "speed" : 2.494872501999065,
+      "state" : "RESTING",
+      "timestamp" : "2026-01-27T13:06:55Z",
+      "verticalSpeed" : -0.03350314181515955
+    },
+    {
+      "note" : "휴식 구간 드리프트 보정: Δ-0.08m, err=-1.53m",
+      "timestamp" : "2026-01-27T13:06:56Z"
+    },
+    {
+      "baroAltitude" : 0.11848097533091813,
+      "recentDrop" : 0.177020263671875,
+      "recentGain" : 0,
+      "speed" : 1.539010528059864,
+      "state" : "RESTING",
+      "timestamp" : "2026-01-27T13:06:56Z",
+      "verticalSpeed" : -0.03607137610707358
+    },
+    {
+      "note" : "휴식 구간 드리프트 보정: Δ-0.09m, err=-1.83m",
+      "timestamp" : "2026-01-27T13:06:57Z"
+    },
+    {
+      "note" : "휴식 구간 드리프트 보정: Δ-0.11m, err=-2.22m",
+      "timestamp" : "2026-01-27T13:06:58Z"
+    },
+    {
+      "baroAltitude" : 0.2828219330577023,
+      "recentDrop" : 0.21270141601562498,
+      "recentGain" : 0,
+      "speed" : 0.1954676693019227,
+      "state" : "RESTING",
+      "timestamp" : "2026-01-27T13:06:58Z",
+      "verticalSpeed" : -0.035830113901990875
+    },
+    {
+      "note" : "휴식 구간 드리프트 보정: Δ-0.13m, err=-2.60m",
+      "timestamp" : "2026-01-27T13:06:59Z"
+    },
+    {
+      "baroAltitude" : 0.3769094455908283,
+      "recentDrop" : 0.2460021972656251,
+      "recentGain" : 0,
+      "speed" : 0.13433750986833198,
+      "state" : "RESTING",
+      "timestamp" : "2026-01-27T13:06:59Z",
+      "verticalSpeed" : -0.03334568672410149
+    },
+    {
+      "note" : "휴식 구간 드리프트 보정: Δ-0.15m, err=-2.92m",
+      "timestamp" : "2026-01-27T13:07:00Z"
+    },
+    {
+      "baroAltitude" : 0.4851619021602157,
+      "recentDrop" : 0.2782409667968748,
+      "recentGain" : 0,
+      "speed" : 0.7254502373969961,
+      "state" : "RESTING",
+      "timestamp" : "2026-01-27T13:07:00Z",
+      "verticalSpeed" : -0.035080692758255726
+    },
+    {
+      "note" : "휴식 구간 드리프트 보정: Δ-0.16m, err=-3.18m",
+      "timestamp" : "2026-01-27T13:07:01Z"
+    },
+    {
+      "baroAltitude" : 0.6077860562390642,
+      "recentDrop" : 0.3094238281249999,
+      "recentGain" : 0,
+      "speed" : 1.8289206383221708,
+      "state" : "RESTING",
+      "timestamp" : "2026-01-27T13:07:01Z",
+      "verticalSpeed" : -0.03376079124205876
+    },
+    {
+      "note" : "휴식 구간 드리프트 보정: Δ-0.17m, err=-3.43m",
+      "timestamp" : "2026-01-27T13:07:02Z"
+    },
+    {
+      "baroAltitude" : 0.7496680754310222,
+      "recentDrop" : 0.33320922851562484,
+      "recentGain" : 0,
+      "speed" : 1.8215778881652214,
+      "state" : "RESTING",
+      "timestamp" : "2026-01-27T13:07:02Z",
+      "verticalSpeed" : -0.02789651874901008
+    },
+    {
+      "note" : "휴식 구간 드리프트 보정: Δ-0.18m, err=-3.57m",
+      "timestamp" : "2026-01-27T13:07:03Z"
+    },
+    {
+      "baroAltitude" : 0.9029417201959087,
+      "recentDrop" : 0.34616088867187456,
+      "recentGain" : 0,
+      "speed" : 1.4351521561936464,
+      "state" : "RESTING",
+      "timestamp" : "2026-01-27T13:07:03Z",
+      "verticalSpeed" : -0.023446470474799967
+    },
+    {
+      "note" : "휴식 구간 드리프트 보정: Δ-0.18m, err=-3.70m",
+      "timestamp" : "2026-01-27T13:07:04Z"
+    },
+    {
+      "baroAltitude" : 1.0705465552185482,
+      "recentDrop" : 0.3466918945312498,
+      "recentGain" : 0,
+      "speed" : 2.5019491544344317,
+      "state" : "RESTING",
+      "timestamp" : "2026-01-27T13:07:04Z",
+      "verticalSpeed" : -0.016072223985382154
+    },
+    {
+      "note" : "휴식 구간 드리프트 보정: Δ-0.19m, err=-3.79m",
+      "timestamp" : "2026-01-27T13:07:05Z"
+    },
+    {
+      "baroAltitude" : 1.2547399389450786,
+      "recentDrop" : 0.3289855957031249,
+      "recentGain" : 0,
+      "speed" : 0.9753090648806516,
+      "state" : "RESTING",
+      "timestamp" : "2026-01-27T13:07:05Z",
+      "verticalSpeed" : -0.004940810606197488
+    },
+    {
+      "note" : "휴식 구간 드리프트 보정: Δ-0.19m, err=-3.89m",
+      "timestamp" : "2026-01-27T13:07:06Z"
+    },
+    {
+      "baroAltitude" : 1.4519773857928642,
+      "recentDrop" : 0.29701538085937473,
+      "recentGain" : 0,
+      "speed" : 1.3673690008210957,
+      "state" : "RESTING",
+      "timestamp" : "2026-01-27T13:07:06Z",
+      "verticalSpeed" : 0.0024705622240767363
+    },
+    {
+      "note" : "휴식 구간 드리프트 보정: Δ-0.20m, err=-3.99m",
+      "timestamp" : "2026-01-27T13:07:07Z"
+    },
+    {
+      "baroAltitude" : 1.6603078966044844,
+      "recentDrop" : 0.25261840820312553,
+      "recentGain" : 0,
+      "speed" : 1.3573681917104492,
+      "state" : "RESTING",
+      "timestamp" : "2026-01-27T13:07:07Z",
+      "verticalSpeed" : 0.008153563110689314
+    },
+    {
+      "note" : "휴식 구간 드리프트 보정: Δ-0.20m, err=-4.03m",
+      "timestamp" : "2026-01-27T13:07:08Z"
+    },
+    {
+      "baroAltitude" : 1.8745445141491843,
+      "recentDrop" : 0.20135498046875,
+      "recentGain" : 0,
+      "speed" : 1.6992984192287868,
+      "state" : "RESTING",
+      "timestamp" : "2026-01-27T13:07:08Z",
+      "verticalSpeed" : 0.011781524616563075
+    },
+    {
+      "note" : "휴식 구간 드리프트 보정: Δ-0.20m, err=-4.03m",
+      "timestamp" : "2026-01-27T13:07:09Z"
+    },
+    {
+      "baroAltitude" : 2.09001361099167,
+      "recentDrop" : 0.14929809570312536,
+      "recentGain" : 0,
+      "speed" : 1.1905075650958425,
+      "state" : "RESTING",
+      "timestamp" : "2026-01-27T13:07:09Z",
+      "verticalSpeed" : 0.01284257705103799
+    },
+    {
+      "note" : "휴식 구간 드리프트 보정: Δ-0.20m, err=-4.07m",
+      "timestamp" : "2026-01-27T13:07:10Z"
+    },
+    {
+      "baroAltitude" : 2.308509220603008,
+      "recentDrop" : 0.09855957031250018,
+      "recentGain" : 0,
+      "speed" : 1.4286507058616131,
+      "state" : "RESTING",
+      "timestamp" : "2026-01-27T13:07:10Z",
+      "verticalSpeed" : 0.01408179260421063
+    },
+    {
+      "note" : "휴식 구간 드리프트 보정: Δ-0.21m, err=-4.13m",
+      "timestamp" : "2026-01-27T13:07:11Z"
+    },
+    {
+      "baroAltitude" : 2.5286532129800494,
+      "recentDrop" : 0.04729614257812509,
+      "recentGain" : 0,
+      "speed" : 1.0981910389324983,
+      "state" : "RESTING",
+      "timestamp" : "2026-01-27T13:07:11Z",
+      "verticalSpeed" : 0.012853279468846466
+    },
+    {
+      "note" : "휴식 구간 드리프트 보정: Δ-0.21m, err=-4.20m",
+      "timestamp" : "2026-01-27T13:07:12Z"
+    },
+    {
+      "note" : "휴식 구간 드리프트 보정: Δ-0.21m, err=-4.24m",
+      "timestamp" : "2026-01-27T13:07:13Z"
+    },
+    {
+      "baroAltitude" : 2.9615816920666953,
+      "recentDrop" : 0,
+      "recentGain" : 0.00026855468749964473,
+      "speed" : 1.3207819137823333,
+      "state" : "RESTING",
+      "timestamp" : "2026-01-27T13:07:13Z",
+      "verticalSpeed" : 0.01028674755276733
+    },
+    {
+      "note" : "휴식 구간 드리프트 보정: Δ-0.21m, err=-4.26m",
+      "timestamp" : "2026-01-27T13:07:14Z"
+    },
+    {
+      "baroAltitude" : 3.1822808679452503,
+      "recentDrop" : 0,
+      "recentGain" : 0.03779296874999982,
+      "speed" : 1.7678339663198421,
+      "state" : "RESTING",
+      "timestamp" : "2026-01-27T13:07:14Z",
+      "verticalSpeed" : 0.007158819953349644
+    },
+    {
+      "note" : "휴식 구간 드리프트 보정: Δ-0.21m, err=-4.22m",
+      "timestamp" : "2026-01-27T13:07:15Z"
+    },
+    {
+      "baroAltitude" : 3.3947280817563317,
+      "recentDrop" : 0,
+      "recentGain" : 0.06448364257812456,
+      "speed" : 1.4926961279438424,
+      "state" : "RESTING",
+      "timestamp" : "2026-01-27T13:07:15Z",
+      "verticalSpeed" : 0.0014906704321618724
+    },
+    {
+      "note" : "휴식 구간 드리프트 보정: Δ-0.21m, err=-4.19m",
+      "timestamp" : "2026-01-27T13:07:16Z"
+    },
+    {
+      "baroAltitude" : 3.5973240079250948,
+      "recentDrop" : 0,
+      "recentGain" : 0.07478637695312473,
+      "speed" : 1.8042241703078419,
+      "state" : "RESTING",
+      "timestamp" : "2026-01-27T13:07:16Z",
+      "verticalSpeed" : -0.006422807812645859
+    },
+    {
+      "note" : "휴식 구간 드리프트 보정: Δ-0.21m, err=-4.15m",
+      "timestamp" : "2026-01-27T13:07:17Z"
+    },
+    {
+      "baroAltitude" : 3.791346120151391,
+      "recentDrop" : 0,
+      "recentGain" : 0.06659545898437358,
+      "speed" : 0.746450597666862,
+      "state" : "RESTING",
+      "timestamp" : "2026-01-27T13:07:17Z",
+      "verticalSpeed" : -0.012600913555532854
+    },
+    {
+      "note" : "휴식 구간 드리프트 보정: Δ-0.20m, err=-4.05m",
+      "timestamp" : "2026-01-27T13:07:18Z"
+    },
+    {
+      "baroAltitude" : 3.975725540639568,
+      "recentDrop" : 0,
+      "recentGain" : 0.045715332031249556,
+      "speed" : 2.314847795564856,
+      "state" : "RESTING",
+      "timestamp" : "2026-01-27T13:07:18Z",
+      "verticalSpeed" : -0.01704490987741777
+    },
+    {
+      "note" : "휴식 구간 드리프트 보정: Δ-0.20m, err=-3.95m",
+      "timestamp" : "2026-01-27T13:07:19Z"
+    },
+    {
+      "baroAltitude" : 4.1539129816795235,
+      "recentDrop" : 0,
+      "recentGain" : 0.017706298828125355,
+      "speed" : 2.7413373167591923,
+      "state" : "RESTING",
+      "timestamp" : "2026-01-27T13:07:19Z",
+      "verticalSpeed" : -0.018036173792144495
+    },
+    {
+      "note" : "휴식 구간 드리프트 보정: Δ-0.19m, err=-3.84m",
+      "timestamp" : "2026-01-27T13:07:20Z"
+    },
+    {
+      "baroAltitude" : 4.325585187180367,
+      "recentDrop" : 0.01531982421875,
+      "recentGain" : 0,
+      "speed" : 2.9407943249365296,
+      "state" : "RESTING",
+      "timestamp" : "2026-01-27T13:07:20Z",
+      "verticalSpeed" : -0.019017553025273963
+    },
+    {
+      "note" : "휴식 구간 드리프트 보정: Δ-0.19m, err=-3.74m",
+      "timestamp" : "2026-01-27T13:07:21Z"
+    },
+    {
+      "baroAltitude" : 4.491669894742572,
+      "recentDrop" : 0.050201416015625,
+      "recentGain" : 0,
+      "speed" : 3.344450056818045,
+      "state" : "RESTING",
+      "timestamp" : "2026-01-27T13:07:21Z",
+      "verticalSpeed" : -0.019759177889286498
+    },
+    {
+      "note" : "휴식 구간 드리프트 보정: Δ-0.18m, err=-3.63m",
+      "timestamp" : "2026-01-27T13:07:22Z"
+    },
+    {
+      "baroAltitude" : 4.653717763867517,
+      "recentDrop" : 0.08455810546875053,
+      "recentGain" : 0,
+      "speed" : 2.622270059462694,
+      "state" : "RESTING",
+      "timestamp" : "2026-01-27T13:07:22Z",
+      "verticalSpeed" : -0.018032473632318736
+    },
+    {
+      "note" : "휴식 구간 드리프트 보정: Δ-0.18m, err=-3.54m",
+      "timestamp" : "2026-01-27T13:07:23Z"
+    },
+    {
+      "baroAltitude" : 4.811621819399171,
+      "recentDrop" : 0.11759033203125036,
+      "recentGain" : 0,
+      "speed" : 3.67868287550021,
+      "state" : "RESTING",
+      "timestamp" : "2026-01-27T13:07:23Z",
+      "verticalSpeed" : -0.017869270216274144
+    },
+    {
+      "note" : "휴식 구간 드리프트 보정: Δ-0.17m, err=-3.46m",
+      "timestamp" : "2026-01-27T13:07:24Z"
+    },
+    {
+      "baroAltitude" : 4.964134894464624,
+      "recentDrop" : 0.14903564453125018,
+      "recentGain" : 0,
+      "speed" : 3.857873333904397,
+      "state" : "RESTING",
+      "timestamp" : "2026-01-27T13:07:24Z",
+      "verticalSpeed" : -0.01901689465480677
+    },
+    {
+      "note" : "휴식 구간 드리프트 보정: Δ-0.17m, err=-3.32m",
+      "timestamp" : "2026-01-27T13:07:25Z"
+    },
+    {
+      "baroAltitude" : 5.112055549350464,
+      "recentDrop" : 0.17493286132812536,
+      "recentGain" : 0,
+      "speed" : 4.341969364247692,
+      "state" : "RESTING",
+      "timestamp" : "2026-01-27T13:07:25Z",
+      "verticalSpeed" : -0.01696351689852858
+    },
+    {
+      "note" : "휴식 구간 드리프트 보정: Δ-0.16m, err=-3.19m",
+      "timestamp" : "2026-01-27T13:07:26Z"
+    },
+    {
+      "baroAltitude" : 5.2560815366337215,
+      "recentDrop" : 0.1921081542968759,
+      "recentGain" : 0,
+      "speed" : 4.262417778017825,
+      "state" : "RESTING",
+      "timestamp" : "2026-01-27T13:07:26Z",
+      "verticalSpeed" : -0.014574176278869286
+    },
+    {
+      "note" : "휴식 구간 드리프트 보정: Δ-0.15m, err=-3.01m",
+      "timestamp" : "2026-01-27T13:07:27Z"
+    },
+    {
+      "note" : "휴식 구간 드리프트 보정: Δ-0.14m, err=-2.82m",
+      "timestamp" : "2026-01-27T13:07:28Z"
+    },
+    {
+      "baroAltitude" : 5.537027242931878,
+      "recentDrop" : 0.19553833007812305,
+      "recentGain" : 0,
+      "speed" : 3.440127254833586,
+      "state" : "RESTING",
+      "timestamp" : "2026-01-27T13:07:28Z",
+      "verticalSpeed" : -0.009669924712170453
+    },
+    {
+      "note" : "휴식 구간 드리프트 보정: Δ-0.13m, err=-2.67m",
+      "timestamp" : "2026-01-27T13:07:29Z"
+    },
+    {
+      "baroAltitude" : 5.664919571252836,
+      "recentDrop" : 0.1878723144531218,
+      "recentGain" : 0,
+      "speed" : 3.7724560072394286,
+      "state" : "RESTING",
+      "timestamp" : "2026-01-27T13:07:29Z",
+      "verticalSpeed" : -0.005411593362653219
+    },
+    {
+      "note" : "휴식 구간 드리프트 보정: Δ-0.13m, err=-2.59m",
+      "timestamp" : "2026-01-27T13:07:30Z"
+    },
+    {
+      "baroAltitude" : 5.795712763256555,
+      "recentDrop" : 0.16857910156249822,
+      "recentGain" : 0,
+      "speed" : 4.435069309201303,
+      "state" : "RESTING",
+      "timestamp" : "2026-01-27T13:07:30Z",
+      "verticalSpeed" : 0.0009870164370509018
+    },
+    {
+      "note" : "휴식 구간 드리프트 보정: Δ-0.13m, err=-2.54m",
+      "timestamp" : "2026-01-27T13:07:31Z"
+    },
+    {
+      "baroAltitude" : 5.935286869669178,
+      "recentDrop" : 0.13660888671874893,
+      "recentGain" : 0,
+      "speed" : 4.365970035759326,
+      "state" : "RESTING",
+      "timestamp" : "2026-01-27T13:07:31Z",
+      "verticalSpeed" : 0.01185603985116951
+    },
+    {
+      "note" : "휴식 구간 드리프트 보정: Δ-0.12m, err=-2.38m",
+      "timestamp" : "2026-01-27T13:07:32Z"
+    },
+    {
+      "baroAltitude" : 6.080720652639271,
+      "recentDrop" : 0.08984375000000089,
+      "recentGain" : 0,
+      "speed" : 3.655886216536145,
+      "state" : "RESTING",
+      "timestamp" : "2026-01-27T13:07:32Z",
+      "verticalSpeed" : 0.024699110086843903
+    },
+    {
+      "note" : "휴식 구간 드리프트 보정: Δ-0.12m, err=-2.34m",
+      "timestamp" : "2026-01-27T13:07:33Z"
+    },
+    {
+      "baroAltitude" : 6.239572071856367,
+      "recentDrop" : 0.026953124999999467,
+      "recentGain" : 0,
+      "speed" : 3.6677437646142663,
+      "state" : "RESTING",
+      "timestamp" : "2026-01-27T13:07:33Z",
+      "verticalSpeed" : 0.03902510777068954
+    },
+    {
+      "note" : "휴식 구간 드리프트 보정: Δ-0.12m, err=-2.45m",
+      "timestamp" : "2026-01-27T13:07:34Z"
+    },
+    {
+      "baroAltitude" : 6.422440150827319,
+      "recentDrop" : 0,
+      "recentGain" : 0.052581787109376776,
+      "speed" : 3.106930906397073,
+      "state" : "RESTING",
+      "timestamp" : "2026-01-27T13:07:34Z",
+      "verticalSpeed" : 0.05644207328208159
+    },
+    {
+      "note" : "휴식 구간 드리프트 보정: Δ-0.14m, err=-2.70m",
+      "timestamp" : "2026-01-27T13:07:35Z"
+    },
+    {
+      "baroAltitude" : 6.637324170768285,
+      "recentDrop" : 0,
+      "recentGain" : 0.15167236328125444,
+      "speed" : 2.962320581457846,
+      "state" : "RESTING",
+      "timestamp" : "2026-01-27T13:07:35Z",
+      "verticalSpeed" : 0.07375987735481443
+    },
+    {
+      "note" : "휴식 구간 드리프트 보정: Δ-0.15m, err=-2.91m",
+      "timestamp" : "2026-01-27T13:07:36Z"
+    },
+    {
+      "baroAltitude" : 6.878188454371545,
+      "recentDrop" : 0,
+      "recentGain" : 0.2671447753906264,
+      "speed" : 1.8765160840265467,
+      "state" : "RESTING",
+      "timestamp" : "2026-01-27T13:07:36Z",
+      "verticalSpeed" : 0.08892446081287615
+    },
+    {
+      "note" : "휴식 구간 드리프트 보정: Δ-0.16m, err=-3.11m",
+      "timestamp" : "2026-01-27T13:07:37Z"
+    },
+    {
+      "baroAltitude" : 7.13955462519278,
+      "recentDrop" : 0,
+      "recentGain" : 0.39133300781250036,
+      "speed" : 2.1011147375719412,
+      "state" : "RESTING",
+      "timestamp" : "2026-01-27T13:07:37Z",
+      "verticalSpeed" : 0.0987917672786282
+    },
+    {
+      "note" : "휴식 구간 드리프트 보정: Δ-0.16m, err=-3.26m",
+      "timestamp" : "2026-01-27T13:07:38Z"
+    },
+    {
+      "baroAltitude" : 7.420160028261269,
+      "recentDrop" : 0,
+      "recentGain" : 0.524768066406252,
+      "speed" : 1.0442258393305786,
+      "state" : "RESTING",
+      "timestamp" : "2026-01-27T13:07:38Z",
+      "verticalSpeed" : 0.1106724504110939
+    },
+    {
+      "note" : "휴식 구간 드리프트 보정: Δ-0.17m, err=-3.40m",
+      "timestamp" : "2026-01-27T13:07:39Z"
+    },
+    {
+      "baroAltitude" : 7.711918236802016,
+      "recentDrop" : 0,
+      "recentGain" : 0.6566162109375,
+      "speed" : 2.1592517775032416,
+      "state" : "RESTING",
+      "timestamp" : "2026-01-27T13:07:39Z",
+      "verticalSpeed" : 0.11330696459957536
+    },
+    {
+      "note" : "휴식 구간 드리프트 보정: Δ-0.19m, err=-3.72m",
+      "timestamp" : "2026-01-27T13:07:40Z"
+    },
+    {
+      "baroAltitude" : 8.017123240008157,
+      "recentDrop" : 0,
+      "recentGain" : 0.7815979003906239,
+      "speed" : 2.5333860187029127,
+      "state" : "RESTING",
+      "timestamp" : "2026-01-27T13:07:40Z",
+      "verticalSpeed" : 0.11175225269638306
+    },
+    {
+      "note" : "휴식 구간 드리프트 보정: Δ-0.20m, err=-3.93m",
+      "timestamp" : "2026-01-27T13:07:41Z"
+    },
+    {
+      "baroAltitude" : 8.327579773401435,
+      "recentDrop" : 0,
+      "recentGain" : 0.8946899414062512,
+      "speed" : 3.5952883617355185,
+      "state" : "RESTING",
+      "timestamp" : "2026-01-27T13:07:41Z",
+      "verticalSpeed" : 0.1064089347098155
+    },
+    {
+      "note" : "휴식 구간 드리프트 보정: Δ-0.21m, err=-4.11m",
+      "timestamp" : "2026-01-27T13:07:42Z"
+    },
+    {
+      "note" : "휴식 구간 드리프트 보정: Δ-0.23m, err=-4.53m",
+      "timestamp" : "2026-01-27T13:07:43Z"
+    },
+    {
+      "baroAltitude" : 8.868088963857769,
+      "recentDrop" : 0,
+      "recentGain" : 0.9908752441406259,
+      "speed" : 2.764661195384626,
+      "state" : "RESTING",
+      "timestamp" : "2026-01-27T13:07:43Z",
+      "verticalSpeed" : 0.10184515885705035
+    },
+    {
+      "note" : "휴식 구간 드리프트 보정: Δ-0.24m, err=-4.85m",
+      "timestamp" : "2026-01-27T13:07:44Z"
+    },
+    {
+      "baroAltitude" : 9.208775099155899,
+      "recentDrop" : 0,
+      "recentGain" : 1.0627502441406271,
+      "speed" : 4.278489604041701,
+      "state" : "RESTING",
+      "timestamp" : "2026-01-27T13:07:44Z",
+      "verticalSpeed" : 0.09189326474979419
+    },
+    {
+      "note" : "휴식 구간 드리프트 보정: Δ-0.25m, err=-5.07m",
+      "timestamp" : "2026-01-27T13:07:45Z"
+    },
+    {
+      "baroAltitude" : 9.556081088250396,
+      "recentDrop" : 0,
+      "recentGain" : 1.1148071289062518,
+      "speed" : 3.4172756882064297,
+      "state" : "RESTING",
+      "timestamp" : "2026-01-27T13:07:45Z",
+      "verticalSpeed" : 0.08768340529849424
+    },
+    {
+      "note" : "휴식 구간 드리프트 보정: Δ-0.26m, err=-5.26m",
+      "timestamp" : "2026-01-27T13:07:46Z"
+    },
+    {
+      "baroAltitude" : 9.914574153827745,
+      "recentDrop" : 0,
+      "recentGain" : 1.1499511718749993,
+      "speed" : 3.3077440026071656,
+      "state" : "RESTING",
+      "timestamp" : "2026-01-27T13:07:46Z",
+      "verticalSpeed" : 0.08917071331123132
+    },
+    {
+      "note" : "휴식 구간 드리프트 보정: Δ-0.26m, err=-5.22m",
+      "timestamp" : "2026-01-27T13:07:47Z"
+    },
+    {
+      "baroAltitude" : 10.2767792143637,
+      "recentDrop" : 0,
+      "recentGain" : 1.171350097656246,
+      "speed" : 4.56039752777251,
+      "state" : "RESTING",
+      "timestamp" : "2026-01-27T13:07:47Z",
+      "verticalSpeed" : 0.09462500975288832
+    },
+    {
+      "note" : "휴식 구간 드리프트 보정: Δ-0.26m, err=-5.11m",
+      "timestamp" : "2026-01-27T13:07:48Z"
+    },
+    {
+      "baroAltitude" : 10.645237246121958,
+      "recentDrop" : 0,
+      "recentGain" : 1.1890563964843732,
+      "speed" : 3.902929156942683,
+      "state" : "RESTING",
+      "timestamp" : "2026-01-27T13:07:48Z",
+      "verticalSpeed" : 0.10494097256562591
+    },
+    {
+      "note" : "휴식 구간 드리프트 보정: Δ-0.25m, err=-4.95m",
+      "timestamp" : "2026-01-27T13:07:49Z"
+    },
+    {
+      "baroAltitude" : 11.015896617309807,
+      "recentDrop" : 0,
+      "recentGain" : 1.2062316894531246,
+      "speed" : 2.018377129504161,
+      "state" : "RESTING",
+      "timestamp" : "2026-01-27T13:07:49Z",
+      "verticalSpeed" : 0.11461558776467631
+    },
+    {
+      "note" : "휴식 구간 드리프트 보정: Δ-0.23m, err=-4.67m",
+      "timestamp" : "2026-01-27T13:07:50Z"
+    },
+    {
+      "baroAltitude" : 11.388191982116552,
+      "recentDrop" : 0,
+      "recentGain" : 1.227374267578126,
+      "speed" : 3.7252410304662997,
+      "state" : "RESTING",
+      "timestamp" : "2026-01-27T13:07:50Z",
+      "verticalSpeed" : 0.12994143239047268
+    },
+    {
+      "note" : "휴식 구간 드리프트 보정: Δ-0.21m, err=-4.15m",
+      "timestamp" : "2026-01-27T13:07:51Z"
+    },
+    {
+      "baroAltitude" : 11.748651375707121,
+      "recentDrop" : 0,
+      "recentGain" : 1.2588195800781268,
+      "speed" : 4.441577291239831,
+      "state" : "RESTING",
+      "timestamp" : "2026-01-27T13:07:51Z",
+      "verticalSpeed" : 0.14299787639029393
+    },
+    {
+      "note" : "휴식 구간 드리프트 보정: Δ-0.18m, err=-3.65m",
+      "timestamp" : "2026-01-27T13:07:52Z"
+    },
+    {
+      "baroAltitude" : 12.09370398223973,
+      "recentDrop" : 0,
+      "recentGain" : 1.3021484375000014,
+      "speed" : 4.353569772343863,
+      "state" : "RESTING",
+      "timestamp" : "2026-01-27T13:07:52Z",
+      "verticalSpeed" : 0.15193618351441604
+    },
+    {
+      "note" : "휴식 구간 드리프트 보정: Δ-0.16m, err=-3.18m",
+      "timestamp" : "2026-01-27T13:07:53Z"
+    },
+    {
+      "baroAltitude" : 12.424642860885676,
+      "recentDrop" : 0,
+      "recentGain" : 1.3597473144531236,
+      "speed" : 4.316055095804159,
+      "state" : "RESTING",
+      "timestamp" : "2026-01-27T13:07:53Z",
+      "verticalSpeed" : 0.16050850533642466
+    },
+    {
+      "note" : "휴식 구간 드리프트 보정: Δ-0.14m, err=-2.72m",
+      "timestamp" : "2026-01-27T13:07:54Z"
+    },
+    {
+      "baroAltitude" : 12.745422066272038,
+      "recentDrop" : 0,
+      "recentGain" : 1.4358398437499993,
+      "speed" : 4.245604440214312,
+      "state" : "RESTING",
+      "timestamp" : "2026-01-27T13:07:54Z",
+      "verticalSpeed" : 0.17299214292802167
+    },
+    {
+      "note" : "휴식 구간 드리프트 보정: Δ-0.12m, err=-2.33m",
+      "timestamp" : "2026-01-27T13:07:55Z"
+    },
+    {
+      "baroAltitude" : 13.050153975726076,
+      "recentDrop" : 0,
+      "recentGain" : 1.52593994140625,
+      "speed" : 4.165212351384493,
+      "state" : "RESTING",
+      "timestamp" : "2026-01-27T13:07:55Z",
+      "verticalSpeed" : 0.1768612510357263
+    },
+    {
+      "note" : "휴식 구간 드리프트 보정: Δ-0.09m, err=-1.89m",
+      "timestamp" : "2026-01-27T13:07:56Z"
+    },
+    {
+      "baroAltitude" : 13.332059123862527,
+      "recentDrop" : 0,
+      "recentGain" : 1.6197387695312493,
+      "speed" : 4.504424181555537,
+      "state" : "RESTING",
+      "timestamp" : "2026-01-27T13:07:56Z",
+      "verticalSpeed" : 0.17460300236929951
+    },
+    {
+      "note" : "휴식 구간 드리프트 보정: Δ-0.08m, err=-1.52m",
+      "timestamp" : "2026-01-27T13:07:57Z"
+    },
+    {
+      "baroAltitude" : 13.591877950537498,
+      "recentDrop" : 0,
+      "recentGain" : 1.7079895019531275,
+      "speed" : 3.27719499366109,
+      "state" : "RESTING",
+      "timestamp" : "2026-01-27T13:07:58Z",
+      "verticalSpeed" : 0.17169251139913988
+    },
+    {
+      "baroAltitude" : 13.769172872412497,
+      "recentDrop" : 0,
+      "recentGain" : 1.7840820312500032,
+      "speed" : 3.8011707229477905,
+      "state" : "RESTING",
+      "timestamp" : "2026-01-27T13:07:59Z",
+      "verticalSpeed" : 0.16573414362215083
+    },
+    {
+      "baroAltitude" : 13.940657247412497,
+      "recentDrop" : 0,
+      "recentGain" : 1.842736816406255,
+      "speed" : 3.0908072608699415,
+      "state" : "RESTING",
+      "timestamp" : "2026-01-27T13:08:00Z",
+      "verticalSpeed" : 0.1603274948438847
+    },
+    {
+      "baroAltitude" : 14.106855977881247,
+      "recentDrop" : 0,
+      "recentGain" : 1.8858032226562536,
+      "speed" : 3.8285983400352195,
+      "state" : "RESTING",
+      "timestamp" : "2026-01-27T13:08:01Z",
+      "verticalSpeed" : 0.15540274604567217
+    },
+    {
+      "baroAltitude" : 14.270411886084371,
+      "recentDrop" : 0,
+      "recentGain" : 1.9103698730468768,
+      "speed" : 3.9457290875324933,
+      "state" : "RESTING",
+      "timestamp" : "2026-01-27T13:08:02Z",
+      "verticalSpeed" : 0.15155011740108568
+    },
+    {
+      "baroAltitude" : 14.433442891943745,
+      "recentDrop" : 0,
+      "recentGain" : 1.9204101562499982,
+      "speed" : 3.9021973098727063,
+      "state" : "RESTING",
+      "timestamp" : "2026-01-27T13:08:03Z",
+      "verticalSpeed" : 0.15314070973542956
+    },
+    {
+      "baroAltitude" : 14.58775807749062,
+      "recentDrop" : 0,
+      "recentGain" : 1.9122253417968746,
+      "speed" : 3.6858477963682748,
+      "state" : "RESTING",
+      "timestamp" : "2026-01-27T13:08:04Z",
+      "verticalSpeed" : 0.14426375080295697
+    },
+    {
+      "baroAltitude" : 14.727009786474994,
+      "recentDrop" : 0,
+      "recentGain" : 1.8797302246093732,
+      "speed" : 3.097239431619724,
+      "state" : "RESTING",
+      "timestamp" : "2026-01-27T13:08:05Z",
+      "verticalSpeed" : 0.1301943584317133
+    },
+    {
+      "baroAltitude" : 14.850935567724994,
+      "recentDrop" : 0,
+      "recentGain" : 1.818695068359375,
+      "speed" : 2.6149785553953335,
+      "state" : "RESTING",
+      "timestamp" : "2026-01-27T13:08:06Z",
+      "verticalSpeed" : 0.11586753516017724
+    },
+    {
+      "baroAltitude" : 14.955574239599994,
+      "recentDrop" : 0,
+      "recentGain" : 1.734936523437499,
+      "speed" : 2.2715727787027875,
+      "state" : "RESTING",
+      "timestamp" : "2026-01-27T13:08:07Z",
+      "verticalSpeed" : 0.0978312836200967
+    },
+    {
+      "baroAltitude" : 15.04330006967812,
+      "recentDrop" : 0,
+      "recentGain" : 1.6350585937499993,
+      "speed" : 0.9733437862501221,
+      "state" : "RESTING",
+      "timestamp" : "2026-01-27T13:08:08Z",
+      "verticalSpeed" : 0.08148482466144866
+    },
+    {
+      "baroAltitude" : 15.114644063818744,
+      "recentDrop" : 0,
+      "recentGain" : 1.5227661132812464,
+      "speed" : 0.9641848200970004,
+      "state" : "RESTING",
+      "timestamp" : "2026-01-27T13:08:09Z",
+      "verticalSpeed" : 0.06670256224671375
+    },
+    {
+      "baroAltitude" : 15.166700948584369,
+      "recentDrop" : 0,
+      "recentGain" : 1.3975280761718718,
+      "speed" : 1.3840813036574466,
+      "state" : "RESTING",
+      "timestamp" : "2026-01-27T13:08:10Z",
+      "verticalSpeed" : 0.04867804466853713
+    },
+    {
+      "baroAltitude" : 15.201582540381244,
+      "recentDrop" : 0,
+      "recentGain" : 1.2609252929687464,
+      "speed" : 2.6040644839834606,
+      "state" : "RESTING",
+      "timestamp" : "2026-01-27T13:08:11Z",
+      "verticalSpeed" : 0.03260178168433848
+    },
+    {
+      "baroAltitude" : 15.22298756967812,
+      "recentDrop" : 0,
+      "recentGain" : 1.1161315917968722,
+      "speed" : 1.0381923757256475,
+      "state" : "RESTING",
+      "timestamp" : "2026-01-27T13:08:13Z",
+      "verticalSpeed" : 0.02001197430206068
+    },
+    {
+      "note" : "휴식 구간 드리프트 보정: Δ0.09m, err=1.82m",
+      "timestamp" : "2026-01-27T13:08:13Z"
+    },
+    {
+      "note" : "휴식 구간 드리프트 보정: Δ0.11m, err=2.11m",
+      "timestamp" : "2026-01-27T13:08:14Z"
+    },
+    {
+      "baroAltitude" : 15.033701545347691,
+      "recentDrop" : 0,
+      "recentGain" : 0.9597106933593746,
+      "speed" : 2.0035051097892946,
+      "state" : "RESTING",
+      "timestamp" : "2026-01-27T13:08:14Z",
+      "verticalSpeed" : 0.006672286657902831
+    },
+    {
+      "note" : "휴식 구간 드리프트 보정: Δ0.12m, err=2.39m",
+      "timestamp" : "2026-01-27T13:08:15Z"
+    },
+    {
+      "baroAltitude" : 14.916883758539063,
+      "recentDrop" : 0,
+      "recentGain" : 0.7993225097656271,
+      "speed" : 0.6468438995122697,
+      "state" : "RESTING",
+      "timestamp" : "2026-01-27T13:08:15Z",
+      "verticalSpeed" : 0.0024708904460755423
+    },
+    {
+      "note" : "휴식 구간 드리프트 보정: Δ0.13m, err=2.65m",
+      "timestamp" : "2026-01-27T13:08:16Z"
+    },
+    {
+      "baroAltitude" : 14.788725933123235,
+      "recentDrop" : 0,
+      "recentGain" : 0.6492370605468771,
+      "speed" : 0.7851402281782585,
+      "state" : "RESTING",
+      "timestamp" : "2026-01-27T13:08:16Z",
+      "verticalSpeed" : 0.00397508446953602
+    },
+    {
+      "note" : "휴식 구간 드리프트 보정: Δ0.15m, err=2.93m",
+      "timestamp" : "2026-01-27T13:08:17Z"
+    },
+    {
+      "baroAltitude" : 14.647739221383418,
+      "recentDrop" : 0,
+      "recentGain" : 0.515533447265625,
+      "speed" : 0.3609190824572938,
+      "state" : "RESTING",
+      "timestamp" : "2026-01-27T13:08:17Z",
+      "verticalSpeed" : 0.005187463273746015
+    },
+    {
+      "note" : "휴식 구간 드리프트 보정: Δ0.16m, err=3.16m",
+      "timestamp" : "2026-01-27T13:08:18Z"
+    },
+    {
+      "baroAltitude" : 14.497264380849632,
+      "recentDrop" : 0,
+      "recentGain" : 0.39926757812500213,
+      "speed" : 0.318244570589678,
+      "state" : "RESTING",
+      "timestamp" : "2026-01-27T13:08:18Z",
+      "verticalSpeed" : 0.007095283352531863
+    },
+    {
+      "note" : "휴식 구간 드리프트 보정: Δ0.17m, err=3.46m",
+      "timestamp" : "2026-01-27T13:08:19Z"
+    },
+    {
+      "baroAltitude" : 14.333172135200485,
+      "recentDrop" : 0,
+      "recentGain" : 0.3033508300781218,
+      "speed" : 0.329583078608937,
+      "state" : "RESTING",
+      "timestamp" : "2026-01-27T13:08:19Z",
+      "verticalSpeed" : 0.008153960206464913
+    },
+    {
+      "note" : "휴식 구간 드리프트 보정: Δ0.19m, err=3.70m",
+      "timestamp" : "2026-01-27T13:08:20Z"
+    },
+    {
+      "baroAltitude" : 14.156476412961222,
+      "recentDrop" : 0,
+      "recentGain" : 0.2240783691406243,
+      "speed" : 0.3779783843830718,
+      "state" : "RESTING",
+      "timestamp" : "2026-01-27T13:08:20Z",
+      "verticalSpeed" : 0.007865604120926765
+    },
+    {
+      "note" : "휴식 구간 드리프트 보정: Δ0.20m, err=3.96m",
+      "timestamp" : "2026-01-27T13:08:21Z"
+    },
+    {
+      "baroAltitude" : 13.969237724306558,
+      "recentDrop" : 0,
+      "recentGain" : 0.16329956054687322,
+      "speed" : 1.1693927967226636,
+      "state" : "RESTING",
+      "timestamp" : "2026-01-27T13:08:21Z",
+      "verticalSpeed" : 0.009886635318769894
+    },
+    {
+      "note" : "휴식 구간 드리프트 보정: Δ0.21m, err=4.18m",
+      "timestamp" : "2026-01-27T13:08:22Z"
+    },
+    {
+      "baroAltitude" : 13.771049081154477,
+      "recentDrop" : 0,
+      "recentGain" : 0.12207641601563068,
+      "speed" : 0,
+      "state" : "RESTING",
+      "timestamp" : "2026-01-27T13:08:22Z",
+      "verticalSpeed" : 0.010127139731577833
+    },
+    {
+      "note" : "휴식 구간 드리프트 보정: Δ0.22m, err=4.41m",
+      "timestamp" : "2026-01-27T13:08:23Z"
+    },
+    {
+      "baroAltitude" : 13.55919728180308,
+      "recentDrop" : 0,
+      "recentGain" : 0.095916748046875,
+      "speed" : 0.41291493436258103,
+      "state" : "RESTING",
+      "timestamp" : "2026-01-27T13:08:23Z",
+      "verticalSpeed" : 0.00815324328133723
+    },
+    {
+      "note" : "휴식 구간 드리프트 보정: Δ0.23m, err=4.57m",
+      "timestamp" : "2026-01-27T13:08:24Z"
+    },
+    {
+      "baroAltitude" : 13.33897336936416,
+      "recentDrop" : 0,
+      "recentGain" : 0.08297119140624964,
+      "speed" : 0,
+      "state" : "RESTING",
+      "timestamp" : "2026-01-27T13:08:24Z",
+      "verticalSpeed" : 0.00791221582784381
+    },
+    {
+      "note" : "휴식 구간 드리프트 보정: Δ0.23m, err=4.63m",
+      "timestamp" : "2026-01-27T13:08:25Z"
+    },
+    {
+      "baroAltitude" : 13.11172337896954,
+      "recentDrop" : 0,
+      "recentGain" : 0.08032836914062536,
+      "speed" : 0,
+      "state" : "RESTING",
+      "timestamp" : "2026-01-27T13:08:25Z",
+      "verticalSpeed" : 0.004182829632655744
+    },
+    {
+      "note" : "휴식 구간 드리프트 보정: Δ0.24m, err=4.76m",
+      "timestamp" : "2026-01-27T13:08:26Z"
+    },
+    {
+      "baroAltitude" : 12.872918842645507,
+      "recentDrop" : 0,
+      "recentGain" : 0.07689208984374574,
+      "speed" : 0.056621544589594126,
+      "state" : "RESTING",
+      "timestamp" : "2026-01-27T13:08:26Z",
+      "verticalSpeed" : -0.0007449027989157391
+    },
+    {
+      "note" : "휴식 구간 드리프트 보정: Δ0.24m, err=4.81m",
+      "timestamp" : "2026-01-27T13:08:27Z"
+    },
+    {
+      "baroAltitude" : 12.629318180292353,
+      "recentDrop" : 0,
+      "recentGain" : 0.06948852539062322,
+      "speed" : 0,
+      "state" : "RESTING",
+      "timestamp" : "2026-01-27T13:08:27Z",
+      "verticalSpeed" : -0.002966291523929496
+    },
+    {
+      "note" : "휴식 구간 드리프트 보정: Δ0.25m, err=4.93m",
+      "timestamp" : "2026-01-27T13:08:28Z"
+    },
+    {
+      "note" : "휴식 구간 드리프트 보정: Δ0.25m, err=5.05m",
+      "timestamp" : "2026-01-27T13:08:29Z"
+    },
+    {
+      "baroAltitude" : 12.127109658876321,
+      "recentDrop" : 0,
+      "recentGain" : 0.06076660156249858,
+      "speed" : 0.5178663756157372,
+      "state" : "RESTING",
+      "timestamp" : "2026-01-27T13:08:29Z",
+      "verticalSpeed" : -0.0029692722037706434
+    },
+    {
+      "note" : "휴식 구간 드리프트 보정: Δ0.26m, err=5.15m",
+      "timestamp" : "2026-01-27T13:08:30Z"
+    },
+    {
+      "baroAltitude" : 11.869911893737974,
+      "recentDrop" : 0,
+      "recentGain" : 0.053369140624999645,
+      "speed" : 0,
+      "state" : "RESTING",
+      "timestamp" : "2026-01-27T13:08:30Z",
+      "verticalSpeed" : 0.00024529957611940667
+    },
+    {
+      "note" : "휴식 구간 드리프트 보정: Δ0.26m, err=5.21m",
+      "timestamp" : "2026-01-27T13:08:31Z"
+    },
+    {
+      "baroAltitude" : 11.61043588038911,
+      "recentDrop" : 0,
+      "recentGain" : 0.04570922851562642,
+      "speed" : 0.25080826141095497,
+      "state" : "RESTING",
+      "timestamp" : "2026-01-27T13:08:31Z",
+      "verticalSpeed" : 0.0009929045131824678
+    },
+    {
+      "note" : "휴식 구간 드리프트 보정: Δ0.26m, err=5.28m",
+      "timestamp" : "2026-01-27T13:08:32Z"
+    },
+    {
+      "baroAltitude" : 11.34800752362769,
+      "recentDrop" : 0,
+      "recentGain" : 0.038842773437499645,
+      "speed" : 1.0183938172282159,
+      "state" : "RESTING",
+      "timestamp" : "2026-01-27T13:08:32Z",
+      "verticalSpeed" : 0.0014838045497708643
+    },
+    {
+      "note" : "휴식 구간 드리프트 보정: Δ0.27m, err=5.32m",
+      "timestamp" : "2026-01-27T13:08:33Z"
+    },
+    {
+      "baroAltitude" : 11.08731129384861,
+      "recentDrop" : 0,
+      "recentGain" : 0.03382568359375249,
+      "speed" : 2.1323033619818106,
+      "state" : "RESTING",
+      "timestamp" : "2026-01-27T13:08:33Z",
+      "verticalSpeed" : 0.005188496718562105
+    },
+    {
+      "note" : "휴식 구간 드리프트 보정: Δ0.26m, err=5.27m",
+      "timestamp" : "2026-01-27T13:08:34Z"
+    },
+    {
+      "baroAltitude" : 10.835811824203505,
+      "recentDrop" : 0,
+      "recentGain" : 0.03514404296874751,
+      "speed" : 2.833337266873481,
+      "state" : "RESTING",
+      "timestamp" : "2026-01-27T13:08:34Z",
+      "verticalSpeed" : 0.011255862198193934
+    },
+    {
+      "note" : "휴식 구간 드리프트 보정: Δ0.26m, err=5.25m",
+      "timestamp" : "2026-01-27T13:08:35Z"
+    },
+    {
+      "baroAltitude" : 10.586117945729386,
+      "recentDrop" : 0,
+      "recentGain" : 0.039105224609373934,
+      "speed" : 1.9029245990509773,
+      "state" : "RESTING",
+      "timestamp" : "2026-01-27T13:08:35Z",
+      "verticalSpeed" : 0.011962214667430342
+    },
+    {
+      "note" : "휴식 구간 드리프트 보정: Δ0.25m, err=5.09m",
+      "timestamp" : "2026-01-27T13:08:36Z"
+    },
+    {
+      "baroAltitude" : 10.352612352464716,
+      "recentDrop" : 0,
+      "recentGain" : 0.051782226562499645,
+      "speed" : 2.383012982036367,
+      "state" : "RESTING",
+      "timestamp" : "2026-01-27T13:08:36Z",
+      "verticalSpeed" : 0.019761009672111793
+    },
+    {
+      "note" : "휴식 구간 드리프트 보정: Δ0.25m, err=4.93m",
+      "timestamp" : "2026-01-27T13:08:37Z"
+    },
+    {
+      "baroAltitude" : 10.136089169640789,
+      "recentDrop" : 0,
+      "recentGain" : 0.07741088867187251,
+      "speed" : 2.1964627086266963,
+      "state" : "RESTING",
+      "timestamp" : "2026-01-27T13:08:37Z",
+      "verticalSpeed" : 0.028164803425897347
+    },
+    {
+      "note" : "휴식 구간 드리프트 보정: Δ0.24m, err=4.83m",
+      "timestamp" : "2026-01-27T13:08:38Z"
+    },
+    {
+      "baroAltitude" : 9.93051416090925,
+      "recentDrop" : 0,
+      "recentGain" : 0.11387939453124751,
+      "speed" : 1.60178020379777,
+      "state" : "RESTING",
+      "timestamp" : "2026-01-27T13:08:38Z",
+      "verticalSpeed" : 0.033395348505029655
+    },
+    {
+      "note" : "휴식 구간 드리프트 보정: Δ0.23m, err=4.67m",
+      "timestamp" : "2026-01-27T13:08:39Z"
+    },
+    {
+      "baroAltitude" : 9.737950753854143,
+      "recentDrop" : 0,
+      "recentGain" : 0.1580139160156211,
+      "speed" : 0.051732655751043605,
+      "state" : "RESTING",
+      "timestamp" : "2026-01-27T13:08:39Z",
+      "verticalSpeed" : 0.03829920563327503
+    },
+    {
+      "note" : "휴식 구간 드리프트 보정: Δ0.23m, err=4.50m",
+      "timestamp" : "2026-01-27T13:08:40Z"
+    },
+    {
+      "baroAltitude" : 9.556058798041072,
+      "recentDrop" : 0,
+      "recentGain" : 0.20452270507812287,
+      "speed" : 0,
+      "state" : "RESTING",
+      "timestamp" : "2026-01-27T13:08:40Z",
+      "verticalSpeed" : 0.04050602219541036
+    },
+    {
+      "note" : "휴식 구간 드리프트 보정: Δ0.22m, err=4.39m",
+      "timestamp" : "2026-01-27T13:08:41Z"
+    },
+    {
+      "baroAltitude" : 9.384561634552194,
+      "recentDrop" : 0,
+      "recentGain" : 0.25208129882812,
+      "speed" : 0.24580672984522853,
+      "state" : "RESTING",
+      "timestamp" : "2026-01-27T13:08:41Z",
+      "verticalSpeed" : 0.04453983633537459
+    },
+    {
+      "note" : "휴식 구간 드리프트 보정: Δ0.21m, err=4.25m",
+      "timestamp" : "2026-01-27T13:08:42Z"
+    },
+    {
+      "baroAltitude" : 9.221832629533848,
+      "recentDrop" : 0,
+      "recentGain" : 0.3006958007812486,
+      "speed" : 0.04214771768033204,
+      "state" : "RESTING",
+      "timestamp" : "2026-01-27T13:08:42Z",
+      "verticalSpeed" : 0.04580621290555298
+    },
+    {
+      "note" : "휴식 구간 드리프트 보정: Δ0.21m, err=4.11m",
+      "timestamp" : "2026-01-27T13:08:43Z"
+    },
+    {
+      "note" : "휴식 구간 드리프트 보정: Δ0.20m, err=3.97m",
+      "timestamp" : "2026-01-27T13:08:44Z"
+    },
+    {
+      "baroAltitude" : 8.86624350131262,
+      "recentDrop" : 0,
+      "recentGain" : 0.3474609374999993,
+      "speed" : 0,
+      "state" : "RESTING",
+      "timestamp" : "2026-01-27T13:08:44Z",
+      "verticalSpeed" : 0.04520564678273957
+    },
+    {
+      "note" : "휴식 구간 드리프트 보정: Δ0.20m, err=3.90m",
+      "timestamp" : "2026-01-27T13:08:45Z"
+    },
+    {
+      "baroAltitude" : 8.712851398119284,
+      "recentDrop" : 0,
+      "recentGain" : 0.3836608886718711,
+      "speed" : 0.06497651102371801,
+      "state" : "RESTING",
+      "timestamp" : "2026-01-27T13:08:45Z",
+      "verticalSpeed" : 0.03903656568108669
+    },
+    {
+      "note" : "휴식 구간 드리프트 보정: Δ0.19m, err=3.79m",
+      "timestamp" : "2026-01-27T13:08:46Z"
+    },
+    {
+      "baroAltitude" : 8.56436659232927,
+      "recentDrop" : 0,
+      "recentGain" : 0.41272583007812,
+      "speed" : 0,
+      "state" : "RESTING",
+      "timestamp" : "2026-01-27T13:08:46Z",
+      "verticalSpeed" : 0.03853136782869995
+    },
+    {
+      "note" : "휴식 구간 드리프트 보정: Δ0.19m, err=3.75m",
+      "timestamp" : "2026-01-27T13:08:47Z"
+    },
+    {
+      "baroAltitude" : 8.41003895701822,
+      "recentDrop" : 0,
+      "recentGain" : 0.43306884765624964,
+      "speed" : 0.11226893916497505,
+      "state" : "RESTING",
+      "timestamp" : "2026-01-27T13:08:47Z",
+      "verticalSpeed" : 0.0308881362674646
+    },
+    {
+      "note" : "휴식 구간 드리프트 보정: Δ0.18m, err=3.68m",
+      "timestamp" : "2026-01-27T13:08:48Z"
+    },
+    {
+      "baroAltitude" : 8.250654150790238,
+      "recentDrop" : 0,
+      "recentGain" : 0.436767578125,
+      "speed" : 0.1302600895646906,
+      "state" : "RESTING",
+      "timestamp" : "2026-01-27T13:08:48Z",
+      "verticalSpeed" : 0.023214032216404626
+    },
+    {
+      "note" : "휴식 구간 드리프트 보정: Δ0.18m, err=3.62m",
+      "timestamp" : "2026-01-27T13:08:49Z"
+    },
+    {
+      "baroAltitude" : 8.090107876727982,
+      "recentDrop" : 0,
+      "recentGain" : 0.4272583007812525,
+      "speed" : 0.21760124184309443,
+      "state" : "RESTING",
+      "timestamp" : "2026-01-27T13:08:49Z",
+      "verticalSpeed" : 0.01930273117016476
+    },
+    {
+      "note" : "휴식 구간 드리프트 보정: Δ0.18m, err=3.57m",
+      "timestamp" : "2026-01-27T13:08:50Z"
+    },
+    {
+      "baroAltitude" : 7.927554788363918,
+      "recentDrop" : 0,
+      "recentGain" : 0.4074340820312514,
+      "speed" : 0.42725528051171513,
+      "state" : "RESTING",
+      "timestamp" : "2026-01-27T13:08:50Z",
+      "verticalSpeed" : 0.014845048310512633
+    },
+    {
+      "note" : "휴식 구간 드리프트 보정: Δ0.17m, err=3.50m",
+      "timestamp" : "2026-01-27T13:08:51Z"
+    },
+    {
+      "baroAltitude" : 7.7629067567650125,
+      "recentDrop" : 0,
+      "recentGain" : 0.3767822265625025,
+      "speed" : 0,
+      "state" : "RESTING",
+      "timestamp" : "2026-01-27T13:08:51Z",
+      "verticalSpeed" : 0.009606514897815572
+    },
+    {
+      "note" : "휴식 구간 드리프트 보정: Δ0.17m, err=3.46m",
+      "timestamp" : "2026-01-27T13:08:52Z"
+    },
+    {
+      "baroAltitude" : 7.596309134955163,
+      "recentDrop" : 0,
+      "recentGain" : 0.33978881835937624,
+      "speed" : 0.04842557731146181,
+      "state" : "RESTING",
+      "timestamp" : "2026-01-27T13:08:52Z",
+      "verticalSpeed" : 0.0059280146408470765
+    },
+    {
+      "note" : "휴식 구간 드리프트 보정: Δ0.17m, err=3.41m",
+      "timestamp" : "2026-01-27T13:08:53Z"
+    },
+    {
+      "baroAltitude" : 7.431042219480043,
+      "recentDrop" : 0,
+      "recentGain" : 0.2972534179687534,
+      "speed" : 0.39317032462957685,
+      "state" : "RESTING",
+      "timestamp" : "2026-01-27T13:08:53Z",
+      "verticalSpeed" : 0.004966739940658258
+    },
+    {
+      "note" : "휴식 구간 드리프트 보정: Δ0.17m, err=3.40m",
+      "timestamp" : "2026-01-27T13:08:54Z"
+    },
+    {
+      "baroAltitude" : 7.263659422108768,
+      "recentDrop" : 0,
+      "recentGain" : 0.24995727539062873,
+      "speed" : 0.057176953372375466,
+      "state" : "RESTING",
+      "timestamp" : "2026-01-27T13:08:54Z",
+      "verticalSpeed" : 0.0022188747478096836
+    },
+    {
+      "note" : "휴식 구간 드리프트 보정: Δ0.17m, err=3.36m",
+      "timestamp" : "2026-01-27T13:08:55Z"
+    },
+    {
+      "baroAltitude" : 7.096621685951931,
+      "recentDrop" : 0,
+      "recentGain" : 0.20266113281249964,
+      "speed" : 0.11094527651386542,
+      "state" : "RESTING",
+      "timestamp" : "2026-01-27T13:08:55Z",
+      "verticalSpeed" : 0.0009897957484672826
+    },
+    {
+      "note" : "휴식 구간 드리프트 보정: Δ0.17m, err=3.36m",
+      "timestamp" : "2026-01-27T13:08:56Z"
+    },
+    {
+      "baroAltitude" : 6.929530764925532,
+      "recentDrop" : 0,
+      "recentGain" : 0.16196899414062926,
+      "speed" : 0,
+      "state" : "RESTING",
+      "timestamp" : "2026-01-27T13:08:56Z",
+      "verticalSpeed" : 0.000983303075067206
+    },
+    {
+      "note" : "휴식 구간 드리프트 보정: Δ0.17m, err=3.33m",
+      "timestamp" : "2026-01-27T13:08:57Z"
+    },
+    {
+      "baroAltitude" : 6.766160881607201,
+      "recentDrop" : 0,
+      "recentGain" : 0.12392578125000231,
+      "speed" : 0.16831652273997158,
+      "state" : "RESTING",
+      "timestamp" : "2026-01-27T13:08:57Z",
+      "verticalSpeed" : 0.002979935689172533
+    },
+    {
+      "note" : "휴식 구간 드리프트 보정: Δ0.17m, err=3.31m",
+      "timestamp" : "2026-01-27T13:08:58Z"
+    },
+    {
+      "baroAltitude" : 6.604120225889855,
+      "recentDrop" : 0,
+      "recentGain" : 0.09459838867187553,
+      "speed" : 0.410128078162708,
+      "state" : "RESTING",
+      "timestamp" : "2026-01-27T13:08:59Z",
+      "verticalSpeed" : 0.0034437646196991654
+    },
+    {
+      "note" : "휴식 구간 드리프트 보정: Δ0.17m, err=3.30m",
+      "timestamp" : "2026-01-27T13:08:59Z"
+    },
+    {
+      "note" : "휴식 구간 드리프트 보정: Δ0.16m, err=3.27m",
+      "timestamp" : "2026-01-27T13:09:00Z"
+    },
+    {
+      "baroAltitude" : 6.279353187209744,
+      "recentDrop" : 0,
+      "recentGain" : 0.07346191406250036,
+      "speed" : 0.1750535847104386,
+      "state" : "RESTING",
+      "timestamp" : "2026-01-27T13:09:00Z",
+      "verticalSpeed" : 0.003426796988740529
+    },
+    {
+      "note" : "휴식 구간 드리프트 보정: Δ0.16m, err=3.18m",
+      "timestamp" : "2026-01-27T13:09:01Z"
+    },
+    {
+      "baroAltitude" : 6.1240441339008385,
+      "recentDrop" : 0,
+      "recentGain" : 0.05654907226562411,
+      "speed" : 0.19384673193696417,
+      "state" : "RESTING",
+      "timestamp" : "2026-01-27T13:09:01Z",
+      "verticalSpeed" : 0.0034588744188204755
+    },
+    {
+      "note" : "휴식 구간 드리프트 보정: Δ0.15m, err=3.04m",
+      "timestamp" : "2026-01-27T13:09:02Z"
+    },
+    {
+      "baroAltitude" : 5.974716017800846,
+      "recentDrop" : 0,
+      "recentGain" : 0.04360351562499876,
+      "speed" : 0.4632535648526863,
+      "state" : "RESTING",
+      "timestamp" : "2026-01-27T13:09:02Z",
+      "verticalSpeed" : 0.002715551466023414
+    },
+    {
+      "note" : "휴식 구간 드리프트 보정: Δ0.14m, err=2.89m",
+      "timestamp" : "2026-01-27T13:09:03Z"
+    },
+    {
+      "baroAltitude" : 5.830392124106963,
+      "recentDrop" : 0,
+      "recentGain" : 0.03356323242187376,
+      "speed" : 0.12518299639780867,
+      "state" : "RESTING",
+      "timestamp" : "2026-01-27T13:09:03Z",
+      "verticalSpeed" : 0.00025115563589121076
+    },
+    {
+      "note" : "휴식 구간 드리프트 보정: Δ0.14m, err=2.72m",
+      "timestamp" : "2026-01-27T13:09:04Z"
+    },
+    {
+      "baroAltitude" : 5.690150694513248,
+      "recentDrop" : 0,
+      "recentGain" : 0.022991943359373934,
+      "speed" : 0.5333491577117544,
+      "state" : "RESTING",
+      "timestamp" : "2026-01-27T13:09:04Z",
+      "verticalSpeed" : -0.003954532505728569
+    },
+    {
+      "note" : "휴식 구간 드리프트 보정: Δ0.13m, err=2.59m",
+      "timestamp" : "2026-01-27T13:09:05Z"
+    },
+    {
+      "baroAltitude" : 5.552199821052904,
+      "recentDrop" : 0,
+      "recentGain" : 0.009252929687500355,
+      "speed" : 0.35369654832387437,
+      "state" : "RESTING",
+      "timestamp" : "2026-01-27T13:09:05Z",
+      "verticalSpeed" : -0.00790425278271064
+    },
+    {
+      "note" : "휴식 구간 드리프트 보정: Δ0.12m, err=2.45m",
+      "timestamp" : "2026-01-27T13:09:06Z"
+    },
+    {
+      "baroAltitude" : 5.418852278022278,
+      "recentDrop" : 0.004223632812501599,
+      "recentGain" : 0,
+      "speed" : 0.45482322105594647,
+      "state" : "RESTING",
+      "timestamp" : "2026-01-27T13:09:06Z",
+      "verticalSpeed" : -0.010374751934785126
+    },
+    {
+      "note" : "휴식 구간 드리프트 보정: Δ0.12m, err=2.31m",
+      "timestamp" : "2026-01-27T13:09:07Z"
+    },
+    {
+      "baroAltitude" : 5.286246836501692,
+      "recentDrop" : 0.02245483398437642,
+      "recentGain" : 0,
+      "speed" : 0.5665284897308703,
+      "state" : "RESTING",
+      "timestamp" : "2026-01-27T13:09:07Z",
+      "verticalSpeed" : -0.01612835265726383
+    },
+    {
+      "note" : "휴식 구간 드리프트 보정: Δ0.11m, err=2.15m",
+      "timestamp" : "2026-01-27T13:09:08Z"
+    },
+    {
+      "baroAltitude" : 5.1559424492963135,
+      "recentDrop" : 0.046234130859377665,
+      "recentGain" : 0,
+      "speed" : 0.9962524592248676,
+      "state" : "RESTING",
+      "timestamp" : "2026-01-27T13:09:08Z",
+      "verticalSpeed" : -0.021250893129581422
+    },
+    {
+      "note" : "휴식 구간 드리프트 보정: Δ0.10m, err=2.02m",
+      "timestamp" : "2026-01-27T13:09:09Z"
+    },
+    {
+      "baroAltitude" : 5.023351281832903,
+      "recentDrop" : 0.08111572265625089,
+      "recentGain" : 0,
+      "speed" : 1.7268408496016965,
+      "state" : "RESTING",
+      "timestamp" : "2026-01-27T13:09:09Z",
+      "verticalSpeed" : -0.029646558329100545
+    },
+    {
+      "note" : "휴식 구간 드리프트 보정: Δ0.10m, err=1.99m",
+      "timestamp" : "2026-01-27T13:09:10Z"
+    },
+    {
+      "baroAltitude" : 4.880231068626251,
+      "recentDrop" : 0.12868041992187518,
+      "recentGain" : 0,
+      "speed" : 2.9797421950464433,
+      "state" : "RESTING",
+      "timestamp" : "2026-01-27T13:09:10Z",
+      "verticalSpeed" : -0.04082487970245534
+    },
+    {
+      "note" : "휴식 구간 드리프트 보정: Δ0.10m, err=1.93m",
+      "timestamp" : "2026-01-27T13:09:11Z"
+    },
+    {
+      "baroAltitude" : 4.731695341286185,
+      "recentDrop" : 0.18442993164062393,
+      "recentGain" : 0,
+      "speed" : 5.249903735171506,
+      "state" : "RESTING",
+      "timestamp" : "2026-01-27T13:09:11Z",
+      "verticalSpeed" : -0.04867520762012566
+    },
+    {
+      "note" : "휴식 구간 드리프트 보정: Δ0.09m, err=1.75m",
+      "timestamp" : "2026-01-27T13:09:12Z"
+    },
+    {
+      "baroAltitude" : 4.586350794708641,
+      "recentDrop" : 0.24573364257812447,
+      "recentGain" : 0,
+      "speed" : 6.8361878783031855,
+      "state" : "RESTING",
+      "timestamp" : "2026-01-27T13:09:12Z",
+      "verticalSpeed" : -0.053862405341726316
+    },
+    {
+      "baroAltitude" : 4.518174525177391,
+      "recentDrop" : 0.31681518554687305,
+      "recentGain" : 0,
+      "speed" : 4.708121875387123,
+      "state" : "RESTING",
+      "timestamp" : "2026-01-27T13:09:14Z",
+      "verticalSpeed" : -0.063741332593572
+    },
+    {
+      "baroAltitude" : 4.4428693493961395,
+      "recentDrop" : 0.39238891601562553,
+      "recentGain" : 0,
+      "speed" : 1.6185064286822937,
+      "state" : "RESTING",
+      "timestamp" : "2026-01-27T13:09:15Z",
+      "verticalSpeed" : -0.07042586814971902
+    },
+    {
+      "baroAltitude" : 4.362540980255515,
+      "recentDrop" : 0.46848754882812393,
+      "recentGain" : 0,
+      "speed" : 2.2468271106773687,
+      "state" : "RESTING",
+      "timestamp" : "2026-01-27T13:09:16Z",
+      "verticalSpeed" : -0.07511844777646097
+    },
+    {
+      "baroAltitude" : 4.27402169314614,
+      "recentDrop" : 0.5485534667968759,
+      "recentGain" : 0,
+      "speed" : 2.223854348842888,
+      "state" : "RESTING",
+      "timestamp" : "2026-01-27T13:09:17Z",
+      "verticalSpeed" : -0.08199137766930317
+    },
+    {
+      "baroAltitude" : 4.173350306427389,
+      "recentDrop" : 0.6381286621093754,
+      "recentGain" : 0,
+      "speed" : 2.5330750501333816,
+      "state" : "RESTING",
+      "timestamp" : "2026-01-27T13:09:18Z",
+      "verticalSpeed" : -0.09412728770548981
+    },
+    {
+      "baroAltitude" : 4.06131417361489,
+      "recentDrop" : 0.7329895019531234,
+      "recentGain" : 0,
+      "speed" : 3.7343586799049877,
+      "state" : "RESTING",
+      "timestamp" : "2026-01-27T13:09:19Z",
+      "verticalSpeed" : -0.10490588825580262
+    },
+    {
+      "baroAltitude" : 3.9400312146305145,
+      "recentDrop" : 0.8315490722656262,
+      "recentGain" : 0,
+      "speed" : 4.3244741494482755,
+      "state" : "RESTING",
+      "timestamp" : "2026-01-27T13:09:20Z",
+      "verticalSpeed" : -0.11324632003378517
+    },
+    {
+      "baroAltitude" : 3.812937708771139,
+      "recentDrop" : 0.926934814453126,
+      "recentGain" : 0,
+      "speed" : 4.364889167670949,
+      "state" : "RESTING",
+      "timestamp" : "2026-01-27T13:09:21Z",
+      "verticalSpeed" : -0.11884106791113454
+    },
+    {
+      "baroAltitude" : 3.673685999786764,
+      "recentDrop" : 1.0223205566406253,
+      "recentGain" : 0,
+      "speed" : 3.767611276778415,
+      "state" : "RESTING",
+      "timestamp" : "2026-01-27T13:09:22Z",
+      "verticalSpeed" : -0.13020821780199396
+    },
+    {
+      "baroAltitude" : 3.520170374786764,
+      "recentDrop" : 1.1237854003906267,
+      "recentGain" : 0,
+      "speed" : 3.4867022350680963,
+      "state" : "RESTING",
+      "timestamp" : "2026-01-27T13:09:23Z",
+      "verticalSpeed" : -0.14354096936844216
+    },
+    {
+      "baroAltitude" : 3.360050745880514,
+      "recentDrop" : 1.2263000488281266,
+      "recentGain" : 0,
+      "speed" : 2.9305893775362875,
+      "state" : "RESTING",
+      "timestamp" : "2026-01-27T13:09:24Z",
+      "verticalSpeed" : -0.14968634734460076
+    },
+    {
+      "baroAltitude" : 3.1885663708805136,
+      "recentDrop" : 1.329608154296877,
+      "recentGain" : 0,
+      "speed" : 4.4034007650194456,
+      "state" : "RESTING",
+      "timestamp" : "2026-01-27T13:09:25Z",
+      "verticalSpeed" : -0.16039887774378453
+    },
+    {
+      "baroAltitude" : 3.0043927868961386,
+      "recentDrop" : 1.4384765625000009,
+      "recentGain" : 0,
+      "speed" : 3.3974757421823294,
+      "state" : "RESTING",
+      "timestamp" : "2026-01-27T13:09:26Z",
+      "verticalSpeed" : -0.17148028164339857
+    },
+    {
+      "baroAltitude" : 2.8096540173648887,
+      "recentDrop" : 1.5528869628906263,
+      "recentGain" : 0,
+      "speed" : 3.7743587232317153,
+      "state" : "RESTING",
+      "timestamp" : "2026-01-27T13:09:27Z",
+      "verticalSpeed" : -0.1828316633883328
+    },
+    {
+      "baroAltitude" : 2.6117475232242637,
+      "recentDrop" : 1.6622741699218762,
+      "recentGain" : 0,
+      "speed" : 3.4700262044647787,
+      "state" : "RESTING",
+      "timestamp" : "2026-01-27T13:09:29Z",
+      "verticalSpeed" : -0.18503179119369223
+    },
+    {
+      "baroAltitude" : 2.4088178357242636,
+      "recentDrop" : 1.7645324707031258,
+      "recentGain" : 0,
+      "speed" : 3.3679362320547925,
+      "state" : "RESTING",
+      "timestamp" : "2026-01-27T13:09:30Z",
+      "verticalSpeed" : -0.1906280903759612
+    },
+    {
+      "baroAltitude" : 2.2043073376773887,
+      "recentDrop" : 1.8570068359375012,
+      "recentGain" : 0,
+      "speed" : 5.228729420911991,
+      "state" : "RIDING",
+      "timestamp" : "2026-01-27T13:09:31Z",
+      "verticalSpeed" : -0.1904049177069212
+    },
+    {
+      "baroAltitude" : 1.9966230115055137,
+      "recentDrop" : 1.9434082031250008,
+      "recentGain" : 0,
+      "speed" : 5.6924980200096575,
+      "state" : "RIDING",
+      "timestamp" : "2026-01-27T13:09:32Z",
+      "verticalSpeed" : -0.19420931141725295
+    },
+    {
+      "baroAltitude" : 1.7878827771305137,
+      "recentDrop" : 2.025054931640625,
+      "recentGain" : 0,
+      "speed" : 5.471623300501236,
+      "state" : "RIDING",
+      "timestamp" : "2026-01-27T13:09:33Z",
+      "verticalSpeed" : -0.19512936580838824
+    },
+    {
+      "baroAltitude" : 1.5772870740055136,
+      "recentDrop" : 2.0963989257812505,
+      "recentGain" : 0,
+      "speed" : 5.708214962116266,
+      "state" : "RIDING",
+      "timestamp" : "2026-01-27T13:09:34Z",
+      "verticalSpeed" : -0.19509791589476058
+    },
+    {
+      "baroAltitude" : 1.3619367322086386,
+      "recentDrop" : 2.1582336425781254,
+      "recentGain" : 0,
+      "speed" : 5.635350339598483,
+      "state" : "RIDING",
+      "timestamp" : "2026-01-27T13:09:35Z",
+      "verticalSpeed" : -0.20139262155170978
+    },
+    {
+      "baroAltitude" : 1.1476422986148886,
+      "recentDrop" : 2.2124084472656254,
+      "recentGain" : 0,
+      "speed" : 5.24527424529743,
+      "state" : "RIDING",
+      "timestamp" : "2026-01-27T13:09:36Z",
+      "verticalSpeed" : -0.20127097627001897
+    },
+    {
+      "baroAltitude" : 0.9346723279117637,
+      "recentDrop" : 2.25389404296875,
+      "recentGain" : 0,
+      "speed" : 5.185261067043987,
+      "state" : "RIDING",
+      "timestamp" : "2026-01-27T13:09:37Z",
+      "verticalSpeed" : -0.19829293656134567
+    },
+    {
+      "baroAltitude" : 0.7261945447086391,
+      "recentDrop" : 2.2781982421874996,
+      "recentGain" : 0,
+      "speed" : 5.298186619883736,
+      "state" : "RIDING",
+      "timestamp" : "2026-01-27T13:09:38Z",
+      "verticalSpeed" : -0.1949068116696327
+    },
+    {
+      "baroAltitude" : 0.5227338513492641,
+      "recentDrop" : 2.2869201660156246,
+      "recentGain" : 0,
+      "speed" : 4.855634535826264,
+      "state" : "RIDING",
+      "timestamp" : "2026-01-27T13:09:39Z",
+      "verticalSpeed" : -0.19060514031894538
+    },
+    {
+      "baroAltitude" : 0.3253522595523891,
+      "recentDrop" : 2.2863952636718747,
+      "recentGain" : 0,
+      "speed" : 5.044988208268165,
+      "state" : "RIDING",
+      "timestamp" : "2026-01-27T13:09:40Z",
+      "verticalSpeed" : -0.1842191354803652
+    },
+    {
+      "baroAltitude" : 0.13483712283363905,
+      "recentDrop" : 2.2739807128906246,
+      "recentGain" : 0,
+      "speed" : 5.770703190616463,
+      "state" : "RIDING",
+      "timestamp" : "2026-01-27T13:09:41Z",
+      "verticalSpeed" : -0.17817608402485932
+    },
+    {
+      "baroAltitude" : -0.04351981076011102,
+      "recentDrop" : 2.2478271484374996,
+      "recentGain" : 0,
+      "speed" : 5.764447775406037,
+      "state" : "RIDING",
+      "timestamp" : "2026-01-27T13:09:42Z",
+      "verticalSpeed" : -0.16677585777741719
+    },
+    {
+      "baroAltitude" : -0.20734427365073604,
+      "recentDrop" : 2.2039672851562497,
+      "recentGain" : 0,
+      "speed" : 5.5840519799212665,
+      "state" : "RIDING",
+      "timestamp" : "2026-01-27T13:09:43Z",
+      "verticalSpeed" : -0.15316522440993194
+    },
+    {
+      "baroAltitude" : -0.352937535369486,
+      "recentDrop" : 2.1408203125,
+      "recentGain" : 0,
+      "speed" : 5.045394366888395,
+      "state" : "RIDING",
+      "timestamp" : "2026-01-27T13:09:45Z",
+      "verticalSpeed" : -0.13615169307150998
+    },
+    {
+      "baroAltitude" : -0.475807408416361,
+      "recentDrop" : 2.0530944824218746,
+      "recentGain" : 0,
+      "speed" : 4.121599399843793,
+      "state" : "RIDING",
+      "timestamp" : "2026-01-27T13:09:46Z",
+      "verticalSpeed" : -0.11488759886930078
+    },
+    {
+      "baroAltitude" : -0.579652623260111,
+      "recentDrop" : 1.9415893554687496,
+      "recentGain" : 0,
+      "speed" : 3.517384253033688,
+      "state" : "RIDING",
+      "timestamp" : "2026-01-27T13:09:47Z",
+      "verticalSpeed" : -0.0971200356408383
+    },
+    {
+      "baroAltitude" : -0.662886265838236,
+      "recentDrop" : 1.8105285644531246,
+      "recentGain" : 0,
+      "speed" : 5.22453224552459,
+      "state" : "RIDING",
+      "timestamp" : "2026-01-27T13:09:48Z",
+      "verticalSpeed" : -0.07781296364876646
+    },
+    {
+      "baroAltitude" : -0.7273577013851109,
+      "recentDrop" : 1.6620300292968746,
+      "recentGain" : 0,
+      "speed" : 6.269738442710096,
+      "state" : "RIDING",
+      "timestamp" : "2026-01-27T13:09:49Z",
+      "verticalSpeed" : -0.060291035399351746
+    },
+    {
+      "baroAltitude" : -0.7709551134944859,
+      "recentDrop" : 1.497149658203125,
+      "recentGain" : 0,
+      "speed" : 6.28128161200695,
+      "state" : "RIDING",
+      "timestamp" : "2026-01-27T13:09:50Z",
+      "verticalSpeed" : -0.040918516655437165
+    },
+    {
+      "baroAltitude" : -0.7910356799007359,
+      "recentDrop" : 1.31376953125,
+      "recentGain" : 0,
+      "speed" : 6.335538971920396,
+      "state" : "RIDING",
+      "timestamp" : "2026-01-27T13:09:51Z",
+      "verticalSpeed" : -0.01870825854198463
+    },
+    {
+      "baroAltitude" : -0.784163121306986,
+      "recentDrop" : 1.1095153808593752,
+      "recentGain" : 0,
+      "speed" : 6.240459155587587,
+      "state" : "RIDING",
+      "timestamp" : "2026-01-27T13:09:52Z",
+      "verticalSpeed" : 0.006366811018539266
+    },
+    {
+      "baroAltitude" : -0.7513994494319859,
+      "recentDrop" : 0.8862365722656249,
+      "recentGain" : 0,
+      "speed" : 6.088605586991148,
+      "state" : "RIDING",
+      "timestamp" : "2026-01-27T13:09:53Z",
+      "verticalSpeed" : 0.030638866364084975
+    },
+    {
+      "baroAltitude" : -0.690626744353861,
+      "recentDrop" : 0.6471069335937499,
+      "recentGain" : 0,
+      "speed" : 6.101989764458953,
+      "state" : "RIDING",
+      "timestamp" : "2026-01-27T13:09:54Z",
+      "verticalSpeed" : 0.056821670234658124
+    },
+    {
+      "baroAltitude" : -0.6026384631038609,
+      "recentDrop" : 0.3952941894531249,
+      "recentGain" : 0,
+      "speed" : 5.136198550133402,
+      "state" : "RIDING",
+      "timestamp" : "2026-01-27T13:09:55Z",
+      "verticalSpeed" : 0.08228025235016223
+    },
+    {
+      "baroAltitude" : -0.4913957873226109,
+      "recentDrop" : 0.1384582519531249,
+      "recentGain" : 0,
+      "speed" : 4.218045209127066,
+      "state" : "RIDING",
+      "timestamp" : "2026-01-27T13:09:56Z",
+      "verticalSpeed" : 0.10443713730001525
+    },
+    {
+      "baroAltitude" : -0.3561052599788609,
+      "recentDrop" : 0,
+      "recentGain" : 0.1197021484375001,
+      "speed" : 4.1879707410068345,
+      "state" : "RIDING",
+      "timestamp" : "2026-01-27T13:09:57Z",
+      "verticalSpeed" : 0.12600966019226675
+    },
+    {
+      "baroAltitude" : -0.19782889279136093,
+      "recentDrop" : 0,
+      "recentGain" : 0.38182373046875007,
+      "speed" : 4.2614374098097905,
+      "state" : "RIDING",
+      "timestamp" : "2026-01-27T13:09:58Z",
+      "verticalSpeed" : 0.14799264695063796
+    },
+    {
+      "baroAltitude" : -0.016304234588235978,
+      "recentDrop" : 0,
+      "recentGain" : 0.64658203125,
+      "speed" : 4.925997785160027,
+      "state" : "RIDING",
+      "timestamp" : "2026-01-27T13:10:00Z",
+      "verticalSpeed" : 0.16971330257463393
+    },
+    {
+      "baroAltitude" : 0.18345162478676397,
+      "recentDrop" : 0,
+      "recentGain" : 0.9108093261718748,
+      "speed" : 5.116492926249258,
+      "state" : "RIDING",
+      "timestamp" : "2026-01-27T13:10:01Z",
+      "verticalSpeed" : 0.18685012470437973
+    },
+    {
+      "baroAltitude" : 0.395890589630514,
+      "recentDrop" : 0,
+      "recentGain" : 1.166845703125,
+      "speed" : 4.600421800582124,
+      "state" : "RIDING",
+      "timestamp" : "2026-01-27T13:10:02Z",
+      "verticalSpeed" : 0.19866157092569348
+    },
+    {
+      "baroAltitude" : 0.616258021271139,
+      "recentDrop" : 0,
+      "recentGain" : 1.407293701171875,
+      "speed" : 4.859836326967885,
+      "state" : "RIDING",
+      "timestamp" : "2026-01-27T13:10:03Z",
+      "verticalSpeed" : 0.20596992973800504
+    },
+    {
+      "baroAltitude" : 0.843229456818014,
+      "recentDrop" : 0,
+      "recentGain" : 1.6273925781249998,
+      "speed" : 4.987063744755104,
+      "state" : "RIDING",
+      "timestamp" : "2026-01-27T13:10:04Z",
+      "verticalSpeed" : 0.21230696699585833
+    },
+    {
+      "baroAltitude" : 1.072843714630514,
+      "recentDrop" : 0,
+      "recentGain" : 1.8242431640625,
+      "speed" : 5.400305268441888,
+      "state" : "RIDING",
+      "timestamp" : "2026-01-27T13:10:05Z",
+      "verticalSpeed" : 0.2146403171357757
+    },
+    {
+      "baroAltitude" : 1.304313441193014,
+      "recentDrop" : 0,
+      "recentGain" : 1.994940185546875,
+      "speed" : 4.232509921336723,
+      "state" : "RIDING",
+      "timestamp" : "2026-01-27T13:10:06Z",
+      "verticalSpeed" : 0.21651766857346746
+    },
+    {
+      "baroAltitude" : 1.539213343536764,
+      "recentDrop" : 0,
+      "recentGain" : 2.141851806640625,
+      "speed" : 4.40968768236827,
+      "state" : "RIDING",
+      "timestamp" : "2026-01-27T13:10:07Z",
+      "verticalSpeed" : 0.2206057490314761
+    },
+    {
+      "baroAltitude" : 1.776493616974264,
+      "recentDrop" : 0,
+      "recentGain" : 2.267889404296875,
+      "speed" : 4.631395596190742,
+      "state" : "RIDING",
+      "timestamp" : "2026-01-27T13:10:08Z",
+      "verticalSpeed" : 0.2209015133539653
+    },
+    {
+      "baroAltitude" : 2.0132489880680136,
+      "recentDrop" : 0,
+      "recentGain" : 2.3693542480468746,
+      "speed" : 5.345500909368813,
+      "state" : "RIDING",
+      "timestamp" : "2026-01-27T13:10:09Z",
+      "verticalSpeed" : 0.22139542184060942
+    },
+    {
+      "baroAltitude" : 2.2500043591617636,
+      "recentDrop" : 0,
+      "recentGain" : 2.4478332519531243,
+      "speed" : 4.13821224798636,
+      "state" : "RIDING",
+      "timestamp" : "2026-01-27T13:10:10Z",
+      "verticalSpeed" : 0.21935928094307633
+    },
+    {
+      "baroAltitude" : 2.4867597302555136,
+      "recentDrop" : 0,
+      "recentGain" : 2.5030639648437494,
+      "speed" : 4.595309903765086,
+      "state" : "RIDING",
+      "timestamp" : "2026-01-27T13:10:11Z",
+      "verticalSpeed" : 0.22137925753242554
+    },
+    {
+      "baroAltitude" : 2.7235151013492636,
+      "recentDrop" : 0,
+      "recentGain" : 2.5400634765624996,
+      "speed" : 3.851795671485254,
+      "state" : "RIDING",
+      "timestamp" : "2026-01-27T13:10:12Z",
+      "verticalSpeed" : 0.22134387704187858
+    },
+    {
+      "baroAltitude" : 2.9586835583805136,
+      "recentDrop" : 0,
+      "recentGain" : 2.5627929687499997,
+      "speed" : 3.000746132494289,
+      "state" : "RIDING",
+      "timestamp" : "2026-01-27T13:10:13Z",
+      "verticalSpeed" : 0.21996060026394346
+    },
+    {
+      "baroAltitude" : 3.1869855603336386,
+      "recentDrop" : 0,
+      "recentGain" : 2.5707275390624993,
+      "speed" : 2.082782640366681,
+      "state" : "RIDING",
+      "timestamp" : "2026-01-27T13:10:15Z",
+      "verticalSpeed" : 0.21347627388075316
+    },
+    {
+      "baroAltitude" : 3.403922816193014,
+      "recentDrop" : 0,
+      "recentGain" : 2.560693359375,
+      "speed" : 0.20114716242922598,
+      "state" : "RIDING",
+      "timestamp" : "2026-01-27T13:10:16Z",
+      "verticalSpeed" : 0.20281427687323084
+    },
+    {
+      "baroAltitude" : 3.605265589630514,
+      "recentDrop" : 0,
+      "recentGain" : 2.532421875,
+      "speed" : 0.3566393044364264,
+      "state" : "RIDING",
+      "timestamp" : "2026-01-27T13:10:17Z",
+      "verticalSpeed" : 0.18970995022008877
+    },
+    {
+      "baroAltitude" : 3.780979700958639,
+      "recentDrop" : 0,
+      "recentGain" : 2.476666259765625,
+      "speed" : 0.5409312983725402,
+      "state" : "RIDING",
+      "timestamp" : "2026-01-27T13:10:18Z",
+      "verticalSpeed" : 0.16430971266471703
+    },
+    {
+      "baroAltitude" : 3.924717493927389,
+      "recentDrop" : 0,
+      "recentGain" : 2.385504150390625,
+      "speed" : 0.7248711764865524,
+      "state" : "RIDING",
+      "timestamp" : "2026-01-27T13:10:19Z",
+      "verticalSpeed" : 0.1343957990612491
+    },
+    {
+      "note" : "휴식 구간 드리프트 보정: Δ-0.36m, err=-7.17m",
+      "timestamp" : "2026-01-27T13:10:20Z"
+    },
+    {
+      "baroAltitude" : 4.392296902219494,
+      "recentDrop" : 0,
+      "recentGain" : 2.2573486328124996,
+      "speed" : 0.5288063192409423,
+      "state" : "RESTING",
+      "timestamp" : "2026-01-27T13:10:20Z",
+      "verticalSpeed" : 0.10206244440613961
+    },
+    {
+      "note" : "휴식 구간 드리프트 보정: Δ-0.32m, err=-6.39m",
+      "timestamp" : "2026-01-27T13:10:21Z"
+    },
+    {
+      "baroAltitude" : 4.779070461601386,
+      "recentDrop" : 0,
+      "recentGain" : 2.087969970703125,
+      "speed" : 0.17932820545538955,
+      "state" : "RESTING",
+      "timestamp" : "2026-01-27T13:10:21Z",
+      "verticalSpeed" : 0.06300686702934144
+    },
+    {
+      "note" : "휴식 구간 드리프트 보정: Δ-0.29m, err=-5.73m",
+      "timestamp" : "2026-01-27T13:10:22Z"
+    },
+    {
+      "baroAltitude" : 5.086784423051911,
+      "recentDrop" : 0,
+      "recentGain" : 1.8726196289062504,
+      "speed" : 0.5703496045132653,
+      "state" : "RESTING",
+      "timestamp" : "2026-01-27T13:10:22Z",
+      "verticalSpeed" : 0.019949736349153046
+    },
+    {
+      "note" : "휴식 구간 드리프트 보정: Δ-0.26m, err=-5.21m",
+      "timestamp" : "2026-01-27T13:10:23Z"
+    },
+    {
+      "baroAltitude" : 5.3270171311370005,
+      "recentDrop" : 0,
+      "recentGain" : 1.6155151367187508,
+      "speed" : 0.23263701408377951,
+      "state" : "RESTING",
+      "timestamp" : "2026-01-27T13:10:23Z",
+      "verticalSpeed" : -0.019036409778936354
+    },
+    {
+      "note" : "휴식 구간 드리프트 보정: Δ-0.25m, err=-4.93m",
+      "timestamp" : "2026-01-27T13:10:24Z"
+    },
+    {
+      "baroAltitude" : 5.513073501220761,
+      "recentDrop" : 0,
+      "recentGain" : 1.3185119628906259,
+      "speed" : 0.5390714933821334,
+      "state" : "RESTING",
+      "timestamp" : "2026-01-27T13:10:24Z",
+      "verticalSpeed" : -0.05634526889234484
+    },
+    {
+      "note" : "휴식 구간 드리프트 보정: Δ-0.24m, err=-4.82m",
+      "timestamp" : "2026-01-27T13:10:25Z"
+    },
+    {
+      "baroAltitude" : 5.656805813056067,
+      "recentDrop" : 0,
+      "recentGain" : 0.9861022949218761,
+      "speed" : 0.7285352963029461,
+      "state" : "RESTING",
+      "timestamp" : "2026-01-27T13:10:25Z",
+      "verticalSpeed" : -0.09089909625581573
+    },
+    {
+      "note" : "휴식 구간 드리프트 보정: Δ-0.24m, err=-4.86m",
+      "timestamp" : "2026-01-27T13:10:26Z"
+    },
+    {
+      "baroAltitude" : 5.769408807006911,
+      "recentDrop" : 0,
+      "recentGain" : 0.6275329589843768,
+      "speed" : 0.5615497038209092,
+      "state" : "RESTING",
+      "timestamp" : "2026-01-27T13:10:26Z",
+      "verticalSpeed" : -0.12182782496802232
+    },
+    {
+      "note" : "휴식 구간 드리프트 보정: Δ-0.25m, err=-5.02m",
+      "timestamp" : "2026-01-27T13:10:27Z"
+    },
+    {
+      "baroAltitude" : 5.86043743282256,
+      "recentDrop" : 0,
+      "recentGain" : 0.25047607421875107,
+      "speed" : 0.767528786332807,
+      "state" : "RESTING",
+      "timestamp" : "2026-01-27T13:10:27Z",
+      "verticalSpeed" : -0.1497245572740285
+    },
+    {
+      "note" : "휴식 구간 드리프트 보정: Δ-0.26m, err=-5.20m",
+      "timestamp" : "2026-01-27T13:10:28Z"
+    },
+    {
+      "baroAltitude" : 5.938288435557908,
+      "recentDrop" : 0.13318481445312358,
+      "recentGain" : 0,
+      "speed" : 0.6561443030700607,
+      "state" : "RESTING",
+      "timestamp" : "2026-01-27T13:10:28Z",
+      "verticalSpeed" : -0.17049608116414863
+    },
+    {
+      "note" : "휴식 구간 드리프트 보정: Δ-0.27m, err=-5.33m",
+      "timestamp" : "2026-01-27T13:10:29Z"
+    },
+    {
+      "baroAltitude" : 6.0063269470957765,
+      "recentDrop" : 0.507598876953125,
+      "recentGain" : 0,
+      "speed" : 0.9033560703306769,
+      "state" : "RESTING",
+      "timestamp" : "2026-01-27T13:10:29Z",
+      "verticalSpeed" : -0.18577172543140297
+    },
+    {
+      "note" : "휴식 구간 드리프트 보정: Δ-0.27m, err=-5.37m",
+      "timestamp" : "2026-01-27T13:10:30Z"
+    },
+    {
+      "note" : "휴식 구간 드리프트 보정: Δ-0.26m, err=-5.11m",
+      "timestamp" : "2026-01-27T13:10:31Z"
+    },
+    {
+      "baroAltitude" : 6.32198109013197,
+      "recentDrop" : 0.8598144531249989,
+      "recentGain" : 0,
+      "speed" : 0.689895293086893,
+      "state" : "RESTING",
+      "timestamp" : "2026-01-27T13:10:31Z",
+      "verticalSpeed" : -0.19315624713869747
+    },
+    {
+      "note" : "휴식 구간 드리프트 보정: Δ-0.25m, err=-5.01m",
+      "timestamp" : "2026-01-27T13:10:32Z"
+    },
+    {
+      "baroAltitude" : 6.360887450437378,
+      "recentDrop" : 1.1803222656249996,
+      "recentGain" : 0,
+      "speed" : 0.6607872256916799,
+      "state" : "RESTING",
+      "timestamp" : "2026-01-27T13:10:32Z",
+      "verticalSpeed" : -0.1977141019611421
+    },
+    {
+      "note" : "휴식 구간 드리프트 보정: Δ-0.24m, err=-4.84m",
+      "timestamp" : "2026-01-27T13:10:33Z"
+    },
+    {
+      "baroAltitude" : 6.394262321736333,
+      "recentDrop" : 1.4561828613281245,
+      "recentGain" : 0,
+      "speed" : 0.6655989914129541,
+      "state" : "RESTING",
+      "timestamp" : "2026-01-27T13:10:33Z",
+      "verticalSpeed" : -0.19462955451056443
+    },
+    {
+      "note" : "휴식 구간 드리프트 보정: Δ-0.23m, err=-4.63m",
+      "timestamp" : "2026-01-27T13:10:34Z"
+    },
+    {
+      "baroAltitude" : 6.417682325392481,
+      "recentDrop" : 1.6855346679687502,
+      "recentGain" : 0,
+      "speed" : 0.6694164089428203,
+      "state" : "RESTING",
+      "timestamp" : "2026-01-27T13:10:34Z",
+      "verticalSpeed" : -0.1947262460322369
+    },
+    {
+      "note" : "휴식 구간 드리프트 보정: Δ-0.22m, err=-4.36m",
+      "timestamp" : "2026-01-27T13:10:35Z"
+    },
+    {
+      "baroAltitude" : 6.426782297253266,
+      "recentDrop" : 1.8739257812499988,
+      "recentGain" : 0,
+      "speed" : 0.8426229574374655,
+      "state" : "RESTING",
+      "timestamp" : "2026-01-27T13:10:35Z",
+      "verticalSpeed" : -0.19515800750343582
+    },
+    {
+      "note" : "휴식 구간 드리프트 보정: Δ-0.21m, err=-4.11m",
+      "timestamp" : "2026-01-27T13:10:36Z"
+    },
+    {
+      "baroAltitude" : 6.420699996070302,
+      "recentDrop" : 2.025329589843751,
+      "recentGain" : 0,
+      "speed" : 0.8847344808720636,
+      "state" : "RESTING",
+      "timestamp" : "2026-01-27T13:10:36Z",
+      "verticalSpeed" : -0.19794973029544813
+    },
+    {
+      "note" : "휴식 구간 드리프트 보정: Δ-0.20m, err=-3.92m",
+      "timestamp" : "2026-01-27T13:10:37Z"
+    },
+    {
+      "baroAltitude" : 6.399984274668922,
+      "recentDrop" : 2.1450256347656236,
+      "recentGain" : 0,
+      "speed" : 0.6660960447871936,
+      "state" : "RESTING",
+      "timestamp" : "2026-01-27T13:10:37Z",
+      "verticalSpeed" : -0.20288844300593342
+    },
+    {
+      "note" : "휴식 구간 드리프트 보정: Δ-0.19m, err=-3.73m",
+      "timestamp" : "2026-01-27T13:10:38Z"
+    },
+    {
+      "baroAltitude" : 6.366466061050751,
+      "recentDrop" : 2.23486328125,
+      "recentGain" : 0,
+      "speed" : 0.6115223499571167,
+      "state" : "RESTING",
+      "timestamp" : "2026-01-27T13:10:38Z",
+      "verticalSpeed" : -0.20579811687208005
+    },
+    {
+      "note" : "휴식 구간 드리프트 보정: Δ-0.18m, err=-3.58m",
+      "timestamp" : "2026-01-27T13:10:39Z"
+    },
+    {
+      "baroAltitude" : 6.324347362699232,
+      "recentDrop" : 2.2959045410156254,
+      "recentGain" : 0,
+      "speed" : 0.6330057372265829,
+      "state" : "RESTING",
+      "timestamp" : "2026-01-27T13:10:39Z",
+      "verticalSpeed" : -0.20679175241506464
+    },
+    {
+      "note" : "휴식 구간 드리프트 보정: Δ-0.17m, err=-3.46m",
+      "timestamp" : "2026-01-27T13:10:40Z"
+    },
+    {
+      "baroAltitude" : 6.276120950372583,
+      "recentDrop" : 2.334747314453125,
+      "recentGain" : 0,
+      "speed" : 0.7318570400742525,
+      "state" : "RESTING",
+      "timestamp" : "2026-01-27T13:10:40Z",
+      "verticalSpeed" : -0.20681920843743604
+    },
+    {
+      "note" : "휴식 구간 드리프트 보정: Δ-0.17m, err=-3.36m",
+      "timestamp" : "2026-01-27T13:10:41Z"
+    },
+    {
+      "baroAltitude" : 6.224726515567541,
+      "recentDrop" : 2.3553588867187525,
+      "recentGain" : 0,
+      "speed" : 0.6583898399712801,
+      "state" : "RESTING",
+      "timestamp" : "2026-01-27T13:10:41Z",
+      "verticalSpeed" : -0.20503091369853071
+    },
+    {
+      "note" : "휴식 구간 드리프트 보정: Δ-0.16m, err=-3.15m",
+      "timestamp" : "2026-01-27T13:10:42Z"
+    },
+    {
+      "baroAltitude" : 6.168000628754214,
+      "recentDrop" : 2.3611755371093768,
+      "recentGain" : 0,
+      "speed" : 2.254051554456199,
+      "state" : "RESTING",
+      "timestamp" : "2026-01-27T13:10:42Z",
+      "verticalSpeed" : -0.20043422181705703
+    },
+    {
+      "note" : "휴식 구간 드리프트 보정: Δ-0.15m, err=-3.04m",
+      "timestamp" : "2026-01-27T13:10:43Z"
+    },
+    {
+      "baroAltitude" : 6.11250414652562,
+      "recentDrop" : 2.3574768066406264,
+      "recentGain" : 0,
+      "speed" : 3.4325842057110565,
+      "state" : "RESTING",
+      "timestamp" : "2026-01-27T13:10:43Z",
+      "verticalSpeed" : -0.1941916903798353
+    },
+    {
+      "note" : "휴식 구간 드리프트 보정: Δ-0.15m, err=-2.93m",
+      "timestamp" : "2026-01-27T13:10:44Z"
+    },
+    {
+      "baroAltitude" : 6.059635102751855,
+      "recentDrop" : 2.3482238769531243,
+      "recentGain" : 0,
+      "speed" : 2.1970403315565497,
+      "state" : "RESTING",
+      "timestamp" : "2026-01-27T13:10:44Z",
+      "verticalSpeed" : -0.18630005418659726
+    },
+    {
+      "note" : "휴식 구간 드리프트 보정: Δ-0.14m, err=-2.83m",
+      "timestamp" : "2026-01-27T13:10:45Z"
+    },
+    {
+      "baroAltitude" : 6.013380309265959,
+      "recentDrop" : 2.327880859374999,
+      "recentGain" : 0,
+      "speed" : 1.9096294600557284,
+      "state" : "RESTING",
+      "timestamp" : "2026-01-27T13:10:46Z",
+      "verticalSpeed" : -0.17544178602679122
+    },
+    {
+      "note" : "휴식 구간 드리프트 보정: Δ-0.14m, err=-2.72m",
+      "timestamp" : "2026-01-27T13:10:46Z"
+    },
+    {
+      "note" : "휴식 구간 드리프트 보정: Δ-0.12m, err=-2.40m",
+      "timestamp" : "2026-01-27T13:10:47Z"
+    },
+    {
+      "baroAltitude" : 6.098147726927091,
+      "recentDrop" : 2.2903625488281305,
+      "recentGain" : 0,
+      "speed" : 3.449420641114764,
+      "state" : "RESTING",
+      "timestamp" : "2026-01-27T13:10:47Z",
+      "verticalSpeed" : -0.16012957406806472
+    },
+    {
+      "note" : "휴식 구간 드리프트 보정: Δ-0.11m, err=-2.30m",
+      "timestamp" : "2026-01-27T13:10:48Z"
+    },
+    {
+      "baroAltitude" : 6.0620835400262525,
+      "recentDrop" : 2.229583740234375,
+      "recentGain" : 0,
+      "speed" : 4.447003288262752,
+      "state" : "RESTING",
+      "timestamp" : "2026-01-27T13:10:48Z",
+      "verticalSpeed" : -0.14103373921725446
+    },
+    {
+      "note" : "휴식 구간 드리프트 보정: Δ-0.11m, err=-2.20m",
+      "timestamp" : "2026-01-27T13:10:49Z"
+    },
+    {
+      "baroAltitude" : 6.039585014962709,
+      "recentDrop" : 2.145294189453125,
+      "recentGain" : 0,
+      "speed" : 4.966245142747129,
+      "state" : "RESTING",
+      "timestamp" : "2026-01-27T13:10:49Z",
+      "verticalSpeed" : -0.12292620437023333
+    },
+    {
+      "baroAltitude" : 5.925437065743958,
+      "recentDrop" : 2.039337158203126,
+      "recentGain" : 0,
+      "speed" : 5.079833823399224,
+      "state" : "RIDING",
+      "timestamp" : "2026-01-27T13:10:50Z",
+      "verticalSpeed" : -0.10668990156551511
+    },
+    {
+      "baroAltitude" : 5.834805962228334,
+      "recentDrop" : 1.9088073730468755,
+      "recentGain" : 0,
+      "speed" : 5.550917493218153,
+      "state" : "RIDING",
+      "timestamp" : "2026-01-27T13:10:51Z",
+      "verticalSpeed" : -0.08480380215039914
+    },
+    {
+      "baroAltitude" : 5.7671606985564585,
+      "recentDrop" : 1.7552917480468757,
+      "recentGain" : 0,
+      "speed" : 5.60220084708999,
+      "state" : "RIDING",
+      "timestamp" : "2026-01-27T13:10:52Z",
+      "verticalSpeed" : -0.06324180307862824
+    },
+    {
+      "baroAltitude" : 5.720395561837709,
+      "recentDrop" : 1.582745361328124,
+      "recentGain" : 0,
+      "speed" : 5.646902503553269,
+      "state" : "RIDING",
+      "timestamp" : "2026-01-27T13:10:53Z",
+      "verticalSpeed" : -0.043724288068593666
+    },
+    {
+      "baroAltitude" : 5.694766899728334,
+      "recentDrop" : 1.3940795898437512,
+      "recentGain" : 0,
+      "speed" : 5.521929226304448,
+      "state" : "RIDING",
+      "timestamp" : "2026-01-27T13:10:54Z",
+      "verticalSpeed" : -0.02397157959865438
+    },
+    {
+      "baroAltitude" : 5.690274712228334,
+      "recentDrop" : 1.1908874511718759,
+      "recentGain" : 0,
+      "speed" : 5.221464415160449,
+      "state" : "RIDING",
+      "timestamp" : "2026-01-27T13:10:55Z",
+      "verticalSpeed" : -0.004200433740440921
+    },
+    {
+      "baroAltitude" : 5.701108452462709,
+      "recentDrop" : 0.9808227539062511,
+      "recentGain" : 0,
+      "speed" : 5.496840479752137,
+      "state" : "RIDING",
+      "timestamp" : "2026-01-27T13:10:56Z",
+      "verticalSpeed" : 0.010129411931239037
+    },
+    {
+      "baroAltitude" : 5.7248938528533335,
+      "recentDrop" : 0.7694335937500014,
+      "recentGain" : 0,
+      "speed" : 5.372768264041983,
+      "state" : "RIDING",
+      "timestamp" : "2026-01-27T13:10:57Z",
+      "verticalSpeed" : 0.02224508250830217
+    },
+    {
+      "baroAltitude" : 5.760562798165834,
+      "recentDrop" : 0.562542724609373,
+      "recentGain" : 0,
+      "speed" : 4.916949242073413,
+      "state" : "RIDING",
+      "timestamp" : "2026-01-27T13:10:58Z",
+      "verticalSpeed" : 0.03335616438356214
+    },
+    {
+      "baroAltitude" : 5.8068030325408335,
+      "recentDrop" : 0.3654296875000016,
+      "recentGain" : 0,
+      "speed" : 1.725257303389011,
+      "state" : "RIDING",
+      "timestamp" : "2026-01-27T13:10:59Z",
+      "verticalSpeed" : 0.04323003805756151
+    },
+    {
+      "baroAltitude" : 5.8601782766814585,
+      "recentDrop" : 0.17940673828125053,
+      "recentGain" : 0,
+      "speed" : 1.9733650151814617,
+      "state" : "RIDING",
+      "timestamp" : "2026-01-27T13:11:01Z",
+      "verticalSpeed" : 0.04988872242378539
+    },
+    {
+      "baroAltitude" : 5.915134331368959,
+      "recentDrop" : 0.01030273437499929,
+      "recentGain" : 0,
+      "speed" : 0,
+      "state" : "RIDING",
+      "timestamp" : "2026-01-27T13:11:02Z",
+      "verticalSpeed" : 0.05142288772091165
+    },
+    {
+      "baroAltitude" : 5.968772026681458,
+      "recentDrop" : 0,
+      "recentGain" : 0.13396606445312464,
+      "speed" : 0,
+      "state" : "RIDING",
+      "timestamp" : "2026-01-27T13:11:03Z",
+      "verticalSpeed" : 0.05016174100569216
+    },
+    {
+      "baroAltitude" : 6.017386528634583,
+      "recentDrop" : 0,
+      "recentGain" : 0.2502258300781248,
+      "speed" : 0,
+      "state" : "RIDING",
+      "timestamp" : "2026-01-27T13:11:04Z",
+      "verticalSpeed" : 0.045454717712569086
+    },
+    {
+      "baroAltitude" : 6.0586035696502085,
+      "recentDrop" : 0,
+      "recentGain" : 0.3382080078124998,
+      "speed" : 0.2954581683903147,
+      "state" : "RESTING",
+      "timestamp" : "2026-01-27T13:11:05Z",
+      "verticalSpeed" : 0.038545418627873355
+    },
+    {
+      "baroAltitude" : 6.0895178762908335,
+      "recentDrop" : 0,
+      "recentGain" : 0.39475097656249947,
+      "speed" : 1.450323144092421,
+      "state" : "RESTING",
+      "timestamp" : "2026-01-27T13:11:06Z",
+      "verticalSpeed" : 0.02891370786571975
+    },
+    {
+      "baroAltitude" : 6.113297173165834,
+      "recentDrop" : 0,
+      "recentGain" : 0.4230224609375002,
+      "speed" : 1.1300259426025625,
+      "state" : "RESTING",
+      "timestamp" : "2026-01-27T13:11:07Z",
+      "verticalSpeed" : 0.022021702298236863
+    },
+    {
+      "baroAltitude" : 6.132053276681459,
+      "recentDrop" : 0,
+      "recentGain" : 0.43094482421875036,
+      "speed" : 2.5125312206829395,
+      "state" : "RESTING",
+      "timestamp" : "2026-01-27T13:11:08Z",
+      "verticalSpeed" : 0.017549061215749055
+    },
+    {
+      "baroAltitude" : 6.144211479806459,
+      "recentDrop" : 0,
+      "recentGain" : 0.41931762695312536,
+      "speed" : 3.6687213506824534,
+      "state" : "RESTING",
+      "timestamp" : "2026-01-27T13:11:09Z",
+      "verticalSpeed" : 0.011369968217947413
+    },
+    {
+      "baroAltitude" : 6.153195854806459,
+      "recentDrop" : 0,
+      "recentGain" : 0.39263305664062464,
+      "speed" : 2.0698177653756837,
+      "state" : "RESTING",
+      "timestamp" : "2026-01-27T13:11:10Z",
+      "verticalSpeed" : 0.008399391006705514
+    },
+    {
+      "baroAltitude" : 6.1629736868377085,
+      "recentDrop" : 0,
+      "recentGain" : 0.356170654296875,
+      "speed" : 0.291289635600249,
+      "state" : "RESTING",
+      "timestamp" : "2026-01-27T13:11:11Z",
+      "verticalSpeed" : 0.009143313737800187
+    },
+    {
+      "note" : "바리오 업데이트 중지",
+      "timestamp" : "2026-01-27T13:11:12Z"
+    },
+    {
+      "note" : "드리프트 보정 스킵: 거리=15m, GPSΔ=5.12m",
+      "timestamp" : "2026-01-27T13:11:12Z"
+    }
+  ],
+  "meta" : {
+    "appVersion" : "1.0 (1)",
+    "exportTime" : "2026-01-27T13:11:12Z",
+    "schemaVersion" : 1
+  },
+  "summary" : {
+    "baroAvailable" : true,
+    "baroDriftCorrection" : -5.9307349173064585,
+    "baroDriftOffset" : -5.9307349173064585,
+    "baroDropTotal" : 0,
+    "baroGainTotal" : 0,
+    "baroOutlierCount" : 0,
+    "baroSampleCount" : 389,
+    "baselineDelay" : 5.030587911605835,
+    "baselineSampleWindow" : 5,
+    "driftUpdateCount" : 190,
+    "endTime" : "2026-01-27T13:11:12Z",
+    "gpsAltitudeOutlierCount" : 0,
+    "startTime" : "2026-01-27T13:04:09Z"
+  }
+}

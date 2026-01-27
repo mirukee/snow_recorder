@@ -59,46 +59,93 @@ class RecordManager: ObservableObject {
     }
     
     // 런 분석 결과가 나오면 RunMetric으로 변환하여 임시 저장
-    private func recordRunMetric(result: RidingSessionResult, isRetry: Bool = false) {
+    private func recordRunMetric(result: RidingSessionResult, isRetry: Bool = false, retryCount: Int = 0) {
         // LocationManager의 현재(직전) 런 정보 가져오기
         let locationManager = LocationManager.shared
+        let maxRetryCount = 5
+        let retryDelay: TimeInterval = 0.4
+        let metricReadyEpsilon = 0.1
+        
+        func scheduleRetry(_ reason: String) {
+            guard retryCount < maxRetryCount else {
+                print("⚠️ Run Metric 재시도 한도 초과: \(reason) (runCount=\(locationManager.completedRunCount))")
+                return
+            }
+            DispatchQueue.main.asyncAfter(deadline: .now() + retryDelay) { [weak self] in
+                self?.recordRunMetric(result: result, isRetry: true, retryCount: retryCount + 1)
+            }
+        }
         
         // 주의: Riding -> Resting 전환 후 결과가 오지만, 그 사이 사용자가 급격히 다시 Riding을 시작했을 수도 있음.
-        // TimelineEvents에는 [Run1(Finished), Run2(Active)] 가 들어있을 수 있음.
-        // 따라서 '마지막'이 아니라 '마지막으로 완료된(endTime != nil)' Riding 이벤트를 찾아야 함.
+        // 따라서 TimelineEvents가 아니라 완료된 런 메타데이터 기준으로 매칭.
         
-        let completedRidingEvents = locationManager.timelineEvents.filter { $0.type == .riding && $0.endTime != nil }
-        guard let lastCompletedRidingEvent = completedRidingEvents.last,
-              let endTime = lastCompletedRidingEvent.endTime else {
-            // 아직 끝난 런이 없거나 매칭 실패 → 짧게 재시도 (타임라인 이벤트가 늦게 추가될 수 있음)
-            if !isRetry {
-                DispatchQueue.main.asyncAfter(deadline: .now() + 0.4) { [weak self] in
-                    self?.recordRunMetric(result: result, isRetry: true)
-                }
+        // 노이즈 런이 확정된 직후라면 결과를 무시 (런 확정 이후 재시도)
+        if !locationManager.lastRunWasAccepted {
+            scheduleRetry("lastRunWasAccepted=false")
+            return
+        }
+        
+        let runNumber = locationManager.completedRunCount
+        guard runNumber > 0,
+              let startTime = locationManager.completedRunStartTime(for: runNumber),
+              let endTime = locationManager.completedRunEndTime(for: runNumber) else {
+            // 아직 끝난 런이 없거나 매칭 실패 → 짧게 재시도
+            scheduleRetry("run meta not ready")
+            return
+        }
+        
+        let slopeName = locationManager.completedRunSlopeName(for: runNumber) ?? "알 수 없는 슬로프"
+        
+        // RidingSessionResult speed unit: m/s -> convert to km/h for UI consistency
+        let runDistance = locationManager.completedRunDistance(for: runNumber)
+        let runVerticalDrop = locationManager.completedRunVerticalDrop(for: runNumber)
+        let duration = endTime.timeIntervalSince(startTime)
+        
+        // 거리/하강이 아직 확정 전이면 잠시 대기 후 재시도
+        if runDistance <= metricReadyEpsilon && runVerticalDrop <= metricReadyEpsilon {
+            scheduleRetry("distance/vertical not ready")
+            return
+        }
+        
+        // 노이즈 런 필터: 40초 이하 + 하강고도 30m 이하
+        if duration <= 40.0 && runVerticalDrop <= 30.0 {
+            return
+        }
+        
+        // 중복 저장 방지 (같은 runNumber 기준으로 확인)
+        if let existingIndex = tempRunMetrics.firstIndex(where: { $0.runNumber == runNumber }) {
+            // Flow는 늦게 도착할 수 있으므로, 기존 값보다 큰 값이면 갱신
+            let updatedFlowScore = max(tempRunMetrics[existingIndex].flowScore, result.flowScore)
+            var didUpdate = false
+            if updatedFlowScore != tempRunMetrics[existingIndex].flowScore {
+                tempRunMetrics[existingIndex].flowScore = updatedFlowScore
+                didUpdate = true
+            }
+            // 거리/버티컬이 0으로 저장됐던 경우 보정
+            if tempRunMetrics[existingIndex].distance <= metricReadyEpsilon, runDistance > metricReadyEpsilon {
+                tempRunMetrics[existingIndex].distance = runDistance
+                didUpdate = true
+            }
+            if tempRunMetrics[existingIndex].verticalDrop <= metricReadyEpsilon, runVerticalDrop > metricReadyEpsilon {
+                tempRunMetrics[existingIndex].verticalDrop = runVerticalDrop
+                didUpdate = true
+            }
+            if didUpdate {
+                currentRunMetrics = tempRunMetrics
+                print("🔁 Run Metric Updated: Run #\(tempRunMetrics[existingIndex].runNumber), Flow: \(updatedFlowScore), Dist: \(Int(tempRunMetrics[existingIndex].distance))m, Drop: \(Int(tempRunMetrics[existingIndex].verticalDrop))m")
             }
             return
         }
         
-        let lastRidingEvent = lastCompletedRidingEvent
-        
-        // 중복 저장 방지 (같은 startTime의 런이 이미 있는지 확인)
-        if tempRunMetrics.contains(where: { $0.startTime == lastRidingEvent.startTime }) {
-            return
-        }
-        
-        // Flow Score (현재 시점의 값)
-        let flowScore = FlowScoreAnalyzer.shared.latestFlowScore
-        
-        // RidingSessionResult speed unit: m/s -> convert to km/h for UI consistency
-        let runDistance = locationManager.completedRunDistance(for: completedRidingEvents.count)
-        let runVerticalDrop = locationManager.completedRunVerticalDrop(for: completedRidingEvents.count)
+        // Flow Score (결과에 포함된 값 사용)
+        let flowScore = result.flowScore
         
         let metric = RunSession.RunMetric(
-            runNumber: completedRidingEvents.count, // 완료된 riding 이벤트 기준으로 런 번호 매칭
-            slopeName: lastRidingEvent.detail,
-            startTime: lastRidingEvent.startTime,
+            runNumber: runNumber, // 완료된 런 기준 번호
+            slopeName: slopeName,
+            startTime: startTime,
             endTime: endTime,
-            duration: lastRidingEvent.duration,
+            duration: duration,
             distance: runDistance,
             verticalDrop: runVerticalDrop,
             maxSpeed: result.maxSpeed * 3.6,
@@ -170,6 +217,10 @@ class RecordManager: ObservableObject {
                 let routeSpeeds = locationManager.routeSpeeds
                 let runStartIndices = locationManager.runStartIndices
                 
+                // 분석 리포트 데이터
+                let ridingAnalysis = RidingMetricAnalyzer.shared.exportAnalysisData()
+                let flowAnalysis = FlowScoreAnalyzer.shared.exportAnalysisData()
+                
                 // Best Score 계산
                 let bestEdgeScore = self.tempRunMetrics.map { $0.edgeScore }.max() ?? (ridingResult?.edgeScore ?? 0)
                 let bestFlowScore = self.tempRunMetrics.map { $0.flowScore }.max() ?? flowScore
@@ -195,13 +246,33 @@ class RecordManager: ObservableObject {
                     timelineEvents: locationManager.timelineEvents,
                     edgeScore: bestEdgeScore,
                     flowScore: bestFlowScore,
-                    maxGForce: maxG
+                    maxGForce: maxG,
+                    baroAvailable: locationManager.barometerAvailable,
+                    baroVerticalDrop: locationManager.baroVerticalDropValue,
+                    baroGain: locationManager.baroGainValue,
+                    baroSampleCount: locationManager.baroSampleCountValue,
+                    baroBaselineAltitude: locationManager.baroBaselineAltitudeValue,
+                    baroDriftCorrection: locationManager.baroDriftCorrectionValue,
+                    analysisSamples: ridingAnalysis.samples,
+                    analysisEvents: flowAnalysis.events,
+                    analysisSegments: flowAnalysis.segments,
+                    flowBreakdown: flowAnalysis.breakdown,
+                    edgeBreakdown: ridingAnalysis.edgeBreakdown
                 )
                 
                 session.runMetrics = self.tempRunMetrics
                 
+                // SwiftData 저장 (에러 로그 남김)
                 context.insert(session)
-                try? context.save()
+                do {
+                    try context.save()
+                    print("✅ RunSession 저장 완료: \(session.startTime)")
+                    
+                    // 바리오 로그 내보내기 (파일 저장)
+                    _ = locationManager.exportBarometerLog(startTime: start, endTime: end)
+                } catch {
+                    print("❌ RunSession 저장 실패: \(error)")
+                }
                 
                 // 3. 랭킹 시스템 연동 (자동 업로드)
                 RankingService.shared.processRun(session: session)

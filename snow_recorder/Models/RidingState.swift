@@ -6,9 +6,6 @@ enum RidingState: String, Codable {
     /// 슬로프 활강 중 - verticalDrop, distance, speed 측정 활성화
     case riding = "RIDING"
     
-    /// 슬로프 내 중간 휴식 - 측정 중지, 런 카운트 유지
-    case paused = "PAUSED"
-    
     /// 리프트 탑승 중 - 모든 측정 중지
     case onLift = "ON_LIFT"
     
@@ -19,7 +16,6 @@ enum RidingState: String, Codable {
     var displayLabel: String {
         switch self {
         case .riding: return "활강 중"
-        case .paused: return "휴식 중"
         case .onLift: return "리프트"
         case .resting: return "대기 중"
         }
@@ -29,9 +25,31 @@ enum RidingState: String, Codable {
     var iconName: String {
         switch self {
         case .riding: return "figure.skiing.downhill"
-        case .paused: return "pause.circle.fill"
         case .onLift: return "cablecar.fill"
         case .resting: return "cup.and.saucer.fill"
         }
+    }
+    
+    // 이전 버전의 PAUSED 값을 안전하게 RESTING으로 매핑
+    init(from decoder: Decoder) throws {
+        let container = try decoder.singleValueContainer()
+        let rawValue = (try? container.decode(String.self)) ?? ""
+        switch rawValue {
+        case "RIDING":
+            self = .riding
+        case "ON_LIFT":
+            self = .onLift
+        case "RESTING":
+            self = .resting
+        case "PAUSED":
+            self = .resting
+        default:
+            self = .resting
+        }
+    }
+    
+    func encode(to encoder: Encoder) throws {
+        var container = encoder.singleValueContainer()
+        try container.encode(self.rawValue)
     }
 }

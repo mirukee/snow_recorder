@@ -15,6 +15,7 @@ struct DashboardView: View {
     // MARK: - State
     @State private var isBlinking = false // REC 점 깜빡임 상태
     @State private var selectedRunMetric: RunSession.RunMetric?
+    @State private var barometerEnabled: Bool = FeatureFlags.barometerEnabled // 피처 플래그 토글 상태
     
     var body: some View {
         ZStack {
@@ -83,11 +84,32 @@ struct DashboardView: View {
                     
                     Spacer()
                     
-                    // Designed Label
-                    Text("DESIGNED IN SEOUL")
-                        .font(.system(size: 10, weight: .semibold, design: .monospaced))
-                        .tracking(1.0)
-                        .foregroundColor(.white.opacity(0.5))
+                    // Designed Label + Feature Flag
+                    VStack(alignment: .trailing, spacing: 6) {
+                        Text("DESIGNED IN SEOUL")
+                            .font(.system(size: 10, weight: .semibold, design: .monospaced))
+                            .tracking(1.0)
+                            .foregroundColor(.white.opacity(0.5))
+                        
+                        HStack(spacing: 6) {
+                            Text("BARO")
+                                .font(.system(size: 9, weight: .bold, design: .monospaced))
+                                .tracking(1.0)
+                                .foregroundColor(.white.opacity(0.6))
+                            
+                            Toggle("", isOn: $barometerEnabled)
+                                .labelsHidden()
+                                .toggleStyle(SwitchToggleStyle(tint: neonGreen))
+                                .scaleEffect(0.7)
+                                .disabled(recordManager.isRecording || !locationManager.barometerAvailable)
+                            
+                            Text(recordManager.isRecording ? "LOCKED" : (barometerEnabled ? "ON" : "OFF"))
+                                .font(.system(size: 8, weight: .bold, design: .monospaced))
+                                .tracking(0.5)
+                                .foregroundColor(.white.opacity(0.5))
+                        }
+                        .opacity((locationManager.barometerAvailable && !recordManager.isRecording) ? 1.0 : 0.35)
+                    }
                 }
                 .padding(.horizontal, 24)
                 .padding(.top, 20)
@@ -127,7 +149,7 @@ struct DashboardView: View {
                 }
                 .offset(y: -20)
                 
-                // [Status Badge] 현재 상태 표시 (RIDING, PAUSED, ON_LIFT, RESTING)
+                // [Status Badge] 현재 상태 표시 (RIDING, ON_LIFT, RESTING)
                 HStack(spacing: 6) {
                     Image(systemName: locationManager.currentState.iconName)
                         .font(.system(size: 12))
@@ -373,11 +395,15 @@ struct DashboardView: View {
         }
         .onAppear {
             locationManager.requestPermission()
+            barometerEnabled = FeatureFlags.barometerEnabled
             
             // REC Blinking Animation
             withAnimation(.easeInOut(duration: 1.0).repeatForever(autoreverses: true)) {
                 isBlinking = true
             }
+        }
+        .onChange(of: barometerEnabled) { newValue in
+            FeatureFlags.barometerEnabled = newValue
         }
         .fullScreenCover(item: $selectedRunMetric) { metric in
             RunMetricDetailSheet(
