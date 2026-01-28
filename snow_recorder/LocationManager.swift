@@ -69,6 +69,7 @@ class LocationManager: NSObject, ObservableObject, CLLocationManagerDelegate {
     private var pendingRestStartIndex: Int?
     private var pendingRestFinalizeTime: Date?
     private var pendingRestFinalizeIndex: Int?
+    private var onLiftStartCandidates: Set<String> = []
     private var pendingRestBoostUntil: Date?
     private var lastPendingRestBoostTime: Date?
     
@@ -722,6 +723,7 @@ class LocationManager: NSObject, ObservableObject, CLLocationManagerDelegate {
         pendingRestStartIndex = routeSpeeds.count
         pendingRestFinalizeTime = nil
         pendingRestFinalizeIndex = nil
+        onLiftStartCandidates.removeAll()
     }
     
     private func resetPendingRest() {
@@ -1141,7 +1143,7 @@ class LocationManager: NSObject, ObservableObject, CLLocationManagerDelegate {
     }
     
     /// 상태 전환 처리
-    private func handleStateChange(from oldState: RidingState, to newState: RidingState) {
+    private func handleStateChange(from oldState: RidingState, to newState: RidingState, currentLocation: CLLocation) {
         // 상태가 변경되었을 때만 처리
         guard oldState != newState else { return }
         
@@ -1210,6 +1212,19 @@ class LocationManager: NSObject, ObservableObject, CLLocationManagerDelegate {
                     print("🛤️ 새로운 런 시작 인덱스 기록: \(routeCoordinates.count)")
                 }
             }
+            
+            // 리프트 부스트로 기록된 Start 후보를 라이딩 시작 위치에서 검증 후 반영
+            if !onLiftStartCandidates.isEmpty {
+                let coordinate = currentLocation.coordinate
+                for slopeName in onLiftStartCandidates {
+                    if let slope = SlopeDatabase.shared.findSlope(byName: slopeName),
+                       slope.contains(coordinate) {
+                        visitedSlopeStartHits.insert(slopeName)
+                        print("🚩 Start Point Merge(Boost): \(slopeName)")
+                    }
+                }
+                onLiftStartCandidates.removeAll()
+            }
         }
 
         if oldState == .riding && (newState == .resting || newState == .onLift) {
@@ -1222,6 +1237,11 @@ class LocationManager: NSObject, ObservableObject, CLLocationManagerDelegate {
         stateChangeTime = nil
         resetPendingRiding()
         resetPendingRest()
+        
+        // ON_LIFT에서 벗어나면 부스트 Start 후보는 폐기
+        if oldState == .onLift && newState != .onLift {
+            onLiftStartCandidates.removeAll()
+        }
         
         if newState != .onLift {
             liftAccuracyBoostUntil = nil
@@ -1334,7 +1354,7 @@ class LocationManager: NSObject, ObservableObject, CLLocationManagerDelegate {
         // 1. 상태 결정
         let newState = determineState(currentLocation: newLocation, previousLocation: lastLocation)
         if newState != currentState {
-            handleStateChange(from: currentState, to: newState)
+            handleStateChange(from: currentState, to: newState, currentLocation: newLocation)
             currentState = newState
         }
         
@@ -1427,6 +1447,24 @@ class LocationManager: NSObject, ObservableObject, CLLocationManagerDelegate {
                 }
             }
             
+            lastSlopeCheckLocation = newLocation
+        }
+        
+        // ON_LIFT 부스트 구간에서 Start 후보만 수집 (실제 반영은 RIDING 시작 시점에 검증)
+        if currentState == .onLift,
+           let until = liftAccuracyBoostUntil,
+           newLocation.timestamp < until,
+           shouldCheckSlope(at: newLocation) {
+            let checkSlopes = SlopeDatabase.shared.operatingSlopes
+            for slope in checkSlopes {
+                if let top = slope.topPoint,
+                   CLLocation(latitude: top.latitude, longitude: top.longitude).distance(from: newLocation) <= pointHitRadius {
+                    if !onLiftStartCandidates.contains(slope.name) {
+                        onLiftStartCandidates.insert(slope.name)
+                        print("🚩 Start Point Candidate(Boost): \(slope.name)")
+                    }
+                }
+            }
             lastSlopeCheckLocation = newLocation
         }
         

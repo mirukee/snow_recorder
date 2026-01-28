@@ -5,15 +5,18 @@
 ## 1. 슬로프 인식 알고리즘 (Slope Recognition Logic)
 
 ### A. 기본 원리
-GPS 좌표가 슬로프의 **다각형(Polygon)** 내부에 포함되는지를 `Ray Casting` 알고리즘으로 1차 판별합니다. 그러나 슬로프가 겹치거나 인접한 경우(교차로, 합류 지점 등) 단순 포함 여부만으로는 정확한 판별이 어렵습니다. 이를 보완하기 위해 **Dwell Time(체류 시간)**과 **Start/Finish(시작/종료) 게이트** 로직을 사용합니다.
+**상태 인식(Status Determination)**과 **슬로프 판별(Slope Tagging)**은 완전히 분리되어 작동합니다.
+
+1. **상태 인식 (Physics-based):** `RIDING` / `ON_LIFT` / `RESTING` 상태는 오직 **속도(Speed)**, **고도 변화(Altitude Change)**, **시간(Time)** 데이터만을 기반으로 물리적으로 판정합니다. 슬로프/리프트 좌표는 사용하지 않습니다.
+2. **슬로프 판별 (Coordinate-based):** `RIDING` 또는 `RESTING` 상태에서 현재 GPS 좌표가 슬로프 **다각형(Polygon)** 내부에 포함되는지를 `Ray Casting`으로 확인하여 이름을 매핑합니다. 다만 **방문 카운트는 `RIDING`에서만 증가**합니다.
 
 ### B. 중복 인식 해결 (Dwell Time Logic)
-- **개념:** 사용자가 런(Run) 중에 실제로 가장 오래 머물러 있었던 슬로프를 '주행한 슬로프'로 판단합니다.
-- **로직:**
-    1. `RIDING` 상태에서 매초 GPS 좌표를 수집할 때마다, 해당 좌표가 포함된 모든 슬로프의 '방문 횟수(Counter)'를 증가시킵니다.
-    2. 런이 종료(`RESTING` 전환)되면, 방문 횟수가 가장 높은 슬로프를 1순위 후보로 선정합니다.
-    3. **노이즈 필터링:** 최대 방문 횟수의 10% 미만인 슬로프(잠깐 스쳐 지나간 경우)는 후보에서 제외합니다.
-    4. **우선순위:** 방문 횟수가 비슷할 경우, `면적이 더 작은 슬로프`(더 구체적인 경로)를 우선합니다.
+- **개념:** 사용자가 런(Run) 중에 가장 많이 머문 슬로프를 대표 슬로프로 판단합니다.
+- **현재 코드 기준 로직:**
+    1. 슬로프 판별은 **난이도 우선(좁은/난이도 높은 슬로프 우선)**으로 단일 슬로프만 선택됩니다.
+    2. `RIDING` 상태에서만 해당 슬로프의 방문 횟수(Counter)를 증가시킵니다.
+    3. 런 종료 시 방문 횟수 상위 슬로프를 후보군으로 추리고(최대의 10% 이상), Start+Finish 완주 여부를 우선 반영합니다.
+    4. 완주 슬로프가 없으면 면적이 작은 슬로프(더 구체적인 경로)와 난이도 우선순위로 결정합니다.
 
 ### C. 시작점/도착점 자동 산출 (Start/Finish Point Derivation)
 - **목적:** 슬로프의 시작(Top)과 끝(Bottom)을 통과했는지를 확인하여 '완주 여부'를 판단하기 위함.
@@ -22,6 +25,11 @@ GPS 좌표가 슬로프의 **다각형(Polygon)** 내부에 포함되는지를 `
     2.  **Top Point (시작점):** 경계 좌표 중 **해발고도가 가장 높은 지점**을 시작점으로 정의합니다.
     3.  **Bottom Point (종료점):** 경계 좌표 중 **해발고도가 가장 낮은 지점**을 종료점으로 정의합니다.
     4.  **장점:** 물리적인 중력 방향과 100% 일치하므로 별도의 수동 보정 없이도 정확한 주행 방향(Top -> Bottom)을 판별할 수 있습니다. S자형이나 복잡한 형태의 슬로프에서도 오동작하지 않습니다.
+
+**추가 메모 (코드 기준):**
+- Start Point는 `RIDING`과 `RESTING`에서 모두 감지됩니다.
+- Finish Point는 `RIDING`에서만 감지됩니다.
+- ON_LIFT에서는 기본적으로 Start/Finish 감지를 하지 않지만, **바리오 부스트 활성화 시 Start 후보를 버퍼링**하고 `RIDING` 시작 위치가 슬로프 폴리곤 내부일 때만 반영합니다.
 
 ---
 
@@ -72,11 +80,11 @@ GPS 좌표가 슬로프의 **다각형(Polygon)** 내부에 포함되는지를 `
 | **현상** | 제우스 리프트로 ZEUS III 상공 통과 시, 실제 라이딩하지 않았음에도 ZEUS III가 기록됨 |
 | **원인** | `LocationManager.swift` Line 414-426에서 슬로프 인식이 **상태(ON_LIFT/RIDING)와 무관하게** 실행됨. `currentSlope` 업데이트가 ON_LIFT에서도 발생하고, 리프트 하차 직후 RIDING 판정 순간에 폴리곤 내부로 감지 |
 | **영향 코드** | `if shouldCheckSlope(at: newLocation) { ... }` |
-| **해결 방안** | 슬로프 인식을 RIDING 상태에서만 수행하도록 조건 추가 |
+| **해결 방안** | 슬로프 인식을 `RIDING`/`RESTING` 상태에서만 수행하도록 조건 추가 (ON_LIFT 차단) |
 
 ```diff
 - if shouldCheckSlope(at: newLocation) {
-+ if currentState == .riding, shouldCheckSlope(at: newLocation) {
++ if (currentState == .riding || currentState == .resting), shouldCheckSlope(at: newLocation) {
 ```
 
 #### 🐛 Issue #2: 리프트 탑승 초기 속도 0 표시
@@ -259,7 +267,7 @@ if let first = altitudeHistory.first, let last = altitudeHistory.last, altitudeH
 
 | ID | 문제 현상 | 원인 | **최종 해결책 (적용됨)** |
 |:---:|---|---|---|
-| **#1** | **리프트 상공 오탐지**<br>(S1: ZEUS III) | 리프트 이동 중에도 슬로프 영역 체크가 동작하여, 슬로프 상공 통과 시 라이딩으로 인식 | **인식 차단**: `currentState == .riding`일 때만 슬로프 인식(`findSlope`)을 수행하도록 변경 |
+| **#1** | **리프트 상공 오탐지**<br>(S1: ZEUS III) | 리프트 이동 중에도 슬로프 영역 체크가 동작하여, 슬로프 상공 통과 시 라이딩으로 인식 | **인식 차단**: `RIDING/RESTING`에서만 슬로프 인식(`findSlope`)을 수행하도록 변경 (ON_LIFT 차단) |
 | **#3**<br>**#4** | **리프트 중단 RESTING**<br>(S2: HERA) | 리프트 좌표 데이터 부재로 `isNearLift`가 `false`가 되어, 속도 0 또는 영역 이탈 시 즉시 휴식 처리 | **조건 강화**: `!isNearLift` 조건 제거, 대신 **`!isClimbing` (상승 중이 아님)** 조건을 추가하여 물리적 상승 시 상태 유지 |
 | **#5** | **리프트 초기 인식 지연**<br>(S3: HERA) | 리프트 초반 저속 구간에서 상승 감지 기준(8m) 미달로 3분간 `RESTING` 유지 | **임계값 완화**: 상승 감지 기준을 `10초간 8m` → **`5m`**로 완화하여 초기 감지력 향상 |
 | **New**| **리프트 탈출 오인식**<br>(사용자 피드백) | 리프트의 일시적 하강(꿀렁임) 시 `RIDING`으로 잘못 전환될 우려 | **강력한 하강 조건**: `ON_LIFT` → `RIDING` 전환 시 **`10초간 5m 이상 하강`** 조건을 필수 적용 (초보자 인식 가능 + 오작동 방지) |
@@ -342,13 +350,14 @@ if currentSpeedKmH < pauseSpeedThreshold && !isClimbing {  // isNearLift 제거
 
 ---
 
-## 6. 개선 방안 Pool (미적용)
+## 6. 개선 방안 Pool (일부 적용됨)
 
 > 필드테스트 완료 후 종합적으로 검토하여 적용 예정
 
-### A. ON_LIFT 상태 슬로프 인식 차단 (우선순위: 높음)
-- **적용 위치:** `LocationManager.swift` Line 414
-- **효과:** 리프트 탑승 중 모든 슬로프 인식/Dwell Time 카운트 차단
+### A. ON_LIFT 상태 슬로프 인식 차단 (우선순위: 높음, **적용됨**)
+- **적용 위치:** `LocationManager.swift` 슬로프 인식 조건
+- **효과:** 리프트 탑승 중 슬로프 인식/Dwell Time 카운트 차단  
+- **현재 구현:** `RIDING/RESTING`에서만 슬로프 인식 수행
 
 ### B. 고도 기반 리프트 필터링 (중간)
 - 리프트는 슬로프보다 높은 고도에서 이동

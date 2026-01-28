@@ -22,6 +22,13 @@ struct AnalysisExportPayload: Codable {
         var locationName: String
     }
     
+    struct Diagnostics: Codable {
+        var routeSpeedCount: Int
+        var runStartIndices: [Int]
+        var runEndIndices: [Int]
+        var runMetricsCount: Int
+    }
+    
     struct ScoreSummary: Codable {
         var edgeScore: Int
         var flowScore: Int
@@ -37,6 +44,7 @@ struct AnalysisExportPayload: Codable {
     var events: [RunSession.AnalysisEvent]
     var segments: [RunSession.AnalysisSegment]
     var runMetrics: [RunSession.RunMetric]
+    var diagnostics: Diagnostics
 }
 
 enum AnalysisExportError: Error {
@@ -60,7 +68,7 @@ enum AnalysisExportService {
         
         let payload = AnalysisExportPayload(
             meta: .init(
-                schemaVersion: 2,
+                schemaVersion: 3,
                 appVersion: appVersion(),
                 exportTime: Date()
             ),
@@ -87,7 +95,18 @@ enum AnalysisExportService {
             samples: session.analysisSamples,
             events: session.analysisEvents,
             segments: session.analysisSegments,
-            runMetrics: session.runMetrics
+            runMetrics: session.runMetrics,
+            diagnostics: .init(
+                routeSpeedCount: session.routeSpeeds.count,
+                runStartIndices: session.runStartIndices,
+                runEndIndices: session.runStartIndices.indices.map { index in
+                    if index < session.runStartIndices.count - 1 {
+                        return session.runStartIndices[index + 1]
+                    }
+                    return session.routeSpeeds.count
+                },
+                runMetricsCount: session.runMetrics.count
+            )
         )
         
         let encoder = JSONEncoder()
