@@ -74,8 +74,8 @@ final class FlowScoreAnalyzer: ObservableObject {
     
     // 2. Events Criteria (Stricter)
     private let hardBrakeThreshold: Double = -2.0 // m/s² (was -1.2) -> 슬라이딩 턴 감속 허용, 급정거(사람 회피 등)만 감지
-    private let chatterJerkThreshold: Double = 4.5 // 저크(Jerk) 임계값
-    private let chatterCooldown: TimeInterval = 1.0
+    private let chatterJerkThreshold: Double = 5.8 // 저크(Jerk) 임계값
+    private let chatterCooldown: TimeInterval = 1.8
     private let chatterWindow: TimeInterval = 0.1
     private let chatterSpeedGateMS: Double = 4.2 // 이 속도 이상일 때만 떨림 감지
     private let quietTargetG: Double = 1.0 // Quiet Phase 기준 G
@@ -97,7 +97,9 @@ final class FlowScoreAnalyzer: ObservableObject {
     
     private let hardBrakePenalty: Double = 40.0      // (was 4.0) 실수 한방에 40점
     private let chatterPenalty: Double = 20.0        // (was 2.0) 털리면 20점
+    private let chatterPenaltyCapPerRun: Double = 450.0 // 런 단위 chatter 감점 상한
     private let bonusPoint: Double = 20.0            // Quiet Phase 보너스 (+20점)
+    private let minFinalScore: Double = 200.0        // 유효한 런의 최소 점수 하한
     
     // 4. 이벤트 구간 샘플링
     private let eventSampleInterval: TimeInterval = 0.1
@@ -386,14 +388,20 @@ final class FlowScoreAnalyzer: ObservableObject {
         
         // (B) Event Penalties (Increased) & Bonus
         let brakePenalty = Double(hardBrakeCount) * hardBrakePenalty
-        let chatterDeduction = Double(chatterEventCount) * chatterPenalty
+        let rawChatterDeduction = Double(chatterEventCount) * chatterPenalty
+        let chatterDeduction = min(chatterPenaltyCapPerRun, rawChatterDeduction)
         let quietBonus = Double(quietEventCount) * bonusPoint // Quiet Phase 보너스 추가
         
         // 점수 반영: 감점은 빼고 가산점은 더함
         score = score - (stopPenalty + brakePenalty + chatterDeduction) + quietBonus
         
         // 4. Final Clamp (Max 1000)
-        let finalScore = max(0.0, min(1000.0, score))
+        let finalScore: Double
+        if score <= 0 {
+            finalScore = 0.0
+        } else {
+            finalScore = max(minFinalScore, min(1000.0, score))
+        }
         let resultInt = Int(finalScore.rounded())
         
         latestBreakdown = RunSession.FlowScoreBreakdown(

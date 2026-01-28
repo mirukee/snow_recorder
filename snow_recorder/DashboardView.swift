@@ -17,6 +17,24 @@ struct DashboardView: View {
     @State private var selectedRunMetric: RunSession.RunMetric?
     @State private var barometerEnabled: Bool = FeatureFlags.barometerEnabled // 피처 플래그 토글 상태
     
+    // 런 기록이 있으면 런 기준 속도를 사용, 없으면 실시간 속도를 사용
+    private var sessionMaxSpeedKmH: Double {
+        guard !recordManager.currentRunMetrics.isEmpty else {
+            return locationManager.maxSpeed
+        }
+        return recordManager.currentRunMetrics.map { $0.maxSpeed }.max() ?? 0.0
+    }
+    
+    private var sessionAvgSpeedKmH: Double {
+        guard !recordManager.currentRunMetrics.isEmpty else {
+            return locationManager.avgSpeed
+        }
+        let totalDuration = recordManager.currentRunMetrics.reduce(0.0) { $0 + $1.duration }
+        guard totalDuration > 0 else { return 0.0 }
+        let weightedSum = recordManager.currentRunMetrics.reduce(0.0) { $0 + ($1.avgSpeed * $1.duration) }
+        return weightedSum / totalDuration
+    }
+    
     var body: some View {
         ZStack {
             // 1. 전체 배경: 리얼 블랙
@@ -150,10 +168,11 @@ struct DashboardView: View {
                 .offset(y: -20)
                 
                 // [Status Badge] 현재 상태 표시 (RIDING, ON_LIFT, RESTING)
+                let displayState = locationManager.displayState
                 HStack(spacing: 6) {
-                    Image(systemName: locationManager.currentState.iconName)
+                    Image(systemName: displayState.iconName)
                         .font(.system(size: 12))
-                    Text(locationManager.currentState.rawValue)
+                    Text(displayState.rawValue)
                         .font(.system(size: 10, weight: .bold))
                         .tracking(1)
                 }
@@ -224,14 +243,14 @@ struct DashboardView: View {
                     StatsCompactCard(
                         icon: "gauge.with.dots.needle.67percent",
                         title: "MAX",
-                        value: "\(Int(locationManager.maxSpeed))km/h",
+                        value: "\(Int(sessionMaxSpeedKmH))km/h",
                         accentColor: neonGreen
                     )
                     
                     StatsCompactCard(
                         icon: "speedometer",
                         title: "AVG",
-                        value: "\(Int(locationManager.avgSpeed))km/h",
+                        value: "\(Int(sessionAvgSpeedKmH))km/h",
                         accentColor: neonGreen
                     )
                 }

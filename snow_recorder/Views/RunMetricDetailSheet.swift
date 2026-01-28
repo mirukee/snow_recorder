@@ -299,7 +299,10 @@ struct RunMetricDetailSheet: View {
     }
     
     private var displayMaxSpeed: Double {
-        metric.maxSpeed * speedScale
+        if let seriesMax = speedSeries.max(), seriesMax > 0 {
+            return seriesMax
+        }
+        return metric.maxSpeed * speedScale
     }
     
     private var displayAvgSpeed: Double {

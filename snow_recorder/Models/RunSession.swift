@@ -60,6 +60,8 @@ final class RunSession {
         var edgeScore: Int
         var flowScore: Int
         var maxGForce: Double
+        var edgeBreakdown: EdgeScoreBreakdown?
+        var flowBreakdown: FlowScoreBreakdown?
         
         enum CodingKeys: String, CodingKey {
             case id
@@ -75,6 +77,8 @@ final class RunSession {
             case edgeScore
             case flowScore
             case maxGForce
+            case edgeBreakdown
+            case flowBreakdown
         }
         
         init(
@@ -90,7 +94,9 @@ final class RunSession {
             avgSpeed: Double,
             edgeScore: Int,
             flowScore: Int,
-            maxGForce: Double
+            maxGForce: Double,
+            edgeBreakdown: EdgeScoreBreakdown? = nil,
+            flowBreakdown: FlowScoreBreakdown? = nil
         ) {
             self.id = id
             self.runNumber = runNumber
@@ -105,6 +111,8 @@ final class RunSession {
             self.edgeScore = edgeScore
             self.flowScore = flowScore
             self.maxGForce = maxGForce
+            self.edgeBreakdown = edgeBreakdown
+            self.flowBreakdown = flowBreakdown
         }
         
         init(from decoder: Decoder) throws {
@@ -122,6 +130,8 @@ final class RunSession {
             edgeScore = try container.decode(Int.self, forKey: .edgeScore)
             flowScore = try container.decode(Int.self, forKey: .flowScore)
             maxGForce = try container.decode(Double.self, forKey: .maxGForce)
+            edgeBreakdown = try container.decodeIfPresent(EdgeScoreBreakdown.self, forKey: .edgeBreakdown)
+            flowBreakdown = try container.decodeIfPresent(FlowScoreBreakdown.self, forKey: .flowBreakdown)
         }
         
         func encode(to encoder: Encoder) throws {
@@ -139,6 +149,8 @@ final class RunSession {
             try container.encode(edgeScore, forKey: .edgeScore)
             try container.encode(flowScore, forKey: .flowScore)
             try container.encode(maxGForce, forKey: .maxGForce)
+            try container.encodeIfPresent(edgeBreakdown, forKey: .edgeBreakdown)
+            try container.encodeIfPresent(flowBreakdown, forKey: .flowBreakdown)
         }
     }
     

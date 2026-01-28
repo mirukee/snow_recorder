@@ -100,6 +100,13 @@ class RecordManager: ObservableObject {
         let runDistance = locationManager.completedRunDistance(for: runNumber)
         let runVerticalDrop = locationManager.completedRunVerticalDrop(for: runNumber)
         let duration = endTime.timeIntervalSince(startTime)
+        let runSpeedSeries = locationManager.completedRunSpeedSeries(for: runNumber)
+        let seriesMaxSpeed = runSpeedSeries.max()
+        let seriesAvgSpeed: Double? = {
+            guard !runSpeedSeries.isEmpty else { return nil }
+            let sum = runSpeedSeries.reduce(0, +)
+            return sum / Double(runSpeedSeries.count)
+        }()
         
         // 거리/하강이 아직 확정 전이면 잠시 대기 후 재시도
         if runDistance <= metricReadyEpsilon && runVerticalDrop <= metricReadyEpsilon {
@@ -140,6 +147,9 @@ class RecordManager: ObservableObject {
         // Flow Score (결과에 포함된 값 사용)
         let flowScore = result.flowScore
         
+        let edgeBreakdown = RidingMetricAnalyzer.shared.exportAnalysisData().edgeBreakdown
+        let flowBreakdown = FlowScoreAnalyzer.shared.exportAnalysisData().breakdown
+        
         let metric = RunSession.RunMetric(
             runNumber: runNumber, // 완료된 런 기준 번호
             slopeName: slopeName,
@@ -148,11 +158,13 @@ class RecordManager: ObservableObject {
             duration: duration,
             distance: runDistance,
             verticalDrop: runVerticalDrop,
-            maxSpeed: result.maxSpeed * 3.6,
-            avgSpeed: result.averageSpeed * 3.6,
+            maxSpeed: seriesMaxSpeed ?? (result.maxSpeed * 3.6),
+            avgSpeed: seriesAvgSpeed ?? (result.averageSpeed * 3.6),
             edgeScore: result.edgeScore,
             flowScore: flowScore ?? 0,
-            maxGForce: result.maxGForce
+            maxGForce: result.maxGForce,
+            edgeBreakdown: edgeBreakdown,
+            flowBreakdown: flowBreakdown
         )
         
         tempRunMetrics.append(metric)
@@ -222,9 +234,16 @@ class RecordManager: ObservableObject {
                 let flowAnalysis = FlowScoreAnalyzer.shared.exportAnalysisData()
                 
                 // Best Score 계산
-                let bestEdgeScore = self.tempRunMetrics.map { $0.edgeScore }.max() ?? (ridingResult?.edgeScore ?? 0)
-                let bestFlowScore = self.tempRunMetrics.map { $0.flowScore }.max() ?? flowScore
+                let bestEdgeMetric = self.tempRunMetrics.max { $0.edgeScore < $1.edgeScore }
+                let bestFlowMetric = self.tempRunMetrics.max { $0.flowScore < $1.flowScore }
+                
+                let bestEdgeScore = bestEdgeMetric?.edgeScore ?? (ridingResult?.edgeScore ?? 0)
+                let bestFlowScore = bestFlowMetric?.flowScore ?? flowScore
                 let maxG = self.tempRunMetrics.map { $0.maxGForce }.max() ?? (ridingResult?.maxGForce ?? 0.0)
+                
+                // 세션 요약용 브레이크다운은 최고 점수 런 기준으로 캐싱
+                let bestEdgeBreakdown = bestEdgeMetric?.edgeBreakdown ?? ridingAnalysis.edgeBreakdown
+                let bestFlowBreakdown = bestFlowMetric?.flowBreakdown ?? flowAnalysis.breakdown
                 
                 // 1. 데이터 저장 (RunMetrics 포함)
                 let session = RunSession(
@@ -256,8 +275,8 @@ class RecordManager: ObservableObject {
                     analysisSamples: ridingAnalysis.samples,
                     analysisEvents: flowAnalysis.events,
                     analysisSegments: flowAnalysis.segments,
-                    flowBreakdown: flowAnalysis.breakdown,
-                    edgeBreakdown: ridingAnalysis.edgeBreakdown
+                    flowBreakdown: bestFlowBreakdown,
+                    edgeBreakdown: bestEdgeBreakdown
                 )
                 
                 session.runMetrics = self.tempRunMetrics

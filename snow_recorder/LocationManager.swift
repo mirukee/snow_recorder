@@ -29,6 +29,7 @@ class LocationManager: NSObject, ObservableObject, CLLocationManagerDelegate {
     @Published var sessionSlopeCounts: [String: Int] = [:] // 세션 동안 탄 슬로프별 횟수
     @Published var routeCoordinates: [[Double]] = [] // GPS 경로 좌표 [[lat, lon], ...]
     @Published var routeSpeeds: [Double] = [] // GPS 경로별 속도 (km/h)
+    @Published var routeSpeedAccuracies: [Double] = [] // GPS 경로별 속도 정확도 (m/s)
     @Published var runStartIndices: [Int] = [0] // 각 런 시작 인덱스
     @Published var timelineEvents: [RunSession.TimelineEvent] = [] // 타임라인 이벤트 목록
     private(set) var lastRunWasAccepted: Bool = true // 최근 런이 유효로 확정되었는지 여부
@@ -157,6 +158,15 @@ class LocationManager: NSObject, ObservableObject, CLLocationManagerDelegate {
     private let slopeCheckDistance: Double = 50.0       // 슬로프 체크 최소 이동 거리 (m)
     private let pointHitRadius: Double = 50.0           // 시작/종료점 통과 판정 반경 (m)
     private let minVerticalDrop: Double = 1.0           // 최소 하강 고도 (GPS 노이즈 필터)
+    private let runSpeedAccuracyThreshold: Double = 2.0 // 런 그래프/메트릭용 속도 정확도 상한 (m/s)
+
+    /// UI 표기용 상태 (Pending Rest는 RESTING으로 표시)
+    var displayState: RidingState {
+        if currentState == .riding, pendingRestStartTime != nil {
+            return .resting
+        }
+        return currentState
+    }
     
     override init() {
         super.init()
@@ -307,14 +317,33 @@ class LocationManager: NSObject, ObservableObject, CLLocationManagerDelegate {
         guard !routeSpeeds.isEmpty else { return [] }
         let index = runNumber - 1
         guard index >= 0 else { return [] }
-        
-        let startIndex = index < runStartIndices.count ? runStartIndices[index] : 0
+
+        // runStartIndices는 초기값 0을 포함하므로, 실제 런 시작 인덱스는 index+1이 우선
+        let startIndex: Int
+        if index + 1 < runStartIndices.count {
+            startIndex = runStartIndices[index + 1]
+        } else if index < runStartIndices.count {
+            startIndex = runStartIndices[index]
+        } else {
+            startIndex = 0
+        }
         let endIndex = index < completedRunEndIndices.count ? completedRunEndIndices[index] : routeSpeeds.count
         
         let safeStart = max(0, min(startIndex, routeSpeeds.count))
         let safeEnd = max(safeStart, min(endIndex, routeSpeeds.count))
         guard safeEnd > safeStart else { return [] }
-        return Array(routeSpeeds[safeStart..<safeEnd])
+        
+        let speedsSlice = Array(routeSpeeds[safeStart..<safeEnd])
+        guard routeSpeedAccuracies.count >= safeEnd else {
+            return speedsSlice
+        }
+        let accuracySlice = Array(routeSpeedAccuracies[safeStart..<safeEnd])
+        let filtered: [Double] = zip(speedsSlice, accuracySlice).compactMap { pair -> Double? in
+            let (speed, accuracy) = pair
+            guard accuracy >= 0, accuracy <= runSpeedAccuracyThreshold else { return nil }
+            return speed
+        }
+        return filtered
     }
     
     /// 메트릭 초기화
@@ -337,6 +366,7 @@ class LocationManager: NSObject, ObservableObject, CLLocationManagerDelegate {
         sessionSlopeCounts.removeAll()
         routeCoordinates.removeAll()
         routeSpeeds.removeAll()
+        routeSpeedAccuracies.removeAll()
         runStartIndices = [0]
         timelineEvents.removeAll()
         currentTimelineEventStart = nil
@@ -1402,6 +1432,7 @@ class LocationManager: NSObject, ObservableObject, CLLocationManagerDelegate {
             if distance >= filterDistance || routeCoordinates.isEmpty {
                 routeCoordinates.append([newLocation.coordinate.latitude, newLocation.coordinate.longitude])
                 routeSpeeds.append(max(0, newLocation.speed * 3.6))
+                routeSpeedAccuracies.append(newLocation.speedAccuracy)
             }
         }
 
