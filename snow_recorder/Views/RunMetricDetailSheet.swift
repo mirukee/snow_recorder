@@ -280,33 +280,28 @@ struct RunMetricDetailSheet: View {
         )
     }
     
+    private var displaySpeedSeries: [Double] {
+        guard metric.maxSpeed > 0 else { return speedSeries }
+        return speedSeries.map { min($0, metric.maxSpeed) }
+    }
+    
     private var maxSpeedPoint: (index: Int, value: Double)? {
-        guard let maxValue = speedSeries.max(),
-              let index = speedSeries.firstIndex(of: maxValue) else {
+        guard let maxValue = displaySpeedSeries.max(),
+              let index = displaySpeedSeries.firstIndex(of: maxValue) else {
             return nil
         }
         return (index, maxValue)
     }
-
-    private var speedScale: Double {
-        let seriesMax = speedSeries.max() ?? 0
-        guard seriesMax > 0, metric.maxSpeed > 0 else { return 1.0 }
-        let ratio = seriesMax / metric.maxSpeed
-        if ratio > 2.6 && ratio < 4.6 {
-            return 3.6
-        }
-        return 1.0
-    }
     
     private var displayMaxSpeed: Double {
-        if let seriesMax = speedSeries.max(), seriesMax > 0 {
-            return seriesMax
+        if metric.maxSpeed > 0 {
+            return metric.maxSpeed
         }
-        return metric.maxSpeed * speedScale
+        return displaySpeedSeries.max() ?? 0
     }
     
     private var displayAvgSpeed: Double {
-        metric.avgSpeed * speedScale
+        metric.avgSpeed
     }
     
     private var speedChartSection: some View {
@@ -329,7 +324,7 @@ struct RunMetricDetailSheet: View {
                     .foregroundColor(.white.opacity(0.4))
             }
             
-            if speedSeries.isEmpty {
+            if displaySpeedSeries.isEmpty {
                 Text("No speed data")
                     .font(.system(size: 12, weight: .medium))
                     .foregroundColor(.white.opacity(0.4))
@@ -348,7 +343,7 @@ struct RunMetricDetailSheet: View {
                     }
                     
                     Chart {
-                        ForEach(Array(speedSeries.enumerated()), id: \.offset) { index, speed in
+                        ForEach(Array(displaySpeedSeries.enumerated()), id: \.offset) { index, speed in
                             AreaMark(
                                 x: .value("Index", index),
                                 y: .value("Speed", speed)
@@ -388,7 +383,7 @@ struct RunMetricDetailSheet: View {
                             }
                         }
                     }
-                    .chartYScale(domain: 0...max(10, (speedSeries.max() ?? 0) * 1.1))
+                    .chartYScale(domain: 0...max(10, (displaySpeedSeries.max() ?? 0) * 1.1))
                     .chartXAxis(.hidden)
                     .chartYAxis(.hidden)
                 }

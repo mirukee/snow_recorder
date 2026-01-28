@@ -149,6 +149,9 @@ class RecordManager: ObservableObject {
         
         let edgeBreakdown = RidingMetricAnalyzer.shared.exportAnalysisData().edgeBreakdown
         let flowBreakdown = FlowScoreAnalyzer.shared.exportAnalysisData().breakdown
+        let flowScoreEvents = FlowScoreAnalyzer.shared.exportScoreEvents()
+        let edgeScoreEvents = RidingMetricAnalyzer.shared.exportScoreEvents()
+        let scoreEvents = (flowScoreEvents + edgeScoreEvents).sorted { $0.t < $1.t }
         
         let metric = RunSession.RunMetric(
             runNumber: runNumber, // 완료된 런 기준 번호
@@ -163,6 +166,7 @@ class RecordManager: ObservableObject {
             edgeScore: result.edgeScore,
             flowScore: flowScore ?? 0,
             maxGForce: result.maxGForce,
+            scoreEvents: scoreEvents.isEmpty ? nil : scoreEvents,
             edgeBreakdown: edgeBreakdown,
             flowBreakdown: flowBreakdown
         )
@@ -214,10 +218,17 @@ class RecordManager: ObservableObject {
                 guard let self = self else { return }
                 
                 // 마지막 런 처리 확인: 마지막 이벤트가 Riding이고 아직 저장이 안됐다면 저장 시도
-                // (생략: 복잡도 줄이기 위해 일단 마지막 런 자동 감지 로직에 의존)
+                // 세션 종료 시점에 Riding/보류 상태였다면 마지막 런 메트릭이 누락될 수 있으므로 강제 확정
+                let locationManager = LocationManager.shared
+                if let ridingResult, locationManager.lastRunWasAccepted {
+                    var finalizedResult = ridingResult
+                    finalizedResult.flowScore = flowScore
+                    if self.tempRunMetrics.count < locationManager.completedRunCount {
+                        self.recordRunMetric(result: finalizedResult)
+                    }
+                }
                 
                 // LocationManager에서 메트릭 수집
-                let locationManager = LocationManager.shared
                 let distance = locationManager.totalDistance
                 let maxSpeed = locationManager.maxSpeed
                 let avgSpeed = locationManager.avgSpeed
@@ -227,6 +238,9 @@ class RecordManager: ObservableObject {
                 let sessionSlopes = locationManager.sessionSlopeCounts
                 let routeCoordinates = locationManager.routeCoordinates
                 let routeSpeeds = locationManager.routeSpeeds
+                let routeTimestamps = locationManager.routeTimestamps
+                let routeAltitudes = locationManager.routeAltitudes
+                let routeDistances = locationManager.routeDistances
                 let runStartIndices = locationManager.runStartIndices
                 
                 // 분석 리포트 데이터
@@ -240,18 +254,24 @@ class RecordManager: ObservableObject {
                 let bestEdgeScore = bestEdgeMetric?.edgeScore ?? (ridingResult?.edgeScore ?? 0)
                 let bestFlowScore = bestFlowMetric?.flowScore ?? flowScore
                 let maxG = self.tempRunMetrics.map { $0.maxGForce }.max() ?? (ridingResult?.maxGForce ?? 0.0)
+                let metricMaxSpeed = self.tempRunMetrics.map { $0.maxSpeed }.max()
+                let sessionMaxSpeed = metricMaxSpeed ?? maxSpeed
                 
                 // 세션 요약용 브레이크다운은 최고 점수 런 기준으로 캐싱
                 let bestEdgeBreakdown = bestEdgeMetric?.edgeBreakdown ?? ridingAnalysis.edgeBreakdown
                 let bestFlowBreakdown = bestFlowMetric?.flowBreakdown ?? flowAnalysis.breakdown
                 
                 // 1. 데이터 저장 (RunMetrics 포함)
+                let gForceSamples = ridingAnalysis.samples.map {
+                    RunSession.GForceSample(t: $0.t, gAvg: $0.gAvg, gMax: $0.gMax)
+                }
+                
                 let session = RunSession(
                     startTime: start,
                     endTime: end,
                     duration: duration,
                     distance: distance,
-                    maxSpeed: maxSpeed,
+                    maxSpeed: sessionMaxSpeed,
                     avgSpeed: avgSpeed,
                     verticalDrop: verticalDrop,
                     runCount: runCount,
@@ -261,6 +281,9 @@ class RecordManager: ObservableObject {
                     countryCode: resolveCountryCode(from: routeCoordinates),
                     routeCoordinates: routeCoordinates,
                     routeSpeeds: routeSpeeds,
+                    routeTimestamps: routeTimestamps,
+                    routeAltitudes: routeAltitudes,
+                    routeDistances: routeDistances,
                     runStartIndices: runStartIndices,
                     timelineEvents: locationManager.timelineEvents,
                     edgeScore: bestEdgeScore,
@@ -275,6 +298,7 @@ class RecordManager: ObservableObject {
                     analysisSamples: ridingAnalysis.samples,
                     analysisEvents: flowAnalysis.events,
                     analysisSegments: flowAnalysis.segments,
+                    gForceSamples: gForceSamples.isEmpty ? nil : gForceSamples,
                     flowBreakdown: bestFlowBreakdown,
                     edgeBreakdown: bestEdgeBreakdown
                 )

@@ -29,6 +29,9 @@ class LocationManager: NSObject, ObservableObject, CLLocationManagerDelegate {
     @Published var sessionSlopeCounts: [String: Int] = [:] // 세션 동안 탄 슬로프별 횟수
     @Published var routeCoordinates: [[Double]] = [] // GPS 경로 좌표 [[lat, lon], ...]
     @Published var routeSpeeds: [Double] = [] // GPS 경로별 속도 (km/h)
+    @Published var routeTimestamps: [TimeInterval] = [] // GPS 경로별 타임스탬프 (UNIX 초)
+    @Published var routeAltitudes: [Double] = [] // GPS 경로별 고도 (m)
+    @Published var routeDistances: [Double] = [] // GPS 경로별 누적 거리 (m)
     @Published var routeSpeedAccuracies: [Double] = [] // GPS 경로별 속도 정확도 (m/s)
     @Published var runStartIndices: [Int] = [0] // 각 런 시작 인덱스
     @Published var timelineEvents: [RunSession.TimelineEvent] = [] // 타임라인 이벤트 목록
@@ -128,6 +131,8 @@ class LocationManager: NSObject, ObservableObject, CLLocationManagerDelegate {
     private let liftAccuracyBoostCooldown: TimeInterval = 20.0 // 정확도 상승 쿨다운(초)
     private let ridingRestSpeedThreshold: Double = 6.0 // 라이딩→휴식 전환용 속도 상한(km/h)
     private let ridingRestDropThreshold: Double = 10.0 // 라이딩→휴식 전환용 하강량 상한(m)
+    private let altitudeTrendWindow: TimeInterval = 10.0 // 상승/하강 판정 윈도우(초)
+    private let altitudeTrendMinSpan: TimeInterval = 6.0 // 판정 최소 시간 span(초)
     private let pendingRidingDuration: TimeInterval = 5.0 // 라이딩 확정 대기 시간(초)
     private let pendingRidingMinAvgSpeed: Double = 5.0 // 확정 조건: 평균 속도(km/h)
     private let pendingRidingMinDistance: Double = 5.0 // 확정 조건: 수평 이동(m)
@@ -366,6 +371,9 @@ class LocationManager: NSObject, ObservableObject, CLLocationManagerDelegate {
         sessionSlopeCounts.removeAll()
         routeCoordinates.removeAll()
         routeSpeeds.removeAll()
+        routeTimestamps.removeAll()
+        routeAltitudes.removeAll()
+        routeDistances.removeAll()
         routeSpeedAccuracies.removeAll()
         runStartIndices = [0]
         timelineEvents.removeAll()
@@ -623,6 +631,24 @@ class LocationManager: NSObject, ObservableObject, CLLocationManagerDelegate {
         }
         return drop
     }
+
+    private func recentAltitudeNetChange(
+        window: TimeInterval,
+        minSpan: TimeInterval,
+        useBarometer: Bool
+    ) -> (gain: Double, drop: Double)? {
+        let samples = useBarometer ? recentBaroSamples : recentGPSAltitudeSamples
+        guard let last = samples.last else { return nil }
+        let cutoff = last.time.addingTimeInterval(-window)
+        let windowSamples = samples.filter { $0.time >= cutoff }
+        guard windowSamples.count >= 2 else { return nil }
+        guard let first = windowSamples.first, let lastSample = windowSamples.last else { return nil }
+        let span = lastSample.time.timeIntervalSince(first.time)
+        guard span >= minSpan else { return nil }
+        let gain = max(0, lastSample.altitude - first.altitude)
+        let drop = max(0, first.altitude - lastSample.altitude)
+        return (gain, drop)
+    }
     
     private func recentBaroCumulativeDrop(within window: TimeInterval, now: Date) -> Double? {
         let cutoff = now.addingTimeInterval(-window)
@@ -754,6 +780,7 @@ class LocationManager: NSObject, ObservableObject, CLLocationManagerDelegate {
         pendingRestFinalizeTime = nil
         pendingRestFinalizeIndex = nil
         onLiftStartCandidates.removeAll()
+        FlowScoreAnalyzer.shared.updatePendingRest(isActive: true)
     }
     
     private func resetPendingRest() {
@@ -763,6 +790,7 @@ class LocationManager: NSObject, ObservableObject, CLLocationManagerDelegate {
         pendingRestFinalizeIndex = nil
         pendingRestBoostUntil = nil
         lastPendingRestBoostTime = nil
+        FlowScoreAnalyzer.shared.updatePendingRest(isActive: false)
     }
     
     private func shouldResumeFromPendingRest(stateSpeedKmH: Double, isDescending: Bool) -> Bool {
@@ -1034,33 +1062,26 @@ class LocationManager: NSObject, ObservableObject, CLLocationManagerDelegate {
              isDescending = altitudeChange > 0.5
         }
         
-        // Robust Ascent Detection (리프트 탑승 감지)
-        // 로직: 최근 10초간 5m 이상 상승 (약 0.5m/s 이상 수직 상승)
-        // Issue #5 수정: 리프트 초기 저속 구간 대응을 위해 임계값 완화 (8m → 5m)
-        let isClimbing: Bool
-        if let first = history.first, let last = history.last, history.count >= 10 {
-            isClimbing = (last - first) > 5.0
-        } else {
-            isClimbing = false
-        }
+        let altitudeTrend = recentAltitudeNetChange(
+            window: altitudeTrendWindow,
+            minSpan: altitudeTrendMinSpan,
+            useBarometer: useBarometerSignals
+        )
+        let recentGain = altitudeTrend?.gain ?? 0
+        let recentDrop = altitudeTrend?.drop ?? 0
         
-        // Riding에서 리프트 전환용 상향 기준 (노이즈 방지)
-        let isClimbingStrict: Bool
-        if let first = history.first, let last = history.last, history.count >= 10 {
-            isClimbingStrict = (last - first) > 7.0
-        } else {
-            isClimbingStrict = false
-        }
+        // Robust Ascent Detection (리프트 탑승 감지)
+        // 로직: 최근 10초간 5m 이상 상승 (최소 span 6초)
+        // Issue #5 수정: 리프트 초기 저속 구간 대응을 위해 임계값 완화 (8m → 5m)
+        let isClimbing = recentGain > 5.0
+        
+        // Riding에서 리프트 전환용 상향 기준 (노이즈 방지, 완화 적용)
+        let isClimbingStrict = recentGain > 7.0
         
         // Robust Strong Descent (강력한 하강 감지 - 리프트 오인식 방지용)
-        // 로직: 최근 10초간 5m 이상 하강 (리프트 꿀렁임 무시 + 초보자 인식 가능)
+        // 로직: 최근 10초간 5m 이상 하강 (최소 span 6초)
         // 10m(초보자 인식 불가) -> 5m(초보자 10km/h 인식 가능)로 완화
-        let isStrongDescent: Bool
-        if let first = history.first, let last = history.last, history.count >= 10 {
-            isStrongDescent = (first - last) > 5.0
-        } else {
-            isStrongDescent = false
-        }
+        let isStrongDescent = recentDrop > 5.0
         
         // 슬로프 좌표는 상태 판정에 사용하지 않고 태깅/표시에만 사용
         // (필요 시 리조트 영역 게이트는 별도 구현 예정)
@@ -1220,8 +1241,8 @@ class LocationManager: NSObject, ObservableObject, CLLocationManagerDelegate {
         updateLocationAccuracy(for: newState)
         
         // 점수 분석기 상태 동기화
-        RidingMetricAnalyzer.shared.updateState(newState)
         FlowScoreAnalyzer.shared.updateState(newState)
+        RidingMetricAnalyzer.shared.updateState(newState)
         
         // 런 시작: RIDING 진입 시 1회만 기록
         // NOTE: 리프트 점선 연결을 위해 실제 런 시작 시점만 인덱스 기록
@@ -1430,8 +1451,22 @@ class LocationManager: NSObject, ObservableObject, CLLocationManagerDelegate {
             let filterDistance: Double = (currentState == .riding) ? 5.0 : 20.0
             
             if distance >= filterDistance || routeCoordinates.isEmpty {
-                routeCoordinates.append([newLocation.coordinate.latitude, newLocation.coordinate.longitude])
+                let coordinate = newLocation.coordinate
+                let altitudeValue = lastSmoothedGPSAltitude ?? newLocation.altitude
+                let cumulativeDistance: Double
+                if let lastCoord = routeCoordinates.last {
+                    let lastLocation = CLLocation(latitude: lastCoord[0], longitude: lastCoord[1])
+                    let previousTotal = routeDistances.last ?? 0
+                    cumulativeDistance = previousTotal + lastLocation.distance(from: newLocation)
+                } else {
+                    cumulativeDistance = 0
+                }
+                
+                routeCoordinates.append([coordinate.latitude, coordinate.longitude])
                 routeSpeeds.append(max(0, newLocation.speed * 3.6))
+                routeTimestamps.append(newLocation.timestamp.timeIntervalSince1970)
+                routeAltitudes.append(altitudeValue)
+                routeDistances.append(cumulativeDistance)
                 routeSpeedAccuracies.append(newLocation.speedAccuracy)
             }
         }

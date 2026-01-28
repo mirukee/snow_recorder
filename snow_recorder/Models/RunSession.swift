@@ -20,6 +20,9 @@ final class RunSession {
     var countryCode: String = "UNKNOWN"     // 국가 코드 (예: KR, JP)
     var routeCoordinates: [[Double]] = [] // GPS 경로 좌표 [[lat, lon], ...] - 지도 폴리라인용
     var routeSpeeds: [Double] = []   // GPS 경로별 속도 (km/h) - 히트맵용
+    var routeTimestamps: [TimeInterval] = [] // GPS 경로별 타임스탬프 (UNIX 초)
+    var routeAltitudes: [Double] = [] // GPS 경로별 고도 (m)
+    var routeDistances: [Double] = [] // GPS 경로별 누적 거리 (m)
     var runStartIndices: [Int] = [0] // 각 런의 시작 인덱스 (리프트 점선 연결용)
     var timelineEvents: [TimelineEvent] = [] // 타임라인 이벤트 목록
     
@@ -43,6 +46,7 @@ final class RunSession {
     var analysisSamples: [AnalysisSample] = []
     var analysisEvents: [AnalysisEvent] = []
     var analysisSegments: [AnalysisSegment] = []
+    var gForceSamples: [GForceSample]? = nil
     var flowBreakdown: FlowScoreBreakdown = RunSession.FlowScoreBreakdown.empty
     var edgeBreakdown: EdgeScoreBreakdown = RunSession.EdgeScoreBreakdown.empty
     
@@ -60,6 +64,7 @@ final class RunSession {
         var edgeScore: Int
         var flowScore: Int
         var maxGForce: Double
+        var scoreEvents: [ScoreEvent]?
         var edgeBreakdown: EdgeScoreBreakdown?
         var flowBreakdown: FlowScoreBreakdown?
         
@@ -77,6 +82,7 @@ final class RunSession {
             case edgeScore
             case flowScore
             case maxGForce
+            case scoreEvents
             case edgeBreakdown
             case flowBreakdown
         }
@@ -95,6 +101,7 @@ final class RunSession {
             edgeScore: Int,
             flowScore: Int,
             maxGForce: Double,
+            scoreEvents: [ScoreEvent]? = nil,
             edgeBreakdown: EdgeScoreBreakdown? = nil,
             flowBreakdown: FlowScoreBreakdown? = nil
         ) {
@@ -111,6 +118,7 @@ final class RunSession {
             self.edgeScore = edgeScore
             self.flowScore = flowScore
             self.maxGForce = maxGForce
+            self.scoreEvents = scoreEvents
             self.edgeBreakdown = edgeBreakdown
             self.flowBreakdown = flowBreakdown
         }
@@ -130,6 +138,7 @@ final class RunSession {
             edgeScore = try container.decode(Int.self, forKey: .edgeScore)
             flowScore = try container.decode(Int.self, forKey: .flowScore)
             maxGForce = try container.decode(Double.self, forKey: .maxGForce)
+            scoreEvents = try container.decodeIfPresent([ScoreEvent].self, forKey: .scoreEvents)
             edgeBreakdown = try container.decodeIfPresent(EdgeScoreBreakdown.self, forKey: .edgeBreakdown)
             flowBreakdown = try container.decodeIfPresent(FlowScoreBreakdown.self, forKey: .flowBreakdown)
         }
@@ -149,6 +158,7 @@ final class RunSession {
             try container.encode(edgeScore, forKey: .edgeScore)
             try container.encode(flowScore, forKey: .flowScore)
             try container.encode(maxGForce, forKey: .maxGForce)
+            try container.encodeIfPresent(scoreEvents, forKey: .scoreEvents)
             try container.encodeIfPresent(edgeBreakdown, forKey: .edgeBreakdown)
             try container.encodeIfPresent(flowBreakdown, forKey: .flowBreakdown)
         }
@@ -168,12 +178,51 @@ final class RunSession {
             case rest
             case pause
             case unknown
+            
+            var displayLabel: String {
+                switch self {
+                case .riding: return "RIDING"
+                case .lift: return "LIFT"
+                case .rest: return "REST"
+                case .pause: return "PAUSE"
+                case .unknown: return "UNKNOWN"
+                }
+            }
         }
         
         var duration: TimeInterval {
             guard let end = endTime else { return 0 }
             return end.timeIntervalSince(startTime)
         }
+    }
+
+    // MARK: - 점수 변화 이벤트
+    struct ScoreEvent: Codable, Identifiable {
+        enum ScoreType: String, Codable {
+            case flow
+            case edge
+        }
+        
+        enum Component: String, Codable {
+            case base
+            case stopPenalty
+            case brakePenalty
+            case chatterPenalty
+            case quietBonus
+            case proCap
+            case tier2Cap
+            case minClamp
+            case maxClamp
+            case unknown
+        }
+        
+        var id: UUID = UUID()
+        var t: Double                 // 세션 시작 기준 초
+        var scoreType: ScoreType
+        var component: Component
+        var delta: Double             // + 가점 / - 감점
+        var value: Double?            // 이벤트 원본 값 (예: duration, jerk)
+        var note: String?             // 디버그/표시용 메모
     }
     
     // MARK: - 분석 샘플 (1초 단위)
@@ -212,6 +261,14 @@ final class RunSession {
         var gSamples: [Double]        // G
         var jerkSamples: [Double]     // G/s
         var speedSamples: [Double]    // km/h
+    }
+    
+    // MARK: - G-Force 시계열 (유료 리포트용)
+    struct GForceSample: Codable, Identifiable {
+        var id: UUID = UUID()
+        var t: Double                 // 세션 시작 기준 초
+        var gAvg: Double              // 평균 G
+        var gMax: Double              // 최대 G
     }
     
     // MARK: - 점수 구성요소 (Flow)
@@ -297,6 +354,9 @@ final class RunSession {
         countryCode: String = "UNKNOWN",
         routeCoordinates: [[Double]] = [],
         routeSpeeds: [Double] = [],
+        routeTimestamps: [TimeInterval] = [],
+        routeAltitudes: [Double] = [],
+        routeDistances: [Double] = [],
         runStartIndices: [Int] = [0],
         timelineEvents: [TimelineEvent] = [],
         edgeScore: Int = 0,
@@ -311,6 +371,7 @@ final class RunSession {
         analysisSamples: [AnalysisSample] = [],
         analysisEvents: [AnalysisEvent] = [],
         analysisSegments: [AnalysisSegment] = [],
+        gForceSamples: [GForceSample]? = nil,
         flowBreakdown: FlowScoreBreakdown = .empty,
         edgeBreakdown: EdgeScoreBreakdown = .empty
     ) {
@@ -329,6 +390,9 @@ final class RunSession {
         self.countryCode = countryCode
         self.routeCoordinates = routeCoordinates
         self.routeSpeeds = routeSpeeds
+        self.routeTimestamps = routeTimestamps
+        self.routeAltitudes = routeAltitudes
+        self.routeDistances = routeDistances
         self.runStartIndices = runStartIndices
         self.timelineEvents = timelineEvents
         self.edgeScore = edgeScore
@@ -343,6 +407,7 @@ final class RunSession {
         self.analysisSamples = analysisSamples
         self.analysisEvents = analysisEvents
         self.analysisSegments = analysisSegments
+        self.gForceSamples = gForceSamples
         self.flowBreakdown = flowBreakdown
         self.edgeBreakdown = edgeBreakdown
     }
@@ -367,6 +432,7 @@ extension RunSession {
         
         var currentCoordinates: [[Double]] = []
         var currentSpeeds: [Double] = []
+        var currentTimestamps: [TimeInterval] = []
         var runStartIndices: [Int] = []
         var timelineEvents: [RunSession.TimelineEvent] = []
         
@@ -389,6 +455,7 @@ extension RunSession {
                 let coord = [lat + Double.random(in: -0.00005...0.00005), lon + Double.random(in: -0.00005...0.00005)]
                 
                 currentCoordinates.append(coord)
+                currentTimestamps.append(eventStart.addingTimeInterval(Double(i)).timeIntervalSince1970)
                 
                 // Speed Logic
                 var speed: Double = 0.0
@@ -469,6 +536,7 @@ extension RunSession {
             countryCode: "KR",
             routeCoordinates: currentCoordinates,
             routeSpeeds: currentSpeeds,
+            routeTimestamps: currentTimestamps,
             runStartIndices: runStartIndices,
             timelineEvents: timelineEvents
         )

@@ -23,9 +23,9 @@
 - isDescending
   - 최근 샘플(>=3) 기준 고도 누적 하강 1.5m 이상 **또는** 현재 프레임 하강 0.5m 이상
 - isClimbing
-  - 최근 10샘플 기준 누적 상승 5m 이상
+  - 최근 10초 기준 누적 상승 5m 이상 (최소 span 6초)
 - isStrongDescent
-  - 최근 10샘플 기준 누적 하강 5m 이상
+  - 최근 10초 기준 누적 하강 5m 이상 (최소 span 6초)
 
 ## 상태 전환 플로우 (ASCII)
 
@@ -109,7 +109,7 @@
     - 바리오 하강 감지 시 `BestForNavigation`으로 10초 임시 격상 (쿨다운 10초)
 
 ### RIDING → ON_LIFT
-- `isClimbingStrict == true` (최근 10샘플 기준 **상승 7m 이상**)
+- `isClimbingStrict == true` (최근 10초 기준 **상승 7m 이상**, 최소 span 6초)
 
 ### ON_LIFT → RIDING
 - `currentSpeedKmH > ridingSpeedThreshold && isStrongDescent`
@@ -151,5 +151,6 @@
 - 상태 전환은 GPS/Barometer 신호 품질에 따라 실제와 차이가 날 수 있음
 - `stopTracking()` 시 **상태와 무관하게** `currentRunStartTime != nil`이면 마지막 런을 확정 저장함
 - `riding → onLift` 전환 시 **런을 종료로 간주하여 확정 저장**함
+- **Riding 종료(RESTING/ON_LIFT) 시점에 Edge/Flow 분석 결과도 확정**되어 RunMetric이 저장됨
 - 노이즈 런 필터: `duration <= 40s` **and** `verticalDrop <= 30m` 인 런은 **RunMetric 저장에서 제외**
 - 기존 데이터의 `pause` 이벤트는 UI에서 `rest`로 표시됨

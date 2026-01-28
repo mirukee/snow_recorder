@@ -74,6 +74,10 @@ struct ContentView: View {
             .shadow(color: .black.opacity(0.5), radius: 20, x: 0, y: 10)
             .padding(.bottom, 30) // 화면 하단에서 띄움
         }
+        .onAppear {
+            // 프로 기능 임시 활성화 (런칭 전 제거)
+            FeatureFlags.proFeaturesEnabled = true
+        }
     }
     
 }

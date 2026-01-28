@@ -2,6 +2,7 @@ import SwiftUI
 import MapKit
 import SwiftData
 import Charts
+import CoreLocation
 
 struct RunDetailView: View {
     @Environment(\.dismiss) var dismiss
@@ -108,7 +109,20 @@ struct RunDetailView: View {
             SharePreviewView(session: session)
         }
         .fullScreenCover(isPresented: $showFullScreenMap) {
-            FullScreenMapView(coordinates: routeCoordinates, speeds: session.routeSpeeds, maxSpeed: session.maxSpeed, runStartIndices: session.runStartIndices, region: mapRegion)
+            FullScreenMapView(
+                coordinates: routeCoordinates,
+                speeds: session.routeSpeeds,
+                maxSpeed: session.maxSpeed,
+                runStartIndices: session.runStartIndices,
+                timelineEvents: session.timelineEvents,
+                routeTimestamps: session.routeTimestamps,
+                routeAltitudes: session.routeAltitudes,
+                routeDistances: session.routeDistances,
+                locationName: session.locationName,
+                startTime: session.startTime,
+                sessionDuration: session.duration,
+                region: mapRegion
+            )
         }
         .fullScreenCover(item: $selectedRunMetric) { metric in
             RunMetricDetailSheet(
@@ -528,8 +542,23 @@ struct RunDetailView: View {
         let indices = session.runStartIndices
         guard !speeds.isEmpty else { return [] }
         let runNumber = max(1, metric.runNumber)
-        let startIndex = (runNumber - 1) < indices.count ? indices[runNumber - 1] : 0
-        let endIndex = runNumber < indices.count ? indices[runNumber] : speeds.count
+        let index = runNumber - 1
+        // runStartIndices는 초기값 0을 포함하므로, 실제 런 시작 인덱스는 index+1 우선
+        let startIndex: Int
+        if index + 1 < indices.count {
+            startIndex = indices[index + 1]
+        } else if index < indices.count {
+            startIndex = indices[index]
+        } else {
+            startIndex = 0
+        }
+        // 히스토리 데이터에는 런 종료 인덱스가 없으므로 다음 런 시작 인덱스로 구간을 나눔
+        let endIndex: Int
+        if index + 2 < indices.count {
+            endIndex = indices[index + 2]
+        } else {
+            endIndex = speeds.count
+        }
         let safeStart = max(0, min(startIndex, speeds.count))
         let safeEnd = max(safeStart, min(endIndex, speeds.count))
         guard safeEnd > safeStart else { return [] }
@@ -1130,13 +1159,47 @@ extension Color {
 
 
 // MARK: - Full Screen Map (Wrapper)
+enum MapControlAction {
+    case zoomIn
+    case zoomOut
+    case center
+}
+
+enum MapViewMode {
+    case twoD
+    case threeD
+}
+
+enum HeatmapMode {
+    case off
+    case speed
+    case gForce
+    case edgeFlow
+}
+
 struct FullScreenMapView: View {
     @Environment(\.dismiss) var dismiss
     let coordinates: [CLLocationCoordinate2D]
     let speeds: [Double]
     let maxSpeed: Double
     let runStartIndices: [Int]
+    let timelineEvents: [RunSession.TimelineEvent]
+    let routeTimestamps: [TimeInterval]
+    let routeAltitudes: [Double]
+    let routeDistances: [Double]
+    let locationName: String
+    let startTime: Date
+    let sessionDuration: TimeInterval
     @State var region: MKCoordinateRegion
+    
+    @State private var scrubProgress: Double = 0.65
+    @State private var showLayersPanel: Bool = false
+    @State private var showRoutePath: Bool = true
+    @State private var showStatusSegments: Bool = true
+    @State private var mapViewMode: MapViewMode = FeatureFlags.proFeaturesEnabled ? .threeD : .twoD
+    @State private var heatmapMode: HeatmapMode = .off
+    @State private var isProUnlocked: Bool = FeatureFlags.proFeaturesEnabled
+    @State private var mapControlAction: MapControlAction? = nil
     
     var body: some View {
         ZStack {
@@ -1146,25 +1209,985 @@ struct FullScreenMapView: View {
                 coordinates: coordinates,
                 lineColor: UIColor(red: 107/255, green: 249/255, blue: 6/255, alpha: 1.0),
                 runStartIndices: runStartIndices,
+                timelineEvents: timelineEvents,
+                routeTimestamps: effectiveRouteTimestamps,
                 speeds: speeds,
-                maxSpeed: maxSpeed
+                maxSpeed: maxSpeed,
+                showRoutePath: showRoutePath,
+                showStatusSegments: showStatusSegments,
+                viewMode: mapViewMode,
+                useHeatmap: heatmapMode == .speed,
+                highlightCoordinate: currentCoordinate,
+                mapControlAction: $mapControlAction
             )
             .ignoresSafeArea()
-            
-            VStack {
-                HStack {
-                    Button(action: { dismiss() }) {
-                        Image(systemName: "xmark.circle.fill")
-                            .font(.system(size: 30))
-                            .foregroundColor(.white)
-                            .shadow(radius: 5)
-                    }
-                    Spacer()
+            // 지도 톤을 살짝 낮춰 라인 대비만 강조 (과도한 암부 방지 - 수정됨)
+            .overlay(
+                Color.black.opacity(0.05) // 0.12 -> 0.05로 대폭 감소
+                    .ignoresSafeArea()
+                    .allowsHitTesting(false)
+            )
+            .overlay(
+                LinearGradient(
+                    colors: [Color.black.opacity(0.3), .clear], // 0.45 -> 0.3
+                    startPoint: .top,
+                    endPoint: .center
+                )
+                .ignoresSafeArea()
+                .allowsHitTesting(false)
+            )
+            .overlay(
+                LinearGradient(
+                    colors: [.clear, Color.black.opacity(0.6)], // 0.7 -> 0.6
+                    startPoint: .center,
+                    endPoint: .bottom
+                )
+                .ignoresSafeArea()
+                .allowsHitTesting(false)
+            )
+            .overlay(alignment: .top) {
+                GeometryReader { proxy in
+                    headerBar
+                        .padding(.top, proxy.safeAreaInsets.top + 60) // 사용자가 요청한 60pt
+                        .padding(.horizontal, 16)
                 }
-                .padding()
-                .padding(.top, 40)
-                Spacer()
+                .ignoresSafeArea()
             }
+            .overlay(alignment: .bottom) {
+                bottomHUD
+            }
+            
+            if showLayersPanel {
+                Color.black.opacity(0.001)
+                    .ignoresSafeArea()
+                    .onTapGesture { showLayersPanel = false }
+                layersPanel
+            }
+            
+            mapControls
+        }
+    }
+    
+    private var neonGreen: Color {
+        Color(red: 107/255, green: 249/255, blue: 6/255)
+    }
+    
+    private var effectiveRouteTimestamps: [TimeInterval] {
+        guard !coordinates.isEmpty else { return [] }
+        if routeTimestamps.count == coordinates.count && !routeTimestamps.isEmpty {
+            return routeTimestamps
+        }
+        
+        let start: TimeInterval
+        let end: TimeInterval
+        if let eventStart = eventTimelineStart, let eventEnd = eventTimelineEnd, eventEnd > eventStart {
+            start = eventStart
+            end = eventEnd
+        } else if routeTimestamps.count >= 2,
+                  let first = routeTimestamps.first,
+                  let last = routeTimestamps.last,
+                  last > first {
+            start = first
+            end = last
+        } else {
+            start = startTime.timeIntervalSince1970
+            let safeDuration = max(1, sessionDuration)
+            end = start + safeDuration
+        }
+        
+        if coordinates.count == 1 {
+            return [start]
+        }
+        
+        let step = (end - start) / Double(coordinates.count - 1)
+        return (0..<coordinates.count).map { index in
+            start + (Double(index) * step)
+        }
+    }
+    
+    private var effectiveRouteDistances: [Double] {
+        guard !coordinates.isEmpty else { return [] }
+        if routeDistances.count == coordinates.count && !routeDistances.isEmpty {
+            return routeDistances
+        }
+        if coordinates.count == 1 {
+            return [0]
+        }
+        var distances: [Double] = [0]
+        distances.reserveCapacity(coordinates.count)
+        var total: Double = 0
+        for index in 1..<coordinates.count {
+            let prev = coordinates[index - 1]
+            let current = coordinates[index]
+            let prevLocation = CLLocation(latitude: prev.latitude, longitude: prev.longitude)
+            let currentLocation = CLLocation(latitude: current.latitude, longitude: current.longitude)
+            total += prevLocation.distance(from: currentLocation)
+            distances.append(total)
+        }
+        return distances
+    }
+
+    private var effectiveRidingDistances: [Double] {
+        guard coordinates.count > 1 else { return coordinates.isEmpty ? [] : [0] }
+        let timestamps = effectiveRouteTimestamps
+        guard timestamps.count == coordinates.count, !timelineEvents.isEmpty else { return [] }
+
+        let sortedEvents = timelineEvents.sorted { $0.startTime < $1.startTime }
+        var eventIndex = 0
+        var distances: [Double] = [0]
+        distances.reserveCapacity(coordinates.count)
+        var total: Double = 0
+
+        for index in 1..<coordinates.count {
+            let timestamp = timestamps[index]
+            while eventIndex < sortedEvents.count {
+                let event = sortedEvents[eventIndex]
+                let endTime = (event.endTime ?? event.startTime).timeIntervalSince1970
+                if timestamp <= endTime {
+                    break
+                }
+                eventIndex += 1
+            }
+
+            var isRiding = false
+            if eventIndex < sortedEvents.count {
+                let event = sortedEvents[eventIndex]
+                let startTime = event.startTime.timeIntervalSince1970
+                let endTime = (event.endTime ?? event.startTime).timeIntervalSince1970
+                isRiding = (event.type == .riding && timestamp >= startTime && timestamp <= endTime)
+            }
+
+            if isRiding {
+                let prev = coordinates[index - 1]
+                let current = coordinates[index]
+                let prevLocation = CLLocation(latitude: prev.latitude, longitude: prev.longitude)
+                let currentLocation = CLLocation(latitude: current.latitude, longitude: current.longitude)
+                total += prevLocation.distance(from: currentLocation)
+            }
+
+            distances.append(total)
+        }
+        return distances
+    }
+    
+    private var hasTimestamps: Bool {
+        !effectiveRouteTimestamps.isEmpty
+    }
+    
+    private var eventTimelineStart: TimeInterval? {
+        let sortedEvents = timelineEvents.sorted { $0.startTime < $1.startTime }
+        return sortedEvents.first?.startTime.timeIntervalSince1970
+    }
+    
+    private var eventTimelineEnd: TimeInterval? {
+        let sortedEvents = timelineEvents.sorted { $0.startTime < $1.startTime }
+        guard let last = sortedEvents.last else { return nil }
+        let endTime = last.endTime ?? last.startTime
+        return endTime.timeIntervalSince1970
+    }
+    
+    private var timelineStart: TimeInterval {
+        if let eventStart = eventTimelineStart {
+            return eventStart
+        }
+        return hasTimestamps ? (effectiveRouteTimestamps.first ?? 0) : 0
+    }
+    
+    private var timelineEnd: TimeInterval {
+        if let eventEnd = eventTimelineEnd {
+            return eventEnd
+        }
+        return hasTimestamps ? (effectiveRouteTimestamps.last ?? timelineStart) : max(1, Double(max(coordinates.count - 1, 1)))
+    }
+    
+    private var timelineDuration: TimeInterval {
+        max(0, timelineEnd - timelineStart)
+    }
+    
+    private var scrubTime: TimeInterval {
+        timelineDuration * scrubProgress
+    }
+    
+    private var currentTimestamp: TimeInterval {
+        timelineStart + scrubTime
+    }
+    
+    private var currentIndex: Int? {
+        guard !coordinates.isEmpty else { return nil }
+        if hasTimestamps {
+            return nearestIndex(for: currentTimestamp)
+        }
+        let index = Int(Double(coordinates.count - 1) * scrubProgress)
+        return max(0, min(coordinates.count - 1, index))
+    }
+
+    private var currentInterpolation: (lower: Int, upper: Int, t: Double)? {
+        guard hasTimestamps else { return nil }
+        let timestamps = effectiveRouteTimestamps
+        guard timestamps.count == coordinates.count, timestamps.count >= 2 else { return nil }
+        let time = currentTimestamp
+        if time <= timestamps.first! {
+            return (0, 0, 0)
+        }
+        if time >= timestamps.last! {
+            let lastIndex = timestamps.count - 1
+            return (lastIndex, lastIndex, 0)
+        }
+        var low = 0
+        var high = timestamps.count - 1
+        while low < high {
+            let mid = (low + high) / 2
+            if timestamps[mid] < time {
+                low = mid + 1
+            } else {
+                high = mid
+            }
+        }
+        let upper = max(0, min(timestamps.count - 1, low))
+        let lower = max(0, upper - 1)
+        let start = timestamps[lower]
+        let end = timestamps[upper]
+        let t = end > start ? (time - start) / (end - start) : 0
+        return (lower, upper, min(max(t, 0), 1))
+    }
+    
+    private var currentCoordinate: CLLocationCoordinate2D? {
+        if let interpolation = currentInterpolation {
+            let lower = coordinates[interpolation.lower]
+            let upper = coordinates[interpolation.upper]
+            let t = interpolation.t
+            let latitude = lower.latitude + (upper.latitude - lower.latitude) * t
+            let longitude = lower.longitude + (upper.longitude - lower.longitude) * t
+            return CLLocationCoordinate2D(latitude: latitude, longitude: longitude)
+        }
+        guard let index = currentIndex, index < coordinates.count else { return nil }
+        return coordinates[index]
+    }
+    
+    private var currentSpeed: Double? {
+        if let interpolation = currentInterpolation,
+           interpolation.upper < speeds.count,
+           interpolation.lower < speeds.count {
+            let lower = speeds[interpolation.lower]
+            let upper = speeds[interpolation.upper]
+            return lower + (upper - lower) * interpolation.t
+        }
+        guard let index = currentIndex, index < speeds.count else { return nil }
+        return speeds[index]
+    }
+    
+    private var currentAltitude: Double? {
+        if let interpolation = currentInterpolation,
+           interpolation.upper < routeAltitudes.count,
+           interpolation.lower < routeAltitudes.count {
+            let lower = routeAltitudes[interpolation.lower]
+            let upper = routeAltitudes[interpolation.upper]
+            return lower + (upper - lower) * interpolation.t
+        }
+        guard let index = currentIndex, index < routeAltitudes.count else { return nil }
+        return routeAltitudes[index]
+    }
+    
+    private var currentDistance: Double? {
+        let distances = effectiveRidingDistances
+        if let interpolation = currentInterpolation,
+           interpolation.upper < distances.count,
+           interpolation.lower < distances.count {
+            let lower = distances[interpolation.lower]
+            let upper = distances[interpolation.upper]
+            return lower + (upper - lower) * interpolation.t
+        }
+        guard let index = currentIndex, index < distances.count else { return nil }
+        return distances[index]
+    }
+    
+    private var currentEvent: RunSession.TimelineEvent? {
+        guard !timelineEvents.isEmpty else { return nil }
+        let time = Date(timeIntervalSince1970: currentTimestamp)
+        return timelineEvents.first { event in
+            let end = event.endTime ?? event.startTime
+            return time >= event.startTime && time <= end
+        }
+    }
+    
+    private func zoomIn() {
+        mapControlAction = .zoomIn
+    }
+
+    private func zoomOut() {
+        mapControlAction = .zoomOut
+    }
+
+    private var headerBar: some View {
+        VStack(spacing: 12) {
+            HStack {
+                Button(action: { dismiss() }) {
+                    Image(systemName: "chevron.left")
+                        .font(.system(size: 18, weight: .bold))
+                        .foregroundColor(.white)
+                        .frame(width: 42, height: 42)
+                        .background(Color.white.opacity(0.08))
+                        .clipShape(RoundedRectangle(cornerRadius: 14))
+                }
+                
+                Spacer()
+                
+                VStack(spacing: 4) {
+                    Text(locationName.uppercased())
+                        .font(.system(size: 16, weight: .heavy))
+                        .tracking(2)
+                        .foregroundColor(.white)
+                    Text(startTime.formatted(.dateTime.month(.abbreviated).day().hour().minute()))
+                        .font(.system(size: 10, weight: .semibold, design: .monospaced))
+                        .tracking(1.2)
+                        .foregroundColor(neonGreen.opacity(0.9))
+                }
+                
+                Spacer()
+                
+                Button(action: { withAnimation(.easeInOut(duration: 0.2)) { showLayersPanel.toggle() } }) {
+                    Image(systemName: "slider.horizontal.3")
+                        .font(.system(size: 18, weight: .bold))
+                        .foregroundColor(.white)
+                        .frame(width: 42, height: 42)
+                        .background(showLayersPanel ? neonGreen : Color.white.opacity(0.08))
+                        .foregroundColor(showLayersPanel ? .black : .white)
+                        .clipShape(RoundedRectangle(cornerRadius: 14))
+                }
+            }
+            .padding(.horizontal, 16)
+            .padding(.top, 8)
+            .padding(.bottom, 10)
+            .background(
+                RoundedRectangle(cornerRadius: 20)
+                    .fill(Color.black.opacity(0.6))
+                    .overlay(
+                        RoundedRectangle(cornerRadius: 20)
+                            .stroke(Color.white.opacity(0.08), lineWidth: 1)
+                    )
+            )
+            .padding(.horizontal, 16)
+        }
+    }
+    
+    private var layersPanel: some View {
+        GeometryReader { proxy in
+            let availableHeight = proxy.size.height - proxy.safeAreaInsets.top - 220
+            let panelHeight = max(240, min(460, availableHeight))
+            
+            VStack(alignment: .leading, spacing: 0) {
+                // Header
+                HStack {
+                    Text("LAYERS")
+                        .font(.system(size: 14, weight: .bold))
+                        .tracking(2)
+                        .foregroundColor(.white)
+                    Spacer()
+                    Image(systemName: "square.stack.3d.up.fill")
+                        .foregroundColor(neonGreen)
+                        .shadow(color: neonGreen.opacity(0.8), radius: 8)
+                }
+                .padding(16)
+                .padding(.bottom, 4)
+                .background(Color.white.opacity(0.05))
+                .overlay(
+                    Rectangle()
+                        .fill(Color.white.opacity(0.1))
+                        .frame(height: 1),
+                    alignment: .bottom
+                )
+                
+                ScrollView(showsIndicators: false) {
+                    VStack(spacing: 20) {
+                        // Basic Section
+                        VStack(alignment: .leading, spacing: 10) {
+                            Text("BASIC")
+                                .font(.system(size: 10, weight: .bold))
+                                .tracking(1.5)
+                                .foregroundColor(.white.opacity(0.5))
+                                .padding(.leading, 4)
+                            
+                            VStack(spacing: 8) {
+                                ToggleRow(title: "Route Path", icon: "arrow.triangle.turn.up.right.diamond.fill", isOn: $showRoutePath, accent: neonGreen)
+                                ToggleRow(title: "Status", icon: "location.circle.fill", isOn: $showStatusSegments, accent: neonGreen)
+                            }
+                        }
+                        
+                        // View Section
+                        VStack(alignment: .leading, spacing: 10) {
+                            Text("VIEW")
+                                .font(.system(size: 10, weight: .bold))
+                                .tracking(1.5)
+                                .foregroundColor(.white.opacity(0.5))
+                                .padding(.leading, 4)
+                            
+                            ViewModeRow(
+                                selectedMode: $mapViewMode,
+                                isProUnlocked: isProUnlocked,
+                                accent: neonGreen
+                            )
+                        }
+                        
+                        // Heatmap Section (Pro)
+                        VStack(alignment: .leading, spacing: 10) {
+                            Text("HEATMAP")
+                                .font(.system(size: 10, weight: .bold))
+                                .tracking(1.5)
+                                .foregroundColor(.white.opacity(0.5))
+                                .padding(.leading, 4)
+                            
+                            VStack(spacing: 8) {
+                                HeatmapRow(
+                                    title: "OFF",
+                                    icon: "circle.slash",
+                                    mode: .off,
+                                    selectedMode: $heatmapMode,
+                                    isProUnlocked: true,
+                                    accent: neonGreen
+                                )
+                                HeatmapRow(
+                                    title: "SPEED",
+                                    icon: "speedometer",
+                                    mode: .speed,
+                                    selectedMode: $heatmapMode,
+                                    isProUnlocked: isProUnlocked,
+                                    accent: neonGreen
+                                )
+                                HeatmapRow(
+                                    title: "G-FORCE",
+                                    icon: "waveform.path.ecg",
+                                    mode: .gForce,
+                                    selectedMode: $heatmapMode,
+                                    isProUnlocked: isProUnlocked,
+                                    accent: neonGreen
+                                )
+                                HeatmapRow(
+                                    title: "EDGE/FLOW",
+                                    icon: "sparkles",
+                                    mode: .edgeFlow,
+                                    selectedMode: $heatmapMode,
+                                    isProUnlocked: isProUnlocked,
+                                    accent: neonGreen
+                                )
+                            }
+                        }
+                        
+                        // Pro Analysis Section
+                        VStack(alignment: .leading, spacing: 0) {
+                            // Pro Header
+                            HStack {
+                                HStack(spacing: 6) {
+                                    Text("PRO ANALYSIS")
+                                        .font(.system(size: 10, weight: .bold))
+                                        .tracking(1.5)
+                                        .foregroundColor(neonGreen)
+                                        .shadow(color: neonGreen.opacity(0.5), radius: 5)
+                                    
+                                    Text("PLUS")
+                                        .font(.system(size: 8, weight: .bold))
+                                        .foregroundColor(neonGreen)
+                                        .padding(.horizontal, 4)
+                                        .padding(.vertical, 2)
+                                        .background(neonGreen.opacity(0.2))
+                                        .overlay(
+                                            RoundedRectangle(cornerRadius: 4)
+                                                .stroke(neonGreen.opacity(0.5), lineWidth: 0.5)
+                                        )
+                                        .cornerRadius(4)
+                                }
+                                
+                                Spacer()
+                                Image(systemName: "lock.fill")
+                                    .font(.system(size: 12))
+                                    .foregroundColor(.yellow)
+                            }
+                            .padding(.bottom, 10)
+                            .padding(.leading, 4)
+                            
+                            // Locked Rows
+                            VStack(spacing: 8) {
+                                ProLayerRow(title: "Flow", locked: true) {
+                                    // Dummy visual for flow
+                                    Path { path in
+                                        path.move(to: CGPoint(x: 0, y: 15))
+                                        path.addCurve(to: CGPoint(x: 40, y: 5), control1: CGPoint(x: 15, y: 5), control2: CGPoint(x: 25, y: 20))
+                                        path.addLine(to: CGPoint(x: 40, y: 20))
+                                        path.addLine(to: CGPoint(x: 0, y: 20))
+                                        path.closeSubpath()
+                                    }
+                                    .fill(LinearGradient(colors: [neonGreen, neonGreen.opacity(0.2)], startPoint: .top, endPoint: .bottom))
+                                    .opacity(0.5)
+                                }
+                                
+                                ProLayerRow(title: "G-Force", locked: true) {
+                                    // Dummy visual for g-force
+                                    HStack(alignment: .bottom, spacing: 2) {
+                                        Capsule().fill(Color.red).frame(width: 4, height: 12)
+                                        Capsule().fill(Color.yellow).frame(width: 4, height: 16)
+                                        Capsule().fill(neonGreen).frame(width: 4, height: 10)
+                                        Capsule().fill(Color.blue).frame(width: 4, height: 14)
+                                    }
+                                    .opacity(0.8)
+                                }
+                            }
+                            .padding(4)
+                            .background(Color.white.opacity(0.05))
+                            .cornerRadius(12)
+                            .overlay(
+                                RoundedRectangle(cornerRadius: 12)
+                                    .stroke(Color.white.opacity(0.05), lineWidth: 1)
+                            )
+                            
+                            // Unlock Button
+                            Button(action: {}) {
+                                HStack(spacing: 4) {
+                                    Text("UNLOCK ALL PRO FEATURES")
+                                        .font(.system(size: 10, weight: .black))
+                                        .tracking(1)
+                                    Image(systemName: "arrow.forward")
+                                        .font(.system(size: 10, weight: .bold))
+                                }
+                                .foregroundColor(.black)
+                                .frame(maxWidth: .infinity)
+                                .padding(.vertical, 12)
+                                .background(
+                                    LinearGradient(colors: [neonGreen.opacity(0.9), neonGreen], startPoint: .leading, endPoint: .trailing)
+                                )
+                                .cornerRadius(8)
+                                .shadow(color: neonGreen.opacity(0.3), radius: 10)
+                            }
+                            .padding(.top, 16)
+                        }
+                    }
+                    .padding(16)
+                    .padding(.bottom, 8)
+                }
+            }
+            .background(.ultraThinMaterial)
+            .background(Color.black.opacity(0.6))
+            .cornerRadius(16)
+            .overlay(
+                RoundedRectangle(cornerRadius: 16)
+                    .stroke(Color.white.opacity(0.1), lineWidth: 1)
+            )
+            .shadow(color: .black.opacity(0.5), radius: 20)
+            .frame(width: 280)
+            .frame(maxHeight: panelHeight)
+            .padding(.top, proxy.safeAreaInsets.top + 92)
+            .padding(.trailing, 16)
+            .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topTrailing)
+        }
+        .ignoresSafeArea()
+    }
+    
+    private var mapControls: some View {
+        VStack(spacing: 10) {
+            MapControlButton(systemName: "plus", accent: neonGreen, action: zoomIn)
+            MapControlButton(systemName: "minus", accent: neonGreen, action: zoomOut)
+        }
+        .position(x: UIScreen.main.bounds.width - 36, y: UIScreen.main.bounds.height * 0.55)
+    }
+    
+    private var bottomHUD: some View {
+        VStack(spacing: 20) {
+            timelineScrubber
+            
+            HStack(spacing: 14) {
+                statusCard
+                proCard
+            }
+            .padding(.horizontal, 16)
+            .padding(.bottom, 24)
+        }
+        .padding(.top, 30)
+        .background(
+            LinearGradient(colors: [Color.black.opacity(0.0), Color.black.opacity(0.9)], startPoint: .top, endPoint: .bottom)
+        )
+    }
+    
+    private var timelineScrubber: some View {
+        VStack(spacing: 8) {
+            HStack {
+                Text("START")
+                Spacer()
+                Text(formatTime(scrubTime))
+                Spacer()
+                Text("FINISH")
+            }
+            .font(.system(size: 10, weight: .bold, design: .monospaced))
+            .tracking(2)
+            .foregroundColor(.white.opacity(0.5))
+            .padding(.horizontal, 16)
+            
+            GeometryReader { proxy in
+                let width = proxy.size.width
+                ZStack(alignment: .leading) {
+                    Capsule()
+                        .fill(Color.white.opacity(0.1))
+                        .frame(height: 6)
+                        .overlay(
+                            Capsule().stroke(Color.white.opacity(0.1), lineWidth: 1)
+                        )
+                    
+                    Capsule()
+                        .fill(
+                            LinearGradient(
+                                colors: [neonGreen.opacity(0.2), neonGreen.opacity(0.8)],
+                                startPoint: .leading,
+                                endPoint: .trailing
+                            )
+                        )
+                        .frame(width: max(8, width * scrubProgress), height: 6)
+                        .shadow(color: neonGreen.opacity(0.8), radius: 8)
+                    
+                    Circle()
+                        .fill(Color.black)
+                        .frame(width: 22, height: 22)
+                        .overlay(
+                            Circle()
+                                .stroke(neonGreen, lineWidth: 2)
+                        )
+                        .shadow(color: neonGreen.opacity(0.8), radius: 8)
+                        .offset(x: width * scrubProgress - 11)
+                        .gesture(
+                            DragGesture(minimumDistance: 0)
+                                .onChanged { value in
+                                    let progress = min(max(0, value.location.x / width), 1)
+                                    scrubProgress = progress
+                                }
+                        )
+                }
+            }
+            .frame(height: 30)
+            .padding(.horizontal, 24)
+        }
+    }
+    
+    private var statusCard: some View {
+        VStack(alignment: .leading, spacing: 10) {
+            HStack(spacing: 8) {
+                Circle()
+                    .fill(neonGreen)
+                    .frame(width: 8, height: 8)
+                Text(currentEvent?.type.displayLabel ?? "Riding")
+                    .font(.system(size: 12, weight: .bold))
+                    .tracking(2)
+                    .foregroundColor(neonGreen)
+            }
+            
+            HStack(alignment: .bottom, spacing: 6) {
+                Text(formatSpeed(currentSpeed))
+                    .font(.system(size: 40, weight: .heavy, design: .rounded))
+                    .foregroundColor(.white)
+                Text("KM/H")
+                    .font(.system(size: 12, weight: .bold))
+                    .foregroundColor(.white.opacity(0.6))
+                    .padding(.bottom, 6)
+            }
+            
+            HStack(spacing: 16) {
+                VStack(alignment: .leading, spacing: 4) {
+                    Text("ALT")
+                        .font(.system(size: 9, weight: .bold))
+                        .foregroundColor(.white.opacity(0.4))
+                    Text(formatAltitude())
+                        .font(.system(size: 13, weight: .bold))
+                        .foregroundColor(.white)
+                }
+                
+                VStack(alignment: .leading, spacing: 4) {
+                    Text("DIST")
+                        .font(.system(size: 9, weight: .bold))
+                        .foregroundColor(.white.opacity(0.4))
+                    Text(formatDistance())
+                        .font(.system(size: 13, weight: .bold))
+                        .foregroundColor(.white)
+                }
+            }
+        }
+        .padding(18)
+        .frame(maxWidth: .infinity, alignment: .leading)
+        .background(
+            RoundedRectangle(cornerRadius: 20)
+                .fill(Color.black.opacity(0.85))
+                .overlay(
+                    RoundedRectangle(cornerRadius: 20)
+                        .stroke(neonGreen.opacity(0.7), lineWidth: 1)
+                )
+        )
+        .shadow(color: neonGreen.opacity(0.3), radius: 12, x: 0, y: 6)
+    }
+    
+    private var proCard: some View {
+        VStack(spacing: 12) {
+            Image(systemName: "lock.fill")
+                .font(.system(size: 18, weight: .bold))
+                .foregroundColor(neonGreen)
+                .padding(10)
+                .background(Circle().fill(Color.white.opacity(0.08)))
+            Text("Unlock Pro Metrics")
+                .font(.system(size: 12, weight: .bold))
+                .foregroundColor(.white)
+            Button(action: {}) {
+                Text("GET PRO")
+                    .font(.system(size: 11, weight: .heavy))
+                    .tracking(2)
+                    .foregroundColor(.black)
+                    .padding(.horizontal, 20)
+                    .padding(.vertical, 10)
+                    .background(neonGreen)
+                    .clipShape(RoundedRectangle(cornerRadius: 12))
+                    .shadow(color: neonGreen.opacity(0.6), radius: 10)
+            }
+        }
+        .padding(20)
+        .frame(maxWidth: .infinity)
+        .background(
+            RoundedRectangle(cornerRadius: 20)
+                .fill(Color.black.opacity(0.7))
+        )
+        .overlay(
+            RoundedRectangle(cornerRadius: 20)
+                .stroke(style: StrokeStyle(lineWidth: 1, dash: [6, 6]))
+                .foregroundColor(.white.opacity(0.2))
+        )
+    }
+    
+    private func formatTime(_ time: TimeInterval) -> String {
+        let formatter = DateComponentsFormatter()
+        formatter.allowedUnits = time >= 3600 ? [.hour, .minute, .second] : [.minute, .second]
+        formatter.unitsStyle = .positional
+        formatter.zeroFormattingBehavior = .pad
+        return formatter.string(from: time) ?? "00:00"
+    }
+    
+    private func formatSpeed(_ speed: Double?) -> String {
+        guard let speed else { return "0" }
+        return String(format: "%.0f", speed)
+    }
+    
+    private func formatAltitude() -> String {
+        guard let altitude = currentAltitude else { return "--" }
+        return String(format: "%.0f m", altitude)
+    }
+    
+    private func formatDistance() -> String {
+        guard let distance = currentDistance else { return "--" }
+        if distance >= 1000 {
+            return String(format: "%.1f km", distance / 1000)
+        }
+        return String(format: "%.0f m", distance)
+    }
+    
+    private func nearestIndex(for timestamp: TimeInterval) -> Int? {
+        let timestamps = effectiveRouteTimestamps
+        guard !timestamps.isEmpty else { return nil }
+        var low = 0
+        var high = timestamps.count - 1
+        
+        while low < high {
+            let mid = (low + high) / 2
+            if timestamps[mid] < timestamp {
+                low = mid + 1
+            } else {
+                high = mid
+            }
+        }
+        
+        let clamped = max(0, min(timestamps.count - 1, low))
+        if clamped > 0 {
+            let prev = clamped - 1
+            let prevDiff = abs(timestamps[prev] - timestamp)
+            let currDiff = abs(timestamps[clamped] - timestamp)
+            return prevDiff < currDiff ? prev : clamped
+        }
+        return clamped
+    }
+}
+
+private struct ToggleRow: View {
+    let title: String
+    let icon: String // Added icon
+    @Binding var isOn: Bool
+    let accent: Color
+    
+    var body: some View {
+        HStack {
+            HStack(spacing: 12) {
+                Image(systemName: icon)
+                    .font(.system(size: 18)) // Slightly larger for clarity
+                    .foregroundColor(.white.opacity(0.6))
+                
+                Text(title)
+                    .font(.system(size: 13, weight: .medium))
+                    .foregroundColor(isOn ? .white : .white.opacity(0.7))
+            }
+            Spacer()
+            Toggle("", isOn: $isOn)
+                .labelsHidden()
+                .tint(accent)
+                .scaleEffect(0.8) // Match new design's smaller toggle feel
+        }
+        .padding(12)
+        .background(Color.white.opacity(0.05))
+        .cornerRadius(12)
+        .overlay(
+            RoundedRectangle(cornerRadius: 12)
+                .stroke(Color.white.opacity(isOn ? 0.1 : 0), lineWidth: 1)
+        )
+    }
+}
+
+private struct ViewModeRow: View {
+    @Binding var selectedMode: MapViewMode
+    let isProUnlocked: Bool
+    let accent: Color
+    
+    var body: some View {
+        HStack(spacing: 8) {
+            viewModeButton(title: "2D", mode: .twoD, locked: false)
+            viewModeButton(title: "3D", mode: .threeD, locked: !isProUnlocked)
+        }
+    }
+    
+    private func viewModeButton(title: String, mode: MapViewMode, locked: Bool) -> some View {
+        Button(action: {
+            guard !locked else { return }
+            selectedMode = mode
+        }) {
+            HStack(spacing: 6) {
+                Text(title)
+                    .font(.system(size: 12, weight: .bold))
+                if locked {
+                    Image(systemName: "lock.fill")
+                        .font(.system(size: 10, weight: .bold))
+                }
+            }
+            .foregroundColor(selectedMode == mode ? .black : .white.opacity(0.7))
+            .frame(maxWidth: .infinity)
+            .padding(.vertical, 10)
+            .background(
+                RoundedRectangle(cornerRadius: 10)
+                    .fill(selectedMode == mode ? accent : Color.white.opacity(0.05))
+            )
+            .overlay(
+                RoundedRectangle(cornerRadius: 10)
+                    .stroke(Color.white.opacity(0.08), lineWidth: 1)
+            )
+        }
+        .disabled(locked)
+    }
+}
+
+private struct HeatmapRow: View {
+    let title: String
+    let icon: String
+    let mode: HeatmapMode
+    @Binding var selectedMode: HeatmapMode
+    let isProUnlocked: Bool
+    let accent: Color
+    
+    var body: some View {
+        let locked = !isProUnlocked && mode != .off
+        Button(action: {
+            guard !locked else { return }
+            selectedMode = mode
+        }) {
+            HStack {
+                HStack(spacing: 12) {
+                    Image(systemName: icon)
+                        .font(.system(size: 18))
+                        .foregroundColor(.white.opacity(0.6))
+                    Text(title)
+                        .font(.system(size: 13, weight: .medium))
+                        .foregroundColor(selectedMode == mode ? .white : .white.opacity(0.7))
+                }
+                Spacer()
+                if locked {
+                    Image(systemName: "lock.fill")
+                        .font(.system(size: 10, weight: .bold))
+                        .foregroundColor(.yellow)
+                } else {
+                    Image(systemName: selectedMode == mode ? "checkmark.circle.fill" : "circle")
+                        .font(.system(size: 14, weight: .bold))
+                        .foregroundColor(selectedMode == mode ? accent : .white.opacity(0.3))
+                }
+            }
+            .padding(12)
+            .background(Color.white.opacity(0.05))
+            .cornerRadius(12)
+            .overlay(
+                RoundedRectangle(cornerRadius: 12)
+                    .stroke(Color.white.opacity(selectedMode == mode ? 0.15 : 0), lineWidth: 1)
+            )
+        }
+        .disabled(locked)
+    }
+}
+
+private struct ProLayerRow<Content: View>: View {
+    let title: String
+    let locked: Bool
+    let visual: () -> Content
+    
+    var body: some View {
+        HStack {
+            Text(title)
+                .font(.system(size: 12, weight: .semibold))
+                .foregroundColor(.white.opacity(0.9))
+            
+            Spacer()
+            
+            // Visual Container
+            ZStack {
+                visual()
+                    .frame(width: 40, height: 20)
+                    .blur(radius: 1) // Slight blur for 'locked' effect
+                
+                Color.black.opacity(0.3)
+                
+                if locked {
+                    Image(systemName: "lock.fill")
+                        .font(.system(size: 10))
+                        .foregroundColor(.yellow)
+                        .shadow(color: .black.opacity(0.5), radius: 2)
+                }
+            }
+            .frame(width: 56, height: 32)
+            .background(Color.black)
+            .cornerRadius(4)
+            .overlay(
+                RoundedRectangle(cornerRadius: 4)
+                    .stroke(Color.white.opacity(0.1), lineWidth: 1)
+            )
+        }
+        .padding(10)
+        .background(Color.black.opacity(0.4))
+        .cornerRadius(8)
+    }
+}
+
+// Removed LockedRow as it is replaced by ProLayerRow for this specific design
+// private struct LockedRow ... (Old implementation removed)
+
+private struct MapControlButton: View {
+    let systemName: String
+    let accent: Color
+    let action: () -> Void
+    
+    var body: some View {
+        Button(action: action) {
+            Image(systemName: systemName)
+                .font(.system(size: 14, weight: .bold))
+                .foregroundColor(.white)
+                .frame(width: 36, height: 36)
+                .background(Color.black.opacity(0.7))
+                .clipShape(RoundedRectangle(cornerRadius: 12))
+                .overlay(
+                    RoundedRectangle(cornerRadius: 12)
+                        .stroke(Color.white.opacity(0.08), lineWidth: 1)
+                )
+                .shadow(color: accent.opacity(0.4), radius: 6)
         }
     }
 }
@@ -1178,8 +2201,16 @@ struct MapViewRepresentable: UIViewRepresentable {
     let coordinates: [CLLocationCoordinate2D]
     let lineColor: UIColor
     let runStartIndices: [Int]
+    let timelineEvents: [RunSession.TimelineEvent]
+    let routeTimestamps: [TimeInterval]
     let speeds: [Double]
     let maxSpeed: Double
+    let showRoutePath: Bool
+    let showStatusSegments: Bool
+    let viewMode: MapViewMode
+    let useHeatmap: Bool
+    let highlightCoordinate: CLLocationCoordinate2D?
+    @Binding var mapControlAction: MapControlAction?
     
     func makeUIView(context: Context) -> MKMapView {
         let mapView = MKMapView()
@@ -1187,86 +2218,162 @@ struct MapViewRepresentable: UIViewRepresentable {
         mapView.showsUserLocation = false
         mapView.isPitchEnabled = true
         mapView.isRotateEnabled = true
+        mapView.isScrollEnabled = true
         mapView.isZoomEnabled = true
-        mapView.mapType = .standard
+        mapView.setRegion(region, animated: false)
+        applyViewMode(viewMode, to: mapView, regionCenter: region.center, animated: false)
+        context.coordinator.hasSetRegion = true
+        context.coordinator.lastCoordinatesCount = coordinates.count
         mapView.overrideUserInterfaceStyle = .dark
         return mapView
     }
     
     func updateUIView(_ view: MKMapView, context: Context) {
-        view.setRegion(region, animated: false)
+        let needsRegionReset = context.coordinator.needsRegionReset
+            || !context.coordinator.hasSetRegion
+            || context.coordinator.lastCoordinatesCount != coordinates.count
         
-        // Remove existing overlays
-        let overlays = view.overlays
-        view.removeOverlays(overlays)
+        if needsRegionReset {
+            view.setRegion(region, animated: false)
+            context.coordinator.hasSetRegion = true
+            context.coordinator.lastCoordinatesCount = coordinates.count
+            context.coordinator.needsRegionReset = false
+        }
         
-        // Add Polylines
-        let sortedIndices = runStartIndices.sorted()
+        if context.coordinator.lastViewMode != viewMode || needsRegionReset {
+            applyViewMode(viewMode, to: view, regionCenter: region.center, animated: true)
+            context.coordinator.lastViewMode = viewMode
+        }
         
-        for (i, startIndex) in sortedIndices.enumerated() {
-            let endIndex = (i + 1 < sortedIndices.count) ? sortedIndices[i+1] : coordinates.count
+        if let action = mapControlAction {
+            handleMapControl(action, in: view)
+            DispatchQueue.main.async {
+                mapControlAction = nil
+            }
+        }
+        
+        // Optimize Overlays: Only rebuild if toggles changed or empty
+        let shouldRebuildOverlays = 
+            view.overlays.isEmpty ||
+            context.coordinator.lastShowRoutePath != showRoutePath ||
+            context.coordinator.lastShowStatusSegments != showStatusSegments ||
+            context.coordinator.lastUseHeatmap != useHeatmap
+        
+        if shouldRebuildOverlays {
+            view.removeOverlays(view.overlays)
             
-            if endIndex > startIndex {
-                let segmentCoords = Array(coordinates[startIndex..<endIndex])
-                if segmentCoords.count > 1 {
-                    // Prepare Gradient Colors
+            if showRoutePath {
+                // Add Polylines
+                let canUseTimeline = !timelineEvents.isEmpty && routeTimestamps.count == coordinates.count
+                
+                func addRidingSegment(_ segmentCoords: [CLLocationCoordinate2D], startIndex: Int, endIndex: Int) {
                     let segmentSpeeds: [Double]
-                    if !speeds.isEmpty {
-                        // Extract speeds for this segment (safely)
-                        let speedStartIndex = min(startIndex, speeds.count - 1)
-                        let speedEndIndex = min(endIndex, speeds.count)
-                        if speedEndIndex > speedStartIndex {
-                            segmentSpeeds = Array(speeds[speedStartIndex..<speedEndIndex])
-                        } else {
-                            segmentSpeeds = []
-                        }
+                    if !speeds.isEmpty, speeds.count >= endIndex {
+                        segmentSpeeds = Array(speeds[startIndex..<endIndex])
                     } else {
                         segmentSpeeds = []
                     }
                     
-                    if !segmentSpeeds.isEmpty && segmentSpeeds.count == segmentCoords.count {
+                    if useHeatmap, !segmentSpeeds.isEmpty && segmentSpeeds.count == segmentCoords.count {
                         let colors = segmentSpeeds.map { speedToUIColor($0, maxSpeed: maxSpeed) }
-                        // Use custom subclass to pass colors
                         let polyline = GradientPolyline(coordinates: segmentCoords, count: segmentCoords.count)
                         polyline.strokeColors = colors
-                        polyline.title = "Run"
+                        polyline.title = "Heatmap"
                         view.addOverlay(polyline)
                     } else {
-                        // Fallback to solid color if speeds mismatch or empty
                         let polyline = MKPolyline(coordinates: segmentCoords, count: segmentCoords.count)
-                        polyline.title = "Run"
+                        polyline.title = "Route"
                         view.addOverlay(polyline)
                     }
                 }
-            }
-            
-            // Add Lift Line (Dashed)
-            if i > 0 {
-                let prevLastIdx = startIndex - 1
-                if prevLastIdx >= 0 && prevLastIdx < coordinates.count && startIndex < coordinates.count {
-                    let p1 = coordinates[prevLastIdx]
-                    let p2 = coordinates[startIndex]
-                    let liftPolyline = MKPolyline(coordinates: [p1, p2], count: 2)
-                    liftPolyline.title = "Lift"
-                    view.addOverlay(liftPolyline)
+                
+                func addStyledSegment(_ segmentCoords: [CLLocationCoordinate2D], title: String) {
+                    let polyline = MKPolyline(coordinates: segmentCoords, count: segmentCoords.count)
+                    polyline.title = title
+                    view.addOverlay(polyline)
                 }
-            }
+                
+                if canUseTimeline {
+                    let sortedEvents = timelineEvents.sorted { $0.startTime < $1.startTime }
+                    var index = 0
+                    
+                    for event in sortedEvents {
+                        let startTs = event.startTime.timeIntervalSince1970
+                        let endTs = (event.endTime ?? event.startTime).timeIntervalSince1970
+                        
+                        while index < routeTimestamps.count && routeTimestamps[index] < startTs {
+                            index += 1
+                        }
+                        let startIndex = index
+                        
+                        while index < routeTimestamps.count && routeTimestamps[index] <= endTs {
+                            index += 1
+                        }
+                        let endIndex = index
+                        
+                        if endIndex > startIndex {
+                            let segmentCoords = Array(coordinates[startIndex..<endIndex])
+                            guard segmentCoords.count > 1 else { continue }
+                            
+                            switch event.type {
+                            case .riding:
+                                addRidingSegment(segmentCoords, startIndex: startIndex, endIndex: endIndex)
+                            case .lift:
+                                if showStatusSegments {
+                                    addStyledSegment(segmentCoords, title: "Lift")
+                                } else {
+                                    addRidingSegment(segmentCoords, startIndex: startIndex, endIndex: endIndex)
+                                }
+                            case .rest, .pause:
+                                if showStatusSegments {
+                                    addStyledSegment(segmentCoords, title: "Rest")
+                                }
+                            case .unknown:
+                                if showStatusSegments {
+                                    addStyledSegment(segmentCoords, title: "Unknown")
+                                } else {
+                                    addRidingSegment(segmentCoords, startIndex: startIndex, endIndex: endIndex)
+                                }
+                            }
+                        }
+                    }
+                } else {
+                    let sortedIndices = runStartIndices.sorted()
+                    
+                    for (i, startIndex) in sortedIndices.enumerated() {
+                        let endIndex = (i + 1 < sortedIndices.count) ? sortedIndices[i+1] : coordinates.count
+                        
+                        if endIndex > startIndex {
+                            let segmentCoords = Array(coordinates[startIndex..<endIndex])
+                            if segmentCoords.count > 1 {
+                                addRidingSegment(segmentCoords, startIndex: startIndex, endIndex: endIndex)
+                            }
+                        }
+                        
+                        // Add Lift Line (Dashed)
+                        if i > 0 {
+                            let prevLastIdx = startIndex - 1
+                            if prevLastIdx >= 0 && prevLastIdx < coordinates.count && startIndex < coordinates.count {
+                                let p1 = coordinates[prevLastIdx]
+                                let p2 = coordinates[startIndex]
+                                let liftPolyline = MKPolyline(coordinates: [p1, p2], count: 2)
+                                liftPolyline.title = "Lift"
+                                view.addOverlay(liftPolyline)
+                            }
+                        }
+                    }
+                }
+            } // end if showRoutePath
+            
+            // Update coordinator state
+            context.coordinator.lastShowRoutePath = showRoutePath
+            context.coordinator.lastShowStatusSegments = showStatusSegments
+            context.coordinator.lastUseHeatmap = useHeatmap
         }
         
-        // Add Start/End annotations
-        if let first = coordinates.first {
-             let startAnnotation = MKPointAnnotation()
-             startAnnotation.coordinate = first
-             startAnnotation.title = "START"
-             view.addAnnotation(startAnnotation)
-        }
-        
-        if let last = coordinates.last {
-             let endAnnotation = MKPointAnnotation()
-             endAnnotation.coordinate = last
-             endAnnotation.title = "FINISH"
-             view.addAnnotation(endAnnotation)
-        }
+        // Always update annotations (optimized)
+        // Note: we do NOT clear annotations here, preventing flickering
+        updateAnnotations(in: view)
     }
     
     // Helper for color calculation
@@ -1279,9 +2386,118 @@ struct MapViewRepresentable: UIViewRepresentable {
     func makeCoordinator() -> Coordinator {
         Coordinator(self)
     }
+
+    private func applyViewMode(
+        _ mode: MapViewMode,
+        to mapView: MKMapView,
+        regionCenter: CLLocationCoordinate2D,
+        animated: Bool
+    ) {
+        let configuration = MKStandardMapConfiguration()
+        configuration.elevationStyle = (mode == .threeD) ? .realistic : .flat
+        mapView.preferredConfiguration = configuration
+        mapView.isPitchEnabled = (mode == .threeD)
+        
+        var camera = mapView.camera
+        if mode == .threeD {
+            let span = max(mapView.region.span.latitudeDelta, mapView.region.span.longitudeDelta)
+            let spanMeters = max(1, span * 111_000)
+            let distance = max(800, min(6000, spanMeters * 1.3))
+            camera = MKMapCamera(
+                lookingAtCenter: regionCenter,
+                fromDistance: distance,
+                pitch: 65,
+                heading: camera.heading
+            )
+            mapView.setCamera(camera, animated: animated)
+        } else {
+            camera.pitch = 0
+            mapView.setCamera(camera, animated: animated)
+        }
+    }
     
+    // Optimized Annotation Update
+    private func updateAnnotations(in view: MKMapView) {
+        // 1. Start Annotation
+        if let first = coordinates.first {
+            if let annotation = view.annotations.first(where: { $0.title == "START" }) {
+                if annotation.coordinate.latitude != first.latitude || annotation.coordinate.longitude != first.longitude {
+                    (annotation as? MKPointAnnotation)?.coordinate = first
+                }
+            } else {
+                let annotation = MKPointAnnotation()
+                annotation.coordinate = first
+                annotation.title = "START"
+                view.addAnnotation(annotation)
+            }
+        }
+        
+        // 2. Finish Annotation
+        if let last = coordinates.last {
+            if let annotation = view.annotations.first(where: { $0.title == "FINISH" }) {
+                if annotation.coordinate.latitude != last.latitude || annotation.coordinate.longitude != last.longitude {
+                    (annotation as? MKPointAnnotation)?.coordinate = last
+                }
+            } else {
+                let annotation = MKPointAnnotation()
+                annotation.coordinate = last
+                annotation.title = "FINISH"
+                view.addAnnotation(annotation)
+            }
+        }
+        
+        // 3. Current Location Annotation
+        if let current = highlightCoordinate {
+            if let annotation = view.annotations.first(where: { $0.title == "CURRENT" }) {
+                UIView.animate(withDuration: 0.1) {
+                    (annotation as? MKPointAnnotation)?.coordinate = current
+                }
+            } else {
+                let annotation = MKPointAnnotation()
+                annotation.coordinate = current
+                annotation.title = "CURRENT"
+                view.addAnnotation(annotation)
+            }
+        } else {
+            if let annotation = view.annotations.first(where: { $0.title == "CURRENT" }) {
+                view.removeAnnotation(annotation)
+            }
+        }
+        
+        // Remove any stray annotations that are not START, FINISH, or CURRENT
+        // (Optional: depending on other map usage, but generally safe here)
+    }
+    
+    private func handleMapControl(_ action: MapControlAction, in mapView: MKMapView) {
+        switch action {
+        case .zoomIn:
+            var region = mapView.region
+            region.span.latitudeDelta = max(region.span.latitudeDelta * 0.6, 0.002)
+            region.span.longitudeDelta = max(region.span.longitudeDelta * 0.6, 0.002)
+            mapView.setRegion(region, animated: true)
+        case .zoomOut:
+            var region = mapView.region
+            region.span.latitudeDelta = min(region.span.latitudeDelta * 1.6, 5.0)
+            region.span.longitudeDelta = min(region.span.longitudeDelta * 1.6, 5.0)
+            mapView.setRegion(region, animated: true)
+        case .center:
+            if let coordinate = highlightCoordinate ?? coordinates.first {
+                mapView.setCenter(coordinate, animated: true)
+            }
+        }
+    }
+
     class Coordinator: NSObject, MKMapViewDelegate {
         var parent: MapViewRepresentable
+        
+        // State tracking for partial updates
+        var lastShowRoutePath: Bool?
+        var lastShowStatusSegments: Bool?
+        var lastUseHeatmap: Bool?
+        var lastViewMode: MapViewMode?
+        var hasSetRegion: Bool = false
+        var lastCoordinatesCount: Int?
+        var needsRegionReset: Bool = false
         
         init(_ parent: MapViewRepresentable) {
             self.parent = parent
@@ -1293,19 +2509,32 @@ struct MapViewRepresentable: UIViewRepresentable {
                  let count = gradientPolyline.strokeColors.count
                  let locations = (0..<count).map { CGFloat($0) / CGFloat(max(1, count - 1)) }
                  renderer.setColors(gradientPolyline.strokeColors, locations: locations)
-                 renderer.lineWidth = 4
+                 renderer.lineWidth = 4.0
                  renderer.lineCap = .round
                  renderer.lineJoin = .round
+                 renderer.alpha = 0.9
                  return renderer
             } else if let polyline = overlay as? MKPolyline {
+                if polyline.title == "Route" {
+                    let renderer = GlowingPolylineRenderer(polyline: polyline)
+                    renderer.strokeColor = parent.lineColor
+                    renderer.lineWidth = 3.0
+                    return renderer
+                }
+                
                 let renderer = MKPolylineRenderer(polyline: polyline)
+                
                 if polyline.title == "Lift" {
                     renderer.strokeColor = .white.withAlphaComponent(0.3)
                     renderer.lineWidth = 2
                     renderer.lineDashPattern = [2, 4]
+                } else if polyline.title == "Rest" || polyline.title == "Unknown" {
+                    renderer.strokeColor = .white.withAlphaComponent(0.15)
+                    renderer.lineWidth = 2
+                    renderer.lineDashPattern = [1, 5]
                 } else {
                     renderer.strokeColor = parent.lineColor
-                    renderer.lineWidth = 4
+                    renderer.lineWidth = 3
                 }
                 return renderer
             }
@@ -1313,8 +2542,77 @@ struct MapViewRepresentable: UIViewRepresentable {
         }
         
         func mapView(_ mapView: MKMapView, viewFor annotation: MKAnnotation) -> MKAnnotationView? {
-            return nil
+            guard !annotation.isKind(of: MKUserLocation.self) else { return nil }
+            
+            // Original logic: Use default pins for Start/Finish
+            if annotation.title == "START" || annotation.title == "FINISH" {
+                return nil
+            }
+            
+            // Custom logic for CURRENT marker
+            let identifier = "current"
+            var view = mapView.dequeueReusableAnnotationView(withIdentifier: identifier)
+            
+            if view == nil {
+                view = MKAnnotationView(annotation: annotation, reuseIdentifier: identifier)
+            } else {
+                view?.annotation = annotation
+            }
+            
+            view?.bounds = CGRect(x: 0, y: 0, width: 16, height: 16)
+            view?.layer.cornerRadius = 8
+            view?.layer.borderWidth = 2
+            view?.layer.borderColor = UIColor(red: 107/255, green: 249/255, blue: 6/255, alpha: 1.0).cgColor
+            view?.backgroundColor = UIColor.black
+            view?.layer.shadowColor = UIColor(red: 107/255, green: 249/255, blue: 6/255, alpha: 0.6).cgColor
+            view?.layer.shadowRadius = 6
+            view?.layer.shadowOpacity = 0.9
+            view?.layer.shadowOffset = .zero
+            
+            return view
         }
+    }
+}
+
+// 네온 글로우 렌더러
+class GlowingPolylineRenderer: MKPolylineRenderer {
+    override func draw(_ mapRect: MKMapRect, zoomScale: MKZoomScale, in context: CGContext) {
+        context.saveGState()
+        
+        // 줌 스케일과 무관하게 두께 유지
+        let baseWidth = self.lineWidth / zoomScale
+        let neonColor = UIColor(red: 107/255, green: 249/255, blue: 6/255, alpha: 1.0)
+        
+        // 1. 외곽 글로우 (넓고 부드럽게)
+        context.setBlendMode(.screen)
+        context.setLineWidth(baseWidth * 3.2)
+        context.setStrokeColor(neonColor.withAlphaComponent(0.12).cgColor)
+        context.setLineCap(.round)
+        context.setLineJoin(.round)
+        context.addPath(self.path)
+        context.strokePath()
+        
+        // 2. 중간 글로우 (집중된 하이라이트)
+        context.setLineWidth(baseWidth * 1.9)
+        context.setStrokeColor(neonColor.withAlphaComponent(0.28).cgColor)
+        context.addPath(self.path)
+        context.strokePath()
+        
+        // 3. 코어 라인 (선명한 본체)
+        context.setBlendMode(.normal)
+        context.setLineWidth(baseWidth * 1.0)
+        context.setStrokeColor(neonColor.withAlphaComponent(0.95).cgColor)
+        context.setShadow(offset: .zero, blur: 0, color: nil) // 코어는 선명하게 유지
+        context.addPath(self.path)
+        context.strokePath()
+        
+        // 4. White Hot Center (Optional, for extreme brightness feel)
+        context.setLineWidth(baseWidth * 0.3)
+        context.setStrokeColor(UIColor.white.withAlphaComponent(0.8).cgColor)
+        context.addPath(self.path)
+        context.strokePath()
+        
+        context.restoreGState()
     }
 }
 

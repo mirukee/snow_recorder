@@ -51,6 +51,7 @@ final class RidingMetricAnalyzer: ObservableObject {
     private var analysisSamples: [RunSession.AnalysisSample] = []
     private var lastSmoothedMagnitude: Double?
     private var latestEdgeBreakdown: RunSession.EdgeScoreBreakdown = .empty
+    private var latestScoreEvents: [RunSession.ScoreEvent] = []
     
     // MARK: - 상수 (튜닝 가능)
     private let updateInterval: TimeInterval = 1.0 / 60.0
@@ -118,6 +119,7 @@ final class RidingMetricAnalyzer: ObservableObject {
             guard let self else { return }
             let previousState = self.currentState
             self.currentState = newState
+            let didExitRiding = previousState == .riding && newState != .riding
             
             switch newState {
             case .riding:
@@ -126,13 +128,17 @@ final class RidingMetricAnalyzer: ObservableObject {
                 }
             case .resting:
                 self.stopMotionUpdates()
-                if self.isAnalyzingInternal && previousState != .resting {
+                if self.isAnalyzingInternal && didExitRiding {
                     self.finalizeSessionResult()
                     self.resetMetricsForNextRun()
                 }
             case .onLift:
                 self.stopMotionUpdates()
                 self.resetSmoothing()
+                if self.isAnalyzingInternal && didExitRiding {
+                    self.finalizeSessionResult()
+                    self.resetMetricsForNextRun()
+                }
             }
         }
     }
@@ -281,6 +287,7 @@ final class RidingMetricAnalyzer: ObservableObject {
     private func resetSessionState() {
         resetMetricsForNextRun()
         latestEdgeBreakdown = .empty
+        latestScoreEvents.removeAll()
         DispatchQueue.main.async { [weak self] in
             self?.latestResult = nil
         }
@@ -303,11 +310,14 @@ final class RidingMetricAnalyzer: ObservableObject {
     
     private func finalizeSessionResult() {
         let edgeScore = calculateEdgeScore()
-        let flowScore = FlowScoreAnalyzer.shared.latestFlowScore ?? 0
+        let flowScore = FlowScoreAnalyzer.shared.latestFlowScoreValue() ?? 0
         let averageSpeed = speedSampleCount > 0 ? (speedSum / Double(speedSampleCount)) : 0.0
         
         // 샘플 버킷 플러시
         flushAnalysisSample()
+        
+        let elapsed = elapsedTime() ?? 0.0
+        latestScoreEvents = buildEdgeScoreEvents(at: elapsed)
         
         let result = RidingSessionResult(
             edgeScore: edgeScore,
@@ -358,6 +368,60 @@ final class RidingMetricAnalyzer: ObservableObject {
         )
         
         return Int(score.rounded())
+    }
+    
+    private func buildEdgeScoreEvents(at elapsed: TimeInterval) -> [RunSession.ScoreEvent] {
+        let rawScore = latestEdgeBreakdown.rawScore ?? 0.0
+        var currentScore = rawScore
+        var events: [RunSession.ScoreEvent] = []
+        
+        if rawScore > 0 {
+            let baseEvent = RunSession.ScoreEvent(
+                t: 0.0,
+                scoreType: .edge,
+                component: .base,
+                delta: rawScore,
+                value: nil,
+                note: "raw"
+            )
+            events.append(baseEvent)
+        }
+        
+        if latestEdgeBreakdown.proCapApplied == true {
+            let capped = min(currentScore, proCapScore)
+            let delta = capped - currentScore
+            if delta != 0 {
+                let event = RunSession.ScoreEvent(
+                    t: elapsed,
+                    scoreType: .edge,
+                    component: .proCap,
+                    delta: delta,
+                    value: maxGForce,
+                    note: "maxG"
+                )
+                events.append(event)
+            }
+            currentScore = capped
+        }
+        
+        if latestEdgeBreakdown.tier2CapApplied == true {
+            let capped = min(currentScore, tier2RatioScoreCap)
+            let delta = capped - currentScore
+            if delta != 0 {
+                let event = RunSession.ScoreEvent(
+                    t: elapsed,
+                    scoreType: .edge,
+                    component: .tier2Cap,
+                    delta: delta,
+                    value: latestEdgeBreakdown.tier2Ratio,
+                    note: "tier2Ratio"
+                )
+                events.append(event)
+            }
+            currentScore = capped
+        }
+        
+        return events.sorted { $0.t < $1.t }
     }
     
     private func edgeWeight(for magnitude: Double) -> Double {
@@ -454,6 +518,12 @@ final class RidingMetricAnalyzer: ObservableObject {
     func exportAnalysisData() -> (samples: [RunSession.AnalysisSample], edgeBreakdown: RunSession.EdgeScoreBreakdown) {
         return analysisQueue.sync {
             (analysisSamples, latestEdgeBreakdown)
+        }
+    }
+
+    func exportScoreEvents() -> [RunSession.ScoreEvent] {
+        return analysisQueue.sync {
+            latestScoreEvents
         }
     }
     

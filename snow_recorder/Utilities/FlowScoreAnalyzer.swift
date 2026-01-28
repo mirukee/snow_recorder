@@ -17,6 +17,7 @@ final class FlowScoreAnalyzer: ObservableObject {
     private let analysisQueue = DispatchQueue(label: "FlowScoreAnalyzer.analysisQueue")
     private var isAnalyzingInternal = false
     private var currentState: RidingState = .resting
+    private var latestFlowScoreInternal: Int?
     
     // MARK: - 시간/속도 추적
     private var lastTimestamp: TimeInterval?
@@ -40,6 +41,7 @@ final class FlowScoreAnalyzer: ObservableObject {
     private var hardBrakeCount: Int = 0
     private var chatterEventCount: Int = 0
     private var quietEventCount: Int = 0 // Quiet Phase 감지 횟수
+    private var isPendingRestActive: Bool = false // Pending Rest 동안 정지 패널티 누적 방지
     
     // MARK: - 이벤트 상태
     private var isInBrakeEvent: Bool = false
@@ -62,6 +64,11 @@ final class FlowScoreAnalyzer: ObservableObject {
     private var latestBreakdown: RunSession.FlowScoreBreakdown = .empty
     private var latestInstantStability: Double?
     
+    // MARK: - 점수 변화 이벤트
+    private var scoreEvents: [RunSession.ScoreEvent] = []
+    private var latestScoreEvents: [RunSession.ScoreEvent] = []
+    private var chatterPenaltyApplied: Double = 0.0
+    
     // 이벤트 구간(10Hz) 캡처
     private var highResBuffer: [HighResSample] = []
     private var activeCaptures: [ActiveCapture] = []
@@ -74,13 +81,13 @@ final class FlowScoreAnalyzer: ObservableObject {
     
     // 2. Events Criteria (Stricter)
     private let hardBrakeThreshold: Double = -2.0 // m/s² (was -1.2) -> 슬라이딩 턴 감속 허용, 급정거(사람 회피 등)만 감지
-    private let chatterJerkThreshold: Double = 5.8 // 저크(Jerk) 임계값
-    private let chatterCooldown: TimeInterval = 1.8
-    private let chatterWindow: TimeInterval = 0.1
-    private let chatterSpeedGateMS: Double = 4.2 // 이 속도 이상일 때만 떨림 감지
+    private let chatterJerkThreshold: Double = 15.0 // 저크(Jerk) 임계값
+    private let chatterCooldown: TimeInterval = 2.5
+    private let chatterWindow: TimeInterval = 0.2
+    private let chatterSpeedGateMS: Double = 5.5 // 이 속도 이상일 때만 떨림 감지
     private let quietTargetG: Double = 1.0 // Quiet Phase 기준 G
     private let quietToleranceG: Double = 0.05 // (was 0.08) 허용 오차 축소 (Very Strict)
-    private let quietMinDuration: TimeInterval = 0.3 // (was 0.2) 0.3초 이상 유지해야 인정
+    private let quietMinDuration: TimeInterval = 0.5 // (was 0.2) 0.5초 이상 유지해야 인정
     private let quietSpeedGateMS: Double = 5.5 // (New) 20km/h 이상일 때만 보너스 인정
     private let gravityMS2: Double = 9.80665
     private let transitionGraceDuration: TimeInterval = 0.3
@@ -96,9 +103,9 @@ final class FlowScoreAnalyzer: ObservableObject {
     private let stopTimePenaltyCap: Double = 300.0   // 정지 패널티 최대 300점 제한 (x10)
     
     private let hardBrakePenalty: Double = 40.0      // (was 4.0) 실수 한방에 40점
-    private let chatterPenalty: Double = 20.0        // (was 2.0) 털리면 20점
+    private let chatterPenalty: Double = 10.0        // (was 2.0) 털리면 10점
     private let chatterPenaltyCapPerRun: Double = 450.0 // 런 단위 chatter 감점 상한
-    private let bonusPoint: Double = 20.0            // Quiet Phase 보너스 (+20점)
+    private let bonusPoint: Double = 5.0             // Quiet Phase 보너스 (+5점)
     private let minFinalScore: Double = 200.0        // 유효한 런의 최소 점수 하한
     
     // 4. 이벤트 구간 샘플링
@@ -147,8 +154,8 @@ final class FlowScoreAnalyzer: ObservableObject {
             let previousState = self.currentState
             self.currentState = newState
             
-            // Resting으로 진입 시 결과 확정
-            if self.isAnalyzingInternal && newState == .resting && previousState != .resting {
+            // Riding 종료(RESTING/ON_LIFT) 시 결과 확정
+            if self.isAnalyzingInternal && previousState == .riding && newState != .riding {
                 self.finalizeSessionResult()
                 self.resetMetricsForNextRun()
             }
@@ -162,8 +169,16 @@ final class FlowScoreAnalyzer: ObservableObject {
                 self.transitionGraceRemaining = 0.0
                 self.brakeEpisodeDuration = 0.0
                 self.lastChatterEventTime = nil
+                self.isPendingRestActive = false
                 self.resetMotionStats()
             }
+        }
+    }
+
+    /// Pending Rest 상태 동기화 (정지 패널티 누적 방지용)
+    func updatePendingRest(isActive: Bool) {
+        analysisQueue.async { [weak self] in
+            self?.isPendingRestActive = isActive
         }
     }
     
@@ -217,7 +232,9 @@ final class FlowScoreAnalyzer: ObservableObject {
         
         // 2. 정지 여부 및 Local Stability 계산
         if currentSpeed <= stopSpeedMS {
-            totalStopDuration += deltaTime
+            if !isPendingRestActive {
+                totalStopDuration += deltaTime
+            }
             // 정지 상태에서는 윈도우 초기화? 아니면 0을 넣어서 "급격한 감속"을 반영?
             // -> 여기서는 윈도우에 0을 넣으면 분산이 커져 "멈추는 과정"도 불안정으로 봅니다.
             // -> 하지만 이미 StopPenalty가 있으므로, Stability 계산에서는 제외하는 것이 깔끔할 수 있음.
@@ -371,6 +388,7 @@ final class FlowScoreAnalyzer: ObservableObject {
         // Stability 0.95 -> 300 + 665 = 965점 (프로)
         let baseScore = stabilityBase + (stabilityRange * avgStability)
         var score = baseScore
+        appendScoreEvent(at: 0.0, component: .base, delta: baseScore, value: avgStability)
         
         // ActiveTime 너무 짧으면(5초 미만) 점수 무효화 -> 0점
         if activeTime < 5.0 { score = 0 }
@@ -396,6 +414,7 @@ final class FlowScoreAnalyzer: ObservableObject {
         score = score - (stopPenalty + brakePenalty + chatterDeduction) + quietBonus
         
         // 4. Final Clamp (Max 1000)
+        let scoreBeforeClamp = score
         let finalScore: Double
         if score <= 0 {
             finalScore = 0.0
@@ -403,6 +422,17 @@ final class FlowScoreAnalyzer: ObservableObject {
             finalScore = max(minFinalScore, min(1000.0, score))
         }
         let resultInt = Int(finalScore.rounded())
+
+        let elapsed = elapsedTime() ?? 0.0
+        if stopPenalty > 0 {
+            appendScoreEvent(at: elapsed, component: .stopPenalty, delta: -stopPenalty, value: totalStopDuration)
+        }
+        if finalScore != scoreBeforeClamp {
+            let delta = finalScore - scoreBeforeClamp
+            let component: RunSession.ScoreEvent.Component = delta > 0 ? .minClamp : .maxClamp
+            appendScoreEvent(at: elapsed, component: component, delta: delta)
+        }
+        latestScoreEvents = scoreEvents.sorted { $0.t < $1.t }
         
         latestBreakdown = RunSession.FlowScoreBreakdown(
             avgStability: avgStability,
@@ -431,6 +461,7 @@ final class FlowScoreAnalyzer: ObservableObject {
         print("[FlowScore] QuietBonus: \(quietEventCount) * \(bonusPoint) = +\(quietBonus)")
         print("[FlowScore] Final: \(resultInt)")
         
+        latestFlowScoreInternal = resultInt
         RidingMetricAnalyzer.shared.updateFlowScore(resultInt)
         
         DispatchQueue.main.async { [weak self] in
@@ -443,10 +474,18 @@ final class FlowScoreAnalyzer: ObservableObject {
     private func resetSessionState() {
         resetMetricsForNextRun()
         latestBreakdown = .empty
+        latestFlowScoreInternal = nil
         latestInstantStability = nil
+        scoreEvents.removeAll()
+        latestScoreEvents.removeAll()
+        chatterPenaltyApplied = 0.0
         DispatchQueue.main.async { [weak self] in
             self?.latestFlowScore = nil
         }
+    }
+
+    func latestFlowScoreValue() -> Int? {
+        analysisQueue.sync { latestFlowScoreInternal }
     }
     
     private func resetMetricsForNextRun() {
@@ -467,6 +506,7 @@ final class FlowScoreAnalyzer: ObservableObject {
         hardBrakeCount = 0
         chatterEventCount = 0
         quietEventCount = 0
+        isPendingRestActive = false
         
         isInBrakeEvent = false
         isInChatterEvent = false
@@ -481,6 +521,9 @@ final class FlowScoreAnalyzer: ObservableObject {
         highResBuffer.removeAll()
         activeCaptures.removeAll()
         lastHighResSampleTime = nil
+
+        scoreEvents.removeAll()
+        chatterPenaltyApplied = 0.0
     }
     
     private func resetMotionStats() {
@@ -520,6 +563,24 @@ final class FlowScoreAnalyzer: ObservableObject {
         return ProcessInfo.processInfo.systemUptime - start
     }
     
+    private func appendScoreEvent(
+        at elapsed: TimeInterval,
+        component: RunSession.ScoreEvent.Component,
+        delta: Double,
+        value: Double? = nil,
+        note: String? = nil
+    ) {
+        let event = RunSession.ScoreEvent(
+            t: elapsed,
+            scoreType: .flow,
+            component: component,
+            delta: delta,
+            value: value,
+            note: note
+        )
+        scoreEvents.append(event)
+    }
+    
     private func recordEvent(_ type: RunSession.AnalysisEvent.EventType, value: Double? = nil, speedMS: Double? = nil) {
         guard let elapsed = elapsedTime() else { return }
         let speedKmH = speedMS.map { max(0.0, $0 * 3.6) }
@@ -533,6 +594,21 @@ final class FlowScoreAnalyzer: ObservableObject {
         
         // 이벤트 구간 캡처 시작
         startEventCapture(type: type, eventTime: elapsed)
+        
+        // 점수 변화 이벤트 기록
+        switch type {
+        case .hardBrake:
+            appendScoreEvent(at: elapsed, component: .brakePenalty, delta: -hardBrakePenalty, value: value)
+        case .chatter:
+            let remaining = max(0.0, chatterPenaltyCapPerRun - chatterPenaltyApplied)
+            let applied = min(chatterPenalty, remaining)
+            if applied > 0 {
+                chatterPenaltyApplied += applied
+                appendScoreEvent(at: elapsed, component: .chatterPenalty, delta: -applied, value: value)
+            }
+        case .quietPhase:
+            appendScoreEvent(at: elapsed, component: .quietBonus, delta: bonusPoint, value: value)
+        }
     }
     
     private func updateHighResBuffer(elapsed: TimeInterval, magnitudeG: Double, jerk: Double, speedMS: Double) -> Bool {
@@ -606,6 +682,12 @@ final class FlowScoreAnalyzer: ObservableObject {
     func exportAnalysisData() -> (events: [RunSession.AnalysisEvent], segments: [RunSession.AnalysisSegment], breakdown: RunSession.FlowScoreBreakdown) {
         return analysisQueue.sync {
             (analysisEvents, analysisSegments, latestBreakdown)
+        }
+    }
+
+    func exportScoreEvents() -> [RunSession.ScoreEvent] {
+        return analysisQueue.sync {
+            latestScoreEvents
         }
     }
     

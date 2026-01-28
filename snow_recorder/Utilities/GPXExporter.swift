@@ -66,11 +66,16 @@ struct GPXExporter {
             // 고도 정보가 있으면 포함 (coord[2]가 있을 경우)
             let elevation = coord.count >= 3 ? coord[2] : nil
             
-            // 시간 보간: 시작 시간부터 종료 시간까지 균등 분배
-            let progress = session.routeCoordinates.count > 1
-                ? Double(index) / Double(session.routeCoordinates.count - 1)
-                : 0.0
-            let pointTime = session.startTime.addingTimeInterval(session.duration * progress)
+            // 시간 계산: 타임스탬프가 있으면 사용, 없으면 균등 보간
+            let pointTime: Date
+            if session.routeTimestamps.count == session.routeCoordinates.count {
+                pointTime = Date(timeIntervalSince1970: session.routeTimestamps[index])
+            } else {
+                let progress = session.routeCoordinates.count > 1
+                    ? Double(index) / Double(session.routeCoordinates.count - 1)
+                    : 0.0
+                pointTime = session.startTime.addingTimeInterval(session.duration * progress)
+            }
             
             let speedValue: Double? = index < session.routeSpeeds.count ? session.routeSpeeds[index] : nil
             let statusValue: String? = statusForTime(pointTime)
