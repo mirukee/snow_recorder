@@ -90,8 +90,8 @@ enum AnalysisExportService {
                 flowScore: session.flowScore,
                 maxGForce: session.maxGForce
             ),
-            flowBreakdown: session.flowBreakdown,
-            edgeBreakdown: session.edgeBreakdown,
+            flowBreakdown: session.flowBreakdown ?? .empty,
+            edgeBreakdown: session.edgeBreakdown ?? .empty,
             samples: session.analysisSamples,
             events: session.analysisEvents,
             segments: session.analysisSegments,

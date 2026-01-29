@@ -178,11 +178,13 @@ struct PersonalStatsDetailView: View {
     }
     
     private var edgeScore: Int {
-        top3Average(seasonSessions.map { $0.edgeScore })
+        let scores = collectRunScores(from: seasonSessions)
+        return top3Average(scores.edge)
     }
     
     private var flowScore: Int {
-        top3Average(seasonSessions.map { $0.flowScore })
+        let scores = collectRunScores(from: seasonSessions)
+        return top3Average(scores.flow)
     }
     
     private var peakSpeed: Int {
@@ -216,6 +218,29 @@ struct PersonalStatsDetailView: View {
         let sum = top3.reduce(0, +)
         let avg = Double(sum) / Double(top3.count)
         return Int(avg.rounded())
+    }
+
+    // 런 단위 점수 수집 (런 메트릭 없는 세션은 세션 최고점으로 보정)
+    private func collectRunScores(from sessions: [RunSession]) -> (edge: [Int], flow: [Int]) {
+        var edgeScores: [Int] = []
+        var flowScores: [Int] = []
+        
+        for session in sessions {
+            if session.runMetrics.isEmpty {
+                if session.runCount > 0 {
+                    edgeScores.append(session.edgeScore)
+                    flowScores.append(session.flowScore)
+                }
+                continue
+            }
+            
+            for metric in session.runMetrics {
+                edgeScores.append(metric.edgeScore)
+                flowScores.append(metric.flowScore)
+            }
+        }
+        
+        return (edgeScores, flowScores)
     }
     
     private func downsample(_ values: [Double], maxSamples: Int) -> [Double] {

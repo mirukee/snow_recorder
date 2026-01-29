@@ -4,6 +4,7 @@ import SwiftData
 /// 메인 진입점 뷰 (Custom Floating Tab Bar 적용)
 struct ContentView: View {
     @StateObject private var authManager = AuthenticationManager.shared
+    @Environment(\.modelContext) var modelContext
     @State private var selection = 0
     
     // 네온 그린 컬러 (#6bf906)
@@ -18,6 +19,10 @@ struct ContentView: View {
         Group {
             if authManager.user != nil || authManager.isGuest {
                 mainTabView
+                    .onAppear {
+                        // Inject context
+                        authManager.modelContext = modelContext
+                    }
             } else {
                 LoginView()
             }
@@ -34,10 +39,10 @@ struct ContentView: View {
                 HistoryView()
                     .tag(1)
                 
-                RankingView()
+                RankingView(isActive: selection == 2)
                     .tag(2)
                 
-                ProfileView()
+                ProfileView(isActive: selection == 3)
                     .tag(3)
             }
             .ignoresSafeArea() // 전체 화면 사용

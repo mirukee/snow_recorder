@@ -14,6 +14,7 @@ final class RunSession {
     var avgSpeed: Double = 0.0        // 평균 속도 (km/h) - RIDING 상태에서만 측정됨
     var verticalDrop: Double = 0.0    // 총 하강 고도 (m)
     var runCount: Int = 0           // 런 횟수
+    var userID: String?             // 소유자 ID (로그인 시 연동)
     var slopeName: String?      // 주행한 슬로프 이름 (대표 슬로프)
     var riddenSlopes: [String: Int] = [:] // 세션 동안 탄 슬로프 목록 (이름: 횟수)
     var locationName: String = "HIGH1 RESORT"    // 스키장 이름 (예: HIGH1 RESORT)
@@ -48,8 +49,8 @@ final class RunSession {
     var analysisEvents: [AnalysisEvent] = []
     var analysisSegments: [AnalysisSegment] = []
     var gForceSamples: [GForceSample]? = nil
-    var flowBreakdown: FlowScoreBreakdown = RunSession.FlowScoreBreakdown.empty
-    var edgeBreakdown: EdgeScoreBreakdown = RunSession.EdgeScoreBreakdown.empty
+    var flowBreakdown: FlowScoreBreakdown? = RunSession.FlowScoreBreakdown.empty
+    var edgeBreakdown: EdgeScoreBreakdown? = RunSession.EdgeScoreBreakdown.empty
     
     struct RunMetric: Codable, Identifiable {
         var id: UUID = UUID()
@@ -349,6 +350,7 @@ final class RunSession {
         avgSpeed: Double = 0.0,
         verticalDrop: Double = 0.0,
         runCount: Int = 0,
+        userID: String? = nil,
         slopeName: String? = nil,
         riddenSlopes: [String: Int] = [:],
         locationName: String = "HIGH1 RESORT",
@@ -386,6 +388,7 @@ final class RunSession {
         self.avgSpeed = avgSpeed
         self.verticalDrop = verticalDrop
         self.runCount = runCount
+        self.userID = userID
         self.slopeName = slopeName
         self.riddenSlopes = riddenSlopes
         self.locationName = locationName

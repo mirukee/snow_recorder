@@ -32,6 +32,9 @@ class RankingService: ObservableObject {
     private let kstTimeZone = TimeZone(identifier: "Asia/Seoul")!
     private let seasonId = "25_26"
     private let userDefaults = UserDefaults.standard
+    private let statsQueue = DispatchQueue(label: "com.snowrecord.ranking.stats", qos: .userInitiated)
+    private var pendingRecalcWorkItem: DispatchWorkItem?
+    private let recalcDebounce: TimeInterval = 0.35
     
     // 마지막으로 요청한 리더보드 필터(업로드 직후 동일 조건으로 갱신하기 위함)
     private var lastFetchCycle: RankingCycle?
@@ -52,6 +55,17 @@ class RankingService: ObservableObject {
         // 초기화 시 더미/로컬 데이터 로드
         self.myProfile = RankingProfile(userId: Auth.auth().currentUser?.uid ?? "guest", userName: Auth.auth().currentUser?.displayName ?? "Guest")
     }
+
+    private struct RunSessionSnapshot {
+        let startTime: Date
+        let distance: Double
+        let duration: TimeInterval
+        let runCount: Int
+        let edgeScores: [Int]
+        let flowScores: [Int]
+        let locationName: String
+        let isDomestic: Bool
+    }
     
     // MARK: - Public Methods
     
@@ -63,7 +77,7 @@ class RankingService: ObservableObject {
             print("⚠️ 랭킹 업로드 스킵: 비정상 세션 감지")
             return
         }
-        recalculateStats(from: sessions, uploadPolicy: .smart)
+        scheduleRecalculateStats(from: sessions, uploadPolicy: .smart)
     }
     
     /// 리더보드 데이터 요청 (Async)
@@ -153,6 +167,38 @@ class RankingService: ObservableObject {
     
     /// SwiftData에 저장된 모든 세션을 기반으로 프로필 재계산 및 서버 업로드
     func recalculateStats(from sessions: [RunSession], uploadPolicy: UploadPolicy = .none) {
+        let snapshots = makeSnapshots(from: sessions)
+        recalculateStats(from: snapshots, uploadPolicy: uploadPolicy)
+    }
+
+    func scheduleRecalculateStats(from sessions: [RunSession], uploadPolicy: UploadPolicy = .none) {
+        let snapshots = makeSnapshotsSafely(from: sessions)
+        scheduleRecalculateStats(from: snapshots, uploadPolicy: uploadPolicy)
+    }
+
+    func syncAfterLocalChange(sessions: [RunSession]) {
+        let snapshots = makeSnapshotsSafely(from: sessions)
+        let hasValidSessions = snapshots.contains { isValidRun($0) && $0.isDomestic && isWithinSeason($0.startTime) }
+
+        if hasValidSessions {
+            scheduleRecalculateStats(from: snapshots, uploadPolicy: .smart)
+        } else {
+            scheduleRecalculateStats(from: snapshots, uploadPolicy: .none)
+            clearProfileOnServer()
+            clearLastUploadedTechnical()
+        }
+    }
+
+    private func scheduleRecalculateStats(from snapshots: [RunSessionSnapshot], uploadPolicy: UploadPolicy = .none) {
+        pendingRecalcWorkItem?.cancel()
+        let workItem = DispatchWorkItem { [weak self] in
+            self?.recalculateStats(from: snapshots, uploadPolicy: uploadPolicy)
+        }
+        pendingRecalcWorkItem = workItem
+        statsQueue.asyncAfter(deadline: .now() + recalcDebounce, execute: workItem)
+    }
+
+    private func recalculateStats(from snapshots: [RunSessionSnapshot], uploadPolicy: UploadPolicy = .none) {
         guard let user = Auth.auth().currentUser else { return }
         
         var newProfile = RankingProfile(userId: user.uid, userName: user.displayName ?? "Skier")
@@ -162,7 +208,7 @@ class RankingService: ObservableObject {
         let calendar = kstCalendar
         let weekId = currentWeekId(for: now)
         
-        // Helper to calculate Top 3 Average
+        // Top3 평균 계산 헬퍼
         func calculateTop3Average(_ scores: [Int]) -> Double {
             guard !scores.isEmpty else { return 0.0 }
             let sortedScores = scores.sorted(by: >) // Descending
@@ -171,7 +217,20 @@ class RankingService: ObservableObject {
             return Double(sum) / Double(top3.count)
         }
         
-        let validSessions = sessions.filter { isValidRun($0) && isDomesticSession($0) && isWithinSeason($0.startTime) }
+        // 런 단위 점수 수집 (런 메트릭 없는 세션은 세션 최고점으로 보정)
+        func collectRunScores(from sessions: [RunSessionSnapshot]) -> (edge: [Int], flow: [Int]) {
+            var edgeScores: [Int] = []
+            var flowScores: [Int] = []
+            
+            for session in sessions {
+                edgeScores.append(contentsOf: session.edgeScores)
+                flowScores.append(contentsOf: session.flowScores)
+            }
+            
+            return (edgeScores, flowScores)
+        }
+        
+        let validSessions = snapshots.filter { isValidRun($0) && $0.isDomestic && isWithinSeason($0.startTime) }
         let weekInterval = calendar.dateInterval(of: .weekOfYear, for: now)
         
         // 1. Season Data
@@ -182,11 +241,10 @@ class RankingService: ObservableObject {
         newProfile.seasonRunCountByResort = seasonResortMetrics.runCount
         newProfile.seasonDistanceByResort = seasonResortMetrics.distance
         
-        let seasonEdgeScores = seasonSessions.map { $0.edgeScore }
-        let seasonFlowScores = seasonSessions.map { $0.flowScore }
+        let seasonRunScores = collectRunScores(from: seasonSessions)
         
-        newProfile.seasonBestEdge = calculateTop3Average(seasonEdgeScores)
-        newProfile.seasonBestFlow = calculateTop3Average(seasonFlowScores)
+        newProfile.seasonBestEdge = calculateTop3Average(seasonRunScores.edge)
+        newProfile.seasonBestFlow = calculateTop3Average(seasonRunScores.flow)
             
         // 2. Weekly Data
         let weeklySessions = validSessions.filter { session in
@@ -199,11 +257,10 @@ class RankingService: ObservableObject {
         newProfile.weeklyRunCountByResort = weeklyResortMetrics.runCount
         newProfile.weeklyDistanceByResort = weeklyResortMetrics.distance
         
-        let weeklyEdgeScores = weeklySessions.map { $0.edgeScore }
-        let weeklyFlowScores = weeklySessions.map { $0.flowScore }
+        let weeklyRunScores = collectRunScores(from: weeklySessions)
         
-        newProfile.weeklyBestEdge = calculateTop3Average(weeklyEdgeScores)
-        newProfile.weeklyBestFlow = calculateTop3Average(weeklyFlowScores)
+        newProfile.weeklyBestEdge = calculateTop3Average(weeklyRunScores.edge)
+        newProfile.weeklyBestFlow = calculateTop3Average(weeklyRunScores.flow)
         
         newProfile.countryCode = validSessions.isEmpty ? "UNKNOWN" : "KR"
         newProfile.seasonId = seasonId
@@ -227,6 +284,10 @@ class RankingService: ObservableObject {
     
     private func isValidRun(_ session: RunSession) -> Bool {
         return session.distance >= 100.0 && session.duration >= 30.0
+    }
+
+    private func isValidRun(_ snapshot: RunSessionSnapshot) -> Bool {
+        return snapshot.distance >= 100.0 && snapshot.duration >= 30.0
     }
     
     private func isSaneSession(_ session: RunSession) -> Bool {
@@ -409,16 +470,16 @@ class RankingService: ObservableObject {
         return String(format: "%04d-W%02d", year, week)
     }
     
-    private func isDomesticSession(_ session: RunSession) -> Bool {
-        if session.countryCode == "KR" {
+    private func isDomesticSession(countryCode: String, routeCoordinates: [[Double]]) -> Bool {
+        if countryCode == "KR" {
             return true
         }
-        if session.countryCode != "UNKNOWN" {
+        if countryCode != "UNKNOWN" {
             return false
         }
-        guard !session.routeCoordinates.isEmpty else { return false }
+        guard !routeCoordinates.isEmpty else { return false }
         
-        for coord in session.routeCoordinates {
+        for coord in routeCoordinates {
             guard coord.count >= 2 else { continue }
             let lat = coord[0]
             let lon = coord[1]
@@ -493,6 +554,13 @@ class RankingService: ObservableObject {
         userDefaults.set(snapshot.weeklyEdge, forKey: TechnicalUploadKey.weeklyEdge)
         userDefaults.set(snapshot.weeklyFlow, forKey: TechnicalUploadKey.weeklyFlow)
     }
+
+    private func clearLastUploadedTechnical() {
+        userDefaults.removeObject(forKey: TechnicalUploadKey.seasonEdge)
+        userDefaults.removeObject(forKey: TechnicalUploadKey.seasonFlow)
+        userDefaults.removeObject(forKey: TechnicalUploadKey.weeklyEdge)
+        userDefaults.removeObject(forKey: TechnicalUploadKey.weeklyFlow)
+    }
     
     // MARK: - 리조트 매핑/집계
     
@@ -517,7 +585,7 @@ class RankingService: ObservableObject {
         return nil
     }
     
-    private func aggregateResortMetrics(from sessions: [RunSession]) -> (runCount: [String: Int], distance: [String: Double]) {
+    private func aggregateResortMetrics(from sessions: [RunSessionSnapshot]) -> (runCount: [String: Int], distance: [String: Double]) {
         var runCountByResort: [String: Int] = [:]
         var distanceByResort: [String: Double] = [:]
         
@@ -528,5 +596,66 @@ class RankingService: ObservableObject {
         }
         
         return (runCountByResort, distanceByResort)
+    }
+
+    private func makeSnapshotsSafely(from sessions: [RunSession]) -> [RunSessionSnapshot] {
+        if Thread.isMainThread {
+            return makeSnapshots(from: sessions)
+        }
+        return DispatchQueue.main.sync {
+            makeSnapshots(from: sessions)
+        }
+    }
+
+    private func makeSnapshots(from sessions: [RunSession]) -> [RunSessionSnapshot] {
+        sessions.map { session in
+            let runScores: (edge: [Int], flow: [Int]) = {
+                if session.runMetrics.isEmpty {
+                    if session.runCount > 0 {
+                        return ([session.edgeScore], [session.flowScore])
+                    }
+                    return ([], [])
+                }
+                return (
+                    session.runMetrics.map { $0.edgeScore },
+                    session.runMetrics.map { $0.flowScore }
+                )
+            }()
+            
+            let isDomestic = isDomesticSession(
+                countryCode: session.countryCode,
+                routeCoordinates: session.routeCoordinates
+            )
+            
+            return RunSessionSnapshot(
+                startTime: session.startTime,
+                distance: session.distance,
+                duration: session.duration,
+                runCount: session.runCount,
+                edgeScores: runScores.edge,
+                flowScores: runScores.flow,
+                locationName: session.locationName,
+                isDomestic: isDomestic
+            )
+        }
+    }
+
+    private func clearProfileOnServer() {
+        guard isRankingEnabled, let user = Auth.auth().currentUser else { return }
+        
+        let docRef = db.collection("rankings").document(user.uid)
+        docRef.delete { [weak self] error in
+            if let error {
+                print("❌ Failed to delete ranking profile: \(error)")
+                DispatchQueue.main.async {
+                    self?.lastErrorMessage = "Delete Error: \(error.localizedDescription)"
+                }
+            } else {
+                print("✅ Ranking Profile Deleted Successfully")
+                DispatchQueue.main.async {
+                    self?.lastErrorMessage = nil
+                }
+            }
+        }
     }
 }

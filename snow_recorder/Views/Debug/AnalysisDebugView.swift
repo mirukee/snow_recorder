@@ -32,7 +32,7 @@ struct AnalysisDebugView: View {
     }
     
     private var flowSection: some View {
-        let f = session.flowBreakdown
+        let f = session.flowBreakdown ?? .empty
         return debugCard(title: "FLOW BREAKDOWN") {
             debugRow("최종 점수", "\(f.finalScore ?? 0)")
             debugRow("평균 안정도", formatDouble(f.avgStability ?? 0, 3))
@@ -51,7 +51,7 @@ struct AnalysisDebugView: View {
     }
     
     private var edgeSection: some View {
-        let e = session.edgeBreakdown
+        let e = session.edgeBreakdown ?? .empty
         return debugCard(title: "EDGE BREAKDOWN") {
             debugRow("최종 점수", "\(e.finalScore ?? 0)")
             debugRow("Raw 점수", formatDouble(e.rawScore ?? 0, 1))

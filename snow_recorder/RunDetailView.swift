@@ -97,7 +97,7 @@ struct RunDetailView: View {
                         }
                         
                         // 6. Bottom Share Button
-                        shareBuoon
+                        shareButton
                             .padding(.vertical, 30)
                     }
                     .padding(.bottom, 100)
@@ -113,6 +113,8 @@ struct RunDetailView: View {
                 coordinates: routeCoordinates,
                 speeds: session.routeSpeeds,
                 maxSpeed: session.maxSpeed,
+                gForceSamples: session.gForceSamples ?? [],
+                maxGForce: session.maxGForce,
                 runStartIndices: session.runStartIndices,
                 timelineEvents: session.timelineEvents,
                 routeTimestamps: session.routeTimestamps,
@@ -849,7 +851,7 @@ struct RunDetailView: View {
         }
     }
     
-    private var shareBuoon: some View {
+    private var shareButton: some View {
         Button(action: { showSharePreview = true }) {
             HStack {
                 Image(systemName: "square.and.arrow.up")
@@ -1183,6 +1185,8 @@ struct FullScreenMapView: View {
     let coordinates: [CLLocationCoordinate2D]
     let speeds: [Double]
     let maxSpeed: Double
+    let gForceSamples: [RunSession.GForceSample]
+    let maxGForce: Double
     let runStartIndices: [Int]
     let timelineEvents: [RunSession.TimelineEvent]
     let routeTimestamps: [TimeInterval]
@@ -1198,12 +1202,16 @@ struct FullScreenMapView: View {
     @State private var showLayersPanel: Bool = false
     @State private var showRoutePath: Bool = true
     @State private var showStatusSegments: Bool = true
-    @State private var mapViewMode: MapViewMode = FeatureFlags.proFeaturesEnabled ? .threeD : .twoD
+    @State private var mapViewMode: MapViewMode = .twoD
     @State private var heatmapMode: HeatmapMode = .off
     @State private var isProUnlocked: Bool = FeatureFlags.proFeaturesEnabled
     @State private var mapControlAction: MapControlAction? = nil
+    @State private var scrubDragStart: Double? = nil
+    private let scrubSensitivity: Double = 0.6 // 스크럽 이동 민감도(낮을수록 타임라인 이동량 감소)
+    private let scrubResponseCurve: Double = 0.85 // 드래그 응답 곡선(1에 가까울수록 선형, 낮을수록 초반 반응 증가)
     
     var body: some View {
+        let heatmap = activeHeatmap
         ZStack {
             Color.black.ignoresSafeArea()
             MapViewRepresentable(
@@ -1219,9 +1227,13 @@ struct FullScreenMapView: View {
                 showRoutePath: showRoutePath,
                 showStatusSegments: showStatusSegments,
                 viewMode: mapViewMode,
-                useHeatmap: heatmapMode == .speed,
+                heatmapMode: heatmapMode,
+                heatmapValues: heatmap.values,
+                maxHeatmapValue: heatmap.maxValue,
                 headingDegrees: currentHeading,
                 highlightCoordinate: currentCoordinate,
+                currentTimestamp: hasTimestamps ? currentTimestamp : nil,
+                currentIndex: currentIndex,
                 mapControlAction: $mapControlAction
             )
             .ignoresSafeArea()
@@ -1274,6 +1286,121 @@ struct FullScreenMapView: View {
     
     private var neonGreen: Color {
         Color(red: 107/255, green: 249/255, blue: 6/255)
+    }
+
+    private var activeHeatmap: (values: [Double], maxValue: Double) {
+        switch heatmapMode {
+        case .speed:
+            return (speeds, maxSpeed)
+        case .gForce:
+            let values = gForceSeries
+            let seriesMax = values.max() ?? 0
+            let maxValue = seriesMax > 0 ? seriesMax : maxGForce
+            return (values, maxValue)
+        case .edgeFlow:
+            let values = flowSeries
+            return (values, 1.0)
+        default:
+            return ([], 0)
+        }
+    }
+
+    private var gForceSeries: [Double] {
+        buildGForceSeries()
+    }
+
+    private var flowSeries: [Double] {
+        buildFlowSeries()
+    }
+
+    private func buildGForceSeries() -> [Double] {
+        guard !gForceSamples.isEmpty else { return [] }
+        let timestamps = effectiveRouteTimestamps
+        guard !timestamps.isEmpty else { return [] }
+
+        // G-Force 히트맵은 1초 평균값(gAvg)을 경로 타임스탬프에 보간한다.
+        let baseTime = startTime.timeIntervalSince1970
+        var sampleTimes: [TimeInterval] = []
+        sampleTimes.reserveCapacity(gForceSamples.count)
+        for sample in gForceSamples {
+            sampleTimes.append(baseTime + sample.t)
+        }
+
+        var values: [Double] = []
+        values.reserveCapacity(timestamps.count)
+        var index = 0
+
+        for timestamp in timestamps {
+            while index + 1 < sampleTimes.count && sampleTimes[index + 1] <= timestamp {
+                index += 1
+            }
+
+            let current = gForceSamples[index]
+            if index + 1 < gForceSamples.count {
+                let next = gForceSamples[index + 1]
+                let t0 = sampleTimes[index]
+                let t1 = sampleTimes[index + 1]
+                let ratio = t1 > t0 ? min(max((timestamp - t0) / (t1 - t0), 0), 1) : 0
+                let interpolated = current.gAvg + (next.gAvg - current.gAvg) * ratio
+                values.append(interpolated)
+            } else {
+                values.append(current.gAvg)
+            }
+        }
+
+        return values
+    }
+
+    private func buildFlowSeries() -> [Double] {
+        guard !speeds.isEmpty else { return [] }
+
+        let flowWindowSize = 5
+        let flowVarianceDenominator: Double = 3.5
+        let flowMinSpeedMS: Double = 2.0
+
+        var window: [Double] = []
+        window.reserveCapacity(flowWindowSize)
+        var sum: Double = 0.0
+        var sumSq: Double = 0.0
+
+        var values: [Double] = []
+        values.reserveCapacity(speeds.count)
+
+        for index in 0..<speeds.count {
+            let speedMS = max(0.0, speeds[index] / 3.6)
+            let isRiding = routeStates.count == speeds.count ? routeStates[index] == .riding : true
+
+            guard isRiding, speedMS >= flowMinSpeedMS else {
+                window.removeAll()
+                sum = 0.0
+                sumSq = 0.0
+                values.append(0.0)
+                continue
+            }
+
+            window.append(speedMS)
+            sum += speedMS
+            sumSq += speedMS * speedMS
+
+            if window.count > flowWindowSize, let removed = window.first {
+                window.removeFirst()
+                sum -= removed
+                sumSq -= removed * removed
+            }
+
+            guard window.count >= 2 else {
+                values.append(0.0)
+                continue
+            }
+
+            let mean = sum / Double(window.count)
+            let variance = max(0.0, (sumSq / Double(window.count)) - (mean * mean))
+            let stdDev = sqrt(variance)
+            let stability = 1.0 / (1.0 + (stdDev / flowVarianceDenominator))
+            values.append(stability)
+        }
+
+        return values
     }
     
     private var effectiveRouteTimestamps: [TimeInterval] {
@@ -1329,6 +1456,27 @@ struct FullScreenMapView: View {
             distances.append(total)
         }
         return distances
+    }
+
+    private var effectiveRouteAltitudes: [Double] {
+        guard !coordinates.isEmpty else { return [] }
+        if routeAltitudes.count == coordinates.count && !routeAltitudes.isEmpty {
+            return routeAltitudes
+        }
+        guard !routeAltitudes.isEmpty else { return [] }
+        if routeAltitudes.count == 1 {
+            return Array(repeating: routeAltitudes[0], count: coordinates.count)
+        }
+        let step = Double(routeAltitudes.count - 1) / Double(max(1, coordinates.count - 1))
+        return (0..<coordinates.count).map { index in
+            let position = Double(index) * step
+            let lower = Int(position.rounded(.down))
+            let upper = min(routeAltitudes.count - 1, lower + 1)
+            let t = position - Double(lower)
+            let start = routeAltitudes[lower]
+            let end = routeAltitudes[upper]
+            return start + (end - start) * t
+        }
     }
 
     private var effectiveRidingDistances: [Double] {
@@ -1493,15 +1641,16 @@ struct FullScreenMapView: View {
     }
     
     private var currentAltitude: Double? {
+        let altitudes = effectiveRouteAltitudes
         if let interpolation = currentInterpolation,
-           interpolation.upper < routeAltitudes.count,
-           interpolation.lower < routeAltitudes.count {
-            let lower = routeAltitudes[interpolation.lower]
-            let upper = routeAltitudes[interpolation.upper]
+           interpolation.upper < altitudes.count,
+           interpolation.lower < altitudes.count {
+            let lower = altitudes[interpolation.lower]
+            let upper = altitudes[interpolation.upper]
             return lower + (upper - lower) * interpolation.t
         }
-        guard let index = currentIndex, index < routeAltitudes.count else { return nil }
-        return routeAltitudes[index]
+        guard let index = currentIndex, index < altitudes.count else { return nil }
+        return altitudes[index]
     }
     
     private var currentDistance: Double? {
@@ -1821,6 +1970,8 @@ struct FullScreenMapView: View {
         )
     }
     
+    @State private var lastHapticState: RunSession.TimelineEvent.EventType?
+    
     private var timelineScrubber: some View {
         VStack(spacing: 8) {
             HStack {
@@ -1837,7 +1988,10 @@ struct FullScreenMapView: View {
             
             GeometryReader { proxy in
                 let width = proxy.size.width
+                let totalDuration = timelineDuration
+                
                 ZStack(alignment: .leading) {
+                    // 1. Background Track (Dimmed)
                     Capsule()
                         .fill(Color.white.opacity(0.1))
                         .frame(height: 6)
@@ -1845,40 +1999,111 @@ struct FullScreenMapView: View {
                             Capsule().stroke(Color.white.opacity(0.1), lineWidth: 1)
                         )
                     
-                    Capsule()
-                        .fill(
-                            LinearGradient(
-                                colors: [neonGreen.opacity(0.2), neonGreen.opacity(0.8)],
-                                startPoint: .leading,
-                                endPoint: .trailing
-                            )
-                        )
-                        .frame(width: max(8, width * scrubProgress), height: 6)
-                        .shadow(color: neonGreen.opacity(0.8), radius: 8)
+                    // 2. State Segments (Glowy Style)
+                    if totalDuration > 0 {
+                        ForEach(timelineEvents) { event in
+                            let eventStart = event.startTime.timeIntervalSince1970
+                            let eventEnd = (event.endTime ?? event.startTime).timeIntervalSince1970
+                            
+                            let safeStart = max(timelineStart, eventStart)
+                            let safeEnd = min(timelineEnd, eventEnd)
+                            
+                            if safeEnd > safeStart {
+                                let segmentDuration = safeEnd - safeStart
+                                let segmentWidth = (segmentDuration / totalDuration) * width
+                                let offset = ((safeStart - timelineStart) / totalDuration) * width
+                                
+                                let color: Color = {
+                                    switch event.type {
+                                    case .riding: return neonGreen
+                                    case .lift: return Color.white.opacity(0.3)
+                                    case .rest, .pause: return Color(white: 0.15)
+                                    case .unknown: return Color.red
+                                    }
+                                }()
+                                
+                                // Enhanced Segment with Glow
+                                Rectangle()
+                                    .fill(color)
+                                    .frame(width: max(1, segmentWidth), height: 6)
+                                    .offset(x: offset)
+                                    .shadow(color: event.type == .riding ? neonGreen.opacity(0.6) : .clear, radius: 4)
+                            }
+                        }
+                    }
                     
+                    // 3. Knob (Neon Circle) - Reduced size
                     Circle()
                         .fill(Color.black)
-                        .frame(width: 22, height: 22)
+                        .frame(width: 16, height: 16)
                         .overlay(
                             Circle()
                                 .stroke(neonGreen, lineWidth: 2)
                         )
                         .shadow(color: neonGreen.opacity(0.8), radius: 8)
-                        .offset(x: width * scrubProgress - 11)
+                        .offset(x: width * scrubProgress - 8)
                         .gesture(
                             DragGesture(minimumDistance: 0)
                                 .onChanged { value in
-                                    let progress = min(max(0, value.location.x / width), 1)
+                                    if scrubDragStart == nil {
+                                        scrubDragStart = scrubProgress
+                                    }
+                                    let base = scrubDragStart ?? scrubProgress
+                                    let raw = value.translation.width / width
+                                    let magnitude = min(1, abs(raw))
+                                    let eased = pow(magnitude, scrubResponseCurve)
+                                    let delta = (raw >= 0 ? 1.0 : -1.0) * eased * scrubSensitivity
+                                    let progress = min(max(0, base + delta), 1)
                                     scrubProgress = progress
+                                    
+                                    // Haptic Feedback Logic
+                                    triggerHapticIfNeeded()
+                                }
+                                .onEnded { value in
+                                    if abs(value.translation.width) < 2,
+                                       abs(value.translation.height) < 2 {
+                                        let progress = min(max(0, value.location.x / width), 1)
+                                        scrubProgress = progress
+                                        triggerHapticIfNeeded()
+                                    }
+                                    scrubDragStart = nil
+                                    lastHapticState = nil
                                 }
                         )
                 }
+                .mask(Rectangle().frame(height: 60).offset(y: 0)) // Ensure mask is large enough if present, or remove mask if causing clipping.
+                // Actually the previous code had .mask(Capsule()) which clips tightly. 
+                // We should remove the tight mask or expand it. 
+                // Let's remove the .mask(Capsule()) on the ZStack if it was there causing clipping, 
+                // or simply rely on the frame increase. The previous code had `.mask(Capsule())`.
+                // I will remove `.mask(Capsule())` to allow shadows to spill out.
             }
-            .frame(height: 30)
+            .frame(height: 44) // Increased height to avoid clipping
             .padding(.horizontal, 24)
         }
     }
     
+    private func triggerHapticIfNeeded() {
+        // Find current event type
+        guard let currentEvent = activeTimelineEvent(for: currentTimestamp) else { return }
+        
+        if lastHapticState != currentEvent.type {
+            let generator = UIImpactFeedbackGenerator(style: .light)
+            generator.impactOccurred()
+            lastHapticState = currentEvent.type
+        }
+    }
+    
+    private func activeTimelineEvent(for timestamp: TimeInterval) -> RunSession.TimelineEvent? {
+        let time = Date(timeIntervalSince1970: timestamp)
+        // Use local timelineEvents
+        let events = timelineEvents.sorted { $0.startTime < $1.startTime }
+        return events.first { event in
+            let end = event.endTime ?? event.startTime
+            return time >= event.startTime && time <= end
+        }
+    }
+
     private var statusCard: some View {
         VStack(alignment: .leading, spacing: 10) {
             HStack(spacing: 8) {
@@ -2075,7 +2300,6 @@ private struct ViewModeRow: View {
     var body: some View {
         HStack(spacing: 8) {
             viewModeButton(title: "2D", mode: .twoD, locked: false)
-            viewModeButton(title: "3D", mode: .threeD, locked: !isProUnlocked)
         }
     }
     
@@ -2238,16 +2462,20 @@ struct MapViewRepresentable: UIViewRepresentable {
     let showRoutePath: Bool
     let showStatusSegments: Bool
     let viewMode: MapViewMode
-    let useHeatmap: Bool
+    let heatmapMode: HeatmapMode
+    let heatmapValues: [Double]
+    let maxHeatmapValue: Double
     let headingDegrees: Double?
     let highlightCoordinate: CLLocationCoordinate2D?
+    let currentTimestamp: TimeInterval?
+    let currentIndex: Int?
     @Binding var mapControlAction: MapControlAction?
     
     func makeUIView(context: Context) -> MKMapView {
         let mapView = MKMapView()
         mapView.delegate = context.coordinator
         mapView.showsUserLocation = false
-        mapView.isPitchEnabled = true
+        mapView.isPitchEnabled = false
         mapView.isRotateEnabled = true
         mapView.isScrollEnabled = true
         mapView.isZoomEnabled = true
@@ -2270,6 +2498,16 @@ struct MapViewRepresentable: UIViewRepresentable {
         let needsRegionReset = context.coordinator.needsRegionReset
             || !context.coordinator.hasSetRegion
             || context.coordinator.lastCoordinatesCount != coordinates.count
+
+        let useHeatmap = heatmapMode != .off
+        let activeIndex = resolveActiveIndex()
+        let activeStateSegment = activeSegmentByState(activeIndex)
+        let activeEvent = activeTimelineEvent(for: currentTimestamp)
+        let activeSignature = buildActiveSignature(
+            activeStateSegment: activeStateSegment,
+            activeEvent: activeEvent,
+            activeIndex: activeIndex
+        )
         
         if needsRegionReset {
             view.setRegion(region, animated: false)
@@ -2278,7 +2516,8 @@ struct MapViewRepresentable: UIViewRepresentable {
             context.coordinator.needsRegionReset = false
         }
         
-        if context.coordinator.lastViewMode != viewMode || needsRegionReset || context.coordinator.lastHeading != headingDegrees {
+        let headingChanged = context.coordinator.lastHeading != headingDegrees
+        if context.coordinator.lastViewMode != viewMode || needsRegionReset || (viewMode == .threeD && headingChanged) {
             applyViewMode(
                 viewMode,
                 to: view,
@@ -2303,7 +2542,8 @@ struct MapViewRepresentable: UIViewRepresentable {
             view.overlays.isEmpty ||
             context.coordinator.lastShowRoutePath != showRoutePath ||
             context.coordinator.lastShowStatusSegments != showStatusSegments ||
-            context.coordinator.lastUseHeatmap != useHeatmap
+            context.coordinator.lastHeatmapMode != heatmapMode ||
+            context.coordinator.lastActiveSignature != activeSignature
         
         if shouldRebuildOverlays {
             view.removeOverlays(view.overlays)
@@ -2312,30 +2552,30 @@ struct MapViewRepresentable: UIViewRepresentable {
                 // Add Polylines
                 let canUseTimeline = !timelineEvents.isEmpty && routeTimestamps.count == coordinates.count
                 
-                func addRidingSegment(_ segmentCoords: [CLLocationCoordinate2D], startIndex: Int, endIndex: Int) {
-                    let segmentSpeeds: [Double]
-                    if !speeds.isEmpty, speeds.count >= endIndex {
-                        segmentSpeeds = Array(speeds[startIndex..<endIndex])
+                func addRidingSegment(_ segmentCoords: [CLLocationCoordinate2D], startIndex: Int, endIndex: Int, isActive: Bool) {
+                    let segmentHeatValues: [Double]
+                    if useHeatmap, !heatmapValues.isEmpty, heatmapValues.count >= endIndex {
+                        segmentHeatValues = Array(heatmapValues[startIndex..<endIndex])
                     } else {
-                        segmentSpeeds = []
+                        segmentHeatValues = []
                     }
                     
-                    if useHeatmap, !segmentSpeeds.isEmpty && segmentSpeeds.count == segmentCoords.count {
-                        let colors = segmentSpeeds.map { speedToUIColor($0, maxSpeed: maxSpeed) }
+                    if isActive, useHeatmap, !segmentHeatValues.isEmpty && segmentHeatValues.count == segmentCoords.count {
+                        let colors = segmentHeatValues.map { heatmapToUIColor($0, maxValue: maxHeatmapValue, mode: heatmapMode) }
                         let polyline = GradientPolyline(coordinates: segmentCoords, count: segmentCoords.count)
                         polyline.strokeColors = colors
-                        polyline.title = "Heatmap"
+                        polyline.title = "ActiveHeatmap"
                         view.addOverlay(polyline)
                     } else {
                         let polyline = MKPolyline(coordinates: segmentCoords, count: segmentCoords.count)
-                        polyline.title = "Route"
+                        polyline.title = isActive ? "ActiveRoute" : "DimRoute"
                         view.addOverlay(polyline)
                     }
                 }
                 
-                func addStyledSegment(_ segmentCoords: [CLLocationCoordinate2D], title: String) {
+                func addStyledSegment(_ segmentCoords: [CLLocationCoordinate2D], title: String, isActive: Bool) {
                     let polyline = MKPolyline(coordinates: segmentCoords, count: segmentCoords.count)
-                    polyline.title = title
+                    polyline.title = isActive ? "Active\(title)" : "Dim\(title)"
                     view.addOverlay(polyline)
                 }
                 
@@ -2348,25 +2588,26 @@ struct MapViewRepresentable: UIViewRepresentable {
                         guard endIndex > segmentStart else { return }
                         let segmentCoords = Array(coordinates[segmentStart..<endIndex])
                         guard segmentCoords.count > 1 else { return }
+                        let isActive = activeStateSegment?.start == segmentStart && activeStateSegment?.end == endIndex && activeStateSegment?.type == currentType
                         
                         switch currentType {
                         case .riding:
-                            addRidingSegment(segmentCoords, startIndex: segmentStart, endIndex: endIndex)
+                            addRidingSegment(segmentCoords, startIndex: segmentStart, endIndex: endIndex, isActive: isActive)
                         case .lift:
                             if showStatusSegments {
-                                addStyledSegment(segmentCoords, title: "Lift")
+                                addStyledSegment(segmentCoords, title: "Lift", isActive: isActive)
                             } else {
-                                addRidingSegment(segmentCoords, startIndex: segmentStart, endIndex: endIndex)
+                                addRidingSegment(segmentCoords, startIndex: segmentStart, endIndex: endIndex, isActive: isActive)
                             }
                         case .rest, .pause:
                             if showStatusSegments {
-                                addStyledSegment(segmentCoords, title: "Rest")
+                                addStyledSegment(segmentCoords, title: "Rest", isActive: isActive)
                             }
                         case .unknown:
                             if showStatusSegments {
-                                addStyledSegment(segmentCoords, title: "Unknown")
+                                addStyledSegment(segmentCoords, title: "Unknown", isActive: isActive)
                             } else {
-                                addRidingSegment(segmentCoords, startIndex: segmentStart, endIndex: endIndex)
+                                addRidingSegment(segmentCoords, startIndex: segmentStart, endIndex: endIndex, isActive: isActive)
                             }
                         }
                     }
@@ -2385,6 +2626,7 @@ struct MapViewRepresentable: UIViewRepresentable {
                     var index = 0
                     
                     for event in sortedEvents {
+                        let isActive = isActiveEvent(event, activeEvent: activeEvent)
                         let startTs = event.startTime.timeIntervalSince1970
                         let endTs = (event.endTime ?? event.startTime).timeIntervalSince1970
                         
@@ -2404,36 +2646,38 @@ struct MapViewRepresentable: UIViewRepresentable {
                             
                             switch event.type {
                             case .riding:
-                                addRidingSegment(segmentCoords, startIndex: startIndex, endIndex: endIndex)
+                                addRidingSegment(segmentCoords, startIndex: startIndex, endIndex: endIndex, isActive: isActive)
                             case .lift:
                                 if showStatusSegments {
-                                    addStyledSegment(segmentCoords, title: "Lift")
+                                    addStyledSegment(segmentCoords, title: "Lift", isActive: isActive)
                                 } else {
-                                    addRidingSegment(segmentCoords, startIndex: startIndex, endIndex: endIndex)
+                                    addRidingSegment(segmentCoords, startIndex: startIndex, endIndex: endIndex, isActive: isActive)
                                 }
                             case .rest, .pause:
                                 if showStatusSegments {
-                                    addStyledSegment(segmentCoords, title: "Rest")
+                                    addStyledSegment(segmentCoords, title: "Rest", isActive: isActive)
                                 }
                             case .unknown:
                                 if showStatusSegments {
-                                    addStyledSegment(segmentCoords, title: "Unknown")
+                                    addStyledSegment(segmentCoords, title: "Unknown", isActive: isActive)
                                 } else {
-                                    addRidingSegment(segmentCoords, startIndex: startIndex, endIndex: endIndex)
+                                    addRidingSegment(segmentCoords, startIndex: startIndex, endIndex: endIndex, isActive: isActive)
                                 }
                             }
                         }
                     }
                 } else {
                     let sortedIndices = runStartIndices.sorted()
+                    let activeRun = activeRunRange(activeIndex: activeIndex, runStartIndices: sortedIndices)
                     
                     for (i, startIndex) in sortedIndices.enumerated() {
                         let endIndex = (i + 1 < sortedIndices.count) ? sortedIndices[i+1] : coordinates.count
+                        let isActive = activeRun?.start == startIndex && activeRun?.end == endIndex
                         
                         if endIndex > startIndex {
                             let segmentCoords = Array(coordinates[startIndex..<endIndex])
                             if segmentCoords.count > 1 {
-                                addRidingSegment(segmentCoords, startIndex: startIndex, endIndex: endIndex)
+                                addRidingSegment(segmentCoords, startIndex: startIndex, endIndex: endIndex, isActive: isActive)
                             }
                         }
                         
@@ -2444,7 +2688,7 @@ struct MapViewRepresentable: UIViewRepresentable {
                                 let p1 = coordinates[prevLastIdx]
                                 let p2 = coordinates[startIndex]
                                 let liftPolyline = MKPolyline(coordinates: [p1, p2], count: 2)
-                                liftPolyline.title = "Lift"
+                                liftPolyline.title = "DimLift"
                                 view.addOverlay(liftPolyline)
                             }
                         }
@@ -2455,7 +2699,8 @@ struct MapViewRepresentable: UIViewRepresentable {
             // Update coordinator state
             context.coordinator.lastShowRoutePath = showRoutePath
             context.coordinator.lastShowStatusSegments = showStatusSegments
-            context.coordinator.lastUseHeatmap = useHeatmap
+            context.coordinator.lastHeatmapMode = heatmapMode
+            context.coordinator.lastActiveSignature = activeSignature
         }
         
         // Always update annotations (optimized)
@@ -2463,11 +2708,174 @@ struct MapViewRepresentable: UIViewRepresentable {
         updateAnnotations(in: view)
     }
     
-    // Helper for color calculation
-    func speedToUIColor(_ speed: Double, maxSpeed: Double) -> UIColor {
-        let ratio = maxSpeed > 0 ? speed / maxSpeed : 0
-        let hue = 0.33 - (0.33 * min(max(ratio, 0), 1))
-        return UIColor(hue: hue, saturation: 1.0, brightness: 1.0, alpha: 1.0)
+    // 히트맵 컬러 계산 (공통 팔레트 + 모드별 매핑)
+    func heatmapToUIColor(_ value: Double, maxValue: Double, mode: HeatmapMode) -> UIColor {
+        switch mode {
+        case .gForce:
+            return gForceBandColor(for: value)
+        default:
+            let ratio = maxValue > 0 ? value / maxValue : 0
+            return heatmapPaletteColor(ratio)
+        }
+    }
+
+    private func gForceBandColor(for value: Double) -> UIColor {
+        // G-Force 밴딩: 1.2 / 1.4 / 1.7 기준 (팔레트 색상만 공유)
+        if value >= 1.7 {
+            return heatmapPaletteColor(1.0)
+        }
+        if value >= 1.4 {
+            return heatmapPaletteColor(0.8)
+        }
+        if value >= 1.2 {
+            return heatmapPaletteColor(0.6)
+        }
+        if value > 1.0 {
+            return heatmapPaletteColor(0.4)
+        }
+        return heatmapPaletteColor(0.15)
+    }
+
+    private func heatmapPaletteColor(_ ratio: Double) -> UIColor {
+        let colors = heatmapPalette
+        let clamped = min(max(ratio, 0), 1)
+        guard colors.count >= 2 else {
+            return colors.first ?? UIColor.white
+        }
+
+        let scaled = clamped * Double(colors.count - 1)
+        let index = Int(scaled)
+        let nextIndex = min(index + 1, colors.count - 1)
+        let t = CGFloat(scaled - Double(index))
+        return blend(colors[index], colors[nextIndex], t: t)
+    }
+
+    private var heatmapPalette: [UIColor] {
+        [
+            UIColor(red: 0.10, green: 0.14, blue: 0.25, alpha: 1.0), // Deep Blue
+            UIColor(red: 0.00, green: 0.80, blue: 0.95, alpha: 1.0), // Cyan
+            UIColor(red: 107/255, green: 249/255, blue: 6/255, alpha: 1.0), // Neon Green
+            UIColor(red: 1.0, green: 0.9, blue: 0.2, alpha: 1.0), // Yellow
+            UIColor(red: 1.0, green: 0.2, blue: 0.2, alpha: 1.0) // Red
+        ]
+    }
+
+    private func blend(_ left: UIColor, _ right: UIColor, t: CGFloat) -> UIColor {
+        var r1: CGFloat = 0
+        var g1: CGFloat = 0
+        var b1: CGFloat = 0
+        var a1: CGFloat = 0
+        var r2: CGFloat = 0
+        var g2: CGFloat = 0
+        var b2: CGFloat = 0
+        var a2: CGFloat = 0
+        left.getRed(&r1, green: &g1, blue: &b1, alpha: &a1)
+        right.getRed(&r2, green: &g2, blue: &b2, alpha: &a2)
+
+        let r = r1 + (r2 - r1) * t
+        let g = g1 + (g2 - g1) * t
+        let b = b1 + (b2 - b1) * t
+        let a = a1 + (a2 - a1) * t
+        return UIColor(red: r, green: g, blue: b, alpha: a)
+    }
+
+    private func resolveActiveIndex() -> Int? {
+        if let currentIndex, currentIndex >= 0, currentIndex < coordinates.count {
+            return currentIndex
+        }
+        guard let timestamp = currentTimestamp else { return nil }
+        guard routeTimestamps.count == coordinates.count, !routeTimestamps.isEmpty else { return nil }
+        return nearestIndex(for: timestamp, in: routeTimestamps)
+    }
+
+    private func nearestIndex(for timestamp: TimeInterval, in timestamps: [TimeInterval]) -> Int? {
+        guard !timestamps.isEmpty else { return nil }
+        var low = 0
+        var high = timestamps.count - 1
+        
+        while low < high {
+            let mid = (low + high) / 2
+            if timestamps[mid] < timestamp {
+                low = mid + 1
+            } else {
+                high = mid
+            }
+        }
+        
+        let clamped = max(0, min(timestamps.count - 1, low))
+        if clamped > 0 {
+            let prev = clamped - 1
+            let prevDiff = abs(timestamps[prev] - timestamp)
+            let currDiff = abs(timestamps[clamped] - timestamp)
+            return prevDiff < currDiff ? prev : clamped
+        }
+        return clamped
+    }
+
+    private func activeSegmentByState(_ index: Int?) -> (start: Int, end: Int, type: RunSession.TimelineEvent.EventType)? {
+        guard let index,
+              routeStates.count == coordinates.count,
+              index >= 0,
+              index < routeStates.count else { return nil }
+        let type = routeStates[index]
+        var start = index
+        var end = index + 1
+        while start > 0 && routeStates[start - 1] == type {
+            start -= 1
+        }
+        while end < routeStates.count && routeStates[end] == type {
+            end += 1
+        }
+        return (start, end, type)
+    }
+
+    private func activeTimelineEvent(for timestamp: TimeInterval?) -> RunSession.TimelineEvent? {
+        guard let timestamp, !timelineEvents.isEmpty else { return nil }
+        let time = Date(timeIntervalSince1970: timestamp)
+        let sortedEvents = timelineEvents.sorted { $0.startTime < $1.startTime }
+        return sortedEvents.first { event in
+            let end = event.endTime ?? event.startTime
+            return time >= event.startTime && time <= end
+        }
+    }
+
+    private func isActiveEvent(_ event: RunSession.TimelineEvent, activeEvent: RunSession.TimelineEvent?) -> Bool {
+        guard let activeEvent else { return false }
+        let end = event.endTime ?? event.startTime
+        let activeEnd = activeEvent.endTime ?? activeEvent.startTime
+        return event.type == activeEvent.type
+            && event.startTime == activeEvent.startTime
+            && end == activeEnd
+    }
+
+    private func activeRunRange(activeIndex: Int?, runStartIndices: [Int]) -> (start: Int, end: Int)? {
+        guard let activeIndex, !runStartIndices.isEmpty else { return nil }
+        for (i, startIndex) in runStartIndices.enumerated() {
+            let endIndex = (i + 1 < runStartIndices.count) ? runStartIndices[i + 1] : coordinates.count
+            if activeIndex >= startIndex && activeIndex < endIndex {
+                return (startIndex, endIndex)
+            }
+        }
+        return nil
+    }
+
+    private func buildActiveSignature(
+        activeStateSegment: (start: Int, end: Int, type: RunSession.TimelineEvent.EventType)?,
+        activeEvent: RunSession.TimelineEvent?,
+        activeIndex: Int?
+    ) -> String {
+        if let segment = activeStateSegment {
+            return "state-\(segment.type)-\(segment.start)-\(segment.end)"
+        }
+        if let activeEvent {
+            let end = activeEvent.endTime ?? activeEvent.startTime
+            return "event-\(activeEvent.type)-\(Int(activeEvent.startTime.timeIntervalSince1970))-\(Int(end.timeIntervalSince1970))"
+        }
+        let sortedIndices = runStartIndices.sorted()
+        if let activeRun = activeRunRange(activeIndex: activeIndex, runStartIndices: sortedIndices) {
+            return "run-\(activeRun.start)-\(activeRun.end)"
+        }
+        return "none"
     }
     
     func makeCoordinator() -> Coordinator {
@@ -2509,9 +2917,10 @@ struct MapViewRepresentable: UIViewRepresentable {
             )
             mapView.setCamera(camera, animated: animated)
         } else {
-            camera.pitch = 0
-            camera.heading = 0
-            mapView.setCamera(camera, animated: animated)
+            if camera.pitch != 0 {
+                camera.pitch = 0
+                mapView.setCamera(camera, animated: animated)
+            }
         }
     }
 
@@ -2610,9 +3019,10 @@ struct MapViewRepresentable: UIViewRepresentable {
         // State tracking for partial updates
         var lastShowRoutePath: Bool?
         var lastShowStatusSegments: Bool?
-        var lastUseHeatmap: Bool?
+        var lastHeatmapMode: HeatmapMode?
         var lastViewMode: MapViewMode?
         var lastHeading: Double?
+        var lastActiveSignature: String?
         var hasSetRegion: Bool = false
         var lastCoordinatesCount: Int?
         var needsRegionReset: Bool = false
@@ -2627,30 +3037,44 @@ struct MapViewRepresentable: UIViewRepresentable {
                  let count = gradientPolyline.strokeColors.count
                  let locations = (0..<count).map { CGFloat($0) / CGFloat(max(1, count - 1)) }
                  renderer.setColors(gradientPolyline.strokeColors, locations: locations)
-                 renderer.lineWidth = 4.0
+                 renderer.lineWidth = 4.2
                  renderer.lineCap = .round
                  renderer.lineJoin = .round
-                 renderer.alpha = 0.9
+                 renderer.alpha = 0.95
                  return renderer
             } else if let polyline = overlay as? MKPolyline {
-                if polyline.title == "Route" {
-                    let renderer = GlowingPolylineRenderer(polyline: polyline)
+                if polyline.title == "ActiveRoute" || polyline.title == "Route" {
+                    let renderer = NeonPolylineRenderer(polyline: polyline)
                     renderer.strokeColor = parent.lineColor
                     renderer.lineWidth = 3.0
                     return renderer
                 }
                 
                 let renderer = MKPolylineRenderer(polyline: polyline)
+                renderer.lineCap = .round
+                renderer.lineJoin = .round
                 
-                if polyline.title == "Lift" {
-                    renderer.strokeColor = .white.withAlphaComponent(0.3)
-                    renderer.lineWidth = 2
-                    renderer.lineDashPattern = [2, 4]
-                } else if polyline.title == "Rest" || polyline.title == "Unknown" {
-                    renderer.strokeColor = .white.withAlphaComponent(0.15)
-                    renderer.lineWidth = 2
+                switch polyline.title ?? "" {
+                case "ActiveLift":
+                    renderer.strokeColor = .white.withAlphaComponent(0.7)
+                    renderer.lineWidth = 2.6
+                    renderer.lineDashPattern = [3, 4]
+                case "DimLift", "Lift":
+                    renderer.strokeColor = .white.withAlphaComponent(0.2)
+                    renderer.lineWidth = 1.6
+                    renderer.lineDashPattern = [2, 6]
+                case "ActiveRest", "ActiveUnknown":
+                    renderer.strokeColor = .white.withAlphaComponent(0.45)
+                    renderer.lineWidth = 2.2
                     renderer.lineDashPattern = [1, 5]
-                } else {
+                case "DimRest", "DimUnknown", "Rest", "Unknown":
+                    renderer.strokeColor = .white.withAlphaComponent(0.12)
+                    renderer.lineWidth = 1.4
+                    renderer.lineDashPattern = [1, 6]
+                case "DimRoute":
+                    renderer.strokeColor = .white.withAlphaComponent(0.16)
+                    renderer.lineWidth = 1.6
+                default:
                     renderer.strokeColor = parent.lineColor
                     renderer.lineWidth = 3
                 }
@@ -2692,41 +3116,37 @@ struct MapViewRepresentable: UIViewRepresentable {
     }
 }
 
-// 네온 글로우 렌더러
-class GlowingPolylineRenderer: MKPolylineRenderer {
+// 네온 글로우 렌더러 (HTML Reference Implementation)
+class NeonPolylineRenderer: MKPolylineRenderer {
     override func draw(_ mapRect: MKMapRect, zoomScale: MKZoomScale, in context: CGContext) {
         context.saveGState()
         
-        // 줌 스케일과 무관하게 두께 유지
+        // Base width corresponds to the 'Core' width (3px in HTML)
         let baseWidth = self.lineWidth / zoomScale
         let neonColor = UIColor(red: 107/255, green: 249/255, blue: 6/255, alpha: 1.0)
         
-        // 1. 외곽 글로우 (넓고 부드럽게)
+        // 1. Outer Glow (The "Blur" Effect)
+        // HTML: stroke-width="12", opacity-40, filter=blur(4)
         context.setBlendMode(.screen)
-        context.setLineWidth(baseWidth * 3.2)
-        context.setStrokeColor(neonColor.withAlphaComponent(0.12).cgColor)
+        context.setLineWidth(baseWidth * 4.0) // 12px / 3px = 4x
+        context.setStrokeColor(neonColor.withAlphaComponent(0.4).cgColor)
         context.setLineCap(.round)
         context.setLineJoin(.round)
+        
+        // Add a soft shadow to simulate the gaussian blur
+        context.setShadow(offset: .zero, blur: baseWidth * 2.0, color: neonColor.withAlphaComponent(0.6).cgColor)
+        
         context.addPath(self.path)
         context.strokePath()
         
-        // 2. 중간 글로우 (집중된 하이라이트)
-        context.setLineWidth(baseWidth * 1.9)
-        context.setStrokeColor(neonColor.withAlphaComponent(0.28).cgColor)
-        context.addPath(self.path)
-        context.strokePath()
+        // Clean shadow for next pass
+        context.setShadow(offset: .zero, blur: 0, color: nil)
         
-        // 3. 코어 라인 (선명한 본체)
+        // 2. Inner Core (The "White" Line)
+        // HTML: stroke-width="3", stroke="#ffffff"
         context.setBlendMode(.normal)
         context.setLineWidth(baseWidth * 1.0)
-        context.setStrokeColor(neonColor.withAlphaComponent(0.95).cgColor)
-        context.setShadow(offset: .zero, blur: 0, color: nil) // 코어는 선명하게 유지
-        context.addPath(self.path)
-        context.strokePath()
-        
-        // 4. White Hot Center (Optional, for extreme brightness feel)
-        context.setLineWidth(baseWidth * 0.3)
-        context.setStrokeColor(UIColor.white.withAlphaComponent(0.8).cgColor)
+        context.setStrokeColor(UIColor.white.cgColor)
         context.addPath(self.path)
         context.strokePath()
         

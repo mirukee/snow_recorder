@@ -28,7 +28,7 @@ class MyPageViewModel: ObservableObject {
     /// SwiftData의 주행 기록을 바탕으로 통계 및 XP 업데이트
     /// - Parameter sessions: 저장된 주행 세션 리스트
     func updateStats(using sessions: [RunSession]) {
-        // 서비스에 위임
-        gamificationService.updateProfile(from: sessions)
+        // 서비스에 위임 (디바운스/백그라운드)
+        gamificationService.scheduleUpdateProfile(from: sessions)
     }
 }

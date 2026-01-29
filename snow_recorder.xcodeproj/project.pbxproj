@@ -276,6 +276,7 @@
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				CODE_SIGN_ENTITLEMENTS = snow_recorder/snow_recorder.entitlements;
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
 				DEVELOPMENT_TEAM = HUTVZ6S6NU;
@@ -287,6 +288,10 @@
 				INFOPLIST_FILE = "/Users/gimdoyun/Documents/snow_recorder/snow_recorder/snow-recorder-Info.plist";
 				INFOPLIST_KEY_CFBundleDisplayName = "Snow Record";
 				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.sports";
+				INFOPLIST_KEY_NSLocationAlwaysAndWhenInUseUsageDescription = "앱이 백그라운드 상태일 때도 활강 경로를 정확히 기록하기 위해 위치 권한이 필요합니다.";
+				INFOPLIST_KEY_NSLocationWhenInUseUsageDescription = "스키/보드 활강 기록을 위해 위치 권한이 필요합니다.";
+				INFOPLIST_KEY_NSMotionUsageDescription = "활강 분석 및 주행 점수 계산을 위해 모션 데이터가 필요합니다.";
+				INFOPLIST_KEY_NSPhotoLibraryAddUsageDescription = "공유 이미지를 사진 앨범에 저장하기 위해 권한이 필요합니다.";
 				"INFOPLIST_KEY_UIApplicationSceneManifest_Generation[sdk=iphoneos*]" = YES;
 				"INFOPLIST_KEY_UIApplicationSceneManifest_Generation[sdk=iphonesimulator*]" = YES;
 				"INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents[sdk=iphoneos*]" = YES;
@@ -323,6 +328,7 @@
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				CODE_SIGN_ENTITLEMENTS = snow_recorder/snow_recorder.entitlements;
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
 				DEVELOPMENT_TEAM = HUTVZ6S6NU;
@@ -334,6 +340,10 @@
 				INFOPLIST_FILE = "/Users/gimdoyun/Documents/snow_recorder/snow_recorder/snow-recorder-Info.plist";
 				INFOPLIST_KEY_CFBundleDisplayName = "Snow Record";
 				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.sports";
+				INFOPLIST_KEY_NSLocationAlwaysAndWhenInUseUsageDescription = "앱이 백그라운드 상태일 때도 활강 경로를 정확히 기록하기 위해 위치 권한이 필요합니다.";
+				INFOPLIST_KEY_NSLocationWhenInUseUsageDescription = "스키/보드 활강 기록을 위해 위치 권한이 필요합니다.";
+				INFOPLIST_KEY_NSMotionUsageDescription = "활강 분석 및 주행 점수 계산을 위해 모션 데이터가 필요합니다.";
+				INFOPLIST_KEY_NSPhotoLibraryAddUsageDescription = "공유 이미지를 사진 앨범에 저장하기 위해 권한이 필요합니다.";
 				"INFOPLIST_KEY_UIApplicationSceneManifest_Generation[sdk=iphoneos*]" = YES;
 				"INFOPLIST_KEY_UIApplicationSceneManifest_Generation[sdk=iphonesimulator*]" = YES;
 				"INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents[sdk=iphoneos*]" = YES;

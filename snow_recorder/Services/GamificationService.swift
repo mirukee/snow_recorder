@@ -13,6 +13,9 @@ class GamificationService: ObservableObject {
     private let xpPerRun: Int = 50
     private let speedBonusThreshold: Double = 50.0 // km/h
     private let speedBonusXP: Int = 5
+    private let statsQueue = DispatchQueue(label: "com.snowrecord.gamification.stats", qos: .userInitiated)
+    private var pendingUpdateWorkItem: DispatchWorkItem?
+    private let updateDebounce: TimeInterval = 0.35
     
     // Badges Configuration
     private var allBadges: [Badge] = [
@@ -42,25 +45,58 @@ class GamificationService: ObservableObject {
         // Sync badges initial state
         self.profile.badges = allBadges
     }
+
+    private struct SessionStatsSnapshot {
+        let runCount: Int
+        let distanceMeters: Double
+        let maxSpeed: Double
+        let verticalDrop: Double
+        let duration: TimeInterval
+    }
     
     // MARK: - Public API
     
     /// Calculate stats and XP from a list of sessions (e.g., from @Query)
     func updateProfile(from sessions: [RunSession]) {
+        let snapshots = makeSnapshots(from: sessions)
+        updateProfile(from: snapshots)
+    }
+
+    func scheduleUpdateProfile(from sessions: [RunSession]) {
+        let snapshots = makeSnapshotsSafely(from: sessions)
+        scheduleUpdateProfile(from: snapshots)
+    }
+
+    private func scheduleUpdateProfile(from snapshots: [SessionStatsSnapshot]) {
+        pendingUpdateWorkItem?.cancel()
+        let workItem = DispatchWorkItem { [weak self] in
+            self?.updateProfile(from: snapshots)
+        }
+        pendingUpdateWorkItem = workItem
+        statsQueue.asyncAfter(deadline: .now() + updateDebounce, execute: workItem)
+    }
+    
+    func setNickname(_ name: String) {
+        self.profile.nickname = name
+    }
+    
+    // MARK: - Private Logic
+
+    private func updateProfile(from snapshots: [SessionStatsSnapshot]) {
         var newStats = UserStats()
         var totalXP = 0
         
-        for session in sessions {
+        for session in snapshots {
             // 1. Accumulate Stats
             newStats.totalRuns += session.runCount
-            newStats.totalDistance += (session.distance / 1000.0) // Convert m to km
+            newStats.totalDistance += (session.distanceMeters / 1000.0) // Convert m to km
             newStats.maxSpeed = max(newStats.maxSpeed, session.maxSpeed)
             newStats.totalVerticalDrop += session.verticalDrop
             newStats.totalDuration += session.duration
             
             // 2. Calculate XP for this session
             let runXP = session.runCount * xpPerRun
-            let distXP = Int((session.distance / 1000.0) * Double(xpPerKm))
+            let distXP = Int((session.distanceMeters / 1000.0) * Double(xpPerKm))
             
             // Speed Bonus logic (Simplified: if session max speed > threshold, add bonus)
             var sessionSpeedBonus = 0
@@ -95,12 +131,6 @@ class GamificationService: ObservableObject {
         }
     }
     
-    func setNickname(_ name: String) {
-        self.profile.nickname = name
-    }
-    
-    // MARK: - Private Logic
-    
     private func calculateLevel(xp: Int) -> Int {
         // Simple Level Formula: Level = sqrt(XP) * 0.1 (Just an example curve)
         // Or linear: Level = 1 + (XP / 500)
@@ -122,6 +152,27 @@ class GamificationService: ObservableObject {
                 print("🏆 Badge Unlocked: \(newBadge.title)")
             }
             return newBadge
+        }
+    }
+
+    private func makeSnapshotsSafely(from sessions: [RunSession]) -> [SessionStatsSnapshot] {
+        if Thread.isMainThread {
+            return makeSnapshots(from: sessions)
+        }
+        return DispatchQueue.main.sync {
+            makeSnapshots(from: sessions)
+        }
+    }
+
+    private func makeSnapshots(from sessions: [RunSession]) -> [SessionStatsSnapshot] {
+        sessions.map { session in
+            SessionStatsSnapshot(
+                runCount: session.runCount,
+                distanceMeters: session.distance,
+                maxSpeed: session.maxSpeed,
+                verticalDrop: session.verticalDrop,
+                duration: session.duration
+            )
         }
     }
 }

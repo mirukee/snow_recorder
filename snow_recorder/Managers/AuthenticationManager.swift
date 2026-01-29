@@ -6,6 +6,7 @@ import AuthenticationServices
 import CryptoKit
 import Combine
 import FirebaseCore
+import SwiftData
 
 class AuthenticationManager: ObservableObject {
     @Published var user: User?
@@ -16,6 +17,9 @@ class AuthenticationManager: ObservableObject {
     
     private init() {
         self.user = Auth.auth().currentUser
+        if self.user == nil {
+            self.isGuest = true
+        }
     }
     
     // MARK: - Sign In with Google
@@ -48,6 +52,8 @@ class AuthenticationManager: ObservableObject {
                 self?.user = authResult?.user
                 self?.isGuest = false
                 self?.checkAndCreateFirestoreUser()
+                // Link local sessions (Guest Data) to this user
+                self?.linkLocalSessionsToUser()
             }
         }
     }
@@ -80,9 +86,36 @@ class AuthenticationManager: ObservableObject {
                     return
                 }
                 
-                self?.user = authResult?.user
+                guard let user = authResult?.user else { return }
+                self?.user = user
                 self?.isGuest = false
-                self?.checkAndCreateFirestoreUser()
+                
+                // Apple Login only returns fullName on the FIRST login.
+                // We must capture it and update the Firebase Profile.
+                if let fullName = appleIDCredential.fullName {
+                    let givenName = fullName.givenName ?? ""
+                    let familyName = fullName.familyName ?? ""
+                    let displayName = "\(givenName) \(familyName)".trimmingCharacters(in: .whitespaces)
+                    
+                    if !displayName.isEmpty {
+                        let changeRequest = user.createProfileChangeRequest()
+                        changeRequest.displayName = displayName
+                        changeRequest.commitChanges { error in
+                            if let error = error {
+                                print("Error updating display name: \(error)")
+                            }
+                            // Sync with Firestore after profile update
+                            self?.checkAndCreateFirestoreUser()
+                        }
+                    } else {
+                        self?.checkAndCreateFirestoreUser()
+                    }
+                } else {
+                    self?.checkAndCreateFirestoreUser()
+                }
+                
+                // Link local sessions (Guest Data) to this user
+                self?.linkLocalSessionsToUser()
             }
         }
     }
@@ -96,7 +129,7 @@ class AuthenticationManager: ObservableObject {
         do {
             try Auth.auth().signOut()
             self.user = nil
-            self.isGuest = false
+            self.isGuest = true
         } catch {
             self.errorMessage = error.localizedDescription
         }
@@ -179,5 +212,32 @@ class AuthenticationManager: ObservableObject {
         }.joined()
 
         return hashString
+    }
+    
+    // MARK: - Data Synchronization (Guest -> User)
+    var modelContext: ModelContext?
+    
+    private func linkLocalSessionsToUser() {
+        guard let user = user, let context = modelContext else { return }
+        print("🔗 Linking local sessions to user: \(user.uid)")
+        
+        do {
+            // Fetch all sessions with nil userID
+            let descriptor = FetchDescriptor<RunSession>(predicate: #Predicate { $0.userID == nil })
+            let sessions = try context.fetch(descriptor)
+            
+            if !sessions.isEmpty {
+                print("Found \(sessions.count) guest sessions. Updating userID...")
+                for session in sessions {
+                    session.userID = user.uid
+                }
+                try context.save()
+                print("✅ Successfully linked \(sessions.count) sessions to \(user.displayName ?? "User").")
+            } else {
+                print("No guest sessions found to link.")
+            }
+        } catch {
+            print("❌ Error linking sessions: \(error)")
+        }
     }
 }

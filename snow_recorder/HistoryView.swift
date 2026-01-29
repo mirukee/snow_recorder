@@ -126,6 +126,15 @@ struct HistoryView: View {
         withAnimation {
             modelContext.delete(session)
         }
+        do {
+            try modelContext.save()
+        } catch {
+            print("❌ RunSession 삭제 저장 실패: \(error)")
+        }
+        DispatchQueue.main.async {
+            RankingService.shared.syncAfterLocalChange(sessions: sessions)
+            GamificationService.shared.scheduleUpdateProfile(from: sessions)
+        }
     }
 }
 

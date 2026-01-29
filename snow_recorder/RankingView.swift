@@ -22,6 +22,7 @@ struct RankingView: View {
     @State private var selectedCycle: RankingCycle = .season
     @ObservedObject private var rankingService = RankingService.shared
     @Query(sort: \RunSession.startTime, order: .reverse) private var sessions: [RunSession]
+    let isActive: Bool
     
     // MARK: - Models (Using RankingModels.swift)
     
@@ -154,14 +155,24 @@ struct RankingView: View {
         .preferredColorScheme(.dark)
         .onAppear {
             // 앱 시작 시 또는 뷰 진입 시 기존 데이터를 기반으로 랭킹 통계 재계산 및 로드
-            rankingService.recalculateStats(from: sessions)
+            guard isActive else { return }
+            rankingService.scheduleRecalculateStats(from: sessions)
             if rankingMode == .technical && (selectedMetric == .runCount || selectedMetric == .distance) {
-                 selectedMetric = .edge
+                selectedMetric = .edge
             }
             rankingService.fetchLeaderboard(cycle: selectedCycle, metric: selectedMetric, scope: selectedScope, resortKey: selectedResortKey)
         }
         .onChange(of: sessions) { _, newSessions in
-            rankingService.recalculateStats(from: newSessions)
+            guard isActive else { return }
+            rankingService.scheduleRecalculateStats(from: newSessions)
+        }
+        .onChange(of: isActive) { _, active in
+            guard active else { return }
+            rankingService.scheduleRecalculateStats(from: sessions)
+            if rankingMode == .technical && (selectedMetric == .runCount || selectedMetric == .distance) {
+                selectedMetric = .edge
+            }
+            rankingService.fetchLeaderboard(cycle: selectedCycle, metric: selectedMetric, scope: selectedScope, resortKey: selectedResortKey)
         }
         // Filters Change Trigger
         .onChange(of: selectedCycle) { _, _ in fetch() }
@@ -171,6 +182,7 @@ struct RankingView: View {
     }
     
     private func fetch() {
+        guard isActive else { return }
         rankingService.fetchLeaderboard(cycle: selectedCycle, metric: selectedMetric, scope: selectedScope, resortKey: selectedResortKey)
     }
     
@@ -623,5 +635,5 @@ struct RankingView: View {
 }
 
 #Preview {
-    RankingView()
+    RankingView(isActive: true)
 }

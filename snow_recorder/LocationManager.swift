@@ -77,6 +77,8 @@ class LocationManager: NSObject, ObservableObject, CLLocationManagerDelegate {
     private var onLiftStartCandidates: Set<String> = []
     private var pendingRestBoostUntil: Date?
     private var lastPendingRestBoostTime: Date?
+    private var baroFallbackTimer: DispatchSourceTimer?
+    private var baroFallbackLiftTicks: Int = 0
     
     // MARK: - Barometer 로깅 (Phase 0 설계)
     private struct BarometerLogEntry {
@@ -140,11 +142,16 @@ class LocationManager: NSObject, ObservableObject, CLLocationManagerDelegate {
     private let pendingRidingMinDrop: Double = 3.0 // 확정 조건: 누적 하강(m)
     private let pendingRestResumeSpeedThreshold: Double = 10.0 // 보류 해제 조건: 재개 속도(km/h)
     private let pendingRestResumeDropThreshold: Double = 3.0 // 보류 해제 조건: 순하강(m)
-    private let pendingRestTimeout: TimeInterval = 180.0 // 보류 해제 타임아웃(초)
+    private let pendingRestTimeout: TimeInterval = 90.0 // 보류 해제 타임아웃(초)
     private let pendingRestDescentWindow: TimeInterval = 5.0 // Pending Rest 하강 감지 윈도우(초)
     private let pendingRestDescentThreshold: Double = 2.0 // Pending Rest 하강 감지 임계값(m)
     private let pendingRestBoostDuration: TimeInterval = 10.0 // Pending Rest 정확도 상승 유지 시간(초)
     private let pendingRestBoostCooldown: TimeInterval = 10.0 // Pending Rest 정확도 상승 쿨다운(초)
+    private let baroFallbackTickInterval: TimeInterval = 1.0 // 바리오 보조 판정 주기(초)
+    private let baroFallbackMinGpsGap: TimeInterval = 10.0 // GPS 업데이트 지연 임계값(초)
+    private let baroFallbackRequiredTicks: Int = 3 // 리프트 전환 확정 연속 틱 수
+    private let baroFallbackRestGainThreshold: Double = 5.0 // Resting→OnLift 보조 판정 상승 임계값(m)
+    private let baroFallbackRidingGainThreshold: Double = 7.0 // Riding→OnLift 보조 판정 상승 임계값(m)
     
     // MARK: - GPS 고도 스무딩
     private var gpsRawAltitudeHistory: [Double] = []
@@ -165,6 +172,10 @@ class LocationManager: NSObject, ObservableObject, CLLocationManagerDelegate {
     private let pointHitRadius: Double = 50.0           // 시작/종료점 통과 판정 반경 (m)
     private let minVerticalDrop: Double = 1.0           // 최소 하강 고도 (GPS 노이즈 필터)
     private let runSpeedAccuracyThreshold: Double = 2.0 // 런 그래프/메트릭용 속도 정확도 상한 (m/s)
+    private let routeTimeSampleInterval: TimeInterval = 30.0 // 경로 포인트 시간 기반 최소 샘플링 간격 (초)
+    private let restToLiftMinSpeedKmH: Double = 4.0     // 휴식→리프트 전환 최소 속도(느슨한 게이트)
+    private let restToLiftMinHorizontalDistance: Double = 8.0 // 휴식→리프트 전환 최소 수평 이동(m)
+    private let shortOnLiftMergeThreshold: TimeInterval = 30.0 // 짧은 리프트 이벤트 병합 기준(초)
 
     /// UI 표기용 상태 (Pending Rest는 RESTING으로 표시)
     var displayState: RidingState {
@@ -214,8 +225,10 @@ class LocationManager: NSObject, ObservableObject, CLLocationManagerDelegate {
         
         if isUsingBarometer {
             startBarometerUpdates()
+            startBarometerFallbackTimer()
         } else {
             stopBarometerUpdates()
+            stopBarometerFallbackTimer()
         }
     }
     
@@ -223,12 +236,16 @@ class LocationManager: NSObject, ObservableObject, CLLocationManagerDelegate {
     func pauseTracking() {
         isTracking = false
         locationManager.stopUpdatingLocation()
+        stopBarometerFallbackTimer()
     }
     
     /// 트래킹 재개 (데이터 유지)
     func resumeTracking() {
         isTracking = true
         locationManager.startUpdatingLocation()
+        if isUsingBarometer {
+            startBarometerFallbackTimer()
+        }
     }
     
     /// 트래킹 종료
@@ -237,6 +254,7 @@ class LocationManager: NSObject, ObservableObject, CLLocationManagerDelegate {
         locationManager.stopUpdatingLocation()
         speed = 0.0
         stopBarometerUpdates()
+        stopBarometerFallbackTimer()
         
         // 마지막 런이 진행 중이었다면 카운트 및 슬로프 확정
         if currentRunStartTime != nil {
@@ -494,6 +512,76 @@ class LocationManager: NSObject, ObservableObject, CLLocationManagerDelegate {
         altimeter.stopRelativeAltitudeUpdates()
         appendBarometerLog(note: "바리오 업데이트 중지")
     }
+
+    // MARK: - 바리오 보조 상태 전환 타이머
+    private func startBarometerFallbackTimer() {
+        guard baroFallbackTimer == nil else { return }
+        let timer = DispatchSource.makeTimerSource(queue: .main)
+        timer.schedule(deadline: .now() + baroFallbackTickInterval, repeating: baroFallbackTickInterval)
+        timer.setEventHandler { [weak self] in
+            self?.handleBarometerFallbackTick()
+        }
+        timer.resume()
+        baroFallbackTimer = timer
+    }
+
+    private func stopBarometerFallbackTimer() {
+        baroFallbackTimer?.cancel()
+        baroFallbackTimer = nil
+        baroFallbackLiftTicks = 0
+    }
+
+    private func handleBarometerFallbackTick() {
+        guard isTracking, isUsingBarometer else {
+            baroFallbackLiftTicks = 0
+            return
+        }
+        guard let lastLocation else {
+            baroFallbackLiftTicks = 0
+            return
+        }
+        let now = Date()
+        let gap = now.timeIntervalSince(lastLocation.timestamp)
+        guard gap >= baroFallbackMinGpsGap else {
+            baroFallbackLiftTicks = 0
+            return
+        }
+        guard let trend = recentAltitudeNetChange(
+            window: altitudeTrendWindow,
+            minSpan: altitudeTrendMinSpan,
+            useBarometer: true
+        ) else {
+            baroFallbackLiftTicks = 0
+            return
+        }
+        
+        let recentGain = trend.gain
+        let shouldLift: Bool
+        switch currentState {
+        case .resting:
+            shouldLift = recentGain > baroFallbackRestGainThreshold
+        case .riding:
+            shouldLift = recentGain > baroFallbackRidingGainThreshold
+        default:
+            shouldLift = false
+        }
+        
+        if shouldLift {
+            baroFallbackLiftTicks += 1
+        } else {
+            baroFallbackLiftTicks = 0
+        }
+        
+        guard baroFallbackLiftTicks >= baroFallbackRequiredTicks else { return }
+        baroFallbackLiftTicks = 0
+        
+        guard currentState == .riding || currentState == .resting else { return }
+        
+        print("🪂 바리오 보조 전환: GPS 지연 \(String(format: "%.1f", gap))s, gain=\(String(format: "%.2f", recentGain))m")
+        appendBarometerLog(note: "바리오 보조 전환: GPS 지연 \(String(format: "%.1f", gap))s, gain=\(String(format: "%.2f", recentGain))m")
+        handleStateChange(from: currentState, to: .onLift, currentLocation: lastLocation)
+        currentState = .onLift
+    }
     
     private func handleBarometerUpdate(_ data: CMAltitudeData) {
         let now = Date()
@@ -613,6 +701,20 @@ class LocationManager: NSObject, ObservableObject, CLLocationManagerDelegate {
         recentGPSAltitudeSamples.append((time: location.timestamp, altitude: smoothed))
         let gpsCutoff = location.timestamp.addingTimeInterval(-recentLocationWindow)
         recentGPSAltitudeSamples.removeAll { $0.time < gpsCutoff }
+    }
+
+    private func routeAltitudeValue(for location: CLLocation) -> Double {
+        if isUsingBarometer, let baroAltitude = lastBaroAltitude {
+            let baseAltitude = sessionStartSmoothedAltitude ?? lastSmoothedGPSAltitude ?? location.altitude
+            return baseAltitude + baroAltitude
+        }
+
+        let smoothed = lastSmoothedGPSAltitude ?? location.altitude
+        let raw = location.altitude
+        if abs(raw - smoothed) <= gpsOutlierThreshold {
+            return raw
+        }
+        return smoothed
     }
     
     private func updateRecentLocations(with location: CLLocation) {
@@ -851,6 +953,19 @@ class LocationManager: NSObject, ObservableObject, CLLocationManagerDelegate {
         let speeds = recentLocations.map { max(0, $0.speed * 3.6) }
         let sum = speeds.reduce(0, +)
         return sum / Double(speeds.count)
+    }
+
+    private func recentHorizontalDisplacement() -> Double? {
+        guard recentLocations.count >= 2 else { return nil }
+        guard let first = recentLocations.first, let last = recentLocations.last else { return nil }
+        return last.distance(from: first)
+    }
+
+    private func shouldAllowRestingToOnLift(stateSpeedKmH: Double) -> Bool {
+        let hasSpeed = stateSpeedKmH >= restToLiftMinSpeedKmH
+        let horizontalDistance = recentHorizontalDisplacement() ?? 0
+        let hasMove = horizontalDistance >= restToLiftMinHorizontalDistance
+        return hasSpeed || hasMove
     }
     
     private func recentNetDropMeters() -> Double? {
@@ -1109,10 +1224,9 @@ class LocationManager: NSObject, ObservableObject, CLLocationManagerDelegate {
             } else {
                 resetPendingRiding()
             }
-            // RESTING → ON_LIFT: 리프트 라인 근처 OR 확실한 상승 중
-            // (좌표 데이터가 없어도 물리적인 상승 트렌드로 감지)
-            // 리프트 탑승 로직 강화: 상승 트렌드가 확실하면 리프트로 간주
-            if isClimbing {
+            // RESTING → ON_LIFT: 상승 트렌드 + 느슨한 이동/속도 게이트
+            // 휴식 중 기압 변동만으로 리프트로 튀는 케이스를 완화
+            if isClimbing && shouldAllowRestingToOnLift(stateSpeedKmH: stateSpeedKmH) {
                 resetPendingRiding()
                 return .onLift
             }
@@ -1207,6 +1321,9 @@ class LocationManager: NSObject, ObservableObject, CLLocationManagerDelegate {
         let transitionTime: Date
         if oldState == .resting, newState == .riding, let pendingTime = pendingRidingStartTime {
             transitionTime = pendingTime
+        } else if oldState == .riding, (newState == .resting || newState == .onLift), let finalizeTime = pendingRestFinalizeTime {
+            // Pending Rest 시작 시점을 타임라인에도 반영 (런 스탯과 정합)
+            transitionTime = finalizeTime
         } else {
             transitionTime = now
         }
@@ -1214,27 +1331,45 @@ class LocationManager: NSObject, ObservableObject, CLLocationManagerDelegate {
         if timelineOldState != timelineNewState {
             if let start = currentTimelineEventStart {
                 var detail = timelineOldState.displayLabel
-                if timelineOldState == .riding {
-                    // 이 시점에서는 아직 visitedSlopeCounts가 초기화되지 않았으므로 calculateBestSlope 호출 가능
-                    // 다만 calculateBestSlope는 무거운 연산일 수 있으므로 주의.
-                    // handleStateChange 내부 로직상 resting으로 갈때만 calculateBestSlope를 호출하긴 함.
-                    // 여기서는 간단히 currentSlope 쓰거나 calculateBestSlope 사용
-                    if let best = calculateBestSlope() {
-                        detail = best.name
-                    } else {
-                        detail = "알 수 없는 슬로프"
-                    }
-                } else if timelineOldState == .onLift {
-                    detail = "리프트 이동"
-                } else if timelineOldState == .resting {
-                    detail = "휴식"
-                }
+                let duration = transitionTime.timeIntervalSince(start)
                 
-                // RunSession.TimelineEvent 생성
-                let type = mapStateToEventType(timelineOldState)
-                let event = RunSession.TimelineEvent(type: type, startTime: start, endTime: transitionTime, detail: detail)
-                timelineEvents.append(event)
-                print("⏱️ 타임라인 이벤트 추가: \(detail) (\(Int(now.timeIntervalSince(start)))초)")
+                // 짧은 리프트 이벤트는 휴식으로 병합 (타임라인 정리용)
+                if timelineOldState == .onLift,
+                   timelineNewState == .resting,
+                   duration < shortOnLiftMergeThreshold {
+                    if let lastIndex = timelineEvents.indices.last,
+                       timelineEvents[lastIndex].type == .rest,
+                       timelineEvents[lastIndex].endTime == start {
+                        timelineEvents[lastIndex].endTime = transitionTime
+                        print("⏱️ 짧은 리프트 병합: 휴식 이벤트 연장 (\(Int(duration))초)")
+                    } else {
+                        let event = RunSession.TimelineEvent(type: .rest, startTime: start, endTime: transitionTime, detail: "휴식")
+                        timelineEvents.append(event)
+                        print("⏱️ 짧은 리프트 병합: 휴식 이벤트 생성 (\(Int(duration))초)")
+                    }
+                } else {
+                    if timelineOldState == .riding {
+                        // 이 시점에서는 아직 visitedSlopeCounts가 초기화되지 않았으므로 calculateBestSlope 호출 가능
+                        // 다만 calculateBestSlope는 무거운 연산일 수 있으므로 주의.
+                        // handleStateChange 내부 로직상 resting으로 갈때만 calculateBestSlope를 호출하긴 함.
+                        // 여기서는 간단히 currentSlope 쓰거나 calculateBestSlope 사용
+                        if let best = calculateBestSlope() {
+                            detail = best.name
+                        } else {
+                            detail = "알 수 없는 슬로프"
+                        }
+                    } else if timelineOldState == .onLift {
+                        detail = "리프트 이동"
+                    } else if timelineOldState == .resting {
+                        detail = "휴식"
+                    }
+                    
+                    // RunSession.TimelineEvent 생성
+                    let type = mapStateToEventType(timelineOldState)
+                    let event = RunSession.TimelineEvent(type: type, startTime: start, endTime: transitionTime, detail: detail)
+                    timelineEvents.append(event)
+                    print("⏱️ 타임라인 이벤트 추가: \(detail) (\(Int(now.timeIntervalSince(start)))초)")
+                }
             }
             currentTimelineEventStart = transitionTime
         }
@@ -1448,13 +1583,16 @@ class LocationManager: NSObject, ObservableObject, CLLocationManagerDelegate {
                 }
             }
             
-            // GPS 경로 수집 (상태별 거리 필터 차등 적용)
+            // GPS 경로 수집 (상태별 거리 필터 차등 적용 + 시간 기반 보강)
             // Riding: 5m (정밀), Lift/Resting: 20m (배터리 절약)
             let filterDistance: Double = (currentState == .riding) ? 5.0 : 20.0
+            let lastTimestamp = routeTimestamps.last ?? newLocation.timestamp.timeIntervalSince1970
+            let timeSinceLastSample = max(0, newLocation.timestamp.timeIntervalSince1970 - lastTimestamp)
+            let shouldRecordByTime = timeSinceLastSample >= routeTimeSampleInterval
             
-            if distance >= filterDistance || routeCoordinates.isEmpty {
+            if distance >= filterDistance || routeCoordinates.isEmpty || shouldRecordByTime {
                 let coordinate = newLocation.coordinate
-                let altitudeValue = lastSmoothedGPSAltitude ?? newLocation.altitude
+                let altitudeValue = routeAltitudeValue(for: newLocation)
                 let cumulativeDistance: Double
                 if let lastCoord = routeCoordinates.last {
                     let lastLocation = CLLocation(latitude: lastCoord[0], longitude: lastCoord[1])
