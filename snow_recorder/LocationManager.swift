@@ -32,6 +32,7 @@ class LocationManager: NSObject, ObservableObject, CLLocationManagerDelegate {
     @Published var routeTimestamps: [TimeInterval] = [] // GPS 경로별 타임스탬프 (UNIX 초)
     @Published var routeAltitudes: [Double] = [] // GPS 경로별 고도 (m)
     @Published var routeDistances: [Double] = [] // GPS 경로별 누적 거리 (m)
+    @Published var routeStates: [RunSession.TimelineEvent.EventType] = [] // GPS 샘플별 상태
     @Published var routeSpeedAccuracies: [Double] = [] // GPS 경로별 속도 정확도 (m/s)
     @Published var runStartIndices: [Int] = [0] // 각 런 시작 인덱스
     @Published var timelineEvents: [RunSession.TimelineEvent] = [] // 타임라인 이벤트 목록
@@ -374,6 +375,7 @@ class LocationManager: NSObject, ObservableObject, CLLocationManagerDelegate {
         routeTimestamps.removeAll()
         routeAltitudes.removeAll()
         routeDistances.removeAll()
+        routeStates.removeAll()
         routeSpeedAccuracies.removeAll()
         runStartIndices = [0]
         timelineEvents.removeAll()
@@ -1462,11 +1464,13 @@ class LocationManager: NSObject, ObservableObject, CLLocationManagerDelegate {
                     cumulativeDistance = 0
                 }
                 
+                let timelineState = timelineState(currentState)
                 routeCoordinates.append([coordinate.latitude, coordinate.longitude])
                 routeSpeeds.append(max(0, newLocation.speed * 3.6))
                 routeTimestamps.append(newLocation.timestamp.timeIntervalSince1970)
                 routeAltitudes.append(altitudeValue)
                 routeDistances.append(cumulativeDistance)
+                routeStates.append(mapStateToEventType(timelineState))
                 routeSpeedAccuracies.append(newLocation.speedAccuracy)
             }
         }

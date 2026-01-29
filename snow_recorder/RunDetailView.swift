@@ -118,6 +118,7 @@ struct RunDetailView: View {
                 routeTimestamps: session.routeTimestamps,
                 routeAltitudes: session.routeAltitudes,
                 routeDistances: session.routeDistances,
+                routeStates: session.routeStates,
                 locationName: session.locationName,
                 startTime: session.startTime,
                 sessionDuration: session.duration,
@@ -1187,6 +1188,7 @@ struct FullScreenMapView: View {
     let routeTimestamps: [TimeInterval]
     let routeAltitudes: [Double]
     let routeDistances: [Double]
+    let routeStates: [RunSession.TimelineEvent.EventType]
     let locationName: String
     let startTime: Date
     let sessionDuration: TimeInterval
@@ -1211,12 +1213,14 @@ struct FullScreenMapView: View {
                 runStartIndices: runStartIndices,
                 timelineEvents: timelineEvents,
                 routeTimestamps: effectiveRouteTimestamps,
+                routeStates: routeStates,
                 speeds: speeds,
                 maxSpeed: maxSpeed,
                 showRoutePath: showRoutePath,
                 showStatusSegments: showStatusSegments,
                 viewMode: mapViewMode,
                 useHeatmap: heatmapMode == .speed,
+                headingDegrees: currentHeading,
                 highlightCoordinate: currentCoordinate,
                 mapControlAction: $mapControlAction
             )
@@ -1474,6 +1478,18 @@ struct FullScreenMapView: View {
         }
         guard let index = currentIndex, index < speeds.count else { return nil }
         return speeds[index]
+    }
+
+    private var currentHeading: Double? {
+        if let interpolation = currentInterpolation {
+            let lower = coordinates[interpolation.lower]
+            let upper = coordinates[interpolation.upper]
+            if interpolation.lower != interpolation.upper {
+                return bearing(from: lower, to: upper)
+            }
+        }
+        guard let index = currentIndex, index + 1 < coordinates.count else { return nil }
+        return bearing(from: coordinates[index], to: coordinates[index + 1])
     }
     
     private var currentAltitude: Double? {
@@ -1979,6 +1995,19 @@ struct FullScreenMapView: View {
         return String(format: "%.0f m", distance)
     }
     
+    private func bearing(from start: CLLocationCoordinate2D, to end: CLLocationCoordinate2D) -> Double {
+        let lat1 = start.latitude * .pi / 180
+        let lon1 = start.longitude * .pi / 180
+        let lat2 = end.latitude * .pi / 180
+        let lon2 = end.longitude * .pi / 180
+        let dLon = lon2 - lon1
+        let y = sin(dLon) * cos(lat2)
+        let x = cos(lat1) * sin(lat2) - sin(lat1) * cos(lat2) * cos(dLon)
+        let radians = atan2(y, x)
+        let degrees = radians * 180 / .pi
+        return (degrees + 360).truncatingRemainder(dividingBy: 360)
+    }
+    
     private func nearestIndex(for timestamp: TimeInterval) -> Int? {
         let timestamps = effectiveRouteTimestamps
         guard !timestamps.isEmpty else { return nil }
@@ -2203,12 +2232,14 @@ struct MapViewRepresentable: UIViewRepresentable {
     let runStartIndices: [Int]
     let timelineEvents: [RunSession.TimelineEvent]
     let routeTimestamps: [TimeInterval]
+    let routeStates: [RunSession.TimelineEvent.EventType]
     let speeds: [Double]
     let maxSpeed: Double
     let showRoutePath: Bool
     let showStatusSegments: Bool
     let viewMode: MapViewMode
     let useHeatmap: Bool
+    let headingDegrees: Double?
     let highlightCoordinate: CLLocationCoordinate2D?
     @Binding var mapControlAction: MapControlAction?
     
@@ -2221,7 +2252,14 @@ struct MapViewRepresentable: UIViewRepresentable {
         mapView.isScrollEnabled = true
         mapView.isZoomEnabled = true
         mapView.setRegion(region, animated: false)
-        applyViewMode(viewMode, to: mapView, regionCenter: region.center, animated: false)
+        applyViewMode(
+            viewMode,
+            to: mapView,
+            regionCenter: region.center,
+            headingDegrees: headingDegrees,
+            anchorCoordinate: highlightCoordinate,
+            animated: false
+        )
         context.coordinator.hasSetRegion = true
         context.coordinator.lastCoordinatesCount = coordinates.count
         mapView.overrideUserInterfaceStyle = .dark
@@ -2240,9 +2278,17 @@ struct MapViewRepresentable: UIViewRepresentable {
             context.coordinator.needsRegionReset = false
         }
         
-        if context.coordinator.lastViewMode != viewMode || needsRegionReset {
-            applyViewMode(viewMode, to: view, regionCenter: region.center, animated: true)
+        if context.coordinator.lastViewMode != viewMode || needsRegionReset || context.coordinator.lastHeading != headingDegrees {
+            applyViewMode(
+                viewMode,
+                to: view,
+                regionCenter: region.center,
+                headingDegrees: headingDegrees,
+                anchorCoordinate: highlightCoordinate,
+                animated: true
+            )
             context.coordinator.lastViewMode = viewMode
+            context.coordinator.lastHeading = headingDegrees
         }
         
         if let action = mapControlAction {
@@ -2293,7 +2339,48 @@ struct MapViewRepresentable: UIViewRepresentable {
                     view.addOverlay(polyline)
                 }
                 
-                if canUseTimeline {
+                if routeStates.count == coordinates.count {
+                    // 샘플별 상태 기반 분할 렌더링
+                    var segmentStart = 0
+                    var currentType = routeStates.first ?? .unknown
+                    
+                    func flushSegment(endIndex: Int) {
+                        guard endIndex > segmentStart else { return }
+                        let segmentCoords = Array(coordinates[segmentStart..<endIndex])
+                        guard segmentCoords.count > 1 else { return }
+                        
+                        switch currentType {
+                        case .riding:
+                            addRidingSegment(segmentCoords, startIndex: segmentStart, endIndex: endIndex)
+                        case .lift:
+                            if showStatusSegments {
+                                addStyledSegment(segmentCoords, title: "Lift")
+                            } else {
+                                addRidingSegment(segmentCoords, startIndex: segmentStart, endIndex: endIndex)
+                            }
+                        case .rest, .pause:
+                            if showStatusSegments {
+                                addStyledSegment(segmentCoords, title: "Rest")
+                            }
+                        case .unknown:
+                            if showStatusSegments {
+                                addStyledSegment(segmentCoords, title: "Unknown")
+                            } else {
+                                addRidingSegment(segmentCoords, startIndex: segmentStart, endIndex: endIndex)
+                            }
+                        }
+                    }
+                    
+                    for index in 1..<routeStates.count {
+                        let nextType = routeStates[index]
+                        if nextType != currentType {
+                            flushSegment(endIndex: index)
+                            segmentStart = index
+                            currentType = nextType
+                        }
+                    }
+                    flushSegment(endIndex: routeStates.count)
+                } else if canUseTimeline {
                     let sortedEvents = timelineEvents.sorted { $0.startTime < $1.startTime }
                     var index = 0
                     
@@ -2391,10 +2478,14 @@ struct MapViewRepresentable: UIViewRepresentable {
         _ mode: MapViewMode,
         to mapView: MKMapView,
         regionCenter: CLLocationCoordinate2D,
+        headingDegrees: Double?,
+        anchorCoordinate: CLLocationCoordinate2D?,
         animated: Bool
     ) {
         let configuration = MKStandardMapConfiguration()
-        configuration.elevationStyle = (mode == .threeD) ? .realistic : .flat
+        configuration.elevationStyle = .flat
+        configuration.pointOfInterestFilter = .excludingAll
+        configuration.emphasisStyle = .muted
         mapView.preferredConfiguration = configuration
         mapView.isPitchEnabled = (mode == .threeD)
         
@@ -2402,18 +2493,44 @@ struct MapViewRepresentable: UIViewRepresentable {
         if mode == .threeD {
             let span = max(mapView.region.span.latitudeDelta, mapView.region.span.longitudeDelta)
             let spanMeters = max(1, span * 111_000)
-            let distance = max(800, min(6000, spanMeters * 1.3))
+            let distance = max(700, min(4200, spanMeters * 0.9))
+            let heading = headingDegrees ?? camera.heading
+            let target = anchorCoordinate ?? regionCenter
+            let biasedCenter = offsetCoordinate(
+                from: target,
+                distanceMeters: 140,
+                bearingDegrees: (heading + 180).truncatingRemainder(dividingBy: 360)
+            )
             camera = MKMapCamera(
-                lookingAtCenter: regionCenter,
+                lookingAtCenter: biasedCenter,
                 fromDistance: distance,
-                pitch: 65,
-                heading: camera.heading
+                pitch: 55,
+                heading: heading
             )
             mapView.setCamera(camera, animated: animated)
         } else {
             camera.pitch = 0
+            camera.heading = 0
             mapView.setCamera(camera, animated: animated)
         }
+    }
+
+    private func offsetCoordinate(
+        from coordinate: CLLocationCoordinate2D,
+        distanceMeters: Double,
+        bearingDegrees: Double
+    ) -> CLLocationCoordinate2D {
+        let radius = 6_371_000.0
+        let bearing = bearingDegrees * .pi / 180
+        let lat1 = coordinate.latitude * .pi / 180
+        let lon1 = coordinate.longitude * .pi / 180
+        let delta = distanceMeters / radius
+        let lat2 = asin(sin(lat1) * cos(delta) + cos(lat1) * sin(delta) * cos(bearing))
+        let lon2 = lon1 + atan2(
+            sin(bearing) * sin(delta) * cos(lat1),
+            cos(delta) - sin(lat1) * sin(lat2)
+        )
+        return CLLocationCoordinate2D(latitude: lat2 * 180 / .pi, longitude: lon2 * 180 / .pi)
     }
     
     // Optimized Annotation Update
@@ -2495,6 +2612,7 @@ struct MapViewRepresentable: UIViewRepresentable {
         var lastShowStatusSegments: Bool?
         var lastUseHeatmap: Bool?
         var lastViewMode: MapViewMode?
+        var lastHeading: Double?
         var hasSetRegion: Bool = false
         var lastCoordinatesCount: Int?
         var needsRegionReset: Bool = false

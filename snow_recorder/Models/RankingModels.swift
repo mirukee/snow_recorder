@@ -63,27 +63,50 @@ struct RankingProfile {
     var seasonDistance: Double = 0.0 // meters
     var seasonBestEdge: Double = 0.0 // Changed to Double for Average
     var seasonBestFlow: Double = 0.0 // Changed to Double for Average
+    var seasonRunCountByResort: [String: Int] = [:]
+    var seasonDistanceByResort: [String: Double] = [:]
     
     // Weekly Totals
     var weeklyRunCount: Int = 0
     var weeklyDistance: Double = 0.0 // meters
     var weeklyBestEdge: Double = 0.0 // Changed to Double for Average
     var weeklyBestFlow: Double = 0.0 // Changed to Double for Average
+    var weeklyRunCountByResort: [String: Int] = [:]
+    var weeklyDistanceByResort: [String: Double] = [:]
     
     // Helper to get value by metric/cycle
-    func getValue(for metric: RankingMetric, cycle: RankingCycle) -> Double {
+    func getValue(for metric: RankingMetric, cycle: RankingCycle, resortKey: String? = nil) -> Double {
+        let normalizedResortKey = resortKey?.lowercased()
+        let useResortFilter = normalizedResortKey != nil && normalizedResortKey != "all"
+        
         switch cycle {
         case .season:
             switch metric {
-            case .runCount: return Double(seasonRunCount)
-            case .distance: return seasonDistance / 1000.0 // km 변환
+            case .runCount:
+                if useResortFilter {
+                    return Double(seasonRunCountByResort[normalizedResortKey ?? ""] ?? 0)
+                }
+                return Double(seasonRunCount)
+            case .distance:
+                if useResortFilter {
+                    return (seasonDistanceByResort[normalizedResortKey ?? ""] ?? 0.0) / 1000.0
+                }
+                return seasonDistance / 1000.0 // km 변환
             case .edge: return seasonBestEdge
             case .flow: return seasonBestFlow
             }
         case .weekly:
             switch metric {
-            case .runCount: return Double(weeklyRunCount)
-            case .distance: return weeklyDistance / 1000.0 // km 변환
+            case .runCount:
+                if useResortFilter {
+                    return Double(weeklyRunCountByResort[normalizedResortKey ?? ""] ?? 0)
+                }
+                return Double(weeklyRunCount)
+            case .distance:
+                if useResortFilter {
+                    return (weeklyDistanceByResort[normalizedResortKey ?? ""] ?? 0.0) / 1000.0
+                }
+                return weeklyDistance / 1000.0 // km 변환
             case .edge: return weeklyBestEdge
             case .flow: return weeklyBestFlow
             }

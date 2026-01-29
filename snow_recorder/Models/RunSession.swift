@@ -23,6 +23,7 @@ final class RunSession {
     var routeTimestamps: [TimeInterval] = [] // GPS 경로별 타임스탬프 (UNIX 초)
     var routeAltitudes: [Double] = [] // GPS 경로별 고도 (m)
     var routeDistances: [Double] = [] // GPS 경로별 누적 거리 (m)
+    var routeStates: [TimelineEvent.EventType] = [] // GPS 샘플별 상태 (riding/lift/rest/pause/unknown)
     var runStartIndices: [Int] = [0] // 각 런의 시작 인덱스 (리프트 점선 연결용)
     var timelineEvents: [TimelineEvent] = [] // 타임라인 이벤트 목록
     
@@ -357,6 +358,7 @@ final class RunSession {
         routeTimestamps: [TimeInterval] = [],
         routeAltitudes: [Double] = [],
         routeDistances: [Double] = [],
+        routeStates: [TimelineEvent.EventType] = [],
         runStartIndices: [Int] = [0],
         timelineEvents: [TimelineEvent] = [],
         edgeScore: Int = 0,
@@ -393,6 +395,7 @@ final class RunSession {
         self.routeTimestamps = routeTimestamps
         self.routeAltitudes = routeAltitudes
         self.routeDistances = routeDistances
+        self.routeStates = routeStates
         self.runStartIndices = runStartIndices
         self.timelineEvents = timelineEvents
         self.edgeScore = edgeScore

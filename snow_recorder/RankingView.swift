@@ -18,7 +18,6 @@ struct RankingView: View {
     @State private var rankingMode: RankingMode = .technical // Default to Technical
     @State private var selectedScope: RankingScope = .individual
     @State private var selectedResort: String = "전체"
-    @State private var selectedSlope: String = "All Slopes" // New Slope Filter
     @State private var selectedMetric: RankingMetric = .runCount
     @State private var selectedCycle: RankingCycle = .season
     @ObservedObject private var rankingService = RankingService.shared
@@ -28,17 +27,6 @@ struct RankingView: View {
     
     // Mock Data (Resorts)
     let resorts = ["전체", "하이원", "용평", "휘닉스", "비발디"]
-    
-    // Slopes Data Helper
-    var availableSlopes: [String] {
-        if selectedResort == "하이원" {
-            var slopes = ["All Slopes"]
-            slopes.append(contentsOf: SlopeDatabase.shared.slopes.map { $0.name })
-            return slopes
-        } else {
-            return ["All Slopes"]
-        }
-    }
     
     @State private var showingScoreInfo = false
     
@@ -92,18 +80,27 @@ struct RankingView: View {
                                     resortFilterScroll
                                         .transition(.move(edge: .top).combined(with: .opacity))
                                     
-                                    // Show Slope Filter only if a specific resort is selected (e.g., High1)
-                                    if selectedResort != "전체" {
-                                        slopeFilterScroll
-                                            .transition(.move(edge: .top).combined(with: .opacity))
+                                    if let updatedAt = rankingService.lastLeaderboardUpdatedAt {
+                                        Text("UPDATED \(formattedUpdateTime(updatedAt))")
+                                            .font(.system(size: 9, weight: .bold))
+                                            .foregroundColor(.gray)
                                     }
+                                    
                                 } else {
                                     // Technical Mode: Show Global Label or nothing (clean look)
-                                    Text("NATIONAL RANKING")
-                                        .font(.system(size: 10, weight: .bold))
-                                        .tracking(2)
-                                        .foregroundColor(neonGreen.opacity(0.7))
-                                        .padding(.bottom, 8)
+                                    VStack(spacing: 4) {
+                                        Text("NATIONAL RANKING")
+                                            .font(.system(size: 10, weight: .bold))
+                                            .tracking(2)
+                                            .foregroundColor(neonGreen.opacity(0.7))
+                                        
+                                        if let updatedAt = rankingService.lastLeaderboardUpdatedAt {
+                                            Text("UPDATED \(formattedUpdateTime(updatedAt))")
+                                                .font(.system(size: 9, weight: .bold))
+                                                .foregroundColor(.gray)
+                                        }
+                                    }
+                                    .padding(.bottom, 8)
                                 }
                                 
                                 metricTabs
@@ -161,7 +158,7 @@ struct RankingView: View {
             if rankingMode == .technical && (selectedMetric == .runCount || selectedMetric == .distance) {
                  selectedMetric = .edge
             }
-            rankingService.fetchLeaderboard(cycle: selectedCycle, metric: selectedMetric, scope: selectedScope)
+            rankingService.fetchLeaderboard(cycle: selectedCycle, metric: selectedMetric, scope: selectedScope, resortKey: selectedResortKey)
         }
         .onChange(of: sessions) { _, newSessions in
             rankingService.recalculateStats(from: newSessions)
@@ -169,12 +166,12 @@ struct RankingView: View {
         // Filters Change Trigger
         .onChange(of: selectedCycle) { _, _ in fetch() }
         .onChange(of: selectedMetric) { _, _ in fetch() }
+        .onChange(of: selectedResort) { _, _ in fetch() }
         // .onChange(of: selectedScope) { _, _ in fetch() } // Removed
-        // .onChange(of: selectedResort) { ... } // Resort/Slope filtering not implemented in Firestore query yet
     }
     
     private func fetch() {
-        rankingService.fetchLeaderboard(cycle: selectedCycle, metric: selectedMetric, scope: selectedScope)
+        rankingService.fetchLeaderboard(cycle: selectedCycle, metric: selectedMetric, scope: selectedScope, resortKey: selectedResortKey)
     }
     
     // MARK: - Subviews
@@ -236,7 +233,6 @@ struct RankingView: View {
                     Button(action: {
                         withAnimation {
                             selectedResort = resort
-                            selectedSlope = "All Slopes" // Reset slope on resort change
                         }
                     }) {
                         Text(resort)
@@ -261,36 +257,6 @@ struct RankingView: View {
             .padding(.horizontal, 24)
         }
     }
-    
-    private var slopeFilterScroll: some View {
-        ScrollView(.horizontal, showsIndicators: false) {
-            HStack(spacing: 8) {
-                ForEach(availableSlopes, id: \.self) { slope in
-                    Button(action: {
-                        withAnimation { selectedSlope = slope }
-                    }) {
-                        Text(slope)
-                            .font(.system(size: 11, weight: .semibold))
-                            .padding(.horizontal, 12)
-                            .padding(.vertical, 6)
-                            .background(
-                                selectedSlope == slope ? neonGreen.opacity(0.2) : Color.white.opacity(0.05)
-                            )
-                            .foregroundColor(
-                                selectedSlope == slope ? neonGreen : .gray
-                            )
-                            .clipShape(Capsule())
-                            .overlay(
-                                Capsule()
-                                    .stroke(selectedSlope == slope ? neonGreen.opacity(0.5) : Color.white.opacity(0.1), lineWidth: 1)
-                            )
-                    }
-                }
-            }
-            .padding(.horizontal, 24)
-        }
-    }
-    
     private var modeSwitcher: some View {
         HStack(spacing: 0) {
             modeButton(title: "TECHNICAL", mode: .technical, icon: "flame.fill")
@@ -310,7 +276,6 @@ struct RankingView: View {
                 if mode == .technical {
                     selectedMetric = .edge
                     selectedResort = "전체" // Reset resort filter for technical
-                    selectedSlope = "All Slopes"
                 } else {
                     selectedMetric = .runCount
                 }
@@ -420,7 +385,7 @@ struct RankingView: View {
     
     private func podiumUser(rank: Int, entry: LeaderboardEntry, scale: CGFloat) -> some View {
         let color: Color = rank == 1 ? neonGreen : (rank == 2 ? .gray : Color(red: 205/255, green: 127/255, blue: 50/255))
-        let valueStr = formattedValue(entry.value, metric: selectedMetric)
+        let valueStr = formattedLeaderboardValue(entry.value, metric: selectedMetric)
         
         return VStack(spacing: 8) {
             Text(rank == 1 ? "CHAMPION" : "RANK \(rank)")
@@ -528,7 +493,7 @@ struct RankingView: View {
             Spacer()
             
             VStack(alignment: .trailing, spacing: 0) {
-                Text(formattedValueOnly(entry.value, metric: entry.metric))
+                Text(formattedLeaderboardValueOnly(entry.value, metric: entry.metric))
                     .font(.system(size: 18, weight: .bold, design: .monospaced))
                     .foregroundColor(.white)
                 Text(entry.metric.unit)
@@ -585,7 +550,7 @@ struct RankingView: View {
             
             VStack(alignment: .trailing, spacing: 0) {
                 // Real Data Integration from Service
-                let myValue = rankingService.myProfile.getValue(for: selectedMetric, cycle: selectedCycle)
+                let myValue = rankingService.myProfile.getValue(for: selectedMetric, cycle: selectedCycle, resortKey: selectedResortKey)
                 
                 Text(formattedValueOnly(myValue, metric: selectedMetric))
                     .font(.system(size: 24, weight: .heavy, design: .monospaced))
@@ -611,7 +576,19 @@ struct RankingView: View {
         .shadow(color: .black.opacity(0.5), radius: 10, y: 5)
     }
     
+    private var selectedResortKey: String? {
+        rankingService.resortKey(forDisplayName: selectedResort)
+    }
+    
     // MARK: - Format Helpers
+    
+    private func formattedUpdateTime(_ date: Date) -> String {
+        let formatter = DateFormatter()
+        formatter.locale = Locale(identifier: "ko_KR")
+        formatter.timeZone = TimeZone(identifier: "Asia/Seoul")
+        formatter.dateFormat = "MM/dd HH:mm"
+        return formatter.string(from: date)
+    }
     
     private func formattedValue(_ value: Double, metric: RankingMetric) -> String {
         let valStr = formattedValueOnly(value, metric: metric)
@@ -624,6 +601,21 @@ struct RankingView: View {
             return "\(Int(value))"
         case .distance:
             return String(format: "%.1f", value)
+        }
+    }
+    
+    private func formattedLeaderboardValue(_ value: Double, metric: RankingMetric) -> String {
+        let valStr = formattedLeaderboardValueOnly(value, metric: metric)
+        return "\(valStr) \(metric.unit)"
+    }
+    
+    private func formattedLeaderboardValueOnly(_ value: Double, metric: RankingMetric) -> String {
+        switch metric {
+        case .runCount, .edge, .flow:
+            return "\(Int(value))"
+        case .distance:
+            // 리더보드 값은 서버에 미터로 저장됨
+            return String(format: "%.1f", value / 1000.0)
         }
     }
     

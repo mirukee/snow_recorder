@@ -15,243 +15,273 @@ struct ProfileView: View {
     let surfaceDark = Color(red: 18/255, green: 18/255, blue: 18/255)
     
     var body: some View {
-        ZStack {
-            // [Background] Pattern
-            Color.black.ignoresSafeArea()
-            VStack {
-                // 상단 그리드 패턴 (이미지 대용)
-               GridPattern()
-                    .stroke(Color.white.opacity(0.05), lineWidth: 1)
-                    .frame(height: 300)
-                    .mask(LinearGradient(colors: [.black, .clear], startPoint: .top, endPoint: .bottom))
-                Spacer()
-            }
-            .ignoresSafeArea()
-            
-            ScrollView {
-                VStack(spacing: 24) {
-                    // [Header]
-                    HStack {
-                        // Avatar
-                        ZStack(alignment: .bottomTrailing) {
-                            Circle()
-                                .fill(Color.gray)
-                                .frame(width: 48, height: 48)
-                                .overlay(Circle().stroke(Color.white.opacity(0.2), lineWidth: 1))
-                            
-                            // Level Badge
-                            Text("LV.\(viewModel.userProfile.level)")
-                                .font(.system(size: 8, weight: .bold))
-                                .foregroundColor(.black)
-                                .padding(.horizontal, 6)
-                                .padding(.vertical, 2)
-                                .background(neonGreen)
-                                .clipShape(Capsule())
-                                .offset(x: 4, y: 4)
-                        }
-                        
-                        VStack(alignment: .leading, spacing: 2) {
-                            Text(viewModel.userProfile.nickname)
-                                .font(.system(size: 16, weight: .bold))
-                                .foregroundColor(.white)
-                            Text("Online")
-                                .font(.caption)
-                                .foregroundColor(.gray)
-                        }
-                        
-                        Spacer()
-                        
-                        // Settings Button
-                        Button(action: { showSettings = true }) {
-                            Circle()
-                                .fill(surfaceDark)
-                                .frame(width: 40, height: 40)
-                                .overlay(
-                                    Image(systemName: "gearshape.fill")
-                                        .foregroundColor(.white)
-                                )
-                                .overlay(Circle().stroke(Color.white.opacity(0.1), lineWidth: 1))
-                        }
-                    }
-                    .sheet(isPresented: $showSettings) {
-                        SettingsView(isRankingEnabled: $rankingService.isRankingEnabled)
-                    }
-                    .padding(.horizontal, 24)
-                    .padding(.top, 20)
-                    
-                    // [Hero Status Card] Dynamic Tier
-                    ZStack {
-                        RoundedRectangle(cornerRadius: 24)
-                            .fill(surfaceDark)
-                            .overlay(
-                                RoundedRectangle(cornerRadius: 24)
-                                    .stroke(
-                                        LinearGradient(colors: [neonGreen.opacity(0.5), .clear], startPoint: .topLeading, endPoint: .bottomTrailing),
-                                        lineWidth: 1
-                                    )
-                            )
-                            .shadow(color: neonGreen.opacity(0.1), radius: 20, x: 0, y: 0)
-                        
-                        // Decor
-                        VStack {
-                            HStack { Spacer(); Circle().fill(neonGreen.opacity(0.1)).frame(width: 100, height: 100).blur(radius: 30) }
-                            Spacer()
-                            HStack { Circle().fill(Color.blue.opacity(0.1)).frame(width: 80, height: 80).blur(radius: 20); Spacer() }
-                        }
-                        
-                        VStack(alignment: .leading, spacing: 4) {
-                            HStack(alignment: .top) {
-                                VStack(alignment: .leading, spacing: 0) {
-                                    Text(viewModel.userProfile.tier.rawValue.uppercased())
-                                        .font(.system(size: 32, weight: .black))
-                                        .italic()
-                                        .foregroundColor(.white)
-                                    Text("TIER")
-                                        .font(.system(size: 32, weight: .black))
-                                        .italic()
-                                        .foregroundColor(neonGreen)
-                                }
-                                Spacer()
-                                Image(systemName: "trophy.fill")
-                                    .font(.title)
-                                    .foregroundColor(neonGreen)
-                            }
-                            
-                            Text("TOP \(String(format: "%.1f", viewModel.userProfile.tier.topPercent))% OF RIDERS")
-                                .font(.caption)
-                                .fontWeight(.bold)
-                                .foregroundColor(.gray)
-                                .padding(.bottom, 12)
-                            
-                            Divider().background(Color.white.opacity(0.1))
-                            
-                            HStack {
-                                VStack(alignment: .leading) {
-                                    Text("SEASON ENDS")
-                                        .font(.system(size: 10, weight: .bold))
-                                        .foregroundColor(.gray)
-                                    Text(remainingDays(to: viewModel.userProfile.tier.seasonEndDate))
-                                        .font(.system(size: 14, weight: .bold))
-                                        .foregroundColor(.white)
-                                }
-                                Spacer()
-                                Button(action: {}) {
-                                    Text("VIEW BENEFITS")
-                                        .font(.system(size: 10, weight: .bold))
-                                        .foregroundColor(.white)
-                                        .padding(.horizontal, 16)
-                                        .padding(.vertical, 8)
-                                        .background(Color.white.opacity(0.05))
-                                        .clipShape(Capsule())
-                                        .overlay(Capsule().stroke(Color.white.opacity(0.1), lineWidth: 1))
-                                }
-                            }
-                            .padding(.top, 12)
-                        }
-                        .padding(24)
-                    }
-                    .frame(height: 220)
-                    .padding(.horizontal, 24)
-                    
-                    // [XP Progress]
-                    VStack(spacing: 8) {
+        NavigationStack {
+            ZStack {
+                // [Background] Pattern
+                Color.black.ignoresSafeArea()
+                VStack {
+                    // 상단 그리드 패턴 (이미지 대용)
+                   GridPattern()
+                        .stroke(Color.white.opacity(0.05), lineWidth: 1)
+                        .frame(height: 300)
+                        .mask(LinearGradient(colors: [.black, .clear], startPoint: .top, endPoint: .bottom))
+                    Spacer()
+                }
+                .ignoresSafeArea()
+                
+                ScrollView {
+                    VStack(spacing: 24) {
+                        // [Header]
                         HStack {
-                            Text("LEVEL PROGRESS")
-                                .font(.system(size: 12, weight: .bold))
-                                .tracking(1)
-                                .foregroundColor(.gray)
-                            Spacer()
-                            HStack(spacing: 0) {
-                                Text("\(viewModel.userProfile.currentXP)")
-                                    .foregroundColor(neonGreen)
-                                Text(" / 3,000 XP") // Max XP는 임시 고정
+                            // Avatar
+                            ZStack(alignment: .bottomTrailing) {
+                                Circle()
+                                    .fill(Color.gray)
+                                    .frame(width: 48, height: 48)
+                                    .overlay(Circle().stroke(Color.white.opacity(0.2), lineWidth: 1))
+                                
+                                // Level Badge
+                                Text("LV.\(viewModel.userProfile.level)")
+                                    .font(.system(size: 8, weight: .bold))
+                                    .foregroundColor(.black)
+                                    .padding(.horizontal, 6)
+                                    .padding(.vertical, 2)
+                                    .background(neonGreen)
+                                    .clipShape(Capsule())
+                                    .offset(x: 4, y: 4)
+                            }
+                            
+                            VStack(alignment: .leading, spacing: 2) {
+                                Text(viewModel.userProfile.nickname)
+                                    .font(.system(size: 16, weight: .bold))
+                                    .foregroundColor(.white)
+                                Text("Online")
+                                    .font(.caption)
                                     .foregroundColor(.gray)
                             }
-                            .font(.system(size: 12, weight: .bold))
-                        }
-                        
-                        // Progress Bar
-                        GeometryReader { geo in
-                            ZStack(alignment: .leading) {
-                                Capsule().fill(surfaceDark)
-                                Capsule().fill(neonGreen)
-                                    .frame(width: geo.size.width * (Double(viewModel.userProfile.currentXP) / 3000.0)) // Progress 계산
-                                    .shadow(color: neonGreen.opacity(0.5), radius: 5)
-                            }
-                        }
-                        .frame(height: 12)
-                        
-                        Text("\(3000 - viewModel.userProfile.currentXP) XP to Level \(viewModel.userProfile.level + 1)")
-                            .font(.system(size: 10))
-                            .foregroundColor(.gray)
-                            .frame(maxWidth: .infinity, alignment: .trailing)
-                    }
-                    .padding(.horizontal, 24)
-                    
-                    // [Stats Grid]
-                    HStack(spacing: 12) {
-                        ProfileStatBox(icon: "globe", title: "GLOBAL RANK", value: "#\(viewModel.userProfile.stats.globalRanking)", subValue: "", neonGreen: neonGreen)
-                        ProfileStatBox(icon: "figure.snowboarding", title: "TOTAL DIST", value: "\(Int(viewModel.userProfile.stats.totalDistance))", subValue: "km", neonGreen: neonGreen)
-                        ProfileStatBox(icon: "speedometer", title: "MAX SPEED", value: "\(Int(viewModel.userProfile.stats.maxSpeed))", subValue: "km/h", neonGreen: neonGreen)
-                    }
-                    .padding(.horizontal, 24)
-                    
-                    // [Badges]
-                    VStack(alignment: .leading, spacing: 16) {
-                        HStack {
-                            Text("RECENT BADGES")
-                                .font(.system(size: 12, weight: .bold))
-                                .tracking(1)
-                                .foregroundColor(.gray)
+                            
                             Spacer()
-                            Button(action: { showBadgeList = true }) {
-                                Text("View All")
-                                    .font(.system(size: 12, weight: .bold))
-                                    .foregroundColor(neonGreen)
+                            
+                            // Settings Button
+                            Button(action: { showSettings = true }) {
+                                Circle()
+                                    .fill(surfaceDark)
+                                    .frame(width: 40, height: 40)
+                                    .overlay(
+                                        Image(systemName: "gearshape.fill")
+                                            .foregroundColor(.white)
+                                    )
+                                    .overlay(Circle().stroke(Color.white.opacity(0.1), lineWidth: 1))
                             }
+                        }
+                        .sheet(isPresented: $showSettings) {
+                            SettingsView(isRankingEnabled: $rankingService.isRankingEnabled)
                         }
                         .padding(.horizontal, 24)
+                        .padding(.top, 20)
                         
-                        ScrollView(.horizontal, showsIndicators: false) {
-                            HStack(spacing: 20) {
-                                Spacer().frame(width: 4) // Left Padding
-                                
-                                ForEach(viewModel.userProfile.badges.prefix(5)) { badge in // Show only first 5 recent
-                                    HexBadge(
-                                        icon: badge.iconName,
-                                        title: badge.title,
-                                        color: badge.isEarned ? neonGreen : .gray,
-                                        isLocked: !badge.isEarned,
-                                        neonGreen: neonGreen
-                                    )
+                        // [Hero Status Card] Dynamic Tier
+                        ZStack {
+                            RoundedRectangle(cornerRadius: 24)
+                                .fill(surfaceDark)
+                                .overlay(
+                                    RoundedRectangle(cornerRadius: 24)
+                                        .stroke(
+                                            LinearGradient(colors: [neonGreen.opacity(0.5), .clear], startPoint: .topLeading, endPoint: .bottomTrailing),
+                                            lineWidth: 1
+                                        )
+                                )
+                                .shadow(color: neonGreen.opacity(0.1), radius: 20, x: 0, y: 0)
+                            
+                            // Decor
+                            VStack {
+                                HStack { Spacer(); Circle().fill(neonGreen.opacity(0.1)).frame(width: 100, height: 100).blur(radius: 30) }
+                                Spacer()
+                                HStack { Circle().fill(Color.blue.opacity(0.1)).frame(width: 80, height: 80).blur(radius: 20); Spacer() }
+                            }
+                            
+                            VStack(alignment: .leading, spacing: 4) {
+                                HStack(alignment: .top) {
+                                    VStack(alignment: .leading, spacing: 0) {
+                                        Text(viewModel.userProfile.tier.rawValue.uppercased())
+                                            .font(.system(size: 32, weight: .black))
+                                            .italic()
+                                            .foregroundColor(.white)
+                                        Text("TIER")
+                                            .font(.system(size: 32, weight: .black))
+                                            .italic()
+                                            .foregroundColor(neonGreen)
+                                    }
+                                    Spacer()
+                                    Image(systemName: "trophy.fill")
+                                        .font(.title)
+                                        .foregroundColor(neonGreen)
                                 }
                                 
-                                Spacer().frame(width: 4) // Right Padding
+                                Text("TOP \(String(format: "%.1f", viewModel.userProfile.tier.topPercent))% OF RIDERS")
+                                    .font(.caption)
+                                    .fontWeight(.bold)
+                                    .foregroundColor(.gray)
+                                    .padding(.bottom, 12)
+                                
+                                Divider().background(Color.white.opacity(0.1))
+                                
+                                HStack {
+                                    VStack(alignment: .leading) {
+                                        Text("SEASON ENDS")
+                                            .font(.system(size: 10, weight: .bold))
+                                            .foregroundColor(.gray)
+                                        Text(remainingDays(to: viewModel.userProfile.tier.seasonEndDate))
+                                            .font(.system(size: 14, weight: .bold))
+                                            .foregroundColor(.white)
+                                    }
+                                    Spacer()
+                                    Button(action: {}) {
+                                        Text("VIEW BENEFITS")
+                                            .font(.system(size: 10, weight: .bold))
+                                            .foregroundColor(.white)
+                                            .padding(.horizontal, 16)
+                                            .padding(.vertical, 8)
+                                            .background(Color.white.opacity(0.05))
+                                            .clipShape(Capsule())
+                                            .overlay(Capsule().stroke(Color.white.opacity(0.1), lineWidth: 1))
+                                    }
+                                }
+                                .padding(.top, 12)
                             }
+                            .padding(24)
                         }
-                    }
-                    .sheet(isPresented: $showBadgeList) {
-                        BadgeListView(badges: viewModel.userProfile.badges)
-                    }
-                    
-                    // [Leaderboard] (Mini)
-                    VStack(spacing: 16) {
-                         HStack {
-                            Text("TOP SQUAD")
+                        .frame(height: 220)
+                        .padding(.horizontal, 24)
+                        
+                        // [XP Progress]
+                        VStack(spacing: 8) {
+                            HStack {
+                                Text("LEVEL PROGRESS")
+                                    .font(.system(size: 12, weight: .bold))
+                                    .tracking(1)
+                                    .foregroundColor(.gray)
+                                Spacer()
+                                HStack(spacing: 0) {
+                                    Text("\(viewModel.userProfile.currentXP)")
+                                        .foregroundColor(neonGreen)
+                                    Text(" / 3,000 XP") // Max XP는 임시 고정
+                                        .foregroundColor(.gray)
+                                }
                                 .font(.system(size: 12, weight: .bold))
-                                .tracking(1)
+                            }
+                            
+                            // Progress Bar
+                            GeometryReader { geo in
+                                ZStack(alignment: .leading) {
+                                    Capsule().fill(surfaceDark)
+                                    Capsule().fill(neonGreen)
+                                        .frame(width: geo.size.width * (Double(viewModel.userProfile.currentXP) / 3000.0)) // Progress 계산
+                                        .shadow(color: neonGreen.opacity(0.5), radius: 5)
+                                }
+                            }
+                            .frame(height: 12)
+                            
+                            Text("\(3000 - viewModel.userProfile.currentXP) XP to Level \(viewModel.userProfile.level + 1)")
+                                .font(.system(size: 10))
                                 .foregroundColor(.gray)
-                            Spacer()
+                                .frame(maxWidth: .infinity, alignment: .trailing)
                         }
                         .padding(.horizontal, 24)
                         
-                        VStack(spacing: 12) {
-                            LeaderboardRow(rank: 1, name: "Snow_Bunny", level: 28, xp: "3,200", neonGreen: neonGreen)
-                            LeaderboardRow(rank: 2, name: viewModel.userProfile.nickname, level: viewModel.userProfile.level, xp: "\(viewModel.userProfile.currentXP)", isMe: true, neonGreen: neonGreen)
-                            LeaderboardRow(rank: 3, name: "IceCold", level: 22, xp: "2,150", neonGreen: neonGreen)
+                        // [Stats Grid]
+                        HStack(spacing: 12) {
+                            ProfileStatBox(icon: "globe", title: "GLOBAL RANK", value: "#\(viewModel.userProfile.stats.globalRanking)", subValue: "", neonGreen: neonGreen)
+                            ProfileStatBox(icon: "figure.snowboarding", title: "TOTAL DIST", value: "\(Int(viewModel.userProfile.stats.totalDistance))", subValue: "km", neonGreen: neonGreen)
+                            ProfileStatBox(icon: "speedometer", title: "MAX SPEED", value: "\(Int(viewModel.userProfile.stats.maxSpeed))", subValue: "km/h", neonGreen: neonGreen)
                         }
+                        .padding(.horizontal, 24)
+                        
+                        // [Personal Stats]
+                        VStack(spacing: 12) {
+                            HStack {
+                                Text("PERSONAL STATS")
+                                    .font(.system(size: 12, weight: .bold))
+                                    .tracking(1)
+                                    .foregroundColor(.gray)
+                                Spacer()
+                                NavigationLink(destination: PersonalStatsDetailView()) {
+                                    Text("DETAIL")
+                                        .font(.system(size: 11, weight: .bold))
+                                        .foregroundColor(neonGreen)
+                                }
+                                .buttonStyle(.plain)
+                            }
+                            .padding(.horizontal, 24)
+                            
+                            LazyVGrid(columns: [GridItem(.flexible()), GridItem(.flexible())], spacing: 12) {
+                                PersonalStatCard(title: "TOTAL RUNS", value: "\(viewModel.userProfile.stats.totalRuns)", unit: "RUNS", neonGreen: neonGreen)
+                                PersonalStatCard(title: "TOTAL DROP", value: formattedMeters(viewModel.userProfile.stats.totalVerticalDrop), unit: "m", neonGreen: neonGreen)
+                                PersonalStatCard(title: "TOTAL TIME", value: formattedDurationHours(viewModel.userProfile.stats.totalDuration), unit: "hrs", neonGreen: neonGreen)
+                                PersonalStatCard(title: "AVG SPEED", value: formattedAverageSpeed(viewModel.userProfile.stats), unit: "km/h", neonGreen: neonGreen)
+                            }
+                            .padding(.horizontal, 24)
+                        }
+                        
+                        // [Badges]
+                        VStack(alignment: .leading, spacing: 16) {
+                            HStack {
+                                Text("RECENT BADGES")
+                                    .font(.system(size: 12, weight: .bold))
+                                    .tracking(1)
+                                    .foregroundColor(.gray)
+                                Spacer()
+                                Button(action: { showBadgeList = true }) {
+                                    Text("View All")
+                                        .font(.system(size: 12, weight: .bold))
+                                        .foregroundColor(neonGreen)
+                                }
+                            }
+                            .padding(.horizontal, 24)
+                            
+                            ScrollView(.horizontal, showsIndicators: false) {
+                                HStack(spacing: 20) {
+                                    Spacer().frame(width: 4) // Left Padding
+                                    
+                                    ForEach(viewModel.userProfile.badges.prefix(5)) { badge in // Show only first 5 recent
+                                        HexBadge(
+                                            icon: badge.iconName,
+                                            title: badge.title,
+                                            color: badge.isEarned ? neonGreen : .gray,
+                                            isLocked: !badge.isEarned,
+                                            neonGreen: neonGreen
+                                        )
+                                    }
+                                    
+                                    Spacer().frame(width: 4) // Right Padding
+                                }
+                            }
+                        }
+                        .sheet(isPresented: $showBadgeList) {
+                            BadgeListView(badges: viewModel.userProfile.badges)
+                        }
+                        
+                        // [Leaderboard] (Mini)
+                        VStack(spacing: 16) {
+                             HStack {
+                                Text("TOP SQUAD")
+                                    .font(.system(size: 12, weight: .bold))
+                                    .tracking(1)
+                                    .foregroundColor(.gray)
+                                Spacer()
+                            }
+                            .padding(.horizontal, 24)
+                            
+                            VStack(spacing: 12) {
+                                LeaderboardRow(rank: 1, name: "Snow_Bunny", level: 28, xp: "3,200", neonGreen: neonGreen)
+                                LeaderboardRow(rank: 2, name: viewModel.userProfile.nickname, level: viewModel.userProfile.level, xp: "\(viewModel.userProfile.currentXP)", isMe: true, neonGreen: neonGreen)
+                                LeaderboardRow(rank: 3, name: "IceCold", level: 22, xp: "2,150", neonGreen: neonGreen)
+                            }
+                        }
+                    }
                 }
             }
+            .toolbar(.hidden, for: .navigationBar)
         }
         .onAppear {
             // 뷰가 나타날 때 통계 업데이트
@@ -261,7 +291,6 @@ struct ProfileView: View {
             // 데이터가 변경(추가/삭제)될 때 통계 업데이트
             viewModel.updateStats(using: newSessions)
         }
-    }
     }
     
     // 남은 기간 계산 헬퍼
@@ -273,6 +302,25 @@ struct ProfileView: View {
         } else {
             return "Ended"
         }
+    }
+    
+    // 거리/시간 포맷 헬퍼
+    private func formattedMeters(_ meters: Double) -> String {
+        let value = Int(meters.rounded())
+        return "\(value)"
+    }
+    
+    private func formattedDurationHours(_ seconds: TimeInterval) -> String {
+        guard seconds > 0 else { return "0.0" }
+        let hours = seconds / 3600.0
+        return String(format: "%.1f", hours)
+    }
+    
+    private func formattedAverageSpeed(_ stats: UserStats) -> String {
+        guard stats.totalDuration > 0 else { return "0.0" }
+        let hours = stats.totalDuration / 3600.0
+        let avg = stats.totalDistance / hours
+        return String(format: "%.1f", avg)
     }
 }
 
@@ -394,6 +442,43 @@ struct LeaderboardRow: View {
         .overlay(
             RoundedRectangle(cornerRadius: 12)
                 .stroke(isMe ? neonGreen.opacity(0.3) : Color.white.opacity(0.05), lineWidth: 1)
+        )
+    }
+}
+
+struct PersonalStatCard: View {
+    let title: String
+    let value: String
+    let unit: String
+    let neonGreen: Color
+    
+    var body: some View {
+        VStack(alignment: .leading, spacing: 6) {
+            Text(title)
+                .font(.system(size: 9, weight: .bold))
+                .foregroundColor(.gray)
+            
+            HStack(alignment: .bottom, spacing: 4) {
+                Text(value)
+                    .font(.system(size: 18, weight: .bold))
+                    .foregroundColor(.white)
+                Text(unit)
+                    .font(.system(size: 10))
+                    .foregroundColor(.gray)
+                    .padding(.bottom, 2)
+            }
+            
+            Rectangle()
+                .fill(neonGreen.opacity(0.4))
+                .frame(height: 1)
+        }
+        .padding(12)
+        .frame(maxWidth: .infinity, alignment: .leading)
+        .background(Color(red: 18/255, green: 18/255, blue: 18/255))
+        .cornerRadius(12)
+        .overlay(
+            RoundedRectangle(cornerRadius: 12)
+                .stroke(Color.white.opacity(0.05), lineWidth: 1)
         )
     }
 }

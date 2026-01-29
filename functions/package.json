@@ -1,0 +1,12 @@
+{
+  "name": "snow-recorder-functions",
+  "description": "Snow Record leaderboard batch jobs",
+  "main": "index.js",
+  "engines": {
+    "node": "20"
+  },
+  "dependencies": {
+    "firebase-admin": "^12.7.0",
+    "firebase-functions": "^5.1.0"
+  }
+}

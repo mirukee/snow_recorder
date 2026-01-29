@@ -1,6 +1,12 @@
 rules_version = '2';
 service cloud.firestore {
   match /databases/{database}/documents {
+    // 리더보드는 공개 읽기 (배치는 서버에서만 쓰기)
+    match /leaderboards/{document=**} {
+      allow read: if true;
+      allow write: if false;
+    }
+    
     match /{document=**} {
       // 인증된 사용자만 읽기/쓰기 허용
       allow read, write: if request.auth != null;

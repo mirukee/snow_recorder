@@ -1,6 +1,7 @@
 import Foundation
 import Combine
 import SwiftData
+import CoreLocation
 
 /// 녹화 상태 및 타이머를 관리하는 매니저 클래스 (Singleton)
 class RecordManager: ObservableObject {
@@ -241,7 +242,9 @@ class RecordManager: ObservableObject {
                 let routeTimestamps = locationManager.routeTimestamps
                 let routeAltitudes = locationManager.routeAltitudes
                 let routeDistances = locationManager.routeDistances
+                let routeStates = locationManager.routeStates
                 let runStartIndices = locationManager.runStartIndices
+                let detectedResortName = self.detectResortName(from: routeCoordinates)
                 
                 // 분석 리포트 데이터
                 let ridingAnalysis = RidingMetricAnalyzer.shared.exportAnalysisData()
@@ -277,13 +280,14 @@ class RecordManager: ObservableObject {
                     runCount: runCount,
                     slopeName: currentSlope,
                     riddenSlopes: sessionSlopes,
-                    locationName: "HIGH1 RESORT",
+                    locationName: detectedResortName ?? "HIGH1 RESORT",
                     countryCode: resolveCountryCode(from: routeCoordinates),
                     routeCoordinates: routeCoordinates,
                     routeSpeeds: routeSpeeds,
                     routeTimestamps: routeTimestamps,
                     routeAltitudes: routeAltitudes,
                     routeDistances: routeDistances,
+                    routeStates: routeStates,
                     runStartIndices: runStartIndices,
                     timelineEvents: locationManager.timelineEvents,
                     edgeScore: bestEdgeScore,
@@ -313,12 +317,15 @@ class RecordManager: ObservableObject {
                     
                     // 바리오 로그 내보내기 (파일 저장)
                     _ = locationManager.exportBarometerLog(startTime: start, endTime: end)
+                    
+                    // 랭킹 업로드 판단을 위해 전체 세션 재계산
+                    let descriptor = FetchDescriptor<RunSession>(sortBy: [SortDescriptor(\.startTime, order: .reverse)])
+                    if let allSessions = try? context.fetch(descriptor) {
+                        RankingService.shared.processRun(latestSession: session, sessions: allSessions)
+                    }
                 } catch {
                     print("❌ RunSession 저장 실패: \(error)")
                 }
-                
-                // 3. 랭킹 시스템 연동 (자동 업로드)
-                RankingService.shared.processRun(session: session)
                 
                 // 2. 상태 초기화
                 self.isRecording = false
@@ -332,6 +339,88 @@ class RecordManager: ObservableObject {
                 self.currentRunMetrics = []
             }
         }
+    }
+    
+    // MARK: - 리조트 감지 (세션 종료 시점)
+    
+    private struct ResortBoundingBox {
+        let key: String
+        let displayName: String
+        let minLat: Double
+        let maxLat: Double
+        let minLon: Double
+        let maxLon: Double
+        
+        func contains(_ coordinate: CLLocationCoordinate2D) -> Bool {
+            return coordinate.latitude >= minLat &&
+                coordinate.latitude <= maxLat &&
+                coordinate.longitude >= minLon &&
+                coordinate.longitude <= maxLon
+        }
+    }
+    
+    private func detectResortName(from routeCoordinates: [[Double]]) -> String? {
+        let samples = sampleRouteCoordinates(routeCoordinates, maxSamples: 200)
+        guard !samples.isEmpty else { return nil }
+        
+        // 1) 하이원: 슬로프 폴리곤 기반 판정 (정확도 우선)
+        if samples.contains(where: { isInHigh1Slope($0) }) {
+            return "하이원 리조트"
+        }
+        
+        // 2) 기타 리조트: 대략 바운딩 박스 기반 (향후 폴리곤으로 고도화)
+        let resortBoxes: [ResortBoundingBox] = [
+            // 좌표는 대략 범위 (운영 중 보정 필요)
+            .init(key: "yongpyong", displayName: "용평 리조트",
+                  minLat: 37.60, maxLat: 37.69, minLon: 128.62, maxLon: 128.76),
+            .init(key: "phoenix", displayName: "휘닉스 파크",
+                  minLat: 37.54, maxLat: 37.63, minLon: 128.28, maxLon: 128.42),
+            .init(key: "vivaldi", displayName: "비발디 파크",
+                  minLat: 37.58, maxLat: 37.70, minLon: 127.62, maxLon: 127.78)
+        ]
+        
+        var hitCounts: [String: Int] = [:]
+        var displayNameByKey: [String: String] = [:]
+        for box in resortBoxes {
+            displayNameByKey[box.key] = box.displayName
+        }
+        
+        for coord in samples {
+            for box in resortBoxes where box.contains(coord) {
+                hitCounts[box.key, default: 0] += 1
+            }
+        }
+        
+        guard let best = hitCounts.max(by: { $0.value < $1.value }),
+              best.value >= 3,
+              let displayName = displayNameByKey[best.key] else {
+            return nil
+        }
+        return displayName
+    }
+    
+    private func sampleRouteCoordinates(_ routeCoordinates: [[Double]], maxSamples: Int) -> [CLLocationCoordinate2D] {
+        guard !routeCoordinates.isEmpty else { return [] }
+        let strideValue = max(1, routeCoordinates.count / maxSamples)
+        var samples: [CLLocationCoordinate2D] = []
+        samples.reserveCapacity(min(routeCoordinates.count, maxSamples))
+        
+        for index in stride(from: 0, to: routeCoordinates.count, by: strideValue) {
+            let coord = routeCoordinates[index]
+            guard coord.count >= 2 else { continue }
+            samples.append(CLLocationCoordinate2D(latitude: coord[0], longitude: coord[1]))
+        }
+        return samples
+    }
+    
+    private func isInHigh1Slope(_ coordinate: CLLocationCoordinate2D) -> Bool {
+        // 하이원 슬로프 폴리곤 포함 여부 체크
+        for slope in SlopeDatabase.shared.slopes {
+            if slope.contains(coordinate) {
+                return true
+            }
+        }
+        return false
     }
     
     /// 경과 시간을 "MM:ss" 또는 "HH:mm:ss" 형식의 문자열로 반환
