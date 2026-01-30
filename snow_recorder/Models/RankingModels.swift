@@ -127,8 +127,14 @@ struct LeaderboardEntry: Identifiable {
     let rank: Int
     let userName: String
     let crewName: String?
-    let mainResort: String
+    let mainResort: String // "All" or name
     let slopeName: String? // Optional specific slope
     let value: Double // Display value (runs, km, or score)
     let metric: RankingMetric
+    
+    // Extended Stats (Optional, fetched separately)
+    var seasonDistance: Double?
+    var seasonRunCount: Int?
+    var bestEdge: Int?
+    var bestFlow: Int?
 }

@@ -30,6 +30,7 @@ struct RankingView: View {
     let resorts = ["전체", "하이원", "용평", "휘닉스", "비발디"]
     
     @State private var showingScoreInfo = false
+    @State private var selectedUser: LeaderboardEntry? = nil
     
     var body: some View {
         ZStack {
@@ -178,6 +179,9 @@ struct RankingView: View {
         .onChange(of: selectedCycle) { _, _ in fetch() }
         .onChange(of: selectedMetric) { _, _ in fetch() }
         .onChange(of: selectedResort) { _, _ in fetch() }
+        .sheet(item: $selectedUser) { user in
+            OtherUserProfileView(user: user)
+        }
         // .onChange(of: selectedScope) { _, _ in fetch() } // Removed
     }
     
@@ -207,10 +211,33 @@ struct RankingView: View {
                 
                 Spacer()
                 
-                Button(action: {}) {
-                    Image(systemName: "gearshape") // Moved actual logic to ProfileView
-                        .foregroundColor(.white.opacity(0.3)) // Dimmed here
-                        .font(.system(size: 20, weight: .semibold))
+                HStack(spacing: 12) {
+                    let remainingSync = rankingService.manualSyncRemainingCount()
+                    let canSync = remainingSync > 0
+                    Text("\(remainingSync)/2")
+                        .font(.system(size: 10, weight: .bold, design: .monospaced))
+                        .foregroundColor(canSync ? neonGreen.opacity(0.9) : .gray)
+                    Button(action: {
+                        guard canSync else { return }
+                        _ = rankingService.manualSync(
+                            sessions: sessions,
+                            cycle: selectedCycle,
+                            metric: selectedMetric,
+                            scope: selectedScope,
+                            resortKey: selectedResortKey
+                        )
+                    }) {
+                        Image(systemName: "arrow.triangle.2.circlepath")
+                            .foregroundColor(canSync ? neonGreen : .gray)
+                            .font(.system(size: 20, weight: .bold))
+                    }
+                    .opacity(canSync ? 1 : 0.4)
+                    
+                    Button(action: {}) {
+                        Image(systemName: "gearshape") // Moved actual logic to ProfileView
+                            .foregroundColor(.white.opacity(0.3)) // Dimmed here
+                            .font(.system(size: 20, weight: .semibold))
+                    }
                 }
             }
             
@@ -397,71 +424,74 @@ struct RankingView: View {
     
     private func podiumUser(rank: Int, entry: LeaderboardEntry, scale: CGFloat) -> some View {
         let color: Color = rank == 1 ? neonGreen : (rank == 2 ? .gray : Color(red: 205/255, green: 127/255, blue: 50/255))
-        let valueStr = formattedLeaderboardValue(entry.value, metric: selectedMetric)
+        let valueStr = formattedLeaderboardValue(entry.value, metric: entry.metric)
         
-        return VStack(spacing: 8) {
-            Text(rank == 1 ? "CHAMPION" : "RANK \(rank)")
-                .font(.system(size: 10, weight: .black))
-                .tracking(2)
-                .foregroundColor(color)
-            
-            ZStack {
-                if rank == 1 {
-                    Image(systemName: "crown.fill")
-                        .font(.system(size: 28))
+        return Button(action: { selectedUser = entry }) {
+            VStack(spacing: 8) {
+                Text(rank == 1 ? "CHAMPION" : "RANK \(rank)")
+                    .font(.system(size: 10, weight: .black))
+                    .tracking(2)
+                    .foregroundColor(color)
+                
+                ZStack {
+                    if rank == 1 {
+                        Image(systemName: "crown.fill")
+                            .font(.system(size: 28))
+                            .foregroundColor(color)
+                            .offset(y: -54)
+                            .shadow(color: color, radius: 10)
+                    }
+                    
+                    Circle()
+                        .stroke(color, lineWidth: 3)
+                        .background(Circle().fill(Color.black))
+                        .frame(width: 80, height: 80)
+                        .shadow(color: color.opacity(0.5), radius: 15)
+                    
+                    // Placeholder Avatar
+                    Image(systemName: "person.fill")
+                        .font(.system(size: 30))
                         .foregroundColor(color)
-                        .offset(y: -54)
-                        .shadow(color: color, radius: 10)
+                    
+                    if rank == 1 {
+                         Capsule()
+                            .fill(color)
+                            .frame(width: 60, height: 20)
+                            .overlay(
+                                Text("RANK 01")
+                                    .font(.system(size: 9, weight: .black))
+                                    .foregroundColor(.black)
+                            )
+                            .offset(y: 36)
+                    } else {
+                        Capsule()
+                            .fill(color)
+                            .frame(width: 50, height: 18)
+                            .overlay(
+                                Text(rank == 2 ? "SILVER" : "BRONZE")
+                                    .font(.system(size: 8, weight: .black))
+                                    .foregroundColor(.black)
+                            )
+                            .offset(y: 36)
+                            .rotationEffect(.degrees(-10))
+                    }
                 }
+                .scaleEffect(scale)
+                .padding(.bottom, 12)
                 
-                Circle()
-                    .stroke(color, lineWidth: 3)
-                    .background(Circle().fill(Color.black))
-                    .frame(width: 80, height: 80)
-                    .shadow(color: color.opacity(0.5), radius: 15)
-                
-                // Placeholder Avatar
-                Image(systemName: "person.fill")
-                    .font(.system(size: 30))
-                    .foregroundColor(color)
-                
-                if rank == 1 {
-                     Capsule()
-                        .fill(color)
-                        .frame(width: 60, height: 20)
-                        .overlay(
-                            Text("RANK 01")
-                                .font(.system(size: 9, weight: .black))
-                                .foregroundColor(.black)
-                        )
-                        .offset(y: 36)
-                } else {
-                    Capsule()
-                        .fill(color)
-                        .frame(width: 50, height: 18)
-                        .overlay(
-                            Text(rank == 2 ? "SILVER" : "BRONZE")
-                                .font(.system(size: 8, weight: .black))
-                                .foregroundColor(.black)
-                        )
-                        .offset(y: 36)
-                        .rotationEffect(.degrees(-10))
+                VStack(spacing: 2) {
+                    Text(entry.userName)
+                        .font(.system(size: 14, weight: .bold))
+                        .foregroundColor(.white)
+                        .lineLimit(1)
+                    Text(valueStr)
+                        .font(.system(size: 12, weight: .bold, design: .monospaced))
+                        .foregroundColor(color)
                 }
             }
-            .scaleEffect(scale)
-            .padding(.bottom, 12)
-            
-            VStack(spacing: 2) {
-                Text(entry.userName)
-                    .font(.system(size: 14, weight: .bold))
-                    .foregroundColor(.white)
-                    .lineLimit(1)
-                Text(valueStr)
-                    .font(.system(size: 12, weight: .bold, design: .monospaced))
-                    .foregroundColor(color)
-            }
+            .frame(width: 100)
         }
-        .frame(width: 100)
+        .buttonStyle(.plain)
     }
     
     private var rankingListView: some View {
@@ -477,50 +507,54 @@ struct RankingView: View {
     }
     
     private func rankingRow(rank: Int, entry: LeaderboardEntry) -> some View {
-        HStack(spacing: 16) {
-            Text(String(format: "%02d", rank))
-                .font(.system(size: 16, weight: .bold, design: .monospaced))
-                .foregroundColor(.gray)
-                .frame(width: 30)
-            
-            Circle()
-                .fill(Color.white.opacity(0.1))
-                .frame(width: 40, height: 40)
-                .overlay(
-                    Image(systemName: "person.fill")
+        Button(action: { selectedUser = entry }) {
+            HStack(spacing: 16) {
+                Text(String(format: "%02d", rank))
+                    .font(.system(size: 16, weight: .bold, design: .monospaced))
+                    .foregroundColor(.gray)
+                    .frame(width: 30)
+                
+                Circle()
+                    .fill(Color.white.opacity(0.1))
+                    .frame(width: 40, height: 40)
+                    .overlay(
+                        Image(systemName: "person.fill")
+                            .foregroundColor(.gray)
+                    )
+                
+                VStack(alignment: .leading, spacing: 2) {
+                    Text(entry.userName)
+                        .font(.system(size: 14, weight: .bold))
+                        .foregroundColor(.white)
+                    if let crew = entry.crewName {
+                        Text("Crew: \(crew)")
+                            .font(.system(size: 10, weight: .bold))
+                            .foregroundColor(.gray)
+                    }
+                }
+                
+                Spacer()
+                
+                VStack(alignment: .trailing, spacing: 0) {
+                    Text(formattedLeaderboardValueOnly(entry.value, metric: entry.metric))
+                        .font(.system(size: 18, weight: .bold, design: .monospaced))
+                        .foregroundColor(.white)
+                    Text(entry.metric.unit)
+                        .font(.system(size: 9, weight: .bold))
                         .foregroundColor(.gray)
-                )
-            
-            VStack(alignment: .leading, spacing: 2) {
-                Text(entry.userName)
-                    .font(.system(size: 14, weight: .bold))
-                    .foregroundColor(.white)
-                if let crew = entry.crewName {
-                    Text("Crew: \(crew)")
-                        .font(.system(size: 10, weight: .bold))
-                        .foregroundColor(.gray)
+                        .textCase(.uppercase)
                 }
             }
-            
-            Spacer()
-            
-            VStack(alignment: .trailing, spacing: 0) {
-                Text(formattedLeaderboardValueOnly(entry.value, metric: entry.metric))
-                    .font(.system(size: 18, weight: .bold, design: .monospaced))
-                    .foregroundColor(.white)
-                Text(entry.metric.unit)
-                    .font(.system(size: 9, weight: .bold))
-                    .foregroundColor(.gray)
-                    .textCase(.uppercase)
-            }
+            .padding(12)
+            .background(glassDark)
+            .cornerRadius(16)
+            .overlay(
+                RoundedRectangle(cornerRadius: 16)
+                    .stroke(Color.white.opacity(0.1), lineWidth: 1)
+            )
+            .contentShape(Rectangle())
         }
-        .padding(12)
-        .background(glassDark)
-        .cornerRadius(16)
-        .overlay(
-            RoundedRectangle(cornerRadius: 16)
-                .stroke(Color.white.opacity(0.1), lineWidth: 1)
-        )
+        .buttonStyle(.plain)
     }
     
     private var stickyHeader: some View {
@@ -562,9 +596,13 @@ struct RankingView: View {
             
             VStack(alignment: .trailing, spacing: 0) {
                 // Real Data Integration from Service
+                let myEntry = rankingService.leaderboard.first { $0.userId == rankingService.myProfile.userId }
                 let myValue = rankingService.myProfile.getValue(for: selectedMetric, cycle: selectedCycle, resortKey: selectedResortKey)
-                
-                Text(formattedValueOnly(myValue, metric: selectedMetric))
+                let displayValue = myEntry != nil
+                    ? formattedLeaderboardValueOnly(myEntry?.value ?? 0, metric: myEntry?.metric ?? selectedMetric)
+                    : formattedValueOnly(myValue, metric: selectedMetric)
+
+                Text(displayValue)
                     .font(.system(size: 24, weight: .heavy, design: .monospaced))
                     .foregroundColor(neonGreen)
                     .shadow(color: neonGreen.opacity(0.3), radius: 5)

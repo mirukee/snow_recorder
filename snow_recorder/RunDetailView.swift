@@ -23,6 +23,7 @@ struct RunDetailView: View {
     @State private var showFullScreenMap = false
     @State private var isTimelineExpanded = false
     @State private var selectedRunMetric: RunSession.RunMetric?
+    @State private var selectedRunAnalysis: RunSession.RunMetric?
     
     private let timelineNoiseThreshold: TimeInterval = 40.0
     private let timelineNoiseVerticalDrop: Double = 30.0
@@ -125,6 +126,54 @@ struct RunDetailView: View {
                 startTime: session.startTime,
                 sessionDuration: session.duration,
                 region: mapRegion
+            )
+        }
+        .fullScreenCover(item: $selectedRunMetric) { metric in
+            RunMetricDetailSheet(
+                metric: metric,
+                accentColor: primaryColor,
+                speedSeries: runSpeedSeries(for: metric),
+                locationName: session.locationName
+            )
+        }
+        .fullScreenCover(item: $selectedRunAnalysis) { metric in
+            // Filter points for this run
+            let indices = session.routeTimestamps.indices.filter {
+                let t = session.routeTimestamps[$0]
+                return t >= metric.startTime.timeIntervalSince1970 && t <= metric.endTime.timeIntervalSince1970
+            }
+            
+            let points = indices.compactMap { i -> CLLocation? in
+                guard i < session.routeCoordinates.count,
+                      i < session.routeSpeeds.count,
+                      session.routeCoordinates[i].count >= 2 else { return nil }
+                
+                let coord = CLLocationCoordinate2D(latitude: session.routeCoordinates[i][0], longitude: session.routeCoordinates[i][1])
+                let speed = session.routeSpeeds[i] / 3.6 // km/h to m/s
+                let timestamp = Date(timeIntervalSince1970: session.routeTimestamps[i])
+                
+                return CLLocation(
+                    coordinate: coord,
+                    altitude: 0,
+                    horizontalAccuracy: 0,
+                    verticalAccuracy: 0,
+                    course: 0,
+                    speed: speed,
+                    timestamp: timestamp
+                )
+            }.sorted { $0.timestamp < $1.timestamp }
+            
+            let gPoints = (session.gForceSamples ?? []).compactMap { sample -> RunAnalysisView.Point? in
+                let absoluteDate = session.startTime.addingTimeInterval(sample.t)
+                guard absoluteDate >= metric.startTime && absoluteDate <= metric.endTime else { return nil }
+                return RunAnalysisView.Point(x: absoluteDate, y: sample.gMax)
+            }
+            
+            RunAnalysisView(
+                runMetric: metric, 
+                locationName: session.locationName, 
+                telemetryPoints: points,
+                gForcePoints: gPoints
             )
         }
         .fullScreenCover(item: $selectedRunMetric) { metric in
@@ -337,11 +386,15 @@ struct RunDetailView: View {
             .grayscale(0.8)
             .overlay(
                 Group {
-                    if !session.routeSpeeds.isEmpty {
-                        GradientRouteOverlay(coordinates: routeCoordinates, speeds: session.routeSpeeds, maxSpeed: session.maxSpeed)
-                    } else {
-                        MapRouteOverlay(coordinates: routeCoordinates, color: primaryColor)
-                    }
+                    // if !session.routeSpeeds.isEmpty {
+                    //    GradientRouteOverlay(coordinates: routeCoordinates, speeds: session.routeSpeeds, maxSpeed: session.maxSpeed)
+                    // } else {
+                        MapRouteOverlay(
+                            coordinates: routeCoordinates,
+                            color: primaryColor,
+                            routeStates: session.routeStates
+                        )
+                    // }
                 }
             )
             
@@ -490,6 +543,27 @@ struct RunDetailView: View {
             HStack(spacing: 8) {
                 runMetricChip(label: "EDGE", value: "\(metric.edgeScore)")
                 runMetricChip(label: "FLOW", value: "\(metric.flowScore)")
+                
+                Spacer()
+                
+                Button(action: { selectedRunAnalysis = metric }) {
+                    HStack(spacing: 4) {
+                        Image(systemName: "waveform.path.ecg")
+                            .font(.system(size: 10))
+                        Text("ANALYSIS")
+                            .font(.system(size: 10, weight: .bold))
+                            .tracking(1)
+                    }
+                    .foregroundColor(primaryColor)
+                    .padding(.horizontal, 8)
+                    .padding(.vertical, 5)
+                    .background(primaryColor.opacity(0.1))
+                    .cornerRadius(8)
+                    .overlay(
+                        RoundedRectangle(cornerRadius: 8)
+                            .stroke(primaryColor.opacity(0.3), lineWidth: 1)
+                    )
+                }
             }
         }
         .padding(14)
@@ -2017,7 +2091,7 @@ struct FullScreenMapView: View {
                                     switch event.type {
                                     case .riding: return neonGreen
                                     case .lift: return Color.white.opacity(0.3)
-                                    case .rest, .pause: return Color(white: 0.15)
+                                    case .rest, .pause: return Color.clear
                                     case .unknown: return Color.red
                                     }
                                 }()
@@ -2127,6 +2201,7 @@ struct FullScreenMapView: View {
             }
             
             HStack(spacing: 16) {
+                /*
                 VStack(alignment: .leading, spacing: 4) {
                     Text("ALT")
                         .font(.system(size: 9, weight: .bold))
@@ -2135,6 +2210,7 @@ struct FullScreenMapView: View {
                         .font(.system(size: 13, weight: .bold))
                         .foregroundColor(.white)
                 }
+                */
                 
                 VStack(alignment: .leading, spacing: 4) {
                     Text("DIST")

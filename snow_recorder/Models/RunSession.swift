@@ -66,6 +66,8 @@ final class RunSession {
         var edgeScore: Int
         var flowScore: Int
         var maxGForce: Double
+        var leftTurnRatio: Double
+        var rightTurnRatio: Double
         var scoreEvents: [ScoreEvent]?
         var edgeBreakdown: EdgeScoreBreakdown?
         var flowBreakdown: FlowScoreBreakdown?
@@ -84,6 +86,8 @@ final class RunSession {
             case edgeScore
             case flowScore
             case maxGForce
+            case leftTurnRatio
+            case rightTurnRatio
             case scoreEvents
             case edgeBreakdown
             case flowBreakdown
@@ -103,6 +107,8 @@ final class RunSession {
             edgeScore: Int,
             flowScore: Int,
             maxGForce: Double,
+            leftTurnRatio: Double = 0.5,
+            rightTurnRatio: Double = 0.5,
             scoreEvents: [ScoreEvent]? = nil,
             edgeBreakdown: EdgeScoreBreakdown? = nil,
             flowBreakdown: FlowScoreBreakdown? = nil
@@ -120,6 +126,8 @@ final class RunSession {
             self.edgeScore = edgeScore
             self.flowScore = flowScore
             self.maxGForce = maxGForce
+            self.leftTurnRatio = leftTurnRatio
+            self.rightTurnRatio = rightTurnRatio
             self.scoreEvents = scoreEvents
             self.edgeBreakdown = edgeBreakdown
             self.flowBreakdown = flowBreakdown
@@ -140,6 +148,8 @@ final class RunSession {
             edgeScore = try container.decode(Int.self, forKey: .edgeScore)
             flowScore = try container.decode(Int.self, forKey: .flowScore)
             maxGForce = try container.decode(Double.self, forKey: .maxGForce)
+            leftTurnRatio = try container.decodeIfPresent(Double.self, forKey: .leftTurnRatio) ?? 0.5
+            rightTurnRatio = try container.decodeIfPresent(Double.self, forKey: .rightTurnRatio) ?? 0.5
             scoreEvents = try container.decodeIfPresent([ScoreEvent].self, forKey: .scoreEvents)
             edgeBreakdown = try container.decodeIfPresent(EdgeScoreBreakdown.self, forKey: .edgeBreakdown)
             flowBreakdown = try container.decodeIfPresent(FlowScoreBreakdown.self, forKey: .flowBreakdown)
@@ -160,6 +170,8 @@ final class RunSession {
             try container.encode(edgeScore, forKey: .edgeScore)
             try container.encode(flowScore, forKey: .flowScore)
             try container.encode(maxGForce, forKey: .maxGForce)
+            try container.encode(leftTurnRatio, forKey: .leftTurnRatio)
+            try container.encode(rightTurnRatio, forKey: .rightTurnRatio)
             try container.encodeIfPresent(scoreEvents, forKey: .scoreEvents)
             try container.encodeIfPresent(edgeBreakdown, forKey: .edgeBreakdown)
             try container.encodeIfPresent(flowBreakdown, forKey: .flowBreakdown)

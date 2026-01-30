@@ -129,6 +129,12 @@ class RecordManager: ObservableObject {
                 tempRunMetrics[existingIndex].flowScore = updatedFlowScore
                 didUpdate = true
             }
+            if tempRunMetrics[existingIndex].leftTurnRatio != result.leftTurnRatio
+                || tempRunMetrics[existingIndex].rightTurnRatio != result.rightTurnRatio {
+                tempRunMetrics[existingIndex].leftTurnRatio = result.leftTurnRatio
+                tempRunMetrics[existingIndex].rightTurnRatio = result.rightTurnRatio
+                didUpdate = true
+            }
             // 거리/버티컬이 0으로 저장됐던 경우 보정
             if tempRunMetrics[existingIndex].distance <= metricReadyEpsilon, runDistance > metricReadyEpsilon {
                 tempRunMetrics[existingIndex].distance = runDistance
@@ -167,6 +173,8 @@ class RecordManager: ObservableObject {
             edgeScore: result.edgeScore,
             flowScore: flowScore ?? 0,
             maxGForce: result.maxGForce,
+            leftTurnRatio: result.leftTurnRatio,
+            rightTurnRatio: result.rightTurnRatio,
             scoreEvents: scoreEvents.isEmpty ? nil : scoreEvents,
             edgeBreakdown: edgeBreakdown,
             flowBreakdown: flowBreakdown

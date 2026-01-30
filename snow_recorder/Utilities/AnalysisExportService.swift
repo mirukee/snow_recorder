@@ -33,6 +33,8 @@ struct AnalysisExportPayload: Codable {
         var edgeScore: Int
         var flowScore: Int
         var maxGForce: Double
+        var leftTurnRatio: Double
+        var rightTurnRatio: Double
     }
     
     var meta: Meta
@@ -68,7 +70,7 @@ enum AnalysisExportService {
         
         let payload = AnalysisExportPayload(
             meta: .init(
-                schemaVersion: 3,
+                schemaVersion: 4,
                 appVersion: appVersion(),
                 exportTime: Date()
             ),
@@ -88,7 +90,9 @@ enum AnalysisExportService {
             scores: .init(
                 edgeScore: session.edgeScore,
                 flowScore: session.flowScore,
-                maxGForce: session.maxGForce
+                maxGForce: session.maxGForce,
+                leftTurnRatio: computeTurnRatio(from: session.runMetrics).left,
+                rightTurnRatio: computeTurnRatio(from: session.runMetrics).right
             ),
             flowBreakdown: session.flowBreakdown ?? .empty,
             edgeBreakdown: session.edgeBreakdown ?? .empty,
@@ -117,6 +121,22 @@ enum AnalysisExportService {
         let fileURL = makeExportURL(startTime: session.startTime)
         try data.write(to: fileURL, options: .atomic)
         return fileURL
+    }
+    
+    private static func computeTurnRatio(from runMetrics: [RunSession.RunMetric]) -> (left: Double, right: Double) {
+        let totalDuration = runMetrics.reduce(0.0) { $0 + $1.duration }
+        guard totalDuration > 0 else {
+            return (0.5, 0.5)
+        }
+        
+        let weightedLeft = runMetrics.reduce(0.0) { $0 + ($1.duration * $1.leftTurnRatio) }
+        let weightedRight = runMetrics.reduce(0.0) { $0 + ($1.duration * $1.rightTurnRatio) }
+        let sum = weightedLeft + weightedRight
+        guard sum > 0 else {
+            return (0.5, 0.5)
+        }
+        
+        return (weightedLeft / sum, weightedRight / sum)
     }
     
     private static func appVersion() -> String {

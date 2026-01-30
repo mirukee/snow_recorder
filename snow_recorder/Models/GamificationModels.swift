@@ -120,6 +120,8 @@ struct UserStats: Codable {
     var totalVerticalDrop: Double = 0.0 // meters
     var totalDuration: TimeInterval = 0 // seconds
     var globalRanking: Int = 0
+    var highestEdgeScore: Int = 0
+    var highestFlowScore: Int = 0
 }
 
 struct GamificationProfile {
@@ -129,4 +131,7 @@ struct GamificationProfile {
     var stats: UserStats
     var badges: [Badge]
     var nickname: String
+    var bio: String?
+    var instagramId: String?
+    var avatarUrl: String?
 }

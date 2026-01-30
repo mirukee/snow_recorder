@@ -12,4 +12,7 @@ struct RidingSessionResult {
     var averageSpeed: Double
     /// 세션 최고 속도 (m/s 단위)
     var maxSpeed: Double
+    /// 좌/우 턴 비율 (0.0~1.0)
+    var leftTurnRatio: Double
+    var rightTurnRatio: Double
 }

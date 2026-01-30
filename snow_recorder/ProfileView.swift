@@ -8,6 +8,7 @@ struct ProfileView: View {
     @StateObject private var viewModel = MyPageViewModel()
     @State private var showSettings = false
     @State private var showBadgeList = false
+    @State private var showMyCard = false
     @ObservedObject private var rankingService = RankingService.shared
     @StateObject private var authManager = AuthenticationManager.shared
     
@@ -65,6 +66,10 @@ struct ProfileView: View {
                                     Text("Online")
                                         .font(.caption)
                                         .foregroundColor(.gray)
+                                }
+                                .contentShape(Rectangle()) // Make tappable area larger
+                                .onTapGesture {
+                                    showMyCard = true
                                 }
                                 
                                 Spacer()
@@ -315,6 +320,9 @@ struct ProfileView: View {
         .onChange(of: isActive) { _, active in
             guard active else { return }
             viewModel.updateStats(using: sessions)
+        }
+        .fullScreenCover(isPresented: $showMyCard) {
+            MyPlayerCardView()
         }
     }
     

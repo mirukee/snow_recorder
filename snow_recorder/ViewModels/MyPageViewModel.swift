@@ -30,5 +30,7 @@ class MyPageViewModel: ObservableObject {
     func updateStats(using sessions: [RunSession]) {
         // 서비스에 위임 (디바운스/백그라운드)
         gamificationService.scheduleUpdateProfile(from: sessions)
+        // 랭킹 서비스에도 로컬 데이터 동기화 요청 (리더보드 기준 통계 재계산 및 업로드)
+        RankingService.shared.syncAfterLocalChange(sessions: sessions)
     }
 }

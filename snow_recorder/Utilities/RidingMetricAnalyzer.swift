@@ -42,6 +42,8 @@ final class RidingMetricAnalyzer: ObservableObject {
     private var speedSampleCount: Int = 0
     private var maxSpeed: Double = 0.0 // 추가: 이번 런의 최고 속도
     private var latestEdgeResult: RidingSessionResult?
+    private var leftTurnDuration: TimeInterval = 0.0
+    private var rightTurnDuration: TimeInterval = 0.0
     
     // MARK: - 분석 리포트 (1초 샘플)
     private let sampleInterval: TimeInterval = 1.0
@@ -69,6 +71,7 @@ final class RidingMetricAnalyzer: ObservableObject {
     private let proCapScore: Double = 940.0             // (was 94.0) 1000점 만점 스케일
     private let tier2RatioThreshold: Double = 0.25
     private let tier2RatioScoreCap: Double = 790.0      // (was 79.0) 1000점 만점 스케일
+    private let turnRateThreshold: Double = 0.35        // rad/s, 좌/우 턴 판정 임계값
     
     // MARK: - 초기화
     init() {
@@ -220,6 +223,8 @@ final class RidingMetricAnalyzer: ObservableObject {
             return
         }
         
+        updateTurnBalance(deltaTime: deltaTime, motion: motion)
+        
         // 델타 체크: 범프(충격) 프레임 제거
         if let prev = previousRawMagnitude, abs(rawMagnitude - prev) >= bumpDeltaThresholdG {
             previousRawMagnitude = rawMagnitude
@@ -306,6 +311,8 @@ final class RidingMetricAnalyzer: ObservableObject {
         speedSum = 0.0
         speedSampleCount = 0
         maxSpeed = 0.0
+        leftTurnDuration = 0.0
+        rightTurnDuration = 0.0
     }
     
     private func finalizeSessionResult() {
@@ -324,7 +331,9 @@ final class RidingMetricAnalyzer: ObservableObject {
             flowScore: flowScore,
             maxGForce: maxGForce,
             averageSpeed: averageSpeed,
-            maxSpeed: maxSpeed
+            maxSpeed: maxSpeed,
+            leftTurnRatio: turnRatio().left,
+            rightTurnRatio: turnRatio().right
         )
         
         latestEdgeResult = result
@@ -435,6 +444,30 @@ final class RidingMetricAnalyzer: ObservableObject {
             return tier1Weight
         }
         return 0.0
+    }
+    
+    private func updateTurnBalance(deltaTime: TimeInterval, motion: CMDeviceMotion) {
+        let rotationRate = motion.rotationRate
+        let matrix = motion.attitude.rotationMatrix
+        
+        // reference -> device 회전 행렬이므로, device -> reference 변환을 위해 전치 행렬 사용
+        let refZ = (matrix.m13 * rotationRate.x) + (matrix.m23 * rotationRate.y) + (matrix.m33 * rotationRate.z)
+        let absRate = abs(refZ)
+        guard absRate >= turnRateThreshold else { return }
+        
+        if refZ > 0 {
+            leftTurnDuration += deltaTime
+        } else {
+            rightTurnDuration += deltaTime
+        }
+    }
+    
+    private func turnRatio() -> (left: Double, right: Double) {
+        let total = leftTurnDuration + rightTurnDuration
+        guard total > 0 else {
+            return (0.5, 0.5)
+        }
+        return (leftTurnDuration / total, rightTurnDuration / total)
     }
     
     /// FlowScoreAnalyzer가 계산한 점수를 반영 (런 단위 동기화)

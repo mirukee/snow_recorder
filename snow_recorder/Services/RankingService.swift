@@ -35,12 +35,24 @@ class RankingService: ObservableObject {
     private let statsQueue = DispatchQueue(label: "com.snowrecord.ranking.stats", qos: .userInitiated)
     private var pendingRecalcWorkItem: DispatchWorkItem?
     private let recalcDebounce: TimeInterval = 0.35
+    private let leaderboardRefreshInterval: TimeInterval = 3600
+    private let leaderboardRetryBaseDelay: TimeInterval = 15
+    private let leaderboardMaxRetryCount: Int = 2
+    private let manualSyncDailyLimit: Int = 2
+    private let manualSyncRetryDelay: TimeInterval = 10
+    private let manualSyncFetchDelay: TimeInterval = 1.0
+    private let manualSyncCountKey = "ranking_manual_sync_count"
+    private let manualSyncDayKey = "ranking_manual_sync_day"
+    private let uploadSnapshotKey = "ranking_last_upload_snapshot"
     
     // 마지막으로 요청한 리더보드 필터(업로드 직후 동일 조건으로 갱신하기 위함)
     private var lastFetchCycle: RankingCycle?
     private var lastFetchMetric: RankingMetric?
     private var lastFetchScope: RankingScope?
     private var lastFetchResortKey: String?
+    private var lastLeaderboardBoardId: String?
+    private var boardFetchStates: [String: BoardFetchState] = [:]
+    private var boardLeaderboardCache: [String: BoardLeaderboardCache] = [:]
     
     // 리조트 키 매핑 (표시명 -> 저장 키)
     private let resortKeyByDisplayName: [String: String] = [
@@ -67,6 +79,18 @@ class RankingService: ObservableObject {
         let isDomestic: Bool
     }
     
+    private struct BoardFetchState {
+        var lastAcceptedUpdatedAt: Date?
+        var nextAllowedFetchAt: Date?
+        var retryCount: Int = 0
+        var pendingRetry: DispatchWorkItem?
+    }
+    
+    private struct BoardLeaderboardCache {
+        var entries: [LeaderboardEntry]
+        var updatedAt: Date?
+    }
+    
     // MARK: - Public Methods
     
     /// 런 세션 종료 시 호출되어 랭킹 데이터를 업데이트하고 서버에 업로드
@@ -81,15 +105,45 @@ class RankingService: ObservableObject {
     }
     
     /// 리더보드 데이터 요청 (Async)
-    func fetchLeaderboard(cycle: RankingCycle, metric: RankingMetric, scope: RankingScope, resortKey: String? = nil) {
+    func fetchLeaderboard(
+        cycle: RankingCycle,
+        metric: RankingMetric,
+        scope: RankingScope,
+        resortKey: String? = nil,
+        force: Bool = false,
+        completion: ((Bool) -> Void)? = nil
+    ) {
         // Scope가 Crew인 경우 등 별도 로직 필요하지만 일단 Individual 기준 구현
+        let boardId = makeBoardId(cycle: cycle, metric: metric, resortKey: resortKey)
+        let now = Date()
+        if lastLeaderboardBoardId != boardId {
+            lastLeaderboardBoardId = boardId
+            if let cached = boardLeaderboardCache[boardId] {
+                DispatchQueue.main.async {
+                    self.leaderboard = cached.entries
+                    self.lastLeaderboardUpdatedAt = cached.updatedAt
+                    self.lastErrorMessage = nil
+                }
+            } else {
+                DispatchQueue.main.async {
+                    self.leaderboard = []
+                    self.lastErrorMessage = nil
+                }
+            }
+        }
+        if !force,
+           let nextAllowed = boardFetchStates[boardId]?.nextAllowedFetchAt, now < nextAllowed,
+           boardLeaderboardCache[boardId]?.entries.isEmpty == false {
+            completion?(true)
+            return
+        }
+
         isLoadingLeaderboard = true
         lastFetchCycle = cycle
         lastFetchMetric = metric
         lastFetchScope = scope
         lastFetchResortKey = resortKey
         
-        let boardId = makeBoardId(cycle: cycle, metric: metric, resortKey: resortKey)
         let boardRef = db.collection("leaderboards").document(boardId)
         
         boardRef.getDocument { [weak self] boardDoc, error in
@@ -99,12 +153,40 @@ class RankingService: ObservableObject {
                 self.isLoadingLeaderboard = false
                 self.lastErrorMessage = "Fetch Error: \(error.localizedDescription)"
                 print("❌ Error fetching leaderboard meta: \(error)")
+                completion?(false)
                 return
             }
             
+            let fetchedUpdatedAt: Date?
             if let data = boardDoc?.data(),
                let timestamp = data["updatedAt"] as? Timestamp {
-                self.lastLeaderboardUpdatedAt = timestamp.dateValue()
+                fetchedUpdatedAt = timestamp.dateValue()
+            } else {
+                fetchedUpdatedAt = nil
+            }
+            
+            var state = self.boardFetchStates[boardId] ?? BoardFetchState()
+            if let fetchedUpdatedAt, let lastAccepted = state.lastAcceptedUpdatedAt, fetchedUpdatedAt <= lastAccepted {
+                self.isLoadingLeaderboard = false
+                self.scheduleLeaderboardRetry(
+                    boardId: boardId,
+                    cycle: cycle,
+                    metric: metric,
+                    scope: scope,
+                    resortKey: resortKey
+                )
+                completion?(false)
+                return
+            }
+            
+            if let fetchedUpdatedAt {
+                self.lastLeaderboardUpdatedAt = fetchedUpdatedAt
+                state.lastAcceptedUpdatedAt = fetchedUpdatedAt
+                state.nextAllowedFetchAt = self.nextAllowedFetchTime(from: fetchedUpdatedAt)
+                state.retryCount = 0
+                state.pendingRetry?.cancel()
+                state.pendingRetry = nil
+                self.boardFetchStates[boardId] = state
             }
             
             boardRef.collection("shards").document("page_1").getDocument { [weak self] shardDoc, shardError in
@@ -115,17 +197,19 @@ class RankingService: ObservableObject {
                     self.lastErrorMessage = "Fetch Error: \(shardError.localizedDescription)"
                     print("❌ Error fetching leaderboard shard: \(shardError)")
                     self.leaderboard = []
+                    completion?(false)
                     return
                 }
                 
                 guard let shardData = shardDoc?.data(),
                       let rawEntries = shardData["entries"] as? [[String: Any]] else {
                     self.leaderboard = []
+                    completion?(false)
                     return
                 }
                 
                 self.lastErrorMessage = nil
-                self.leaderboard = rawEntries.compactMap { raw in
+                let entries: [LeaderboardEntry] = rawEntries.compactMap { raw in
                     let userId = raw["uid"] as? String ?? "unknown"
                     let userName = raw["nickname"] as? String ?? "Unknown"
                     let rank = (raw["rank"] as? Int) ?? (raw["rank"] as? Double).map(Int.init) ?? 0
@@ -146,8 +230,105 @@ class RankingService: ObservableObject {
                         metric: metric
                     )
                 }
+                self.leaderboard = entries
+                self.boardLeaderboardCache[boardId] = BoardLeaderboardCache(entries: entries, updatedAt: fetchedUpdatedAt)
+                
+                if fetchedUpdatedAt == nil {
+                    var state = self.boardFetchStates[boardId] ?? BoardFetchState()
+                    state.nextAllowedFetchAt = Date().addingTimeInterval(self.leaderboardRefreshInterval)
+                    self.boardFetchStates[boardId] = state
+                }
+                completion?(true)
             }
         }
+    }
+    
+    // Fetch full profile details for a user
+    func fetchUserProfile(userId: String) async -> LeaderboardEntry? {
+        do {
+            let doc = try await db.collection("rankings").document(userId).getDocument()
+            guard let data = doc.data() else { return nil }
+
+            func numberValue(_ any: Any?) -> Double? {
+                if let number = any as? NSNumber { return number.doubleValue }
+                if let value = any as? Double { return value }
+                if let value = any as? Int { return Double(value) }
+                return nil
+            }
+            
+            let userName = data["nickname"] as? String ?? "Unknown"
+            // We construct a temporary entry with full stats
+            var entry = LeaderboardEntry(
+                userId: userId,
+                rank: 0, // Rank is context dependent, kept 0 or passed from view
+                userName: userName,
+                crewName: nil,
+                mainResort: "All",
+                slopeName: nil,
+                value: 0,
+                metric: .distance
+            )
+            
+            // Populate extended stats
+            entry.seasonDistance = numberValue(data["season_distance_m"]) ?? 0.0
+            entry.seasonRunCount = (data["season_runCount"] as? Int) ?? Int(numberValue(data["season_runCount"]) ?? 0)
+            let seasonEdge = numberValue(data["season_edge"]) ?? numberValue(data["weekly_edge"])
+            let seasonFlow = numberValue(data["season_flow"]) ?? numberValue(data["weekly_flow"])
+            entry.bestEdge = seasonEdge.map { Int($0.rounded()) }
+            entry.bestFlow = seasonFlow.map { Int($0.rounded()) }
+            
+            return entry
+        } catch {
+            print("❌ Error fetching user profile: \(error)")
+            return nil
+        }
+    }
+
+    func canManualSyncNow() -> Bool {
+        let dayKey = currentKSTDayKey()
+        let storedDay = userDefaults.string(forKey: manualSyncDayKey)
+        if storedDay != dayKey {
+            return true
+        }
+        let count = userDefaults.integer(forKey: manualSyncCountKey)
+        return count < manualSyncDailyLimit
+    }
+
+    func manualSyncRemainingCount() -> Int {
+        let dayKey = currentKSTDayKey()
+        let storedDay = userDefaults.string(forKey: manualSyncDayKey)
+        if storedDay != dayKey {
+            return manualSyncDailyLimit
+        }
+        let count = userDefaults.integer(forKey: manualSyncCountKey)
+        return max(0, manualSyncDailyLimit - count)
+    }
+
+    @discardableResult
+    func manualSync(
+        sessions: [RunSession],
+        cycle: RankingCycle,
+        metric: RankingMetric,
+        scope: RankingScope,
+        resortKey: String? = nil
+    ) -> Bool {
+        guard consumeManualSyncQuotaIfPossible() else { return false }
+        
+        statsQueue.async { [weak self] in
+            guard let self else { return }
+            self.recalculateStats(from: sessions, uploadPolicy: .smart)
+            DispatchQueue.main.asyncAfter(deadline: .now() + self.manualSyncFetchDelay) {
+                self.performManualFetch(
+                    cycle: cycle,
+                    metric: metric,
+                    scope: scope,
+                    resortKey: resortKey,
+                    retryRemaining: 1
+                )
+            }
+        }
+        
+        return true
     }
     
     /// 내 현재 순위를 문자열로 반환 (예: "RANK 1", "TOP 10%")
@@ -186,6 +367,7 @@ class RankingService: ObservableObject {
             scheduleRecalculateStats(from: snapshots, uploadPolicy: .none)
             clearProfileOnServer()
             clearLastUploadedTechnical()
+            clearLastUploadedSnapshot()
         }
     }
 
@@ -269,12 +451,18 @@ class RankingService: ObservableObject {
         DispatchQueue.main.async {
             self.myProfile = newProfile
             if uploadPolicy == .smart, !validSessions.isEmpty {
+                let uploadSnapshot = self.makeUploadSnapshot(from: newProfile)
+                guard self.hasProfileChange(uploadSnapshot) else {
+                    print("⏭️ 랭킹 업로드 스킵: 변경 없음")
+                    return
+                }
                 let technicalSnapshot = self.makeTechnicalSnapshot(from: newProfile)
                 let shouldUploadTechnical = self.hasTechnicalChange(technicalSnapshot)
                 self.uploadProfileToServer(
                     profile: newProfile,
                     includeTechnicalFields: shouldUploadTechnical,
-                    technicalSnapshot: shouldUploadTechnical ? technicalSnapshot : nil
+                    technicalSnapshot: shouldUploadTechnical ? technicalSnapshot : nil,
+                    uploadSnapshot: uploadSnapshot
                 )
             }
         }
@@ -327,7 +515,8 @@ class RankingService: ObservableObject {
     private func uploadProfileToServer(
         profile: RankingProfile,
         includeTechnicalFields: Bool,
-        technicalSnapshot: TechnicalSnapshot?
+        technicalSnapshot: TechnicalSnapshot?,
+        uploadSnapshot: UploadSnapshot
     ) {
         guard isRankingEnabled, !profile.userId.isEmpty else { return }
         
@@ -354,11 +543,15 @@ class RankingService: ObservableObject {
             "weekly_distance_m": profile.weeklyDistance
         ]
         
+        // Always upload technical stats for profile view
+        data["season_edge"] = profile.seasonBestEdge
+        data["season_flow"] = profile.seasonBestFlow
+        data["weekly_edge"] = profile.weeklyBestEdge
+        data["weekly_flow"] = profile.weeklyBestFlow
+        
         if includeTechnicalFields {
-            data["season_edge"] = profile.seasonBestEdge
-            data["season_flow"] = profile.seasonBestFlow
-            data["weekly_edge"] = profile.weeklyBestEdge
-            data["weekly_flow"] = profile.weeklyBestFlow
+            // Check logic kept for other technical fields if any, or remove if unused.
+            // For now, keys are moved out.
         }
         
         // 리조트별 마일리지 (미터 기준)
@@ -380,6 +573,7 @@ class RankingService: ObservableObject {
                     if let technicalSnapshot {
                         self?.saveLastUploadedTechnical(technicalSnapshot)
                     }
+                    self?.saveLastUploadedSnapshot(uploadSnapshot)
                     // 업로드 직후 현재 선택된 필터로 갱신 (잘못된 지표로 덮어쓰는 문제 방지)
                     if let cycle = self?.lastFetchCycle,
                        let metric = self?.lastFetchMetric,
@@ -427,6 +621,79 @@ class RankingService: ObservableObject {
         
         let scopeKey = resortKey?.isEmpty == false ? (resortKey ?? "all") : "all"
         return "\(cycleKey)_\(metricKey)_\(scopeKey)"
+    }
+
+    private func nextAllowedFetchTime(from updatedAt: Date) -> Date {
+        let components = kstCalendar.dateComponents([.year, .month, .day, .hour], from: updatedAt)
+        let base = kstCalendar.date(from: components) ?? updatedAt
+        return kstCalendar.date(byAdding: .hour, value: 1, to: base) ?? updatedAt.addingTimeInterval(leaderboardRefreshInterval)
+    }
+
+    private func scheduleLeaderboardRetry(
+        boardId: String,
+        cycle: RankingCycle,
+        metric: RankingMetric,
+        scope: RankingScope,
+        resortKey: String?
+    ) {
+        var state = boardFetchStates[boardId] ?? BoardFetchState()
+        guard state.retryCount < leaderboardMaxRetryCount else { return }
+        
+        state.pendingRetry?.cancel()
+        let delay = leaderboardRetryBaseDelay * pow(2.0, Double(state.retryCount))
+        state.retryCount += 1
+        state.nextAllowedFetchAt = Date().addingTimeInterval(delay)
+        
+        let workItem = DispatchWorkItem { [weak self] in
+            self?.fetchLeaderboard(cycle: cycle, metric: metric, scope: scope, resortKey: resortKey)
+        }
+        state.pendingRetry = workItem
+        boardFetchStates[boardId] = state
+        
+        DispatchQueue.main.asyncAfter(deadline: .now() + delay, execute: workItem)
+    }
+
+    private func performManualFetch(
+        cycle: RankingCycle,
+        metric: RankingMetric,
+        scope: RankingScope,
+        resortKey: String?,
+        retryRemaining: Int
+    ) {
+        fetchLeaderboard(cycle: cycle, metric: metric, scope: scope, resortKey: resortKey, force: true) { [weak self] success in
+            guard let self else { return }
+            guard !success, retryRemaining > 0 else { return }
+            DispatchQueue.main.asyncAfter(deadline: .now() + self.manualSyncRetryDelay) {
+                self.performManualFetch(
+                    cycle: cycle,
+                    metric: metric,
+                    scope: scope,
+                    resortKey: resortKey,
+                    retryRemaining: retryRemaining - 1
+                )
+            }
+        }
+    }
+
+    private func currentKSTDayKey() -> String {
+        let formatter = DateFormatter()
+        formatter.timeZone = kstTimeZone
+        formatter.locale = Locale(identifier: "ko_KR")
+        formatter.dateFormat = "yyyy-MM-dd"
+        return formatter.string(from: Date())
+    }
+
+    private func consumeManualSyncQuotaIfPossible() -> Bool {
+        let dayKey = currentKSTDayKey()
+        let storedDay = userDefaults.string(forKey: manualSyncDayKey)
+        var count = userDefaults.integer(forKey: manualSyncCountKey)
+        if storedDay != dayKey {
+            userDefaults.set(dayKey, forKey: manualSyncDayKey)
+            count = 0
+        }
+        guard count < manualSyncDailyLimit else { return false }
+        userDefaults.set(count + 1, forKey: manualSyncCountKey)
+        return true
     }
 
     // MARK: - 국내/시즌/주차 계산
@@ -561,6 +828,114 @@ class RankingService: ObservableObject {
         userDefaults.removeObject(forKey: TechnicalUploadKey.weeklyEdge)
         userDefaults.removeObject(forKey: TechnicalUploadKey.weeklyFlow)
     }
+
+    // MARK: - 업로드 스냅샷 비교 (변경 없음 업로드 방지)
+
+    private struct UploadSnapshot: Codable {
+        let schemaVersion: Int
+        let userName: String
+        let countryCode: String
+        let seasonId: String
+        let weeklyWeekId: String
+        let seasonRunCount: Int
+        let seasonDistance: Double
+        let seasonBestEdge: Double
+        let seasonBestFlow: Double
+        let seasonRunCountByResort: [String: Int]
+        let seasonDistanceByResort: [String: Double]
+        let weeklyRunCount: Int
+        let weeklyDistance: Double
+        let weeklyBestEdge: Double
+        let weeklyBestFlow: Double
+        let weeklyRunCountByResort: [String: Int]
+        let weeklyDistanceByResort: [String: Double]
+    }
+
+    private func makeUploadSnapshot(from profile: RankingProfile) -> UploadSnapshot {
+        return UploadSnapshot(
+            schemaVersion: 1,
+            userName: profile.userName,
+            countryCode: profile.countryCode,
+            seasonId: profile.seasonId,
+            weeklyWeekId: profile.weeklyWeekId,
+            seasonRunCount: profile.seasonRunCount,
+            seasonDistance: profile.seasonDistance,
+            seasonBestEdge: profile.seasonBestEdge,
+            seasonBestFlow: profile.seasonBestFlow,
+            seasonRunCountByResort: profile.seasonRunCountByResort,
+            seasonDistanceByResort: profile.seasonDistanceByResort,
+            weeklyRunCount: profile.weeklyRunCount,
+            weeklyDistance: profile.weeklyDistance,
+            weeklyBestEdge: profile.weeklyBestEdge,
+            weeklyBestFlow: profile.weeklyBestFlow,
+            weeklyRunCountByResort: profile.weeklyRunCountByResort,
+            weeklyDistanceByResort: profile.weeklyDistanceByResort
+        )
+    }
+
+    private func hasProfileChange(_ snapshot: UploadSnapshot) -> Bool {
+        guard let last = loadLastUploadedSnapshot() else {
+            return true
+        }
+        return !isSnapshotEqual(last, snapshot)
+    }
+
+    private func isSnapshotEqual(_ lhs: UploadSnapshot, _ rhs: UploadSnapshot) -> Bool {
+        let distanceEpsilon = 0.1
+        let scoreEpsilon = 0.0001
+
+        guard lhs.schemaVersion == rhs.schemaVersion else { return false }
+        guard lhs.userName == rhs.userName else { return false }
+        guard lhs.countryCode == rhs.countryCode else { return false }
+        guard lhs.seasonId == rhs.seasonId else { return false }
+        guard lhs.weeklyWeekId == rhs.weeklyWeekId else { return false }
+        guard lhs.seasonRunCount == rhs.seasonRunCount else { return false }
+        guard nearlyEqual(lhs.seasonDistance, rhs.seasonDistance, epsilon: distanceEpsilon) else { return false }
+        guard nearlyEqual(lhs.seasonBestEdge, rhs.seasonBestEdge, epsilon: scoreEpsilon) else { return false }
+        guard nearlyEqual(lhs.seasonBestFlow, rhs.seasonBestFlow, epsilon: scoreEpsilon) else { return false }
+        guard dictionariesEqual(lhs.seasonRunCountByResort, rhs.seasonRunCountByResort) else { return false }
+        guard dictionariesEqual(lhs.seasonDistanceByResort, rhs.seasonDistanceByResort, epsilon: distanceEpsilon) else { return false }
+        guard lhs.weeklyRunCount == rhs.weeklyRunCount else { return false }
+        guard nearlyEqual(lhs.weeklyDistance, rhs.weeklyDistance, epsilon: distanceEpsilon) else { return false }
+        guard nearlyEqual(lhs.weeklyBestEdge, rhs.weeklyBestEdge, epsilon: scoreEpsilon) else { return false }
+        guard nearlyEqual(lhs.weeklyBestFlow, rhs.weeklyBestFlow, epsilon: scoreEpsilon) else { return false }
+        guard dictionariesEqual(lhs.weeklyRunCountByResort, rhs.weeklyRunCountByResort) else { return false }
+        guard dictionariesEqual(lhs.weeklyDistanceByResort, rhs.weeklyDistanceByResort, epsilon: distanceEpsilon) else { return false }
+        return true
+    }
+
+    private func dictionariesEqual(_ lhs: [String: Int], _ rhs: [String: Int]) -> Bool {
+        guard lhs.count == rhs.count else { return false }
+        return lhs.allSatisfy { key, value in
+            rhs[key] == value
+        }
+    }
+
+    private func dictionariesEqual(_ lhs: [String: Double], _ rhs: [String: Double], epsilon: Double) -> Bool {
+        guard lhs.count == rhs.count else { return false }
+        return lhs.allSatisfy { key, value in
+            guard let other = rhs[key] else { return false }
+            return nearlyEqual(value, other, epsilon: epsilon)
+        }
+    }
+
+    private func nearlyEqual(_ lhs: Double, _ rhs: Double, epsilon: Double) -> Bool {
+        return abs(lhs - rhs) <= epsilon
+    }
+
+    private func loadLastUploadedSnapshot() -> UploadSnapshot? {
+        guard let data = userDefaults.data(forKey: uploadSnapshotKey) else { return nil }
+        return try? JSONDecoder().decode(UploadSnapshot.self, from: data)
+    }
+
+    private func saveLastUploadedSnapshot(_ snapshot: UploadSnapshot) {
+        guard let data = try? JSONEncoder().encode(snapshot) else { return }
+        userDefaults.set(data, forKey: uploadSnapshotKey)
+    }
+
+    private func clearLastUploadedSnapshot() {
+        userDefaults.removeObject(forKey: uploadSnapshotKey)
+    }
     
     // MARK: - 리조트 매핑/집계
     
@@ -654,6 +1029,7 @@ class RankingService: ObservableObject {
                 print("✅ Ranking Profile Deleted Successfully")
                 DispatchQueue.main.async {
                     self?.lastErrorMessage = nil
+                    self?.clearLastUploadedSnapshot()
                 }
             }
         }

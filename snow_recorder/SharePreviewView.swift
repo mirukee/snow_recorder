@@ -1,5 +1,6 @@
 import SwiftUI
 import PhotosUI
+import SwiftData
 
 struct SharePreviewView: View {
     @Environment(\.dismiss) var dismiss
@@ -98,18 +99,10 @@ struct SharePreviewView: View {
                 }
                 .allowsHitTesting(false)
                 
-                // Brand Watermark (Top Left)
-                if ![.explorer, .techSpec, .cover, .rewind, .frostGlass].contains(selectedLayout) {
-                    VStack {
-                        HStack {
-                            brandView
-                            Spacer()
-                        }
-                        .padding(.horizontal, 20)
-                        .padding(.top, 120)
-                        Spacer()
-                    }
-                    .allowsHitTesting(false)
+                // Brand Watermark (설정 기반)
+                if selectedLayout.getWatermarkConfig().show {
+                    watermarkOverlay(config: selectedLayout.getWatermarkConfig(), scaled: false)
+                        .allowsHitTesting(false)
                 }
                 
                 // Save Toast
@@ -223,6 +216,26 @@ struct SharePreviewView: View {
     }
     
     // MARK: - Enums
+    
+    /// 워터마크 위치 설정
+    enum WatermarkPosition {
+        case topLeft
+        case topRight
+        case bottomLeft
+        case bottomRight
+        case custom(x: CGFloat, y: CGFloat) // 0.0 ~ 1.0 비율
+    }
+    
+    /// 워터마크 설정 구조체 - 레이아웃별로 이 값을 수정하세요
+    struct WatermarkConfig {
+        let show: Bool              // 공통 워터마크 표시 여부
+        let position: WatermarkPosition
+        let opacity: CGFloat        // 0.0 ~ 1.0
+        
+        static let hidden = WatermarkConfig(show: false, position: .topLeft, opacity: 0)
+        static let defaultConfig = WatermarkConfig(show: true, position: .topLeft, opacity: 1.0)
+    }
+    
     enum ShareLayout: String, CaseIterable, Identifiable {
         case standard = "Standard"
         case photo = "Photo"
@@ -261,6 +274,36 @@ struct SharePreviewView: View {
             case .cover: return "magazine.fill"
             case .rewind: return "video.fill"
             case .frostGlass: return "square.on.square.fill"
+            }
+        }
+        
+        // MARK: - 워터마크 설정 (여기서 레이아웃별로 조절하세요!)
+        // MARK: - 워터마크 설정 (여기서 레이아웃별로 조절하세요!)
+        func getWatermarkConfig() -> WatermarkConfig {
+            switch self {
+            // ✅ 공통 워터마크 표시
+            case .standard:
+                return WatermarkConfig(show: true, position: .topLeft, opacity: 1.0)
+            case .photo:
+                return WatermarkConfig(show: true, position: .topLeft, opacity: 1.0)
+            case .minimal:
+                // 하단 지표(리조트명) 위쪽으로 배치 (커스텀 위치 사용)
+                // y: 0.82는 하단 패딩 및 지표 높이를 고려한 대략적인 위치
+                return WatermarkConfig(show: true, position: .custom(x: 0.30, y: 0.65), opacity: 1.0)
+            case .speedDemon:
+                return WatermarkConfig(show: true, position: .custom(x: 0.25, y: 0.70), opacity: 1.0)
+                
+            // ❌ 자체 브랜딩 사용 (공통 워터마크 숨김)
+            case .explorer:
+                return .hidden
+            case .techSpec:
+                return .hidden
+            case .cover:
+                return .hidden
+            case .rewind:
+                return .hidden
+            case .frostGlass:
+                return .hidden
             }
         }
     }
@@ -320,6 +363,76 @@ struct SharePreviewView: View {
         .padding(10)
         .background(Color.black.opacity(0.5))
         .cornerRadius(4)
+    }
+    
+    /// 위치 기반 워터마크 오버레이 (Preview/Export 공용)
+    /// 위치 기반 워터마크 오버레이 (Preview/Export 공용)
+    // @ViewBuilder removed to avoid return issues
+    func watermarkOverlay(config: WatermarkConfig, scaled: Bool) -> some View {
+        let s: CGFloat = scaled ? 3.0 : 1.0
+        let hPadding: CGFloat = scaled ? 60 : 20
+        let topPadding: CGFloat = scaled ? 100 : 120
+        let bottomPadding: CGFloat = scaled ? 100 : 50
+        
+        let watermark = HStack(spacing: 8 * s) {
+            Image(systemName: "snowflake")
+                .font(.system(size: 22 * s))
+                .foregroundColor(primaryColor)
+            Text("SNOW RECORD")
+                .font(.system(size: 18 * s, weight: .black))
+                .italic()
+                .foregroundColor(.white)
+        }
+        .padding(10 * s)
+        .background(Color.black.opacity(0.5))
+        .cornerRadius(4 * s)
+        .opacity(config.opacity)
+        
+        switch config.position {
+        case .topLeft:
+            return AnyView(
+                VStack {
+                    HStack { watermark; Spacer() }
+                        .padding(.horizontal, hPadding)
+                        .padding(.top, topPadding)
+                    Spacer()
+                }
+            )
+        case .topRight:
+            return AnyView(
+                VStack {
+                    HStack { Spacer(); watermark }
+                        .padding(.horizontal, hPadding)
+                        .padding(.top, topPadding)
+                    Spacer()
+                }
+            )
+        case .bottomLeft:
+            return AnyView(
+                VStack {
+                    Spacer()
+                    HStack { watermark; Spacer() }
+                        .padding(.horizontal, hPadding)
+                        .padding(.bottom, bottomPadding)
+                }
+            )
+        case .bottomRight:
+            return AnyView(
+                VStack {
+                    Spacer()
+                    HStack { Spacer(); watermark }
+                        .padding(.horizontal, hPadding)
+                        .padding(.bottom, bottomPadding)
+                }
+            )
+        case .custom(let x, let y):
+            return AnyView(
+                GeometryReader { geo in
+                    watermark
+                        .position(x: geo.size.width * x, y: geo.size.height * y)
+                }
+            )
+        }
     }
     
     // MARK: - Preview Stats (small, for screen)
@@ -617,6 +730,8 @@ struct SharePreviewView: View {
                         .italic()
                         .foregroundColor(.white)
                         .shadow(color: .black.opacity(0.6), radius: 5, x: 0, y: 4)
+                        .lineLimit(1)
+                        .minimumScaleFactor(0.5)
                     
                     ZStack {
                         // Shadow/Glow Background
@@ -627,6 +742,7 @@ struct SharePreviewView: View {
                             .lineSpacing(-20) // Tight leading
                             .foregroundColor(.white.opacity(0.9))
                             .shadow(color: .black.opacity(0.5), radius: 10)
+                            .minimumScaleFactor(0.5)
                         
                         // Stroke Effect (Front)
                          Text("POWDER\nDAY")
@@ -642,7 +758,9 @@ struct SharePreviewView: View {
                                     .multilineTextAlignment(.center)
                                     .lineSpacing(-20)
                                     .foregroundColor(.white.opacity(0.3))
+                                    .minimumScaleFactor(0.5)
                             )
+                            .minimumScaleFactor(0.5)
                             // Simulate stroke via shadow if needed, but opacity overlay works for "Ghost" effect
                     }
                 }
@@ -1460,7 +1578,7 @@ struct SharePreviewView: View {
         return ZStack {
              // Scanlines Overlay (Scaled)
             VStack(spacing: 0) {
-                ForEach(0..<Int(100 * s)) { _ in
+                ForEach(0..<Int(100 * s), id: \.self) { _ in
                     Rectangle()
                         .fill(Color.black.opacity(0.1))
                         .frame(height: 2 * 1.5) // Slightly thicker relative to scale? No just keeping it fine or scaling
@@ -1604,6 +1722,8 @@ struct SharePreviewView: View {
                         .italic()
                         .foregroundColor(.white)
                         .shadow(color: .black.opacity(0.6), radius: 5 * s, x: 0, y: 4 * s)
+                        .lineLimit(1)
+                        .minimumScaleFactor(0.5)
                     
                     ZStack {
                         // Shadow/Glow Background
@@ -1614,6 +1734,7 @@ struct SharePreviewView: View {
                             .lineSpacing(-20 * s)
                             .foregroundColor(.white.opacity(0.9))
                             .shadow(color: .black.opacity(0.5), radius: 10 * s)
+                            .minimumScaleFactor(0.5)
                         
                         // Stroke Effect
                          Text("POWDER\nDAY")
@@ -1629,7 +1750,9 @@ struct SharePreviewView: View {
                                     .multilineTextAlignment(.center)
                                     .lineSpacing(-20 * s)
                                     .foregroundColor(.white.opacity(0.3))
+                                    .minimumScaleFactor(0.5)
                             )
+                            .minimumScaleFactor(0.5)
                     }
                 }
                 .padding(.top, 20 * s)
@@ -1894,9 +2017,10 @@ struct SharePreviewView: View {
     }
     
     // Explorer Export
+    @ViewBuilder
     func exportStatsExplorer() -> some View {
         let s: CGFloat = 3.0
-        return VStack {
+        VStack {
             Spacer()
             
             // Brand Top Left
@@ -2267,10 +2391,8 @@ struct SharePreviewView: View {
     }
     
     // MARK: - Export View (1080x1920)
+    // MARK: - Export View (1080x1920)
     func exportView() -> some View {
-        let width: CGFloat = 1080
-        let height: CGFloat = 1920
-        
         return ZStack {
             Color.black
             
@@ -2280,7 +2402,7 @@ struct SharePreviewView: View {
                     .scaledToFill()
                     .scaleEffect(currentScale)
                     .offset(x: currentOffset.width * 3, y: currentOffset.height * 3)
-                    .frame(width: width, height: height)
+                    .frame(width: 1080, height: 1920)
                     .clipped()
             } else {
                 LinearGradient(colors: [Color(white: 0.15), .black], startPoint: .top, endPoint: .bottom)
@@ -2295,18 +2417,12 @@ struct SharePreviewView: View {
                     .padding(.bottom, 120)
             }
             
-            // Brand at top left
-            VStack {
-                HStack {
-                    exportBrandView()
-                    Spacer()
-                }
-                .padding(.horizontal, 60)
-                .padding(.top, 100)
-                Spacer()
+            // Brand Watermark (설정 기반)
+            if selectedLayout.getWatermarkConfig().show {
+                watermarkOverlay(config: selectedLayout.getWatermarkConfig(), scaled: true)
             }
         }
-        .frame(width: width, height: height)
+        .frame(width: 1080, height: 1920)
     }
     
     func exportBrandView() -> some View {
@@ -2360,4 +2476,27 @@ struct SharePreviewView: View {
     }
 }
 
+#Preview {
+    let config = ModelConfiguration(isStoredInMemoryOnly: true)
+    let container = try! ModelContainer(for: RunSession.self, configurations: config)
+    
+    // Create Dummy Session
+    let session = RunSession(
+        startTime: Date(),
+        endTime: Date().addingTimeInterval(3600),
+        duration: 3600,
+        distance: 12500, // 12.5km
+        maxSpeed: 64.8,
+        avgSpeed: 35.0,
+        verticalDrop: 2150,
+        runCount: 12,
+        locationName: "YongPyong Resort"
+    )
+
+    SharePreviewView(session: session)
+        .modelContainer(container)
+        .onAppear {
+            container.mainContext.insert(session)
+        }
+}
 

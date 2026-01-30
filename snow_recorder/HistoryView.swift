@@ -1,14 +1,19 @@
 import SwiftUI
 import SwiftData
 import MapKit
+import UIKit
 
 /// 라이딩 기록 리스트 뷰 (Tab 2) - Riding History Feed Design
 struct HistoryView: View {
     let neonGreen = Color(red: 107/255, green: 249/255, blue: 6/255)
     
-    // SwiftData Query (최신순 정렬)
+    // Manual Data Fetching for Pagination
     @Environment(\.modelContext) private var modelContext
-    @Query(sort: \RunSession.startTime, order: .reverse) private var sessions: [RunSession]
+    @State private var sessions: [RunSession] = []
+    @State private var offset: Int = 0
+    @State private var hasMoreData: Bool = true
+    @State private var isLoading: Bool = false
+    private let pageSize = 10
     
     var body: some View {
         NavigationStack {
@@ -29,6 +34,7 @@ struct HistoryView: View {
                         // Test Data Button (Debug)
                         Button(action: {
                             RunSession.createMockSession(context: modelContext)
+                            resetAndReload() // Reload after adding
                         }) {
                             Image(systemName: "plus.circle.fill")
                             .font(.system(size: 24))
@@ -51,7 +57,7 @@ struct HistoryView: View {
                     
                     // [Feed List]
                     List {
-                        if sessions.isEmpty {
+                        if sessions.isEmpty && !isLoading {
                             // Empty State
                             VStack(spacing: 20) {
                                 Image(systemName: "figure.skiing.downhill")
@@ -79,6 +85,12 @@ struct HistoryView: View {
                                         rotation: Double((index % 3) - 1) * 2.0, // -2, 0, 2 rotation
                                         neonGreen: neonGreen
                                     )
+                                    .onAppear {
+                                        // Load more if near end
+                                        if index == sessions.count - 1 && hasMoreData {
+                                            loadMoreData()
+                                        }
+                                    }
                                 }
                                 .listRowInsets(EdgeInsets(top: 10, leading: 16, bottom: 10, trailing: 16))
                                 .listRowBackground(Color.clear)
@@ -99,31 +111,98 @@ struct HistoryView: View {
                                 }
                             }
                             
-                            // End of Season
-                            Text("END OF LIST")
-                                .font(.caption)
-                                .fontWeight(.bold)
-                                .tracking(2)
-                                .foregroundColor(.gray)
-                                .frame(maxWidth: .infinity)
-                                .padding(.top, 20)
-                                .padding(.bottom, 100)
+                            // Loading Indicator or End of List
+                            if hasMoreData {
+                                HStack {
+                                    Spacer()
+                                    ProgressView()
+                                        .progressViewStyle(CircularProgressViewStyle(tint: neonGreen))
+                                    Spacer()
+                                }
                                 .listRowBackground(Color.clear)
                                 .listRowSeparator(.hidden)
+                            } else {
+                                Text("END OF LIST")
+                                    .font(.caption)
+                                    .fontWeight(.bold)
+                                    .tracking(2)
+                                    .foregroundColor(.gray)
+                                    .frame(maxWidth: .infinity)
+                                    .padding(.top, 20)
+                                    .padding(.bottom, 100)
+                                    .listRowBackground(Color.clear)
+                                    .listRowSeparator(.hidden)
+                            }
                         }
                     }
                     .listStyle(.plain)
                     .scrollContentBackground(.hidden) // Remove default list background
                     .background(Color.black)
+                    .refreshable {
+                        resetAndReload()
+                    }
                 }
             }
             .ignoresSafeArea(.all, edges: .top) // 헤더가 상단까지 덮도록
+            .onAppear {
+                if sessions.isEmpty {
+                    loadMoreData()
+                }
+            }
+        }
+    }
+    
+    // MARK: - Data Loading
+    private func resetAndReload() {
+        sessions.removeAll()
+        offset = 0
+        hasMoreData = true
+        loadMoreData()
+    }
+    
+    private func loadMoreData() {
+        guard !isLoading && hasMoreData else { return }
+        isLoading = true
+        
+        // Delayed fetch to prevent ui stutter
+        DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) {
+            let descriptor = FetchDescriptor<RunSession>(
+                sortBy: [SortDescriptor(\.startTime, order: .reverse)]
+            )
+            // SwiftData usually fetches all, but we emulate pagination by fetching counts?
+            // Actually SwiftData DOES support fetchLimit and fetchOffset.
+            // But we need to define descriptor inside.
+            
+            var fetchDescriptor = FetchDescriptor<RunSession>(
+                sortBy: [SortDescriptor(\.startTime, order: .reverse)]
+            )
+            fetchDescriptor.fetchLimit = pageSize
+            fetchDescriptor.fetchOffset = offset
+            
+            do {
+                let newSessions = try modelContext.fetch(fetchDescriptor)
+                if newSessions.count < pageSize {
+                    hasMoreData = false
+                }
+                
+                withAnimation {
+                    sessions.append(contentsOf: newSessions)
+                    offset += newSessions.count
+                }
+            } catch {
+                print("❌ Fetch failed: \(error)")
+            }
+            
+            isLoading = false
         }
     }
     
     // 삭제 함수
     private func deleteSession(_ session: RunSession) {
         withAnimation {
+            if let index = sessions.firstIndex(where: { $0.id == session.id }) {
+                sessions.remove(at: index)
+            }
             modelContext.delete(session)
         }
         do {
@@ -144,15 +223,10 @@ struct HistoryCard: View {
     let rotation: Double
     let neonGreen: Color
     
+    @State private var snapshotImage: UIImage? = nil
+    @State private var isGenerating: Bool = false
+    
     // Cached values
-    private var coordinates: [CLLocationCoordinate2D] {
-        session.coordinates
-    }
-    
-    private var mapRegion: MKCoordinateRegion {
-        calculateMapRegion(from: coordinates)
-    }
-    
     private var dateString: String {
         let formatter = DateFormatter()
         formatter.dateFormat = "MMM d" // "DEC 24"
@@ -161,22 +235,23 @@ struct HistoryCard: View {
     
     var body: some View {
         ZStack {
-            // 1. Map Background
+            // 1. Map Background (Snapshot)
             Group {
-                if !coordinates.isEmpty {
-                    Map(coordinateRegion: .constant(mapRegion))
-                        .overlay(
-                            GradientRouteOverlay(
-                                coordinates: coordinates,
-                                speeds: session.routeSpeeds,
-                                maxSpeed: session.maxSpeed
-                            )
-                        )
+                if let image = snapshotImage {
+                    Image(uiImage: image)
+                        .resizable()
+                        .aspectRatio(contentMode: .fill)
                 } else {
-                    // Fallback color if no coordinates
-                    Rectangle().fill(Color.gray.opacity(0.3))
+                    // Placeholder while loading
+                    Rectangle()
+                        .fill(Color(white: 0.1))
+                        .overlay(
+                            ProgressView()
+                                .progressViewStyle(CircularProgressViewStyle(tint: neonGreen))
+                        )
                 }
             }
+            .frame(maxWidth: .infinity, maxHeight: .infinity)
             .disabled(true) // Disable interaction
             .colorMultiply(Color(white: 0.8)) // Slightly darken map
             
@@ -251,6 +326,36 @@ struct HistoryCard: View {
         .frame(height: 220)
         .clipShape(RoundedRectangle(cornerRadius: 24))
         .shadow(color: neonGreen.opacity(0.1), radius: 10, x: 0, y: 5)
+        .onAppear {
+            loadSnapshot()
+        }
+    }
+    
+    private func loadSnapshot() {
+        // 1. Check Memory/Disk Cache
+        if let cached = MapSnapshotManager.shared.loadSnapshot(for: session.id) {
+            self.snapshotImage = cached
+            return
+        }
+        
+        // 2. Generate if needed
+        guard !isGenerating else { return }
+        isGenerating = true
+        
+        let coords = session.coordinates // Accessing this might be heavy if not faulted? SwiftData is lazy though.
+        // Actually accessing computed property computing from routeCoordinates array.
+        
+        DispatchQueue.global(qos: .userInitiated).async {
+            // Pre-calculate region size based on view size (approx 350x220)
+            let targetSize = CGSize(width: 360, height: 220)
+            
+            MapSnapshotManager.shared.generateSnapshot(coordinates: coords, routeStates: session.routeStates, size: targetSize, sessionID: session.id) { image in
+                DispatchQueue.main.async {
+                    self.snapshotImage = image
+                    self.isGenerating = false
+                }
+            }
+        }
     }
 }
 
