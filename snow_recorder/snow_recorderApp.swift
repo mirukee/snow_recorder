@@ -28,10 +28,26 @@ class AppDelegate: NSObject, UIApplicationDelegate {
 struct snow_recorderApp: App {
     // register app delegate for Firebase setup
     @UIApplicationDelegateAdaptor(AppDelegate.self) var delegate
+    
+    @StateObject private var storeManager = StoreManager.shared
+    @AppStorage("preferred_language") private var preferredLanguage: String = "system"
+
+    private var appLocale: Locale {
+        switch preferredLanguage {
+        case "ko":
+            return Locale(identifier: "ko")
+        case "en":
+            return Locale(identifier: "en")
+        default:
+            return Locale.autoupdatingCurrent
+        }
+    }
 
     var body: some Scene {
         WindowGroup {
             ContentView()
+                .environmentObject(storeManager)
+                .environment(\.locale, appLocale)
         }
         .modelContainer(for: RunSession.self, isAutosaveEnabled: true, isUndoEnabled: false) { result in
             switch result {

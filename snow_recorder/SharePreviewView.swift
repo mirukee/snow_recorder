@@ -4,6 +4,7 @@ import SwiftData
 
 struct SharePreviewView: View {
     @Environment(\.dismiss) var dismiss
+    @EnvironmentObject private var storeManager: StoreManager
     let session: RunSession
     
     // MARK: - State
@@ -13,6 +14,7 @@ struct SharePreviewView: View {
     @State private var showShareSheet = false
     @State private var imageToShare: UIImage?
     @State private var showSaveToast = false
+    @State private var showPaywall = false
     
     // Image Transform
     @GestureState private var pinchScale: CGFloat = 1.0
@@ -99,6 +101,36 @@ struct SharePreviewView: View {
                 }
                 .allowsHitTesting(false)
                 
+                // Pro 템플릿 잠금 오버레이
+                if selectedLayout.isPro && !storeManager.isPro {
+                    Color.black.opacity(0.45)
+                        .ignoresSafeArea()
+                        .overlay(
+                            VStack(spacing: 10) {
+                                Image(systemName: "lock.fill")
+                                    .font(.system(size: 22, weight: .bold))
+                                    .foregroundColor(.yellow)
+                                Text("PRO TEMPLATE")
+                                    .font(.system(size: 14, weight: .bold))
+                                    .tracking(2)
+                                    .foregroundColor(.white)
+                                Text("share.locked_share_hint")
+                                    .font(.system(size: 12, weight: .medium))
+                                    .foregroundColor(.gray)
+                            }
+                            .padding(.horizontal, 20)
+                            .padding(.vertical, 16)
+                            .background(Color.black.opacity(0.6))
+                            .cornerRadius(14)
+                            .overlay(
+                                RoundedRectangle(cornerRadius: 14)
+                                    .stroke(Color.white.opacity(0.12), lineWidth: 1)
+                            )
+                        )
+                        .transition(.opacity)
+                        .allowsHitTesting(false)
+                }
+                
                 // Brand Watermark (설정 기반)
                 if selectedLayout.getWatermarkConfig().show {
                     watermarkOverlay(config: selectedLayout.getWatermarkConfig(), scaled: false)
@@ -109,7 +141,7 @@ struct SharePreviewView: View {
                 if showSaveToast {
                     VStack {
                         Spacer()
-                        Text("✓ 저장 완료")
+                        Text("share.save_complete")
                             .font(.system(size: 14, weight: .semibold))
                             .foregroundColor(.white)
                             .padding(.horizontal, 20)
@@ -153,12 +185,14 @@ struct SharePreviewView: View {
                             }
                             .shadow(radius: 4)
                         }
+                        .disabled(selectedLayout.isPro && !storeManager.isPro)
+                        .opacity(selectedLayout.isPro && !storeManager.isPro ? 0.4 : 1.0)
                     }
                     .padding(.horizontal, 20)
                     .padding(.top, 60)
                     
                     if backgroundUIImage != nil {
-                        Text("핀치/드래그로 사진 조절")
+                        Text("share.photo_adjust_hint")
                             .font(.caption)
                             .foregroundColor(.white.opacity(0.6))
                             .padding(.top, 8)
@@ -169,17 +203,32 @@ struct SharePreviewView: View {
                     layoutSelector
                     
                     HStack(spacing: 16) {
-                        Button(action: shareToStory) {
-                            HStack(spacing: 8) {
-                                Image(systemName: "arrow.up.circle.fill")
-                                Text("SHARE TO STORY")
+                        if selectedLayout.isPro && !storeManager.isPro {
+                            Button(action: { showPaywall = true }) {
+                                HStack(spacing: 8) {
+                                    Image(systemName: "lock.fill")
+                                    Text("UNLOCK PRO")
+                                }
+                                .font(.system(size: 16, weight: .bold))
+                                .foregroundColor(.black)
+                                .padding(.vertical, 16)
+                                .padding(.horizontal, 24)
+                                .background(primaryColor)
+                                .clipShape(Capsule())
                             }
-                            .font(.system(size: 16, weight: .bold))
-                            .foregroundColor(.black)
-                            .padding(.vertical, 16)
-                            .padding(.horizontal, 24)
-                            .background(primaryColor)
-                            .clipShape(Capsule())
+                        } else {
+                            Button(action: shareToStory) {
+                                HStack(spacing: 8) {
+                                    Image(systemName: "arrow.up.circle.fill")
+                                    Text("SHARE TO STORY")
+                                }
+                                .font(.system(size: 16, weight: .bold))
+                                .foregroundColor(.black)
+                                .padding(.vertical, 16)
+                                .padding(.horizontal, 24)
+                                .background(primaryColor)
+                                .clipShape(Capsule())
+                            }
                         }
                         
                         Button(action: saveToPhotos) {
@@ -193,6 +242,8 @@ struct SharePreviewView: View {
                                     .foregroundColor(.white)
                             }
                         }
+                        .disabled(selectedLayout.isPro && !storeManager.isPro)
+                        .opacity(selectedLayout.isPro && !storeManager.isPro ? 0.4 : 1.0)
                     }
                     .padding(.bottom, 50)
                 }
@@ -212,6 +263,9 @@ struct SharePreviewView: View {
             if let image = imageToShare {
                 ShareSheet(activityItems: [image])
             }
+        }
+        .sheet(isPresented: $showPaywall) {
+            PaywallView()
         }
     }
     
@@ -238,6 +292,7 @@ struct SharePreviewView: View {
     
     enum ShareLayout: String, CaseIterable, Identifiable {
         case standard = "Standard"
+        case frostGlass = "Frost Glass"
         case photo = "Photo"
         case minimal = "Minimal"
         case speedDemon = "Speed Demon"
@@ -245,21 +300,20 @@ struct SharePreviewView: View {
         case techSpec = "Tech-Spec"
         case cover = "The Cover"
         case rewind = "Rewind"
-        case frostGlass = "Frost Glass"
         
         var id: String { self.rawValue }
         
-        var displayName: String {
+        var displayName: LocalizedStringKey {
             switch self {
-            case .standard: return "기본"
-            case .photo: return "포토 포커스"
-            case .minimal: return "미니멀"
-            case .speedDemon: return "스피드 데몬"
-            case .explorer: return "익스플로러"
-            case .techSpec: return "테크 스펙"
-            case .cover: return "매거진 커버"
-            case .rewind: return "리와인드"
-            case .frostGlass: return "프로스트"
+            case .standard: return "share.layout.standard"
+            case .photo: return "share.layout.photo"
+            case .minimal: return "share.layout.minimal"
+            case .speedDemon: return "share.layout.speed_demon"
+            case .explorer: return "share.layout.explorer"
+            case .techSpec: return "share.layout.tech_spec"
+            case .cover: return "share.layout.cover"
+            case .rewind: return "share.layout.rewind"
+            case .frostGlass: return "share.layout.frost_glass"
             }
         }
         
@@ -277,6 +331,15 @@ struct SharePreviewView: View {
             }
         }
         
+        var isPro: Bool {
+            switch self {
+            case .standard, .frostGlass:
+                return false
+            case .photo, .minimal, .speedDemon, .explorer, .techSpec, .cover, .rewind:
+                return true
+            }
+        }
+        
         // MARK: - 워터마크 설정 (여기서 레이아웃별로 조절하세요!)
         // MARK: - 워터마크 설정 (여기서 레이아웃별로 조절하세요!)
         func getWatermarkConfig() -> WatermarkConfig {
@@ -287,9 +350,7 @@ struct SharePreviewView: View {
             case .photo:
                 return WatermarkConfig(show: true, position: .topLeft, opacity: 1.0)
             case .minimal:
-                // 하단 지표(리조트명) 위쪽으로 배치 (커스텀 위치 사용)
-                // y: 0.82는 하단 패딩 및 지표 높이를 고려한 대략적인 위치
-                return WatermarkConfig(show: true, position: .custom(x: 0.30, y: 0.65), opacity: 1.0)
+                return .hidden
             case .speedDemon:
                 return WatermarkConfig(show: true, position: .custom(x: 0.25, y: 0.70), opacity: 1.0)
                 
@@ -313,6 +374,7 @@ struct SharePreviewView: View {
         ScrollView(.horizontal, showsIndicators: false) {
             HStack(spacing: 16) {
                 ForEach(ShareLayout.allCases) { layout in
+                    let locked = layout.isPro && !storeManager.isPro
                     Button(action: {
                         withAnimation(.spring()) {
                             selectedLayout = layout
@@ -331,11 +393,30 @@ struct SharePreviewView: View {
                                 Image(systemName: layout.iconName)
                                     .font(.system(size: 20))
                                     .foregroundColor(selectedLayout == layout ? .black : .white)
+                                
+                                if locked {
+                                    Circle()
+                                        .fill(Color.black.opacity(0.45))
+                                    Image(systemName: "lock.fill")
+                                        .font(.system(size: 12, weight: .bold))
+                                        .foregroundColor(.yellow)
+                                }
                             }
                             
                             Text(layout.displayName)
                                 .font(.system(size: 11, weight: .semibold))
                                 .foregroundColor(selectedLayout == layout ? primaryColor : .white.opacity(0.7))
+                            
+                            if layout.isPro {
+                                Text("PRO")
+                                    .font(.system(size: 9, weight: .bold))
+                                    .tracking(1)
+                                    .foregroundColor(locked ? .yellow : primaryColor)
+                                    .padding(.horizontal, 6)
+                                    .padding(.vertical, 2)
+                                    .background((locked ? Color.yellow.opacity(0.12) : primaryColor.opacity(0.15)))
+                                    .cornerRadius(6)
+                            }
                         }
                         .frame(width: 70) // Fixed width for consistency
                     }
@@ -2499,4 +2580,3 @@ struct SharePreviewView: View {
             container.mainContext.insert(session)
         }
 }
-

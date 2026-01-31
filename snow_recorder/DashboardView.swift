@@ -454,7 +454,7 @@ struct DashboardView: View {
             .padding(.horizontal, 16)
             
             if sortedRunMetrics.isEmpty {
-                Text("첫 런을 기다리는 중...")
+                Text("dashboard.wait_first_run")
                     .font(.system(size: 12, weight: .medium))
                     .foregroundColor(.white.opacity(0.5))
                     .frame(maxWidth: .infinity, alignment: .leading)

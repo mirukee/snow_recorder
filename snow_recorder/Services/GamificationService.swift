@@ -7,6 +7,7 @@ class GamificationService: ObservableObject {
     
     // Published Profile for Views to observe
     @Published var profile: GamificationProfile
+    @Published private(set) var featuredBadgeTitles: [String] = []
     
     // Constants
     private let xpPerKm: Int = 10
@@ -20,17 +21,17 @@ class GamificationService: ObservableObject {
     
     // Badges Configuration
     private var allBadges: [Badge] = [
-        Badge(title: "First Steps", description: "Complete your first run.", iconName: "figure.skiing.downhill", unlockCondition: { stats in stats.totalRuns >= 1 }),
-        Badge(title: "Marathoner", description: "Ski a total of 100km.", iconName: "figure.walk", unlockCondition: { stats in stats.totalDistance >= 100.0 }),
-        Badge(title: "Speed Demon", description: "Reach a speed of 80km/h.", iconName: "flame.fill", unlockCondition: { stats in stats.maxSpeed >= 80.0 }),
-        Badge(title: "Century Club", description: "Complete 100 runs.", iconName: "100.circle.fill", unlockCondition: { stats in stats.totalRuns >= 100 }),
-        Badge(title: "Everest", description: "Ski 8,848m vertical drop.", iconName: "mountain.2.fill", unlockCondition: { stats in stats.totalVerticalDrop >= 8848.0 }),
+        Badge(title: "First Steps", description: NSLocalizedString("badge.desc.first_steps", comment: "첫 번째 런을 완료하세요."), iconName: "figure.skiing.downhill", unlockCondition: { stats in stats.totalRuns >= 1 }),
+        Badge(title: "Marathoner", description: NSLocalizedString("badge.desc.marathoner", comment: "총 100km를 주행하세요."), iconName: "figure.walk", unlockCondition: { stats in stats.totalDistance >= 100.0 }),
+        Badge(title: "Speed Demon", description: NSLocalizedString("badge.desc.speed_demon", comment: "최고 속도 80km/h에 도달하세요."), iconName: "flame.fill", unlockCondition: { stats in stats.maxSpeed >= 80.0 }),
+        Badge(title: "Century Club", description: NSLocalizedString("badge.desc.century_club", comment: "100런을 완주하세요."), iconName: "100.circle.fill", unlockCondition: { stats in stats.totalRuns >= 100 }),
+        Badge(title: "Everest", description: NSLocalizedString("badge.desc.everest", comment: "총 하강고도 8,848m를 달성하세요."), iconName: "mountain.2.fill", unlockCondition: { stats in stats.totalVerticalDrop >= 8848.0 }),
         
         // New Badges
-        Badge(title: "High Flyer", description: "Ski 20,000m vertical drop.", iconName: "airplane.departure", unlockCondition: { stats in stats.totalVerticalDrop >= 20000.0 }),
-        Badge(title: "Early Bird", description: "Start skiing before 9 AM.", iconName: "sunrise.fill", unlockCondition: { _ in false }), // Needs session time check logic
-        Badge(title: "Night Owl", description: "Ski after 7 PM.", iconName: "moon.stars.fill", unlockCondition: { _ in false }), // Needs session time check logic
-        Badge(title: "Safe Rider", description: "Record 10 sessions without crashing (Mock).", iconName: "checkmark.shield.fill", unlockCondition: { stats in stats.totalRuns >= 50 }) // Placeholder
+        Badge(title: "High Flyer", description: NSLocalizedString("badge.desc.high_flyer", comment: "총 하강고도 20,000m를 달성하세요."), iconName: "airplane.departure", unlockCondition: { stats in stats.totalVerticalDrop >= 20000.0 }),
+        Badge(title: "Early Bird", description: NSLocalizedString("badge.desc.early_bird", comment: "오전 9시 이전에 출발하세요."), iconName: "sunrise.fill", unlockCondition: { _ in false }), // Needs session time check logic
+        Badge(title: "Night Owl", description: NSLocalizedString("badge.desc.night_owl", comment: "오후 7시 이후에 주행하세요."), iconName: "moon.stars.fill", unlockCondition: { _ in false }), // Needs session time check logic
+        Badge(title: "Safe Rider", description: NSLocalizedString("badge.desc.safe_rider", comment: "크래시 없이 10회 기록하세요."), iconName: "checkmark.shield.fill", unlockCondition: { stats in stats.totalRuns >= 50 }) // Placeholder
     ]
     
     private enum Keys {
@@ -38,14 +39,18 @@ class GamificationService: ObservableObject {
         static let bio = "user_bio"
         static let instagramId = "user_instagram_id"
         static let earnedBadges = "user_earned_badges"
+        static let featuredBadges = "profile_featured_badges"
+        static let featuredBadgesLastChangedAt = "profile_featured_badges_last_changed_at"
+        static let featuredBadgesPendingUpload = "profile_featured_badges_pending_upload"
     }
     
     private init() {
         // Load persist data
-        let savedNickname = UserDefaults.standard.string(forKey: Keys.nickname) ?? "Skier"
+        let savedNickname = UserDefaults.standard.string(forKey: Keys.nickname) ?? "skier"
         let savedBio = UserDefaults.standard.string(forKey: Keys.bio)
         let savedInstagramId = UserDefaults.standard.string(forKey: Keys.instagramId)
         let earnedBadgeTitles = UserDefaults.standard.stringArray(forKey: Keys.earnedBadges) ?? []
+        let savedFeaturedBadges = UserDefaults.standard.stringArray(forKey: Keys.featuredBadges) ?? []
         
         // Sync badges initial state
         for i in 0..<allBadges.count {
@@ -61,6 +66,7 @@ class GamificationService: ObservableObject {
             tier: .bronze,
             stats: UserStats(),
             badges: [], // Will be populated in init
+            featuredBadgeTitles: savedFeaturedBadges,
             nickname: savedNickname,
             bio: savedBio,
             instagramId: savedInstagramId,
@@ -68,6 +74,7 @@ class GamificationService: ObservableObject {
         )
         // Set badges from updated allBadges
         self.profile.badges = allBadges
+        self.featuredBadgeTitles = savedFeaturedBadges
     }
 
     private struct SessionStatsSnapshot {
@@ -120,6 +127,57 @@ class GamificationService: ObservableObject {
         
         if let instagramId = instagramId { UserDefaults.standard.set(instagramId, forKey: Keys.instagramId) }
         else { UserDefaults.standard.removeObject(forKey: Keys.instagramId) }
+    }
+
+    // MARK: - Featured Badges
+
+    var canChangeFeaturedBadges: Bool {
+        guard let lastDate = featuredBadgesLastChangedDate else { return true }
+        return !Calendar.current.isDateInToday(lastDate)
+    }
+
+    var featuredBadgesRemainingDays: Int? {
+        guard let nextDate = featuredBadgesNextChangeDate, !canChangeFeaturedBadges else { return nil }
+        let days = Calendar.current.dateComponents([.day], from: Date(), to: nextDate).day ?? 0
+        return max(1, days)
+    }
+
+    var isFeaturedBadgesUploadPending: Bool {
+        UserDefaults.standard.bool(forKey: Keys.featuredBadgesPendingUpload)
+    }
+
+    func clearFeaturedBadgesUploadPending() {
+        UserDefaults.standard.set(false, forKey: Keys.featuredBadgesPendingUpload)
+    }
+
+    @discardableResult
+    func updateFeaturedBadges(_ titles: [String]) -> Bool {
+        let normalized = titles.filter { !$0.isEmpty }
+        if normalized == featuredBadgeTitles {
+            return true
+        }
+        guard canChangeFeaturedBadges else {
+            return false
+        }
+        featuredBadgeTitles = normalized
+        profile.featuredBadgeTitles = normalized
+        UserDefaults.standard.set(normalized, forKey: Keys.featuredBadges)
+        UserDefaults.standard.set(Date().timeIntervalSince1970, forKey: Keys.featuredBadgesLastChangedAt)
+        UserDefaults.standard.set(true, forKey: Keys.featuredBadgesPendingUpload)
+        return true
+    }
+
+    private var featuredBadgesLastChangedDate: Date? {
+        let interval = UserDefaults.standard.double(forKey: Keys.featuredBadgesLastChangedAt)
+        guard interval > 0 else { return nil }
+        return Date(timeIntervalSince1970: interval)
+    }
+
+    private var featuredBadgesNextChangeDate: Date? {
+        guard let lastDate = featuredBadgesLastChangedDate else { return nil }
+        let calendar = Calendar.current
+        let startOfDay = calendar.startOfDay(for: lastDate)
+        return calendar.date(byAdding: .day, value: 1, to: startOfDay)
     }
     
     // MARK: - Private Logic
@@ -179,7 +237,11 @@ class GamificationService: ObservableObject {
                 tier: newTier,
                 stats: newStats,
                 badges: updatedBadges,
-                nickname: self.profile.nickname // Preserve nickname
+                featuredBadgeTitles: self.featuredBadgeTitles,
+                nickname: self.profile.nickname,
+                bio: self.profile.bio,
+                instagramId: self.profile.instagramId,
+                avatarUrl: self.profile.avatarUrl
             )
         }
     }

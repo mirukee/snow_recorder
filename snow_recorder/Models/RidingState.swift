@@ -15,9 +15,9 @@ enum RidingState: String, Codable {
     /// UI 표시용 한글 라벨
     var displayLabel: String {
         switch self {
-        case .riding: return "활강 중"
-        case .onLift: return "리프트"
-        case .resting: return "대기 중"
+        case .riding: return localizedLabel(key: "state.riding", fallback: "활강 중")
+        case .onLift: return localizedLabel(key: "state.on_lift", fallback: "리프트")
+        case .resting: return localizedLabel(key: "state.resting", fallback: "대기 중")
         }
     }
     
@@ -52,4 +52,19 @@ enum RidingState: String, Codable {
         var container = encoder.singleValueContainer()
         try container.encode(self.rawValue)
     }
+}
+
+private func localizedLabel(key: String, fallback: String) -> String {
+    let preferred = UserDefaults.standard.string(forKey: "preferred_language") ?? "system"
+    let locale: Locale
+    switch preferred {
+    case "ko":
+        locale = Locale(identifier: "ko")
+    case "en":
+        locale = Locale(identifier: "en")
+    default:
+        locale = Locale.autoupdatingCurrent
+    }
+    let value = String(localized: .init(key), locale: locale)
+    return value.isEmpty ? fallback : value
 }

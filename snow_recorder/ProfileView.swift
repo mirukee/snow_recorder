@@ -9,8 +9,11 @@ struct ProfileView: View {
     @State private var showSettings = false
     @State private var showBadgeList = false
     @State private var showMyCard = false
+    @State private var showPaywall = false
+    @State private var showForceNonProAlert = false
     @ObservedObject private var rankingService = RankingService.shared
     @StateObject private var authManager = AuthenticationManager.shared
+    @EnvironmentObject private var storeManager: StoreManager
     
     // SwiftData에서 모든 주행 기록 가져오기
     @Query private var sessions: [RunSession]
@@ -91,6 +94,28 @@ struct ProfileView: View {
                             }
                             .padding(.horizontal, 24)
                             .padding(.top, 20)
+                            
+                            // [Pro Upgrade Banner]
+                            Button(action: {
+                                showPaywall = true
+                            }) {
+                                ProUpgradeBanner()
+                            }
+                            .buttonStyle(PlainButtonStyle())
+                            .onLongPressGesture {
+                                showForceNonProAlert = true
+                            }
+                            .sheet(isPresented: $showPaywall) {
+                                PaywallView()
+                            }
+                            .alert("디버그: 비구독 강제", isPresented: $showForceNonProAlert) {
+                                Button(storeManager.forceNonPro ? "비구독 강제 해제" : "비구독 강제 켜기") {
+                                    storeManager.setForceNonPro(!storeManager.forceNonPro)
+                                }
+                                Button("취소", role: .cancel) {}
+                            } message: {
+                                Text(storeManager.forceNonPro ? "현재 비구독 상태가 강제로 적용되어 있습니다." : "구독 여부와 상관없이 비구독 상태로 강제 전환합니다.")
+                            }
                             
                             // [Hero Status Card] Dynamic Tier
                             ZStack {
@@ -238,7 +263,7 @@ struct ProfileView: View {
                             // [Badges]
                             VStack(alignment: .leading, spacing: 16) {
                                 HStack {
-                                    Text("RECENT BADGES")
+                                    Text("FEATURED BADGES")
                                         .font(.system(size: 12, weight: .bold))
                                         .tracking(1)
                                         .foregroundColor(.gray)
@@ -255,7 +280,7 @@ struct ProfileView: View {
                                     HStack(spacing: 20) {
                                         Spacer().frame(width: 4) // Left Padding
                                         
-                                        ForEach(viewModel.userProfile.badges.prefix(5)) { badge in // Show only first 5 recent
+                                        ForEach(featuredBadges) { badge in
                                             HexBadge(
                                                 icon: badge.iconName,
                                                 title: badge.title,
@@ -354,6 +379,17 @@ struct ProfileView: View {
         let hours = stats.totalDuration / 3600.0
         let avg = stats.totalDistance / hours
         return String(format: "%.1f", avg)
+    }
+
+    private var featuredBadges: [Badge] {
+        let earned = viewModel.userProfile.badges.filter { $0.isEarned }
+        let featuredTitles = viewModel.userProfile.featuredBadgeTitles
+        if featuredTitles.isEmpty {
+            return Array(earned.prefix(3))
+        }
+        let badgeByTitle = Dictionary(uniqueKeysWithValues: earned.map { ($0.title, $0) })
+        let ordered = featuredTitles.compactMap { badgeByTitle[$0] }
+        return Array(ordered.prefix(3))
     }
 }
 
@@ -556,17 +592,33 @@ struct GridPattern: Shape {
     /// Settings Sheet
     struct SettingsView: View {
         @Environment(\.dismiss) var dismiss
+        @Environment(\.modelContext) private var modelContext
         @Binding var isRankingEnabled: Bool
+        @Query(sort: \RunSession.startTime, order: .reverse) private var sessions: [RunSession]
+        @AppStorage("preferred_language") private var preferredLanguage: String = "system"
+        @EnvironmentObject private var storeManager: StoreManager
+        @Environment(\.locale) private var locale
+        
+        @State private var isWorking: Bool = false
+        @State private var lastBackupText: String = "NONE"
+        @State private var lastBackupDetail: String? = nil
+        @State private var errorMessage: String? = nil
+        @State private var showRestoreConfirm: Bool = false
+        private let isBackupEnabled: Bool = false
+
+        private func locString(_ key: String) -> String {
+            String(localized: .init(key), locale: locale)
+        }
         
         var body: some View {
             NavigationView {
                 Form {
-                    Section(header: Text("PRIVACY & COMPETITION")) {
+                    Section(header: Text("settings.section_privacy_competition")) {
                         Toggle(isOn: $isRankingEnabled) {
                             VStack(alignment: .leading) {
-                                Text("Participate in Ranking")
+                                Text("settings.ranking_participate_title")
                                     .font(.system(size: 16, weight: .bold))
-                                Text("Upload your runs to the leaderboard automatically.")
+                                Text("settings.ranking_participate_desc")
                                     .font(.caption)
                                     .foregroundColor(.gray)
                             }
@@ -574,24 +626,193 @@ struct GridPattern: Shape {
                         .tint(Color(red: 107/255, green: 249/255, blue: 6/255))
                     }
                     
-                    Section(header: Text("APP INFO")) {
+                    Section(header: Text("settings.section_backup")) {
+                        if !isBackupEnabled {
+                            Text("profile.mvp_later")
+                                .font(.caption)
+                                .foregroundColor(.gray)
+                        }
+                        VStack(alignment: .leading, spacing: 6) {
+                            Text("settings.backup_last_label")
+                                .font(.caption)
+                                .foregroundColor(.gray)
+                            if isBackupEnabled {
+                                Text(lastBackupText)
+                                    .font(.system(size: 14, weight: .bold, design: .monospaced))
+                                    .foregroundColor(.white)
+                            } else {
+                                Text("settings.backup_none")
+                                    .font(.system(size: 14, weight: .bold, design: .monospaced))
+                                    .foregroundColor(.white)
+                            }
+                            if let detail = lastBackupDetail {
+                                Text(detail)
+                                    .font(.caption)
+                                    .foregroundColor(.gray)
+                            }
+                        }
+                        .padding(.vertical, 4)
+                        
+                        Button(action: { Task { await handleBackup() } }) {
+                            HStack {
+                                Text("settings.backup_now")
+                                Spacer()
+                                if isWorking {
+                                    ProgressView()
+                                }
+                            }
+                        }
+                        .disabled(isWorking || !isBackupEnabled)
+                        
+                        Button(action: { showRestoreConfirm = true }) {
+                            HStack {
+                                Text("settings.restore_overwrite")
+                                Spacer()
+                                Image(systemName: "exclamationmark.triangle.fill")
+                                    .foregroundColor(.yellow)
+                            }
+                        }
+                        .disabled(isWorking || !isBackupEnabled)
+                        
+                        if let errorMessage {
+                            Text(errorMessage)
+                                .font(.caption)
+                                .foregroundColor(.red)
+                        }
+                    }
+
+                    Section(header: Text("settings.section_language")) {
+                        Picker("settings.language_label", selection: $preferredLanguage) {
+                            Text("settings.language_system").tag("system")
+                            Text("settings.language_ko").tag("ko")
+                            Text("settings.language_en").tag("en")
+                        }
+                        .pickerStyle(.segmented)
+                    }
+                    
+                    Section(header: Text("settings.section_app_info")) {
                         HStack {
-                            Text("Version")
+                            Text("settings.app_version")
                             Spacer()
                             Text("1.0.0 (Beta)")
                                 .foregroundColor(.gray)
                         }
                     }
+                    
+                    Section(header: Text("settings.legal")) {
+                        Link("paywall.terms", destination: URL(string: "https://actually-hamster-aa2.notion.site/Snow-Record-Terms-of-Service-2f95e95d9ec180c4848adb22faecef63")!)
+                        Link("paywall.privacy", destination: URL(string: "https://actually-hamster-aa2.notion.site/Snow-Record-Privacy-Policy-2f95e95d9ec180a795c2e7620227c213")!)
+                    }
+
+                    Section(header: Text("settings.section_debug")) {
+                        Toggle(isOn: Binding(
+                            get: { storeManager.forceNonPro },
+                            set: { storeManager.setForceNonPro($0) }
+                        )) {
+                            VStack(alignment: .leading) {
+                                Text("settings.debug_force_nonpro_title")
+                                    .font(.system(size: 16, weight: .bold))
+                                Text("settings.debug_force_nonpro_desc")
+                                    .font(.caption)
+                                    .foregroundColor(.gray)
+                            }
+                        }
+                        .tint(Color(red: 107/255, green: 249/255, blue: 6/255))
+                    }
                 }
-                .navigationTitle("Settings")
+                .navigationTitle("settings.title")
                 .navigationBarTitleDisplayMode(.inline)
                 .toolbar {
                     ToolbarItem(placement: .navigationBarTrailing) {
-                        Button("Done") { dismiss() }
+                        Button("settings.done") { dismiss() }
                     }
                 }
             }
             .preferredColorScheme(.dark)
+            .id(locale.identifier)
+            .onAppear {
+                if lastBackupText == "NONE" {
+                    lastBackupText = locString("settings.backup_none")
+                }
+                guard isBackupEnabled else { return }
+                Task { await refreshBackupInfo() }
+            }
+            .alert("profile.restore_title", isPresented: $showRestoreConfirm) {
+                Button("profile.restore_cancel", role: .cancel) { }
+                Button("profile.restore_confirm", role: .destructive) {
+                    Task { await handleRestore() }
+                }
+            } message: {
+                Text("profile.restore_message")
+            }
+        }
+        
+        private func refreshBackupInfo() async {
+            guard isBackupEnabled else { return }
+            do {
+                if let metadata = try await CloudBackupService.shared.fetchLatestMetadata() {
+                    let formatter = DateFormatter()
+                    formatter.dateFormat = "yyyy-MM-dd HH:mm"
+                    formatter.timeZone = TimeZone(identifier: "Asia/Seoul")
+                    lastBackupText = formatter.string(from: metadata.createdAt)
+                    lastBackupDetail = String(format: locString("settings.backup_sessions_format"), metadata.sessionCount)
+                } else {
+                    lastBackupText = locString("settings.backup_none")
+                    lastBackupDetail = nil
+                }
+                errorMessage = nil
+            } catch {
+                errorMessage = locString("profile.backup_load_fail")
+            }
+        }
+        
+        private func handleBackup() async {
+            guard isBackupEnabled else {
+                errorMessage = locString("profile.mvp_later")
+                return
+            }
+            guard !isWorking else { return }
+            isWorking = true
+            defer { isWorking = false }
+            
+            do {
+                let metadata = try await CloudBackupService.shared.backup(sessions: sessions)
+                let formatter = DateFormatter()
+                formatter.dateFormat = "yyyy-MM-dd HH:mm"
+                formatter.timeZone = TimeZone(identifier: "Asia/Seoul")
+                lastBackupText = formatter.string(from: metadata.createdAt)
+                lastBackupDetail = String(format: locString("settings.backup_sessions_format"), metadata.sessionCount)
+                errorMessage = nil
+            } catch {
+                print("❌ iCloud 백업 실패: \(error)")
+                errorMessage = locString("profile.backup_fail")
+            }
+        }
+        
+        private func handleRestore() async {
+            guard isBackupEnabled else {
+                errorMessage = locString("profile.mvp_later")
+                return
+            }
+            guard !isWorking else { return }
+            isWorking = true
+            defer { isWorking = false }
+            
+            do {
+                let metadata = try await CloudBackupService.shared.restoreLatestBackup(context: modelContext)
+                let formatter = DateFormatter()
+                formatter.dateFormat = "yyyy-MM-dd HH:mm"
+                formatter.timeZone = TimeZone(identifier: "Asia/Seoul")
+                lastBackupText = formatter.string(from: metadata.createdAt)
+                lastBackupDetail = String(format: locString("settings.backup_sessions_format"), metadata.sessionCount)
+                errorMessage = nil
+
+                let restoredSessions = try modelContext.fetch(FetchDescriptor<RunSession>())
+                RankingService.shared.syncAfterLocalChange(sessions: restoredSessions)
+            } catch {
+                print("❌ iCloud 복원 실패: \(error)")
+                errorMessage = locString("profile.restore_fail")
+            }
         }
     }
 

@@ -1,0 +1,8 @@
+/* Location access (when in use) */
+"NSLocationWhenInUseUsageDescription" = "We need location access to record your ski/snowboard runs.";
+/* Location access (always) */
+"NSLocationAlwaysAndWhenInUseUsageDescription" = "We need location access in the background to accurately record your run path.";
+/* Motion access */
+"NSMotionUsageDescription" = "We need motion data for run analysis and scoring.";
+/* Photo library add access */
+"NSPhotoLibraryAddUsageDescription" = "We need photo access to save share images to your library.";

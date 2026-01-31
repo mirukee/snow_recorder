@@ -206,9 +206,9 @@ struct MyPlayerCardView: View {
                 }
                 .padding(.horizontal, 24)
                 
-                // Earned Badges
+                // Featured Badges
                 VStack(alignment: .leading, spacing: 16) {
-                    Text("MY BADGES")
+                    Text("FEATURED BADGES")
                         .font(.system(size: 12, weight: .bold))
                         .tracking(1.5)
                         .foregroundColor(.gray)
@@ -218,8 +218,8 @@ struct MyPlayerCardView: View {
                         HStack(spacing: 16) {
                             Spacer().frame(width: 8)
                             
-                            // Load actual earned badges
-                            ForEach(profile.badges.filter { $0.isEarned }) { badge in
+                            // Load featured badges (fallback to earned)
+                            ForEach(featuredBadges) { badge in
                                 ProfileBadgeItem(
                                     icon: badge.iconName,
                                     title: badge.title,
@@ -229,7 +229,7 @@ struct MyPlayerCardView: View {
                             }
                             
                             // Placeholders if empty
-                            if profile.badges.filter({ $0.isEarned }).isEmpty {
+                            if featuredBadges.isEmpty {
                                 Text("No badges earned yet.")
                                     .font(.system(size: 12))
                                     .foregroundColor(.gray)
@@ -283,5 +283,16 @@ struct MyPlayerCardView: View {
         .padding(16)
         .background(cardBackground)
         .cornerRadius(24)
+    }
+
+    private var featuredBadges: [Badge] {
+        let earned = profile.badges.filter { $0.isEarned }
+        let featuredTitles = profile.featuredBadgeTitles
+        if featuredTitles.isEmpty {
+            return Array(earned.prefix(3))
+        }
+        let badgeByTitle = Dictionary(uniqueKeysWithValues: earned.map { ($0.title, $0) })
+        let ordered = featuredTitles.compactMap { badgeByTitle[$0] }
+        return Array(ordered.prefix(3))
     }
 }

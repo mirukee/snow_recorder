@@ -12,10 +12,18 @@
 		0B984AAD2F24902D002D1BF4 /* GoogleSignInSwift in Frameworks */ = {isa = PBXBuildFile; productRef = 0B984AAC2F24902D002D1BF4 /* GoogleSignInSwift */; };
 		0B984AB02F249168002D1BF4 /* FirebaseAuth in Frameworks */ = {isa = PBXBuildFile; productRef = 0B984AAF2F249168002D1BF4 /* FirebaseAuth */; };
 		0B984AB22F249168002D1BF4 /* FirebaseFirestore in Frameworks */ = {isa = PBXBuildFile; productRef = 0B984AB12F249168002D1BF4 /* FirebaseFirestore */; };
+		0BDCF9732F2E148100987439 /* StoreKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 0BDCF9722F2E148100987439 /* StoreKit.framework */; };
+		0C1A0F1B2F3A000100000001 /* InfoPlist.strings in Resources */ = {isa = PBXBuildFile; fileRef = 0C1A0F1C2F3A000100000001 /* InfoPlist.strings */; };
+		0C1A0F202F3A000100000001 /* Localizable.strings in Resources */ = {isa = PBXBuildFile; fileRef = 0C1A0F212F3A000100000001 /* Localizable.strings */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
 		0B4C3B722F20A4C500A73C1B /* snow_recorder.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = snow_recorder.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		0BDCF9722F2E148100987439 /* StoreKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = StoreKit.framework; path = System/Library/Frameworks/StoreKit.framework; sourceTree = SDKROOT; };
+		0C1A0F1D2F3A000100000001 /* InfoPlist.strings */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = InfoPlist.strings; path = ko.lproj/InfoPlist.strings; sourceTree = "<group>"; };
+		0C1A0F1E2F3A000100000001 /* InfoPlist.strings */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = InfoPlist.strings; path = en.lproj/InfoPlist.strings; sourceTree = "<group>"; };
+		0C1A0F222F3A000100000001 /* Localizable.strings */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = Localizable.strings; path = ko.lproj/Localizable.strings; sourceTree = "<group>"; };
+		0C1A0F232F3A000100000001 /* Localizable.strings */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = Localizable.strings; path = en.lproj/Localizable.strings; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFileSystemSynchronizedRootGroup section */
@@ -34,6 +42,7 @@
 				0B984AAD2F24902D002D1BF4 /* GoogleSignInSwift in Frameworks */,
 				0B984A9F2F248E9E002D1BF4 /* FirebaseAnalytics in Frameworks */,
 				0B984AAB2F24902D002D1BF4 /* GoogleSignIn in Frameworks */,
+				0BDCF9732F2E148100987439 /* StoreKit.framework in Frameworks */,
 				0B984AB22F249168002D1BF4 /* FirebaseFirestore in Frameworks */,
 				0B984AB02F249168002D1BF4 /* FirebaseAuth in Frameworks */,
 			);
@@ -48,6 +57,7 @@
 				0B4C3B742F20A4C500A73C1B /* snow_recorder */,
 				0B984AAE2F249168002D1BF4 /* Frameworks */,
 				0B4C3B732F20A4C500A73C1B /* Products */,
+				0BC44AA02F2E4B46008D451A /* Recovered References */,
 			);
 			sourceTree = "<group>";
 		};
@@ -62,8 +72,18 @@
 		0B984AAE2F249168002D1BF4 /* Frameworks */ = {
 			isa = PBXGroup;
 			children = (
+				0BDCF9722F2E148100987439 /* StoreKit.framework */,
 			);
 			name = Frameworks;
+			sourceTree = "<group>";
+		};
+		0BC44AA02F2E4B46008D451A /* Recovered References */ = {
+			isa = PBXGroup;
+			children = (
+				0C1A0F1C2F3A000100000001 /* InfoPlist.strings */,
+				0C1A0F212F3A000100000001 /* Localizable.strings */,
+			);
+			name = "Recovered References";
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -117,6 +137,7 @@
 			knownRegions = (
 				en,
 				Base,
+				ko,
 			);
 			mainGroup = 0B4C3B692F20A4C500A73C1B;
 			minimizedProjectReferenceProxies = 1;
@@ -139,6 +160,8 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				0C1A0F1B2F3A000100000001 /* InfoPlist.strings in Resources */,
+				0C1A0F202F3A000100000001 /* Localizable.strings in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -153,6 +176,27 @@
 			runOnlyForDeploymentPostprocessing = 0;
 		};
 /* End PBXSourcesBuildPhase section */
+
+/* Begin PBXVariantGroup section */
+		0C1A0F1C2F3A000100000001 /* InfoPlist.strings */ = {
+			isa = PBXVariantGroup;
+			children = (
+				0C1A0F1E2F3A000100000001 /* InfoPlist.strings */,
+				0C1A0F1D2F3A000100000001 /* InfoPlist.strings */,
+			);
+			name = InfoPlist.strings;
+			sourceTree = "<group>";
+		};
+		0C1A0F212F3A000100000001 /* Localizable.strings */ = {
+			isa = PBXVariantGroup;
+			children = (
+				0C1A0F232F3A000100000001 /* Localizable.strings */,
+				0C1A0F222F3A000100000001 /* Localizable.strings */,
+			);
+			name = Localizable.strings;
+			sourceTree = "<group>";
+		};
+/* End PBXVariantGroup section */
 
 /* Begin XCBuildConfiguration section */
 		0B4C3B7B2F20A4C600A73C1B /* Debug */ = {
@@ -288,10 +332,6 @@
 				INFOPLIST_FILE = "/Users/gimdoyun/Documents/snow_recorder/snow_recorder/snow-recorder-Info.plist";
 				INFOPLIST_KEY_CFBundleDisplayName = "Snow Record";
 				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.sports";
-				INFOPLIST_KEY_NSLocationAlwaysAndWhenInUseUsageDescription = "앱이 백그라운드 상태일 때도 활강 경로를 정확히 기록하기 위해 위치 권한이 필요합니다.";
-				INFOPLIST_KEY_NSLocationWhenInUseUsageDescription = "스키/보드 활강 기록을 위해 위치 권한이 필요합니다.";
-				INFOPLIST_KEY_NSMotionUsageDescription = "활강 분석 및 주행 점수 계산을 위해 모션 데이터가 필요합니다.";
-				INFOPLIST_KEY_NSPhotoLibraryAddUsageDescription = "공유 이미지를 사진 앨범에 저장하기 위해 권한이 필요합니다.";
 				"INFOPLIST_KEY_UIApplicationSceneManifest_Generation[sdk=iphoneos*]" = YES;
 				"INFOPLIST_KEY_UIApplicationSceneManifest_Generation[sdk=iphonesimulator*]" = YES;
 				"INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents[sdk=iphoneos*]" = YES;
@@ -340,10 +380,6 @@
 				INFOPLIST_FILE = "/Users/gimdoyun/Documents/snow_recorder/snow_recorder/snow-recorder-Info.plist";
 				INFOPLIST_KEY_CFBundleDisplayName = "Snow Record";
 				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.sports";
-				INFOPLIST_KEY_NSLocationAlwaysAndWhenInUseUsageDescription = "앱이 백그라운드 상태일 때도 활강 경로를 정확히 기록하기 위해 위치 권한이 필요합니다.";
-				INFOPLIST_KEY_NSLocationWhenInUseUsageDescription = "스키/보드 활강 기록을 위해 위치 권한이 필요합니다.";
-				INFOPLIST_KEY_NSMotionUsageDescription = "활강 분석 및 주행 점수 계산을 위해 모션 데이터가 필요합니다.";
-				INFOPLIST_KEY_NSPhotoLibraryAddUsageDescription = "공유 이미지를 사진 앨범에 저장하기 위해 권한이 필요합니다.";
 				"INFOPLIST_KEY_UIApplicationSceneManifest_Generation[sdk=iphoneos*]" = YES;
 				"INFOPLIST_KEY_UIApplicationSceneManifest_Generation[sdk=iphonesimulator*]" = YES;
 				"INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents[sdk=iphoneos*]" = YES;

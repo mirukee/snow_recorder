@@ -455,6 +455,18 @@ extension RunSession {
         var timelineEvents: [RunSession.TimelineEvent] = []
         
         var currentTime = startTime
+
+        func localText(ko: String, en: String) -> String {
+            let preferred = UserDefaults.standard.string(forKey: "preferred_language") ?? "system"
+            switch preferred {
+            case "ko":
+                return ko
+            case "en":
+                return en
+            default:
+                return Locale.autoupdatingCurrent.languageCode == "en" ? en : ko
+            }
+        }
         
         // --- Helper for interpolation ---
         func addSegment(from start: (lat: Double, lon: Double), to end: (lat: Double, lon: Double), duration: TimeInterval, type: RunSession.TimelineEvent.EventType, name: String) {
@@ -510,13 +522,13 @@ extension RunSession {
         let victoriaTop = (lat: 37.2150, lon: 128.8400)
         
         // 1. Valley Hub Start > Walk to Hera Lift (5 min)
-        addSegment(from: valleyHub, to: heraStation, duration: 300, type: .unknown, name: "이동")
+        addSegment(from: valleyHub, to: heraStation, duration: 300, type: .unknown, name: localText(ko: "이동", en: "Move"))
         
         // 2. Hera Lift (10 min)
-        addSegment(from: heraStation, to: heraTop, duration: 600, type: .lift, name: "헤라 리프트")
+        addSegment(from: heraStation, to: heraTop, duration: 600, type: .lift, name: localText(ko: "헤라 리프트", en: "Hera Lift"))
         
         // 3. Hera 3 Run (5 min)
-        addSegment(from: heraTop, to: valleyHub, duration: 300, type: .riding, name: "헤라 3")
+        addSegment(from: heraTop, to: valleyHub, duration: 300, type: .riding, name: localText(ko: "헤라 3", en: "Hera 3"))
         
         // 4. Rest at Valley Hub (10 min) - No movement (repeat same coord)
         // Since we process segments by distance in real app, we might check if duplicate coords are issue.
@@ -525,17 +537,17 @@ extension RunSession {
         // Let's create a *timeline event* but NOT add many points, maybe just one or two to simulate drift.
         let restStart = currentTime
         currentTime = currentTime.addingTimeInterval(600) // +10 mins
-        timelineEvents.append(RunSession.TimelineEvent(type: .rest, startTime: restStart, endTime: currentTime, detail: "휴식"))
+        timelineEvents.append(RunSession.TimelineEvent(type: .rest, startTime: restStart, endTime: currentTime, detail: localText(ko: "휴식", en: "Rest")))
         // Add minimal drift points for heatmap continuity? No, rest is gap.
         
         // 5. Walk to Victoria Lift (2 min)
-        addSegment(from: valleyHub, to: victoriaStation, duration: 120, type: .unknown, name: "이동")
+        addSegment(from: valleyHub, to: victoriaStation, duration: 120, type: .unknown, name: localText(ko: "이동", en: "Move"))
         
         // 6. Victoria Lift (15 min)
-        addSegment(from: victoriaStation, to: victoriaTop, duration: 900, type: .lift, name: "빅토리아 리프트")
+        addSegment(from: victoriaStation, to: victoriaTop, duration: 900, type: .lift, name: localText(ko: "빅토리아 리프트", en: "Victoria Lift"))
         
         // 7. Victoria 1 Run (Top -> Valley Hub) (7 min)
-        addSegment(from: victoriaTop, to: valleyHub, duration: 420, type: .riding, name: "빅토리아 1")
+        addSegment(from: victoriaTop, to: valleyHub, duration: 420, type: .riding, name: localText(ko: "빅토리아 1", en: "Victoria 1"))
         
         
         // Create Session
@@ -548,8 +560,8 @@ extension RunSession {
             avgSpeed: currentSpeeds.reduce(0, +) / Double(max(1, currentSpeeds.count)),
             verticalDrop: 600,
             runCount: 2,
-            slopeName: "헤라 3",
-            riddenSlopes: ["헤라 3": 1, "빅토리아 1": 1],
+            slopeName: localText(ko: "헤라 3", en: "Hera 3"),
+            riddenSlopes: [localText(ko: "헤라 3", en: "Hera 3"): 1, localText(ko: "빅토리아 1", en: "Victoria 1"): 1],
             locationName: "HIGH1 RESORT",
             countryCode: "KR",
             routeCoordinates: currentCoordinates,

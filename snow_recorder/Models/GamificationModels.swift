@@ -130,6 +130,7 @@ struct GamificationProfile {
     var tier: Tier
     var stats: UserStats
     var badges: [Badge]
+    var featuredBadgeTitles: [String]
     var nickname: String
     var bio: String?
     var instagramId: String?

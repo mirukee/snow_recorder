@@ -106,7 +106,7 @@ struct HistoryView: View {
                                     Button(role: .destructive) {
                                         deleteSession(session)
                                     } label: {
-                                        Label("삭제하기", systemImage: "trash")
+                                        Label("history.delete", systemImage: "trash")
                                     }
                                 }
                             }

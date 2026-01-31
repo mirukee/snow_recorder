@@ -80,7 +80,7 @@ struct LoginView: View {
                     Button(action: {
                         authManager.continueAsGuest()
                     }) {
-                        Text("Guest Mode (기록만 하기)")
+                        Text("login.guest_mode")
                             .font(.subheadline)
                             .foregroundColor(.gray)
                             .underline()

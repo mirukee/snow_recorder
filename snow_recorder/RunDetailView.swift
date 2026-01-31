@@ -6,6 +6,7 @@ import CoreLocation
 
 struct RunDetailView: View {
     @Environment(\.dismiss) var dismiss
+    @EnvironmentObject var storeManager: StoreManager
     let session: RunSession
     
     // State for Share Preview
@@ -24,6 +25,8 @@ struct RunDetailView: View {
     @State private var isTimelineExpanded = false
     @State private var selectedRunMetric: RunSession.RunMetric?
     @State private var selectedRunAnalysis: RunSession.RunMetric?
+    @State private var showPaywall = false
+    @State private var showAnalysisPaywall = false
     
     private let timelineNoiseThreshold: TimeInterval = 40.0
     private let timelineNoiseVerticalDrop: Double = 30.0
@@ -53,8 +56,16 @@ struct RunDetailView: View {
         
         var description: String {
             switch self {
-            case .edge: return "\"얼마나 날카롭게 베고 나갔는가?\"\n\n당신의 턴이 설면을 얼마나 견고하게 파고들었는지 분석한 '카빙(Carving) 완성도' 지표입니다.\n\n분석 기준: 턴의 깊이, 엣징 각도(G-Force), 슬립(미끄러짐) 최소화\n\nTip: 데크가 눈에 박히는 느낌에 집중하고, 과감하게 엣지를 세울수록 점수가 올라갑니다."
-            case .flow: return "\"얼마나 물 흐르듯 내려왔는가?\"\n\n주행의 리듬과 속도 유지를 분석한 '주행 안정성(Smoothness)' 지표입니다.\n\n분석 기준: 속도 유지력, 턴 연결의 부드러움, 불필요한 급제동 여부\n\nTip: 턴과 턴 사이가 끊기지 않게 연결하고, 일정한 리듬을 유지할수록 점수가 올라갑니다."
+            case .edge:
+                return NSLocalizedString(
+                    "run_detail.edge_desc",
+                    comment: "런 디테일 엣지 스코어 설명"
+                )
+            case .flow:
+                return NSLocalizedString(
+                    "run_detail.flow_desc",
+                    comment: "런 디테일 플로우 스코어 설명"
+                )
             }
         }
     }
@@ -169,12 +180,26 @@ struct RunDetailView: View {
                 return RunAnalysisView.Point(x: absoluteDate, y: sample.gMax)
             }
             
-            RunAnalysisView(
-                runMetric: metric, 
-                locationName: session.locationName, 
-                telemetryPoints: points,
-                gForcePoints: gPoints
-            )
+            ZStack {
+                RunAnalysisView(
+                    runMetric: metric, 
+                    locationName: session.locationName, 
+                    telemetryPoints: points,
+                    gForcePoints: gPoints
+                )
+                .blur(radius: storeManager.isPro ? 0 : 6)
+                
+                if !storeManager.isPro {
+                    AnalysisLockOverlay(
+                        accent: primaryColor,
+                        onClose: { selectedRunAnalysis = nil },
+                        onUnlock: { showAnalysisPaywall = true }
+                    )
+                }
+            }
+            .sheet(isPresented: $showAnalysisPaywall) {
+                PaywallView()
+            }
         }
         .fullScreenCover(item: $selectedRunMetric) { metric in
             RunMetricDetailSheet(
@@ -183,6 +208,9 @@ struct RunDetailView: View {
                 speedSeries: runSpeedSeries(for: metric),
                 locationName: session.locationName
             )
+        }
+        .sheet(isPresented: $showPaywall) {
+            PaywallView()
         }
         .sheet(item: $gpxFileURL) { identifiableURL in
             ShareSheet(activityItems: [identifiableURL.url])
@@ -222,7 +250,7 @@ struct RunDetailView: View {
             Alert(
                 title: Text(info.title),
                 message: Text(info.description),
-                dismissButton: .default(Text("확인"))
+                dismissButton: .default(Text("ranking.tech_guide_ok"))
             )
         }
     }
@@ -481,7 +509,7 @@ struct RunDetailView: View {
     
     private var metricsGrid: some View {
         LazyVGrid(columns: [GridItem(.flexible()), GridItem(.flexible())], spacing: 12) {
-            // Vertical Drop (Span 2)
+            // 버티컬 드롭
             verticalDropCard
                 .gridCellColumns(2)
             
@@ -546,25 +574,28 @@ struct RunDetailView: View {
                 
                 Spacer()
                 
-                Button(action: { selectedRunAnalysis = metric }) {
+                Button(action: {
+                    selectedRunAnalysis = metric
+                }) {
                     HStack(spacing: 4) {
-                        Image(systemName: "waveform.path.ecg")
-                            .font(.system(size: 10))
-                        Text("ANALYSIS")
-                            .font(.system(size: 10, weight: .bold))
-                            .tracking(1)
+                        Image(systemName: storeManager.isPro ? "waveform.path.ecg" : "lock.fill")
+                            .font(.system(size: 12, weight: .bold))
                     }
-                    .foregroundColor(primaryColor)
-                    .padding(.horizontal, 8)
-                    .padding(.vertical, 5)
-                    .background(primaryColor.opacity(0.1))
+                    .foregroundColor(storeManager.isPro ? primaryColor : .yellow)
+                    .padding(6)
+                    .background((storeManager.isPro ? primaryColor.opacity(0.12) : Color.yellow.opacity(0.14)))
                     .cornerRadius(8)
                     .overlay(
                         RoundedRectangle(cornerRadius: 8)
-                            .stroke(primaryColor.opacity(0.3), lineWidth: 1)
+                            .stroke((storeManager.isPro ? primaryColor.opacity(0.3) : Color.yellow.opacity(0.5)), lineWidth: 1)
                     )
                 }
             }
+            
+            Text("VIEW DETAILS")
+                .font(.system(size: 10, weight: .bold))
+                .tracking(1.2)
+                .foregroundColor(.gray)
         }
         .padding(14)
         .background(surfaceCard)
@@ -755,43 +786,31 @@ struct RunDetailView: View {
     }
     
     private var verticalDropCard: some View {
-        HStack {
-            VStack(alignment: .leading, spacing: 4) {
-                HStack {
-                    Image(systemName: "arrow.down.to.line")
-                        .font(.caption)
-                        .foregroundColor(.gray)
-                    Text("VERTICAL DROP")
-                        .font(.system(size: 10, weight: .bold))
-                        .foregroundColor(.gray)
-                        .tracking(2)
-                }
-                
-                HStack(alignment: .lastTextBaseline, spacing: 4) {
-                    Text("\(Int(session.verticalDrop))")
-                        .font(.system(size: 36, weight: .bold)) // Space Grotesk
-                        .foregroundColor(.white)
-                        .shadow(color: primaryColor.opacity(0.3), radius: 8)
-                    Text("M")
-                        .font(.system(size: 14, weight: .medium))
-                        .foregroundColor(.gray)
-                }
+        VStack(alignment: .leading) {
+            HStack {
+                Text("VERTICAL DROP")
+                    .font(.system(size: 10, weight: .bold))
+                    .foregroundColor(.gray)
+                    .tracking(1)
+                Spacer()
+                Image(systemName: "arrow.down.to.line")
+                    .font(.system(size: 14))
+                    .foregroundColor(.gray.opacity(0.7))
             }
             
             Spacer()
             
-            // Visual Bars Decoration
-            HStack(alignment: .bottom, spacing: 4) {
-                ForEach(0..<5) { i in
-                    RoundedRectangle(cornerRadius: 2)
-                        .fill(i == 3 ? primaryColor : primaryColor.opacity(Double(i+2)/10.0))
-                        .frame(width: 6, height: CGFloat([20, 35, 50, 65, 40][i]))
-                        .shadow(color: i == 3 ? primaryColor.opacity(0.8) : .clear, radius: 5)
-                }
+            HStack(alignment: .lastTextBaseline, spacing: 2) {
+                Text("\(Int(session.verticalDrop))")
+                    .font(.system(size: 24, weight: .bold, design: .monospaced))
+                    .foregroundColor(.white)
+                Text("M")
+                    .font(.system(size: 10, weight: .medium))
+                    .foregroundColor(.gray)
             }
-            .opacity(0.8)
         }
-        .padding(20)
+        .padding(16)
+        .frame(height: 100)
         .background(surfaceCard)
         .cornerRadius(16)
         .overlay(
@@ -799,6 +818,41 @@ struct RunDetailView: View {
                 .stroke(Color.white.opacity(0.1), lineWidth: 1)
         )
         .shadow(color: .black.opacity(0.2), radius: 10)
+    }
+    
+    private var compareRunsCard: some View {
+        Button(action: { showPaywall = true }) {
+            HStack(spacing: 12) {
+                Image(systemName: "chart.xyaxis.line")
+                    .font(.system(size: 18, weight: .bold))
+                    .foregroundColor(primaryColor)
+                    .padding(10)
+                    .background(Circle().fill(Color.white.opacity(0.06)))
+                
+                VStack(alignment: .leading, spacing: 4) {
+                    Text("COMPARE RUNS")
+                        .font(.system(size: 12, weight: .bold))
+                        .tracking(1)
+                        .foregroundColor(.white)
+                    Text("이번 런 vs 시즌 평균 비교")
+                        .font(.system(size: 10, weight: .medium))
+                        .foregroundColor(.gray)
+                }
+                
+                Spacer()
+                
+                Image(systemName: "lock.fill")
+                    .font(.system(size: 12, weight: .bold))
+                    .foregroundColor(.yellow)
+            }
+            .padding(14)
+            .background(surfaceCard)
+            .cornerRadius(14)
+            .overlay(
+                RoundedRectangle(cornerRadius: 14)
+                    .stroke(Color.white.opacity(0.08), lineWidth: 1)
+            )
+        }
     }
     
     private func metricCardBento(title: String, value: String, unit: String, icon: String) -> some View {
@@ -908,6 +962,11 @@ struct RunDetailView: View {
                 }
             }
             .padding(.horizontal)
+            
+            if !storeManager.isPro {
+                compareRunsCard
+                    .padding(.horizontal)
+            }
         }
     }
     
@@ -1256,6 +1315,7 @@ enum HeatmapMode {
 
 struct FullScreenMapView: View {
     @Environment(\.dismiss) var dismiss
+    @EnvironmentObject var storeManager: StoreManager
     let coordinates: [CLLocationCoordinate2D]
     let speeds: [Double]
     let maxSpeed: Double
@@ -1278,7 +1338,8 @@ struct FullScreenMapView: View {
     @State private var showStatusSegments: Bool = true
     @State private var mapViewMode: MapViewMode = .twoD
     @State private var heatmapMode: HeatmapMode = .off
-    @State private var isProUnlocked: Bool = FeatureFlags.proFeaturesEnabled
+    @State private var showPaywall: Bool = false
+    // Removed local isProUnlocked state
     @State private var mapControlAction: MapControlAction? = nil
     @State private var scrubDragStart: Double? = nil
     private let scrubSensitivity: Double = 0.6 // 스크럽 이동 민감도(낮을수록 타임라인 이동량 감소)
@@ -1355,6 +1416,9 @@ struct FullScreenMapView: View {
             }
             
             mapControls
+        }
+        .sheet(isPresented: $showPaywall) {
+            PaywallView()
         }
     }
     
@@ -1862,12 +1926,12 @@ struct FullScreenMapView: View {
                             
                             ViewModeRow(
                                 selectedMode: $mapViewMode,
-                                isProUnlocked: isProUnlocked,
+                                isProUnlocked: storeManager.isPro,
                                 accent: neonGreen
                             )
                         }
                         
-                        // Heatmap Section (Pro)
+                        // Heatmap Section (Base)
                         VStack(alignment: .leading, spacing: 10) {
                             Text("HEATMAP")
                                 .font(.system(size: 10, weight: .bold))
@@ -1882,30 +1946,6 @@ struct FullScreenMapView: View {
                                     mode: .off,
                                     selectedMode: $heatmapMode,
                                     isProUnlocked: true,
-                                    accent: neonGreen
-                                )
-                                HeatmapRow(
-                                    title: "SPEED",
-                                    icon: "speedometer",
-                                    mode: .speed,
-                                    selectedMode: $heatmapMode,
-                                    isProUnlocked: isProUnlocked,
-                                    accent: neonGreen
-                                )
-                                HeatmapRow(
-                                    title: "G-FORCE",
-                                    icon: "waveform.path.ecg",
-                                    mode: .gForce,
-                                    selectedMode: $heatmapMode,
-                                    isProUnlocked: isProUnlocked,
-                                    accent: neonGreen
-                                )
-                                HeatmapRow(
-                                    title: "EDGE/FLOW",
-                                    icon: "sparkles",
-                                    mode: .edgeFlow,
-                                    selectedMode: $heatmapMode,
-                                    isProUnlocked: isProUnlocked,
                                     accent: neonGreen
                                 )
                             }
@@ -1943,31 +1983,23 @@ struct FullScreenMapView: View {
                             .padding(.bottom, 10)
                             .padding(.leading, 4)
                             
-                            // Locked Rows
                             VStack(spacing: 8) {
-                                ProLayerRow(title: "Flow", locked: true) {
-                                    // Dummy visual for flow
-                                    Path { path in
-                                        path.move(to: CGPoint(x: 0, y: 15))
-                                        path.addCurve(to: CGPoint(x: 40, y: 5), control1: CGPoint(x: 15, y: 5), control2: CGPoint(x: 25, y: 20))
-                                        path.addLine(to: CGPoint(x: 40, y: 20))
-                                        path.addLine(to: CGPoint(x: 0, y: 20))
-                                        path.closeSubpath()
-                                    }
-                                    .fill(LinearGradient(colors: [neonGreen, neonGreen.opacity(0.2)], startPoint: .top, endPoint: .bottom))
-                                    .opacity(0.5)
-                                }
-                                
-                                ProLayerRow(title: "G-Force", locked: true) {
-                                    // Dummy visual for g-force
-                                    HStack(alignment: .bottom, spacing: 2) {
-                                        Capsule().fill(Color.red).frame(width: 4, height: 12)
-                                        Capsule().fill(Color.yellow).frame(width: 4, height: 16)
-                                        Capsule().fill(neonGreen).frame(width: 4, height: 10)
-                                        Capsule().fill(Color.blue).frame(width: 4, height: 14)
-                                    }
-                                    .opacity(0.8)
-                                }
+                                HeatmapRow(
+                                    title: "SPEED",
+                                    icon: "speedometer",
+                                    mode: .speed,
+                                    selectedMode: $heatmapMode,
+                                    isProUnlocked: storeManager.isPro,
+                                    accent: neonGreen
+                                )
+                                HeatmapRow(
+                                    title: "G-FORCE",
+                                    icon: "waveform.path.ecg",
+                                    mode: .gForce,
+                                    selectedMode: $heatmapMode,
+                                    isProUnlocked: storeManager.isPro,
+                                    accent: neonGreen
+                                )
                             }
                             .padding(4)
                             .background(Color.white.opacity(0.05))
@@ -1978,7 +2010,7 @@ struct FullScreenMapView: View {
                             )
                             
                             // Unlock Button
-                            Button(action: {}) {
+                            Button(action: { showPaywall = true }) {
                                 HStack(spacing: 4) {
                                     Text("UNLOCK ALL PRO FEATURES")
                                         .font(.system(size: 10, weight: .black))
@@ -2517,6 +2549,73 @@ private struct MapControlButton: View {
                         .stroke(Color.white.opacity(0.08), lineWidth: 1)
                 )
                 .shadow(color: accent.opacity(0.4), radius: 6)
+        }
+    }
+}
+
+private struct AnalysisLockOverlay: View {
+    let accent: Color
+    let onClose: () -> Void
+    let onUnlock: () -> Void
+    
+    var body: some View {
+        ZStack {
+            Color.black.opacity(0.45)
+                .ignoresSafeArea()
+                .allowsHitTesting(false)
+            
+            VStack {
+                HStack {
+                    Button(action: onClose) {
+                        Image(systemName: "xmark")
+                            .font(.system(size: 14, weight: .bold))
+                            .foregroundColor(.white)
+                            .frame(width: 40, height: 40)
+                            .background(Color.white.opacity(0.08))
+                            .clipShape(Circle())
+                    }
+                    Spacer()
+                }
+                .padding(.horizontal, 20)
+                .padding(.top, 16)
+                
+                Spacer()
+            }
+            
+            VStack(spacing: 12) {
+                Image(systemName: "lock.fill")
+                    .font(.system(size: 22, weight: .bold))
+                    .foregroundColor(.yellow)
+                Text("PRO ANALYSIS")
+                    .font(.system(size: 14, weight: .bold))
+                    .tracking(2)
+                    .foregroundColor(.white)
+                Text("잠금 해제 후 상세 분석 확인")
+                    .font(.system(size: 12, weight: .medium))
+                    .foregroundColor(.gray)
+                Button(action: onUnlock) {
+                    HStack(spacing: 6) {
+                        Text("UNLOCK PRO")
+                            .font(.system(size: 12, weight: .bold))
+                            .tracking(1)
+                        Image(systemName: "arrow.right")
+                            .font(.system(size: 12, weight: .bold))
+                    }
+                    .foregroundColor(.black)
+                    .padding(.horizontal, 16)
+                    .padding(.vertical, 10)
+                    .background(accent)
+                    .cornerRadius(10)
+                }
+            }
+            .padding(.horizontal, 20)
+            .padding(.vertical, 16)
+            .background(Color.black.opacity(0.7))
+            .cornerRadius(14)
+            .overlay(
+                RoundedRectangle(cornerRadius: 14)
+                    .stroke(Color.white.opacity(0.12), lineWidth: 1)
+            )
         }
     }
 }

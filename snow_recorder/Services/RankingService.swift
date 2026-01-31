@@ -27,6 +27,7 @@ class RankingService: ObservableObject {
     @Published var isLoadingLeaderboard: Bool = false
     @Published var lastErrorMessage: String? // Debug Info
     @Published var lastLeaderboardUpdatedAt: Date?
+    @Published private(set) var hasPendingUpload: Bool = false
     
     private let db = Firestore.firestore()
     private let kstTimeZone = TimeZone(identifier: "Asia/Seoul")!
@@ -38,12 +39,21 @@ class RankingService: ObservableObject {
     private let leaderboardRefreshInterval: TimeInterval = 3600
     private let leaderboardRetryBaseDelay: TimeInterval = 15
     private let leaderboardMaxRetryCount: Int = 2
+    private let leaderboardFetchJitterRange: ClosedRange<TimeInterval> = 0...300
     private let manualSyncDailyLimit: Int = 2
     private let manualSyncRetryDelay: TimeInterval = 10
     private let manualSyncFetchDelay: TimeInterval = 1.0
     private let manualSyncCountKey = "ranking_manual_sync_count"
     private let manualSyncDayKey = "ranking_manual_sync_day"
     private let uploadSnapshotKey = "ranking_last_upload_snapshot"
+    private let pendingUploadCooldown: TimeInterval = 60 * 30
+    private let pendingUploadJitterRange: ClosedRange<TimeInterval> = 0...240
+    private let autoUploadDailyLimit: Int = 3
+    private let autoUploadCountKey = "ranking_auto_upload_count"
+    private let autoUploadDayKey = "ranking_auto_upload_day"
+    private let pendingUploadFlagKey = "ranking_pending_upload"
+    private let pendingUploadSinceKey = "ranking_pending_upload_since"
+    private var pendingUploadWorkItem: DispatchWorkItem?
     
     // 마지막으로 요청한 리더보드 필터(업로드 직후 동일 조건으로 갱신하기 위함)
     private var lastFetchCycle: RankingCycle?
@@ -65,7 +75,19 @@ class RankingService: ObservableObject {
     
     private init() {
         // 초기화 시 더미/로컬 데이터 로드
-        self.myProfile = RankingProfile(userId: Auth.auth().currentUser?.uid ?? "guest", userName: Auth.auth().currentUser?.displayName ?? "Guest")
+        self.myProfile = RankingProfile(userId: Auth.auth().currentUser?.uid ?? "guest", userName: Auth.auth().currentUser?.displayName ?? "skier")
+        self.hasPendingUpload = userDefaults.bool(forKey: pendingUploadFlagKey)
+    }
+
+    // MARK: - 닉네임 동기화
+
+    func updateUserNameIfNeeded(_ name: String) {
+        let trimmed = name.trimmingCharacters(in: .whitespacesAndNewlines)
+        guard !trimmed.isEmpty else { return }
+        guard myProfile.userName != trimmed else { return }
+        var updated = myProfile
+        updated.userName = trimmed
+        myProfile = updated
     }
 
     private struct RunSessionSnapshot {
@@ -96,6 +118,7 @@ class RankingService: ObservableObject {
     /// 런 세션 종료 시 호출되어 랭킹 데이터를 업데이트하고 서버에 업로드
     func processRun(latestSession: RunSession, sessions: [RunSession]) {
         guard isRankingEnabled else { return }
+        guard Auth.auth().currentUser != nil else { return }
         guard isValidRun(latestSession) else { return }
         guard isSaneSession(latestSession) else {
             print("⚠️ 랭킹 업로드 스킵: 비정상 세션 감지")
@@ -166,27 +189,31 @@ class RankingService: ObservableObject {
             }
             
             var state = self.boardFetchStates[boardId] ?? BoardFetchState()
-            if let fetchedUpdatedAt, let lastAccepted = state.lastAcceptedUpdatedAt, fetchedUpdatedAt <= lastAccepted {
-                self.isLoadingLeaderboard = false
-                self.scheduleLeaderboardRetry(
-                    boardId: boardId,
-                    cycle: cycle,
-                    metric: metric,
-                    scope: scope,
-                    resortKey: resortKey
-                )
-                completion?(false)
-                return
-            }
-            
+            let hasCache = self.boardLeaderboardCache[boardId]?.entries.isEmpty == false
+
             if let fetchedUpdatedAt {
                 self.lastLeaderboardUpdatedAt = fetchedUpdatedAt
-                state.lastAcceptedUpdatedAt = fetchedUpdatedAt
                 state.nextAllowedFetchAt = self.nextAllowedFetchTime(from: fetchedUpdatedAt)
-                state.retryCount = 0
-                state.pendingRetry?.cancel()
-                state.pendingRetry = nil
+            } else if state.nextAllowedFetchAt == nil {
+                state.nextAllowedFetchAt = Date().addingTimeInterval(self.leaderboardRefreshInterval + Double.random(in: self.leaderboardFetchJitterRange))
+            }
+
+            let shouldFetchShard: Bool
+            if force || !hasCache {
+                shouldFetchShard = true
+            } else if let fetchedUpdatedAt, let lastAccepted = state.lastAcceptedUpdatedAt {
+                shouldFetchShard = fetchedUpdatedAt > lastAccepted
+            } else if fetchedUpdatedAt != nil {
+                shouldFetchShard = true
+            } else {
+                shouldFetchShard = true
+            }
+
+            if !shouldFetchShard {
                 self.boardFetchStates[boardId] = state
+                self.isLoadingLeaderboard = false
+                completion?(true)
+                return
             }
             
             boardRef.collection("shards").document("page_1").getDocument { [weak self] shardDoc, shardError in
@@ -233,11 +260,13 @@ class RankingService: ObservableObject {
                 self.leaderboard = entries
                 self.boardLeaderboardCache[boardId] = BoardLeaderboardCache(entries: entries, updatedAt: fetchedUpdatedAt)
                 
-                if fetchedUpdatedAt == nil {
-                    var state = self.boardFetchStates[boardId] ?? BoardFetchState()
-                    state.nextAllowedFetchAt = Date().addingTimeInterval(self.leaderboardRefreshInterval)
-                    self.boardFetchStates[boardId] = state
+                if let fetchedUpdatedAt {
+                    state.lastAcceptedUpdatedAt = fetchedUpdatedAt
+                    state.retryCount = 0
+                    state.pendingRetry?.cancel()
+                    state.pendingRetry = nil
                 }
+                self.boardFetchStates[boardId] = state
                 completion?(true)
             }
         }
@@ -303,6 +332,49 @@ class RankingService: ObservableObject {
         let count = userDefaults.integer(forKey: manualSyncCountKey)
         return max(0, manualSyncDailyLimit - count)
     }
+    
+    // MARK: - 지연 업로드 관리
+    
+    private func markPendingUpload() {
+        hasPendingUpload = true
+        userDefaults.set(true, forKey: pendingUploadFlagKey)
+        userDefaults.set(Date().timeIntervalSince1970, forKey: pendingUploadSinceKey)
+    }
+    
+    private func clearPendingUpload() {
+        hasPendingUpload = false
+        userDefaults.removeObject(forKey: pendingUploadFlagKey)
+        userDefaults.removeObject(forKey: pendingUploadSinceKey)
+        pendingUploadWorkItem?.cancel()
+        pendingUploadWorkItem = nil
+    }
+    
+    private func consumeAutoUploadQuotaIfPossible() -> Bool {
+        let dayKey = currentKSTDayKey()
+        let storedDay = userDefaults.string(forKey: autoUploadDayKey)
+        var count = userDefaults.integer(forKey: autoUploadCountKey)
+        if storedDay != dayKey {
+            userDefaults.set(dayKey, forKey: autoUploadDayKey)
+            count = 0
+        }
+        guard count < autoUploadDailyLimit else { return false }
+        userDefaults.set(count + 1, forKey: autoUploadCountKey)
+        return true
+    }
+    
+    private func scheduleDeferredUpload(sessions: [RunSession], allowEmptyUpload: Bool) {
+        guard isRankingEnabled else { return }
+        pendingUploadWorkItem?.cancel()
+        let delay = pendingUploadCooldown + Double.random(in: pendingUploadJitterRange)
+        let workItem = DispatchWorkItem { [weak self] in
+            guard let self else { return }
+            guard self.hasPendingUpload else { return }
+            guard self.consumeAutoUploadQuotaIfPossible() else { return }
+            self.recalculateStats(from: sessions, uploadPolicy: .smart, forceUpload: false, allowEmptyUpload: allowEmptyUpload)
+        }
+        pendingUploadWorkItem = workItem
+        statsQueue.asyncAfter(deadline: .now() + delay, execute: workItem)
+    }
 
     @discardableResult
     func manualSync(
@@ -316,7 +388,7 @@ class RankingService: ObservableObject {
         
         statsQueue.async { [weak self] in
             guard let self else { return }
-            self.recalculateStats(from: sessions, uploadPolicy: .smart)
+            self.recalculateStats(from: sessions, uploadPolicy: .smart, forceUpload: true, allowEmptyUpload: true)
             DispatchQueue.main.asyncAfter(deadline: .now() + self.manualSyncFetchDelay) {
                 self.performManualFetch(
                     cycle: cycle,
@@ -347,43 +419,42 @@ class RankingService: ObservableObject {
     // 하지만 View는 이제 subscribed to $leaderboard
     
     /// SwiftData에 저장된 모든 세션을 기반으로 프로필 재계산 및 서버 업로드
-    func recalculateStats(from sessions: [RunSession], uploadPolicy: UploadPolicy = .none) {
+    func recalculateStats(from sessions: [RunSession], uploadPolicy: UploadPolicy = .none, forceUpload: Bool = false, allowEmptyUpload: Bool = false) {
         let snapshots = makeSnapshots(from: sessions)
-        recalculateStats(from: snapshots, uploadPolicy: uploadPolicy)
+        recalculateStats(from: snapshots, uploadPolicy: uploadPolicy, forceUpload: forceUpload, allowEmptyUpload: allowEmptyUpload)
     }
 
-    func scheduleRecalculateStats(from sessions: [RunSession], uploadPolicy: UploadPolicy = .none) {
+    func scheduleRecalculateStats(from sessions: [RunSession], uploadPolicy: UploadPolicy = .none, forceUpload: Bool = false, allowEmptyUpload: Bool = false) {
         let snapshots = makeSnapshotsSafely(from: sessions)
-        scheduleRecalculateStats(from: snapshots, uploadPolicy: uploadPolicy)
+        scheduleRecalculateStats(from: snapshots, uploadPolicy: uploadPolicy, forceUpload: forceUpload, allowEmptyUpload: allowEmptyUpload)
     }
 
     func syncAfterLocalChange(sessions: [RunSession]) {
+        guard isRankingEnabled else { return }
+        guard Auth.auth().currentUser != nil else { return }
         let snapshots = makeSnapshotsSafely(from: sessions)
         let hasValidSessions = snapshots.contains { isValidRun($0) && $0.isDomestic && isWithinSeason($0.startTime) }
-
-        if hasValidSessions {
-            scheduleRecalculateStats(from: snapshots, uploadPolicy: .smart)
-        } else {
-            scheduleRecalculateStats(from: snapshots, uploadPolicy: .none)
-            clearProfileOnServer()
-            clearLastUploadedTechnical()
-            clearLastUploadedSnapshot()
+        scheduleRecalculateStats(from: snapshots, uploadPolicy: .none)
+        let allowEmptyUpload = !hasValidSessions && loadLastUploadedSnapshot() != nil
+        if hasValidSessions || allowEmptyUpload {
+            markPendingUpload()
+            scheduleDeferredUpload(sessions: sessions, allowEmptyUpload: allowEmptyUpload)
         }
     }
 
-    private func scheduleRecalculateStats(from snapshots: [RunSessionSnapshot], uploadPolicy: UploadPolicy = .none) {
+    private func scheduleRecalculateStats(from snapshots: [RunSessionSnapshot], uploadPolicy: UploadPolicy = .none, forceUpload: Bool = false, allowEmptyUpload: Bool = false) {
         pendingRecalcWorkItem?.cancel()
         let workItem = DispatchWorkItem { [weak self] in
-            self?.recalculateStats(from: snapshots, uploadPolicy: uploadPolicy)
+            self?.recalculateStats(from: snapshots, uploadPolicy: uploadPolicy, forceUpload: forceUpload, allowEmptyUpload: allowEmptyUpload)
         }
         pendingRecalcWorkItem = workItem
         statsQueue.asyncAfter(deadline: .now() + recalcDebounce, execute: workItem)
     }
 
-    private func recalculateStats(from snapshots: [RunSessionSnapshot], uploadPolicy: UploadPolicy = .none) {
+    private func recalculateStats(from snapshots: [RunSessionSnapshot], uploadPolicy: UploadPolicy = .none, forceUpload: Bool = false, allowEmptyUpload: Bool = false) {
         guard let user = Auth.auth().currentUser else { return }
         
-        var newProfile = RankingProfile(userId: user.uid, userName: user.displayName ?? "Skier")
+        var newProfile = RankingProfile(userId: user.uid, userName: user.displayName ?? "skier")
         print("🔄 Recalculating Stats for user: \(newProfile.userId)")
         
         let now = Date()
@@ -450,10 +521,11 @@ class RankingService: ObservableObject {
         
         DispatchQueue.main.async {
             self.myProfile = newProfile
-            if uploadPolicy == .smart, !validSessions.isEmpty {
+            if uploadPolicy == .smart, (!validSessions.isEmpty || allowEmptyUpload) {
                 let uploadSnapshot = self.makeUploadSnapshot(from: newProfile)
-                guard self.hasProfileChange(uploadSnapshot) else {
+                guard forceUpload || self.hasProfileChange(uploadSnapshot) else {
                     print("⏭️ 랭킹 업로드 스킵: 변경 없음")
+                    self.clearPendingUpload()
                     return
                 }
                 let technicalSnapshot = self.makeTechnicalSnapshot(from: newProfile)
@@ -570,6 +642,7 @@ class RankingService: ObservableObject {
                 print("✅ Ranking Profile Uploaded Successfully")
                 DispatchQueue.main.async {
                     self?.lastErrorMessage = nil
+                    self?.clearPendingUpload()
                     if let technicalSnapshot {
                         self?.saveLastUploadedTechnical(technicalSnapshot)
                     }
@@ -626,7 +699,8 @@ class RankingService: ObservableObject {
     private func nextAllowedFetchTime(from updatedAt: Date) -> Date {
         let components = kstCalendar.dateComponents([.year, .month, .day, .hour], from: updatedAt)
         let base = kstCalendar.date(from: components) ?? updatedAt
-        return kstCalendar.date(byAdding: .hour, value: 1, to: base) ?? updatedAt.addingTimeInterval(leaderboardRefreshInterval)
+        let next = kstCalendar.date(byAdding: .hour, value: 1, to: base) ?? updatedAt.addingTimeInterval(leaderboardRefreshInterval)
+        return next.addingTimeInterval(Double.random(in: leaderboardFetchJitterRange))
     }
 
     private func scheduleLeaderboardRetry(

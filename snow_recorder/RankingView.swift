@@ -1,5 +1,6 @@
 import SwiftUI
 import SwiftData
+import AuthenticationServices
 
 struct RankingView: View {
     // MARK: - Colors
@@ -21,6 +22,7 @@ struct RankingView: View {
     @State private var selectedMetric: RankingMetric = .runCount
     @State private var selectedCycle: RankingCycle = .season
     @ObservedObject private var rankingService = RankingService.shared
+    @StateObject private var authManager = AuthenticationManager.shared
     @Query(sort: \RunSession.startTime, order: .reverse) private var sessions: [RunSession]
     let isActive: Bool
     
@@ -31,132 +33,139 @@ struct RankingView: View {
     
     @State private var showingScoreInfo = false
     @State private var selectedUser: LeaderboardEntry? = nil
+    @State private var showSyncHelp = false
     
     var body: some View {
-        ZStack {
-            // ... (rest of background)
-            // Background
-            backgroundDark.ignoresSafeArea()
-            
-            // Grid Effect (Optional subtle background)
-            VStack {
-                Spacer()
-                HStack { Spacer() }
-            }
-            .background(
-                GeometryReader { geometry in
-                    Path { path in
-                        let step: CGFloat = 40
-                        for x in stride(from: 0, to: geometry.size.width, by: step) {
-                            path.move(to: CGPoint(x: x, y: 0))
-                            path.addLine(to: CGPoint(x: x, y: geometry.size.height))
-                        }
-                        for y in stride(from: 0, to: geometry.size.height, by: step) {
-                            path.move(to: CGPoint(x: 0, y: y))
-                            path.addLine(to: CGPoint(x: geometry.size.width, y: y))
-                        }
+        Group {
+            if authManager.isGuest {
+                guestRankingView
+            } else {
+                ZStack {
+                    // ... (rest of background)
+                    // Background
+                    backgroundDark.ignoresSafeArea()
+                    
+                    // Grid Effect (Optional subtle background)
+                    VStack {
+                        Spacer()
+                        HStack { Spacer() }
                     }
-                    .stroke(Color.white.opacity(0.03), lineWidth: 1)
-                }
-            )
-            .mask(LinearGradient(colors: [.black, .black.opacity(0)], startPoint: .top, endPoint: .bottom))
-            .ignoresSafeArea()
-            
-            VStack(spacing: 0) {
-                // MARK: - Main Content with Collapsing Header
-                ScrollView(showsIndicators: false) {
-                    LazyVStack(spacing: 0, pinnedViews: [.sectionHeaders]) {
-                        
-                        // 1. Scrollable Header Content (Filters)
-                        VStack(spacing: 0) {
-                            headerView
-                            
-                            modeSwitcher
-                                .padding(.top, 10)
-                                .padding(.bottom, 20)
-                            
-                            // Filters Container
-                            VStack(spacing: 16) {
-                                // Resort Filter (Only for Mileage Mode)
-                                if rankingMode == .mileage {
-                                    resortFilterScroll
-                                        .transition(.move(edge: .top).combined(with: .opacity))
+                    .background(
+                        GeometryReader { geometry in
+                            Path { path in
+                                let step: CGFloat = 40
+                                for x in stride(from: 0, to: geometry.size.width, by: step) {
+                                    path.move(to: CGPoint(x: x, y: 0))
+                                    path.addLine(to: CGPoint(x: x, y: geometry.size.height))
+                                }
+                                for y in stride(from: 0, to: geometry.size.height, by: step) {
+                                    path.move(to: CGPoint(x: 0, y: y))
+                                    path.addLine(to: CGPoint(x: geometry.size.width, y: y))
+                                }
+                            }
+                            .stroke(Color.white.opacity(0.03), lineWidth: 1)
+                        }
+                    )
+                    .mask(LinearGradient(colors: [.black, .black.opacity(0)], startPoint: .top, endPoint: .bottom))
+                    .ignoresSafeArea()
+                    
+                    VStack(spacing: 0) {
+                        // MARK: - Main Content with Collapsing Header
+                        ScrollView(showsIndicators: false) {
+                            LazyVStack(spacing: 0, pinnedViews: [.sectionHeaders]) {
+                                
+                                // 1. Scrollable Header Content (Filters)
+                                VStack(spacing: 0) {
+                                    headerView
                                     
-                                    if let updatedAt = rankingService.lastLeaderboardUpdatedAt {
-                                        Text("UPDATED \(formattedUpdateTime(updatedAt))")
-                                            .font(.system(size: 9, weight: .bold))
-                                            .foregroundColor(.gray)
-                                    }
+                                    modeSwitcher
+                                        .padding(.top, 10)
+                                        .padding(.bottom, 20)
                                     
-                                } else {
-                                    // Technical Mode: Show Global Label or nothing (clean look)
-                                    VStack(spacing: 4) {
-                                        Text("NATIONAL RANKING")
-                                            .font(.system(size: 10, weight: .bold))
-                                            .tracking(2)
-                                            .foregroundColor(neonGreen.opacity(0.7))
-                                        
-                                        if let updatedAt = rankingService.lastLeaderboardUpdatedAt {
-                                            Text("UPDATED \(formattedUpdateTime(updatedAt))")
-                                                .font(.system(size: 9, weight: .bold))
-                                                .foregroundColor(.gray)
+                                    // Filters Container
+                                    VStack(spacing: 16) {
+                                        // Resort Filter (Only for Mileage Mode)
+                                        if rankingMode == .mileage {
+                                            resortFilterScroll
+                                                .transition(.move(edge: .top).combined(with: .opacity))
+                                            
+                                            if let updatedAt = rankingService.lastLeaderboardUpdatedAt {
+                                                Text("UPDATED \(formattedUpdateTime(updatedAt))")
+                                                    .font(.system(size: 9, weight: .bold))
+                                                    .foregroundColor(.gray)
+                                            }
+                                            
+                                        } else {
+                                            // Technical Mode: Show Global Label or nothing (clean look)
+                                            VStack(spacing: 4) {
+                                                Text("NATIONAL RANKING")
+                                                    .font(.system(size: 10, weight: .bold))
+                                                    .tracking(2)
+                                                    .foregroundColor(neonGreen.opacity(0.7))
+                                                
+                                                if let updatedAt = rankingService.lastLeaderboardUpdatedAt {
+                                                    Text("UPDATED \(formattedUpdateTime(updatedAt))")
+                                                        .font(.system(size: 9, weight: .bold))
+                                                        .foregroundColor(.gray)
+                                                }
+                                            }
+                                            .padding(.bottom, 8)
                                         }
+                                        
+                                        metricTabs
                                     }
-                                    .padding(.bottom, 8)
+                                    .padding(.bottom, 24)
                                 }
                                 
-                                metricTabs
-                            }
-                            .padding(.bottom, 24)
-                        }
-                        
-                        // 2. Section with Sticky Header (My Ranking)
-                        Section(header: stickyHeader) {
-                            VStack(spacing: 0) {
-                                // Podium
-                                podiumSection
-                                    .padding(.top, 24)
-                                    .padding(.bottom, 32)
-                                
-                                // Ranking List
-                                rankingListView
-                                    .padding(.bottom, 40)
+                                // 2. Section with Sticky Header (My Ranking)
+                                Section(header: stickyHeader) {
+                                    VStack(spacing: 0) {
+                                        // Podium
+                                        podiumSection
+                                            .padding(.top, 24)
+                                            .padding(.bottom, 32)
+                                        
+                                        // Ranking List
+                                        rankingListView
+                                            .padding(.bottom, 40)
+                                    }
+                                }
                             }
                         }
                     }
                 }
-            }
-            
-            if rankingService.isLoadingLeaderboard {
-                ProgressView()
-                    .progressViewStyle(CircularProgressViewStyle(tint: neonGreen))
-                    .scaleEffect(1.5)
-            }
-            
-            // Debug / Empty State
-            if let error = rankingService.lastErrorMessage {
-                VStack {
-                    Image(systemName: "exclamationmark.triangle.fill")
-                        .foregroundColor(.yellow)
-                    Text(error)
-                        .font(.caption)
-                        .foregroundColor(.white)
-                        .multilineTextAlignment(.center)
+                
+                if rankingService.isLoadingLeaderboard {
+                    ProgressView()
+                        .progressViewStyle(CircularProgressViewStyle(tint: neonGreen))
+                        .scaleEffect(1.5)
+                }
+                
+                // Debug / Empty State
+                if let error = rankingService.lastErrorMessage {
+                    VStack {
+                        Image(systemName: "exclamationmark.triangle.fill")
+                            .foregroundColor(.yellow)
+                        Text(error)
+                            .font(.caption)
+                            .foregroundColor(.white)
+                            .multilineTextAlignment(.center)
+                            .padding()
+                    }
+                    .background(Color.black.opacity(0.8))
+                    .cornerRadius(10)
+                } else if rankingService.leaderboard.isEmpty && !rankingService.isLoadingLeaderboard {
+                    Text("NO DATA FOUND")
+                        .font(.headline)
+                        .foregroundColor(.gray)
                         .padding()
                 }
-                .background(Color.black.opacity(0.8))
-                .cornerRadius(10)
-            } else if rankingService.leaderboard.isEmpty && !rankingService.isLoadingLeaderboard {
-               Text("NO DATA FOUND")
-                   .font(.headline)
-                   .foregroundColor(.gray)
-                   .padding()
             }
         }
         .preferredColorScheme(.dark)
         .onAppear {
             // 앱 시작 시 또는 뷰 진입 시 기존 데이터를 기반으로 랭킹 통계 재계산 및 로드
-            guard isActive else { return }
+            guard isActive, !authManager.isGuest else { return }
             rankingService.scheduleRecalculateStats(from: sessions)
             if rankingMode == .technical && (selectedMetric == .runCount || selectedMetric == .distance) {
                 selectedMetric = .edge
@@ -164,11 +173,11 @@ struct RankingView: View {
             rankingService.fetchLeaderboard(cycle: selectedCycle, metric: selectedMetric, scope: selectedScope, resortKey: selectedResortKey)
         }
         .onChange(of: sessions) { _, newSessions in
-            guard isActive else { return }
+            guard isActive, !authManager.isGuest else { return }
             rankingService.scheduleRecalculateStats(from: newSessions)
         }
         .onChange(of: isActive) { _, active in
-            guard active else { return }
+            guard active, !authManager.isGuest else { return }
             rankingService.scheduleRecalculateStats(from: sessions)
             if rankingMode == .technical && (selectedMetric == .runCount || selectedMetric == .distance) {
                 selectedMetric = .edge
@@ -182,11 +191,14 @@ struct RankingView: View {
         .sheet(item: $selectedUser) { user in
             OtherUserProfileView(user: user)
         }
+        .sheet(isPresented: $showSyncHelp) {
+            syncHelpSheet
+        }
         // .onChange(of: selectedScope) { _, _ in fetch() } // Removed
     }
     
     private func fetch() {
-        guard isActive else { return }
+        guard isActive, !authManager.isGuest else { return }
         rankingService.fetchLeaderboard(cycle: selectedCycle, metric: selectedMetric, scope: selectedScope, resortKey: selectedResortKey)
     }
     
@@ -357,19 +369,9 @@ struct RankingView: View {
         .padding(.horizontal, 24)
         .alert(isPresented: $showingScoreInfo) {
             Alert(
-                title: Text("테크니컬 스코어 가이드"),
-                message: Text("""
-                [EDGE SCORE]
-                "얼마나 날카롭게 베고 나갔는가?"
-                당신의 턴이 설면을 얼마나 견고하게 파고들었는지 분석한 '카빙(Carving) 완성도' 지표입니다.
-                - 분석 기준: 턴의 깊이, 엣징 각도(G-Force), 슬립 최소화
-                
-                [FLOW SCORE]
-                "얼마나 물 흐르듯 내려왔는가?"
-                주행의 리듬과 속도 유지를 분석한 '주행 안정성(Smoothness)' 지표입니다.
-                - 분석 기준: 속도 유지력, 턴 연결의 부드러움, 급제동 여부
-                """),
-                dismissButton: .default(Text("확인"))
+                title: Text("ranking.tech_guide_title"),
+                message: Text("ranking.tech_guide_body"),
+                dismissButton: .default(Text("ranking.tech_guide_ok"))
             )
         }
     }
@@ -570,7 +572,7 @@ struct RankingView: View {
         .padding(.top, 8) // Small gap
     }
     
-     private var myRankingBar: some View {
+    private var myRankingBar: some View {
         HStack(spacing: 16) {
             // Rank Circle
             Circle()
@@ -590,17 +592,30 @@ struct RankingView: View {
                 Text(rankingService.getMyRankString())
                     .font(.system(size: 10, weight: .bold))
                     .foregroundColor(neonGreen)
+                HStack(spacing: 6) {
+                    if rankingService.hasPendingUpload {
+                        Text("ranking.sync_pending")
+                            .font(.system(size: 9, weight: .bold))
+                            .foregroundColor(neonGreen)
+                            .padding(.horizontal, 6)
+                            .padding(.vertical, 2)
+                            .background(neonGreen.opacity(0.15))
+                            .clipShape(Capsule())
+                    }
+                    Button(action: { showSyncHelp = true }) {
+                        Image(systemName: "questionmark.circle")
+                            .font(.system(size: 12, weight: .bold))
+                            .foregroundColor(.gray)
+                    }
+                    .buttonStyle(.plain)
+                }
             }
             
             Spacer()
             
             VStack(alignment: .trailing, spacing: 0) {
-                // Real Data Integration from Service
-                let myEntry = rankingService.leaderboard.first { $0.userId == rankingService.myProfile.userId }
                 let myValue = rankingService.myProfile.getValue(for: selectedMetric, cycle: selectedCycle, resortKey: selectedResortKey)
-                let displayValue = myEntry != nil
-                    ? formattedLeaderboardValueOnly(myEntry?.value ?? 0, metric: myEntry?.metric ?? selectedMetric)
-                    : formattedValueOnly(myValue, metric: selectedMetric)
+                let displayValue = formattedValueOnly(myValue, metric: selectedMetric)
 
                 Text(displayValue)
                     .font(.system(size: 24, weight: .heavy, design: .monospaced))
@@ -670,6 +685,109 @@ struct RankingView: View {
     }
     
     // Enums are now in RankingModels.swift
+
+    private var syncHelpSheet: some View {
+        ZStack {
+            Color.black.ignoresSafeArea()
+            VStack(spacing: 16) {
+                Text("ranking.sync_help_title")
+                    .font(.system(size: 18, weight: .heavy))
+                    .foregroundColor(.white)
+                    .tracking(2)
+                Text("ranking.sync_help_body")
+                    .font(.system(size: 12, weight: .medium))
+                    .foregroundColor(.gray)
+                    .multilineTextAlignment(.center)
+                    .lineSpacing(4)
+                    .padding(.horizontal, 20)
+                Button(action: { showSyncHelp = false }) {
+                    Text("ranking.sync_help_ok")
+                        .font(.system(size: 14, weight: .bold))
+                        .foregroundColor(.black)
+                        .padding(.horizontal, 24)
+                        .padding(.vertical, 10)
+                        .background(neonGreen)
+                        .clipShape(Capsule())
+                }
+                .buttonStyle(.plain)
+            }
+            .padding(.vertical, 24)
+            .padding(.horizontal, 20)
+            .background(Color.white.opacity(0.06))
+            .overlay(
+                RoundedRectangle(cornerRadius: 20)
+                    .stroke(neonGreen.opacity(0.4), lineWidth: 1)
+            )
+            .cornerRadius(20)
+            .padding(.horizontal, 24)
+        }
+        .presentationDetents([.medium])
+    }
+
+    private var guestRankingView: some View {
+        ZStack {
+            Color.black.ignoresSafeArea()
+            VStack(spacing: 24) {
+                Spacer()
+                Image(systemName: "trophy.fill")
+                    .font(.system(size: 56))
+                    .foregroundColor(neonGreen)
+                    .shadow(color: neonGreen.opacity(0.5), radius: 16)
+                VStack(spacing: 12) {
+                    Text("ranking.guest_title")
+                        .font(.system(size: 24, weight: .heavy))
+                        .foregroundColor(.white)
+                    Text("ranking.guest_body")
+                        .font(.system(size: 13, weight: .medium))
+                        .foregroundColor(.gray)
+                        .multilineTextAlignment(.center)
+                        .lineSpacing(4)
+                        .padding(.horizontal, 24)
+                }
+                Spacer()
+                VStack(spacing: 16) {
+                    Button(action: {
+                        authManager.signInWithGoogle()
+                    }) {
+                        HStack {
+                            Image(systemName: "g.circle.fill")
+                                .resizable()
+                                .frame(width: 20, height: 20)
+                            Text("Sign in with Google")
+                                .font(.headline)
+                        }
+                        .foregroundColor(.black)
+                        .frame(maxWidth: .infinity)
+                        .padding()
+                        .background(Color.white)
+                        .cornerRadius(12)
+                    }
+                    
+                    SignInWithAppleButton(
+                        onRequest: { request in
+                            let nonce = authManager.startSignInWithAppleFlow()
+                            request.requestedScopes = [.fullName, .email]
+                            request.nonce = nonce
+                        },
+                        onCompletion: { result in
+                            switch result {
+                            case .success(let authorization):
+                                authManager.signInWithApple(authorization: authorization)
+                            case .failure(let error):
+                                authManager.errorMessage = error.localizedDescription
+                            }
+                        }
+                    )
+                    .signInWithAppleButtonStyle(.white)
+                    .frame(height: 50)
+                    .cornerRadius(12)
+                }
+                .padding(.horizontal, 40)
+                Spacer()
+            }
+            .padding(.vertical, 40)
+        }
+    }
 }
 
 #Preview {

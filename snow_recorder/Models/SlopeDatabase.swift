@@ -1,6 +1,33 @@
 import Foundation
 import CoreLocation
 
+private func localizedLabel(key: String, fallback: String) -> String {
+    let preferred = UserDefaults.standard.string(forKey: "preferred_language") ?? "system"
+    let locale: Locale
+    switch preferred {
+    case "ko":
+        locale = Locale(identifier: "ko")
+    case "en":
+        locale = Locale(identifier: "en")
+    default:
+        locale = Locale.autoupdatingCurrent
+    }
+    let value = String(localized: .init(key), locale: locale)
+    return value.isEmpty ? fallback : value
+}
+
+private func preferredName(ko: String, en: String) -> String {
+    let preferred = UserDefaults.standard.string(forKey: "preferred_language") ?? "system"
+    switch preferred {
+    case "ko":
+        return ko
+    case "en":
+        return en
+    default:
+        return Locale.autoupdatingCurrent.languageCode == "en" ? en : ko
+    }
+}
+
 /// 슬로프 난이도
 enum SlopeDifficulty: String, Codable {
     case beginner = "초급"
@@ -8,6 +35,21 @@ enum SlopeDifficulty: String, Codable {
     case advancedIntermediate = "중상급"
     case advanced = "상급"
     case expert = "최상급"
+
+    var displayLabel: String {
+        switch self {
+        case .beginner:
+            return localizedLabel(key: "slope.difficulty.beginner", fallback: "초급")
+        case .intermediate:
+            return localizedLabel(key: "slope.difficulty.intermediate", fallback: "중급")
+        case .advancedIntermediate:
+            return localizedLabel(key: "slope.difficulty.advanced_intermediate", fallback: "중상급")
+        case .advanced:
+            return localizedLabel(key: "slope.difficulty.advanced", fallback: "상급")
+        case .expert:
+            return localizedLabel(key: "slope.difficulty.expert", fallback: "최상급")
+        }
+    }
     
     /// 색상 표시용 (UI에서 사용)
     var colorHex: String {
@@ -36,6 +78,17 @@ enum SlopeStatus: String, Codable {
     case operating = "운영중"
     case closed = "미운영"
     case seasonal = "시즌운영"  // 특정 시즌만 운영
+
+    var displayLabel: String {
+        switch self {
+        case .operating:
+            return localizedLabel(key: "slope.status.operating", fallback: "운영중")
+        case .closed:
+            return localizedLabel(key: "slope.status.closed", fallback: "미운영")
+        case .seasonal:
+            return localizedLabel(key: "slope.status.seasonal", fallback: "시즌운영")
+        }
+    }
 }
 
 /// 슬로프 정보 모델 (폴리곤 기반)
@@ -53,6 +106,10 @@ struct Slope: Identifiable {
     var bottomPoint: CLLocationCoordinate2D?    // 하단 지점 (자동 산출)
     var topAltitude: Double?                    // 정상 해발고도 (m)
     var bottomAltitude: Double?                 // 하단 해발고도 (m)
+
+    var displayName: String {
+        preferredName(ko: koreanName, en: name)
+    }
     
     /// 주어진 좌표가 슬로프 폴리곤 내부에 있는지 확인 (Ray Casting 알고리즘)
     func contains(_ coordinate: CLLocationCoordinate2D) -> Bool {
@@ -101,6 +158,10 @@ struct LiftLine: Identifiable {
     let koreanName: String                      // 한글 이름
     var path: [CLLocationCoordinate2D]          // 리프트 경로 좌표들 (TODO: 좌표 입력 필요)
     let bufferRadius: CLLocationDistance = 30.0 // 리프트 라인으로 인식할 반경 (m)
+
+    var displayName: String {
+        preferredName(ko: koreanName, en: name)
+    }
     
     /// 주어진 좌표가 리프트 라인 근처인지 확인
     func isNear(_ coordinate: CLLocationCoordinate2D) -> Bool {

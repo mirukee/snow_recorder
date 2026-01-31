@@ -1,0 +1,300 @@
+/* 게스트 모드(기록만 하기) */
+"login.guest_mode" = "Guest Mode (Record only)";
+
+/* 삭제하기 */
+"history.delete" = "Delete";
+
+/* 첫 런을 기다리는 중... */
+"dashboard.wait_first_run" = "Waiting for your first run...";
+
+/* 테크니컬 스코어 가이드 */
+"ranking.tech_guide_title" = "Technical Score Guide";
+
+/* 법적 문서 섹션 */
+"settings.legal" = "LEGAL";
+
+/* 설정 타이틀 */
+"settings.title" = "Settings";
+
+/* 설정 완료 */
+"settings.done" = "Done";
+
+/* 프라이버시/랭킹 섹션 타이틀 */
+"settings.section_privacy_competition" = "PRIVACY & COMPETITION";
+
+/* 랭킹 참여 타이틀 */
+"settings.ranking_participate_title" = "Participate in Ranking";
+
+/* 랭킹 업로드 설명 */
+"settings.ranking_participate_desc" = "Upload your runs to the leaderboard automatically.";
+
+/* 백업 섹션 타이틀 */
+"settings.section_backup" = "BACKUP (ICLOUD)";
+
+/* 마지막 백업 라벨 */
+"settings.backup_last_label" = "LAST BACKUP";
+
+/* 백업 실행 버튼 */
+"settings.backup_now" = "BACKUP NOW";
+
+/* 복원 버튼 */
+"settings.restore_overwrite" = "RESTORE (OVERWRITE)";
+
+/* 언어 섹션 타이틀 */
+"settings.section_language" = "LANGUAGE";
+
+/* 언어 선택 라벨 */
+"settings.language_label" = "Language";
+
+/* 언어 시스템 */
+"settings.language_system" = "System";
+
+/* 언어 한국어 */
+"settings.language_ko" = "Korean";
+
+/* 언어 영어 */
+"settings.language_en" = "English";
+
+/* 앱 정보 섹션 타이틀 */
+"settings.section_app_info" = "APP INFO";
+
+/* 앱 버전 라벨 */
+"settings.app_version" = "Version";
+
+/* 디버그 섹션 타이틀 */
+"settings.section_debug" = "DEBUG";
+
+/* 구독 강제 해제 타이틀 */
+"settings.debug_force_nonpro_title" = "Force Non-Pro";
+
+/* 구독 강제 해제 설명 */
+"settings.debug_force_nonpro_desc" = "Force non-subscription status regardless of subscription.";
+
+/* 백업 세션 개수 포맷 */
+"settings.backup_sessions_format" = "SESSIONS %d";
+
+/* 백업 없음 라벨 */
+"settings.backup_none" = "NONE";
+
+/* State labels */
+"state.riding" = "Riding";
+"state.on_lift" = "On Lift";
+"state.resting" = "Resting";
+
+/* Slope difficulty */
+"slope.difficulty.beginner" = "Beginner";
+"slope.difficulty.intermediate" = "Intermediate";
+"slope.difficulty.advanced_intermediate" = "Advanced-Intermediate";
+"slope.difficulty.advanced" = "Advanced";
+"slope.difficulty.expert" = "Expert";
+
+/* Slope status */
+"slope.status.operating" = "Open";
+"slope.status.closed" = "Closed";
+"slope.status.seasonal" = "Seasonal";
+
+/* Share preview */
+"share.locked_share_hint" = "Unlock to share";
+"share.save_complete" = "Saved";
+"share.photo_adjust_hint" = "Pinch/drag to adjust photo";
+"share.layout.standard" = "Standard";
+"share.layout.photo" = "Photo Focus";
+"share.layout.minimal" = "Minimal";
+"share.layout.speed_demon" = "Speed Demon";
+"share.layout.explorer" = "Explorer";
+"share.layout.tech_spec" = "Tech Spec";
+"share.layout.cover" = "Magazine Cover";
+"share.layout.rewind" = "Rewind";
+"share.layout.frost_glass" = "Frost";
+
+/* 동기화 대기 */
+"ranking.sync_pending" = "SYNC PENDING";
+
+/* 게스트 랭킹 타이틀 */
+"ranking.guest_title" = "RANKING LOCKED";
+
+/* 게스트 랭킹 설명 */
+"ranking.guest_body" = "Sign in to participate in the leaderboard.";
+
+/* 동기화 도움말 타이틀 */
+"ranking.sync_help_title" = "SYNC HELP";
+
+/* 리더보드 동기화 도움말 */
+"ranking.sync_help_body" = "Leaderboard values may be delayed depending on server aggregation and sync timing.\nAfter deleting/editing sessions, local values update first and server values may lag.\nSYNC PENDING means changes haven't been synced to the server yet.";
+
+/* 동기화 도움말 확인 */
+"ranking.sync_help_ok" = "OK";
+
+/* [EDGE SCORE]\n"얼마나 날카롭게 베고 나갔는가?"\n당신의 턴이 설면을 얼마나 견고하게 파고들었는지 분석한 '카빙(Carving) 완성도' 지표입니다.\n- 분석 기준: 턴의 깊이, 엣징 각도(G-Force), 슬립 최소화\n\n[FLOW SCORE]\n"얼마나 물 흐르듯 내려왔는가?"\n주행의 리듬과 속도 유지를 분석한 '주행 안정성(Smoothness)' 지표입니다.\n- 분석 기준: 속도 유지력, 턴 연결의 부드러움, 급제동 여부 */
+"ranking.tech_guide_body" = "[EDGE SCORE]\n\"How sharply did you carve?\"\nA carving-completion metric that analyzes how firmly your turns cut into the snow.\n- Criteria: turn depth, edge angle (G-Force), minimal slip\n\n[FLOW SCORE]\n\"How smoothly did you flow down?\"\nA stability metric that analyzes rhythm and speed maintenance.\n- Criteria: speed retention, smooth turn linking, hard braking";
+
+/* 확인 */
+"ranking.tech_guide_ok" = "OK";
+
+/* 기존 기록을 모두 덮어쓸까요? */
+"profile.restore_title" = "Overwrite all existing records?";
+
+/* 현재 기기 기록이 전부 삭제되고 iCloud 백업으로 복원됩니다. */
+"profile.restore_message" = "All records on this device will be deleted and restored from your iCloud backup.";
+
+/* 취소 */
+"profile.restore_cancel" = "Cancel";
+
+/* 덮어쓰기 */
+"profile.restore_confirm" = "Overwrite";
+
+/* 백업 정보를 불러오지 못했습니다. */
+"profile.backup_load_fail" = "Failed to load backup information.";
+
+/* 백업에 실패했습니다. */
+"profile.backup_fail" = "Backup failed.";
+
+/* 복원에 실패했습니다. */
+"profile.restore_fail" = "Restore failed.";
+
+/* MVP 이후 업데이트 예정 */
+"profile.mvp_later" = "Planned after MVP.";
+
+/* 첫 번째 런을 완료하세요. */
+"badge.desc.first_steps" = "Complete your first run.";
+
+/* 총 100km를 주행하세요. */
+"badge.desc.marathoner" = "Ski a total of 100km.";
+
+/* 최고 속도 80km/h에 도달하세요. */
+"badge.desc.speed_demon" = "Reach a speed of 80km/h.";
+
+/* 100런을 완주하세요. */
+"badge.desc.century_club" = "Complete 100 runs.";
+
+/* 총 하강고도 8,848m를 달성하세요. */
+"badge.desc.everest" = "Ski 8,848m vertical drop.";
+
+/* 총 하강고도 20,000m를 달성하세요. */
+"badge.desc.high_flyer" = "Ski 20,000m vertical drop.";
+
+/* 오전 9시 이전에 출발하세요. */
+"badge.desc.early_bird" = "Start skiing before 9 AM.";
+
+/* 오후 7시 이후에 주행하세요. */
+"badge.desc.night_owl" = "Ski after 7 PM.";
+
+/* 크래시 없이 10회 기록하세요. */
+"badge.desc.safe_rider" = "Record 10 sessions without crashing.";
+
+/* "얼마나 날카롭게 베고 나갔는가?"\n\n당신의 턴이 설면을 얼마나 견고하게 파고들었는지 분석한 '카빙(Carving) 완성도' 지표입니다.\n\n분석 기준: 턴의 깊이, 엣징 각도(G-Force), 슬립(미끄러짐) 최소화\n\nTip: 데크가 눈에 박히는 느낌에 집중하고, 과감하게 엣지를 세울수록 점수가 올라갑니다. */
+"run_detail.edge_desc" = "\"How sharply did you carve?\"\n\nA carving-completion metric that analyzes how firmly your turns cut into the snow.\n\nCriteria: turn depth, edge angle (G-Force), minimal slip\n\nTip: Focus on driving the edge into the snow; the more confidently you set the edge, the higher the score.";
+
+/* "얼마나 물 흐르듯 내려왔는가?"\n\n주행의 리듬과 속도 유지를 분석한 '주행 안정성(Smoothness)' 지표입니다.\n\n분석 기준: 속도 유지력, 턴 연결의 부드러움, 불필요한 급제동 여부\n\nTip: 턴과 턴 사이가 끊기지 않게 연결하고, 일정한 리듬을 유지할수록 점수가 올라갑니다. */
+"run_detail.flow_desc" = "\"How smoothly did you flow down?\"\n\nA stability metric that analyzes rhythm and speed maintenance.\n\nCriteria: speed retention, smooth turn linking, unnecessary hard braking\n\nTip: Link turns seamlessly and keep a steady rhythm to boost your score.";
+
+/* PRO 시작: */
+"paywall.headline_go_pro" = "GO PRO:";
+
+/* 잠재력 해제 */
+"paywall.headline_unlock_potential" = "UNLOCK POTENTIAL";
+
+/* 고급 텔레메트리, 무제한 동기화,\n프로급 분석 도구. */
+"paywall.subtitle" = "Edge/Flow breakdown, replay & heatmaps,\nshare+ templates and run comparisons.";
+
+/* 결제 실패 */
+"paywall.purchase_fail_title" = "Purchase Failed";
+
+/* 닉네임 변경 쿨타임 타이틀 */
+"profile.nickname_cooldown_title" = "Nickname cooldown";
+
+/* 닉네임 변경 쿨타임 확인 */
+"profile.nickname_cooldown_ok" = "OK";
+
+/* 닉네임 변경 남은 일수 포맷 */
+"profile.nickname_cooldown_remaining_format" = "You can change again in %d days.";
+
+/* 닉네임 쿨타임 경고 포맷 */
+"profile.nickname_cooldown_alert_remaining_format" = "You can change your nickname again in %d days.";
+
+/* 닉네임 쿨타임 기본 안내 */
+"profile.nickname_cooldown_alert_fallback" = "You can change your nickname once per month.";
+
+/* 전시 뱃지 없음 */
+"profile.featured_badges_empty" = "No badges earned yet.";
+
+/* 전시 뱃지 제한 타이틀 */
+"profile.featured_badges_limit_title" = "Selection limit";
+
+/* 전시 뱃지 제한 확인 */
+"profile.featured_badges_limit_ok" = "OK";
+
+/* 전시 뱃지 제한 메시지 */
+"profile.featured_badges_limit_message" = "You can select up to 3 badges.";
+
+/* 전시 뱃지 쿨타임 타이틀 */
+"profile.featured_badges_cooldown_title" = "Badge cooldown";
+
+/* 전시 뱃지 변경 남은 일수 포맷 */
+"profile.featured_badges_cooldown_remaining_format" = "Next change in %d days.";
+
+/* 전시 뱃지 쿨타임 경고 포맷 */
+"profile.featured_badges_cooldown_alert_remaining_format" = "You can change featured badges again in %d days.";
+
+/* 전시 뱃지 쿨타임 기본 안내 */
+"profile.featured_badges_cooldown_fallback" = "Featured badges can be changed once per day.";
+
+/* 확인 */
+"paywall.alert_ok" = "OK";
+
+/* 예기치 못한 오류가 발생했습니다. */
+"paywall.purchase_fail_default" = "An unexpected error occurred.";
+
+/* 복원 */
+"paywall.restore" = "RESTORE";
+
+/* AI 퍼포먼스\n분석 */
+"paywall.feature_ai_analysis" = "EDGE/FLOW\nBREAKDOWN";
+
+/* 3D 맵\n리플레이 */
+"paywall.feature_3d_replay" = "REPLAY\n& HEATMAPS";
+
+/* 프리미엄\n플렉스 카드 */
+"paywall.feature_flex_cards" = "SHARE+\nTEMPLATES";
+
+/* 무제한\n데이터 동기화 */
+"paywall.feature_sync" = "RUN\nCOMPARE";
+
+/* 10,000+ Pro 라이더 • 언제든 해지 가능 */
+"paywall.footer_social_proof" = "Cancel anytime • Billed through the App Store";
+
+/* 이용약관 */
+"paywall.terms" = "Terms of Service";
+
+/* 개인정보 처리방침 */
+"paywall.privacy" = "Privacy Policy";
+
+/* 평생 이용권 잠금 해제 */
+"paywall.cta_forever" = "UNLOCK FOREVER";
+
+/* %@ 무료 체험 시작 */
+"paywall.cta_trial_format" = "START %@ FREE TRIAL";
+
+/* PRO 시작 */
+"paywall.cta_start_pro" = "START PRO";
+
+/* %d일 */
+"paywall.trial_day_format" = "%d-DAY";
+
+/* %d주 */
+"paywall.trial_week_format" = "%d-WEEK";
+
+/* %d개월 */
+"paywall.trial_month_format" = "%d-MONTH";
+
+/* %d년 */
+"paywall.trial_year_format" = "%d-YEAR";
+
+/* 월간 결제 */
+"paywall.billing_monthly" = "Billed monthly";
+
+/* 1회 결제 */
+"paywall.billing_lifetime" = "One-time payment";
+
+/* 연간 결제 %@ */
+"paywall.billing_yearly_format" = "Billed yearly %@";

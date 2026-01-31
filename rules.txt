@@ -30,6 +30,7 @@
 
 # 코딩 규칙 (Coding Rules)
 - **모든 주석과 설명은 '한국어'로 작성한다.**
+- **신규 UI/문장형 텍스트 추가 시 Localizable.strings 키로 추가하고, 한국어 원문 주석을 반드시 남긴다.**
 - **데이터 흐름:** `LocationManager`(상태/센서) -> `RecordManager`(세션/런 로직) -> `SwiftData`(저장) -> `Views`(표시).
 - **배터리 최적화:**
     - `Riding`: 최고 정확도 (kCLLocationAccuracyBestForNavigation).
@@ -59,6 +60,8 @@
 - **Flow Score (Stability, 1000점 만점):**
     - 주행 안정성 및 리듬 분석. 속도 유지력과 턴 연결의 부드러움 측정.
 - **기본 메트릭:** Max Speed, Avg Speed, Run Count, Distance, Vertical Drop, Duration.
+- **Experimental:**
+    - **Max Bank Angle:** 턴 시 스키/보드의 최대 기울기 각도 (G-Force 기반 추정, 노이즈 필터링 적용).
 
 ## 4. 데이터 대시보드 & 시각화 (Dashboard & Visualization)
 - **Real-time Dashboard:** 네온 스타일 Dark UI, 현재 속도/슬로프/상태 실시간 표시.
@@ -110,6 +113,3 @@
 
 # 최근 이슈 및 해결 (Changlog Summary)
 - 개발 일지로 분리: `docs/dev_log.md` 참고
-
-# 임시 플래그 (런칭 전 제거)
-- **프로 기능 강제 활성화:** `snow_recorder/ContentView.swift`의 `mainTabView` `.onAppear`에서 `FeatureFlags.proFeaturesEnabled = true` 설정. 런칭 전에 제거/비활성화 필요.

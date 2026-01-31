@@ -14,12 +14,17 @@ class AuthenticationManager: ObservableObject {
     @Published var errorMessage: String = ""
     
     static let shared = AuthenticationManager()
+
+    private let featuredBadgesUploadDelay: TimeInterval = 6
+    private var featuredBadgesUploadWorkItem: DispatchWorkItem?
     
     private init() {
         self.user = Auth.auth().currentUser
         if self.user == nil {
             self.isGuest = true
         }
+        syncNicknameFromAuthIfNeeded()
+        scheduleFeaturedBadgesUploadIfNeeded()
     }
     
     // MARK: - Sign In with Google
@@ -51,7 +56,9 @@ class AuthenticationManager: ObservableObject {
                 }
                 self?.user = authResult?.user
                 self?.isGuest = false
+                self?.syncNicknameFromAuthIfNeeded()
                 self?.checkAndCreateFirestoreUser()
+                self?.scheduleFeaturedBadgesUploadIfNeeded()
                 // Link local sessions (Guest Data) to this user
                 self?.linkLocalSessionsToUser()
             }
@@ -104,14 +111,20 @@ class AuthenticationManager: ObservableObject {
                             if let error = error {
                                 print("Error updating display name: \(error)")
                             }
+                            self?.syncNicknameFromAuthIfNeeded()
                             // Sync with Firestore after profile update
                             self?.checkAndCreateFirestoreUser()
+                            self?.scheduleFeaturedBadgesUploadIfNeeded()
                         }
                     } else {
+                        self?.syncNicknameFromAuthIfNeeded()
                         self?.checkAndCreateFirestoreUser()
+                        self?.scheduleFeaturedBadgesUploadIfNeeded()
                     }
                 } else {
+                    self?.syncNicknameFromAuthIfNeeded()
                     self?.checkAndCreateFirestoreUser()
+                    self?.scheduleFeaturedBadgesUploadIfNeeded()
                 }
                 
                 // Link local sessions (Guest Data) to this user
@@ -130,9 +143,84 @@ class AuthenticationManager: ObservableObject {
             try Auth.auth().signOut()
             self.user = nil
             self.isGuest = true
+            featuredBadgesUploadWorkItem?.cancel()
+            featuredBadgesUploadWorkItem = nil
         } catch {
             self.errorMessage = error.localizedDescription
         }
+    }
+
+    // MARK: - 닉네임 동기화
+
+    func updateDisplayName(to name: String, completion: ((Bool) -> Void)? = nil) {
+        let trimmed = name.trimmingCharacters(in: .whitespacesAndNewlines)
+        guard !trimmed.isEmpty else {
+            completion?(false)
+            return
+        }
+        guard let user = Auth.auth().currentUser else {
+            completion?(false)
+            return
+        }
+        if user.displayName == trimmed {
+            syncNicknameFromAuthIfNeeded()
+            completion?(true)
+            return
+        }
+        let changeRequest = user.createProfileChangeRequest()
+        changeRequest.displayName = trimmed
+        changeRequest.commitChanges { [weak self] error in
+            if let error = error {
+                print("❌ Failed to update display name: \(error)")
+                completion?(false)
+                return
+            }
+            self?.user = Auth.auth().currentUser
+            self?.syncNicknameFromAuthIfNeeded()
+            self?.syncNicknameToRankingIfNeeded(displayName: trimmed)
+            completion?(true)
+        }
+    }
+
+    private func syncNicknameFromAuthIfNeeded() {
+        guard let name = Auth.auth().currentUser?.displayName, !name.isEmpty else { return }
+        let profile = GamificationService.shared.profile
+        if profile.nickname != name {
+            GamificationService.shared.updateProfileInfo(
+                nickname: name,
+                bio: profile.bio,
+                instagramId: profile.instagramId
+            )
+        }
+        RankingService.shared.updateUserNameIfNeeded(name)
+    }
+
+    private func syncNicknameToRankingIfNeeded(displayName: String) {
+        guard let user = user else { return }
+        let db = Firestore.firestore()
+        let userRef = db.collection("rankings").document(user.uid)
+        userRef.setData(["nickname": displayName], merge: true)
+    }
+
+    private func scheduleFeaturedBadgesUploadIfNeeded() {
+        guard let user = user else { return }
+        guard GamificationService.shared.isFeaturedBadgesUploadPending else { return }
+        featuredBadgesUploadWorkItem?.cancel()
+        let titles = GamificationService.shared.featuredBadgeTitles
+        let workItem = DispatchWorkItem { [weak self] in
+            guard let self else { return }
+            let db = Firestore.firestore()
+            let userRef = db.collection("rankings").document(user.uid)
+            userRef.setData(["featured_badges": titles], merge: true) { error in
+                if let error {
+                    print("❌ Featured badges upload failed: \(error)")
+                    return
+                }
+                GamificationService.shared.clearFeaturedBadgesUploadPending()
+            }
+        }
+        featuredBadgesUploadWorkItem = workItem
+        DispatchQueue.main.asyncAfter(deadline: .now() + featuredBadgesUploadDelay, execute: workItem)
     }
     
     // MARK: - Firestore Sync
@@ -143,14 +231,16 @@ class AuthenticationManager: ObservableObject {
         
         userRef.getDocument { document, error in
             if let document = document, document.exists {
-                // User info exists, maybe update last login?
+                let nickname = user.displayName ?? "skier"
+                // 기존 유저: 마지막 로그인 + 닉네임 미러 동기화
                 userRef.updateData([
-                    "lastLogin": FieldValue.serverTimestamp()
+                    "lastLogin": FieldValue.serverTimestamp(),
+                    "nickname": nickname
                 ])
             } else {
                 // Create new user entry
                 let userData: [String: Any] = [
-                    "nickname": user.displayName ?? "Skier_\(String(user.uid.prefix(4)))",
+                    "nickname": user.displayName ?? "skier",
                     "createdAt": FieldValue.serverTimestamp(),
                     "totalDistance": 0.0,
                     "maxSpeed": 0.0,

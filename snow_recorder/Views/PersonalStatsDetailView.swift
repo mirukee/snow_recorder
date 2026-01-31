@@ -9,7 +9,9 @@ struct PersonalStatsDetailView: View {
     private let neonGreen = Color(red: 107/255, green: 249/255, blue: 6/255)
     private let glassDark = Color.white.opacity(0.05)
     
+    @State private var selectedSeasonId: String?
     @State private var selectedRange: RangeOption = .oneHour
+    @State private var didSetInitialSeason = false
     
     var body: some View {
         ZStack {
@@ -41,31 +43,41 @@ struct PersonalStatsDetailView: View {
             }
         }
         .toolbar(.hidden, for: .navigationBar)
+        .onAppear { setInitialSeasonIfNeeded() }
+        .onChange(of: sessions.count) { _ in
+            setInitialSeasonIfNeeded()
+        }
     }
     
     // MARK: - 서브뷰
     
     private var headerView: some View {
-        HStack(alignment: .bottom) {
-            VStack(alignment: .leading, spacing: 6) {
-                Text("SEASON 25/26")
-                    .font(.system(size: 11, weight: .bold))
-                    .tracking(3)
-                    .foregroundColor(neonGreen)
-                Text("PERSONAL STATS")
-                    .font(.system(size: 28, weight: .black))
-                    .foregroundColor(.white)
+        VStack(spacing: 12) {
+            HStack(alignment: .bottom) {
+                VStack(alignment: .leading, spacing: 6) {
+                    Text(selectedSeasonTitle)
+                        .font(.system(size: 11, weight: .bold))
+                        .tracking(3)
+                        .foregroundColor(neonGreen)
+                    Text("PERSONAL STATS")
+                        .font(.system(size: 28, weight: .black))
+                        .foregroundColor(.white)
+                }
+                Spacer()
+                Button(action: { dismiss() }) {
+                    Circle()
+                        .stroke(Color.white.opacity(0.15), lineWidth: 1)
+                        .frame(width: 40, height: 40)
+                        .overlay(
+                            Image(systemName: "chevron.left")
+                                .font(.system(size: 16, weight: .bold))
+                                .foregroundColor(.white)
+                        )
+                }
             }
-            Spacer()
-            Button(action: { dismiss() }) {
-                Circle()
-                    .stroke(Color.white.opacity(0.15), lineWidth: 1)
-                    .frame(width: 40, height: 40)
-                    .overlay(
-                        Image(systemName: "chevron.left")
-                            .font(.system(size: 16, weight: .bold))
-                            .foregroundColor(.white)
-                    )
+            
+            if !availableSeasons.isEmpty {
+                seasonPicker
             }
         }
         .padding(.top, 24)
@@ -142,12 +154,15 @@ struct PersonalStatsDetailView: View {
     
     // MARK: - 데이터 헬퍼
     
-    private var seasonSessions: [RunSession] {
-        sessions.filter { isWithinSeason($0.startTime) }
+    private var activeSessions: [RunSession] {
+        guard let selectedSeason = selectedSeason else {
+            return sessions
+        }
+        return sessions.filter { $0.startTime >= selectedSeason.start && $0.startTime <= selectedSeason.end }
     }
     
     private var rangeFilteredSessions: [RunSession] {
-        let source = seasonSessions
+        let source = activeSessions
         guard let cutoff = selectedRange.cutoffDate(from: Date()) else {
             return source
         }
@@ -156,34 +171,34 @@ struct PersonalStatsDetailView: View {
     }
     
     private var totalRuns: Int {
-        seasonSessions.reduce(0) { $0 + $1.runCount }
+        activeSessions.reduce(0) { $0 + $1.runCount }
     }
     
     private var totalDistanceKm: String {
-        let meters = seasonSessions.reduce(0.0) { $0 + $1.distance }
+        let meters = activeSessions.reduce(0.0) { $0 + $1.distance }
         let km = meters / 1000.0
         return String(format: "%.0f", km)
     }
     
     private var totalDropK: String {
-        let meters = seasonSessions.reduce(0.0) { $0 + $1.verticalDrop }
+        let meters = activeSessions.reduce(0.0) { $0 + $1.verticalDrop }
         let k = meters / 1000.0
         return String(format: "%.1f", k)
     }
     
     private var totalTimeHours: String {
-        let seconds = seasonSessions.reduce(0.0) { $0 + $1.duration }
+        let seconds = activeSessions.reduce(0.0) { $0 + $1.duration }
         let hours = seconds / 3600.0
         return String(format: "%.1f", hours)
     }
     
     private var edgeScore: Int {
-        let scores = collectRunScores(from: seasonSessions)
+        let scores = collectRunScores(from: activeSessions)
         return top3Average(scores.edge)
     }
     
     private var flowScore: Int {
-        let scores = collectRunScores(from: seasonSessions)
+        let scores = collectRunScores(from: activeSessions)
         return top3Average(scores.flow)
     }
     
@@ -208,7 +223,7 @@ struct PersonalStatsDetailView: View {
         formatter.locale = Locale(identifier: "ko_KR")
         formatter.timeZone = TimeZone(identifier: "Asia/Seoul")
         formatter.dateFormat = "MM/dd HH:mm"
-        let date = seasonSessions.first?.endTime ?? Date()
+        let date = activeSessions.first?.endTime ?? Date()
         return formatter.string(from: date)
     }
     
@@ -272,13 +287,6 @@ struct PersonalStatsDetailView: View {
         return samples
     }
     
-    private func isWithinSeason(_ date: Date) -> Bool {
-        let calendar = kstCalendar
-        let start = makeKSTDate(year: 2025, month: 11, day: 1, hour: 0, minute: 0, second: 0)
-        let end = makeKSTDate(year: 2026, month: 3, day: 31, hour: 23, minute: 59, second: 59)
-        return date >= start && date <= end
-    }
-    
     private var kstCalendar: Calendar {
         var calendar = Calendar(identifier: .gregorian)
         calendar.timeZone = TimeZone(identifier: "Asia/Seoul")!
@@ -298,6 +306,105 @@ struct PersonalStatsDetailView: View {
         components.timeZone = TimeZone(identifier: "Asia/Seoul")
         return kstCalendar.date(from: components) ?? Date()
     }
+    
+    private var availableSeasons: [SeasonInfo] {
+        var map: [String: SeasonInfo] = [:]
+        for session in sessions {
+            guard let season = seasonInfo(for: session.startTime) else { continue }
+            map[season.id] = season
+        }
+        return map.values.sorted { $0.start > $1.start }
+    }
+    
+    private var selectedSeason: SeasonInfo? {
+        guard let selectedSeasonId else { return nil }
+        return availableSeasons.first { $0.id == selectedSeasonId }
+    }
+    
+    private var selectedSeasonTitle: String {
+        if let selectedSeason {
+            return "SEASON \(selectedSeason.label)"
+        }
+        return "ALL TIME"
+    }
+    
+    private var seasonPicker: some View {
+        ScrollView(.horizontal, showsIndicators: false) {
+            HStack(spacing: 6) {
+                seasonPill(title: "ALL TIME", isSelected: selectedSeasonId == nil) {
+                    selectedSeasonId = nil
+                }
+                ForEach(availableSeasons) { season in
+                    seasonPill(title: season.shortLabel, isSelected: selectedSeasonId == season.id) {
+                        selectedSeasonId = season.id
+                    }
+                }
+            }
+            .padding(4)
+            .background(Color.white.opacity(0.08))
+            .clipShape(Capsule())
+        }
+        .frame(maxWidth: .infinity, alignment: .leading)
+    }
+    
+    private func seasonPill(title: String, isSelected: Bool, action: @escaping () -> Void) -> some View {
+        Button(action: { withAnimation(.spring(response: 0.3, dampingFraction: 0.8)) { action() } }) {
+            Text(title)
+                .font(.system(size: 11, weight: .bold))
+                .padding(.horizontal, 10)
+                .padding(.vertical, 6)
+                .foregroundColor(isSelected ? .black : .gray)
+                .background(isSelected ? neonGreen : Color.clear)
+                .clipShape(Capsule())
+        }
+    }
+    
+    private func setInitialSeasonIfNeeded() {
+        guard !didSetInitialSeason else { return }
+        if let currentSeason = seasonInfo(for: Date()),
+           availableSeasons.contains(where: { $0.id == currentSeason.id }) {
+            selectedSeasonId = currentSeason.id
+        } else if let fallback = availableSeasons.first {
+            selectedSeasonId = fallback.id
+        } else {
+            selectedSeasonId = nil
+        }
+        didSetInitialSeason = true
+    }
+    
+    private func seasonInfo(for date: Date) -> SeasonInfo? {
+        let calendar = kstCalendar
+        let month = calendar.component(.month, from: date)
+        let year = calendar.component(.year, from: date)
+        
+        let startYear: Int
+        let endYear: Int
+        
+        if month >= 11 {
+            startYear = year
+            endYear = year + 1
+        } else if month <= 3 {
+            startYear = year - 1
+            endYear = year
+        } else {
+            return nil
+        }
+        
+        let start = makeKSTDate(year: startYear, month: 11, day: 1, hour: 0, minute: 0, second: 0)
+        let end = makeKSTDate(year: endYear, month: 3, day: 31, hour: 23, minute: 59, second: 59)
+        let label = String(format: "%02d/%02d", startYear % 100, endYear % 100)
+        let id = String(format: "%04d_%04d", startYear, endYear)
+        return SeasonInfo(id: id, start: start, end: end, label: label)
+    }
+}
+
+private struct SeasonInfo: Identifiable, Hashable {
+    let id: String
+    let start: Date
+    let end: Date
+    let label: String
+    
+    var shortLabel: String { label }
 }
 
 // MARK: - 구성 요소
