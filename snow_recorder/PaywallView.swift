@@ -5,6 +5,7 @@ struct PaywallView: View {
     @Environment(\.dismiss) var dismiss
     @EnvironmentObject var storeManager: StoreManager
     @Environment(\.locale) private var locale
+    @AppStorage("preferred_language") private var preferredLanguage: String = "system"
     
     // Theme Colors
     private let neonGreen = Color(red: 107/255, green: 249/255, blue: 6/255) // #6bf906
@@ -16,8 +17,35 @@ struct PaywallView: View {
     @State private var isPurchasing: Bool = false
     @State private var purchaseErrorMessage: String? = nil
     
+    private var preferredLocale: Locale {
+        switch preferredLanguage {
+        case "ko":
+            return Locale(identifier: "ko")
+        case "en":
+            return Locale(identifier: "en")
+        default:
+            return locale
+        }
+    }
+
+    private func localizedBundleString(_ key: String) -> String {
+        let language: String?
+        switch preferredLanguage {
+        case "ko": language = "ko"
+        case "en": language = "en"
+        default: language = nil
+        }
+
+        if let language,
+           let path = Bundle.main.path(forResource: language, ofType: "lproj"),
+           let bundle = Bundle(path: path) {
+            return bundle.localizedString(forKey: key, value: key, table: nil)
+        }
+        return Bundle.main.localizedString(forKey: key, value: key, table: nil)
+    }
+
     private func locString(_ key: String) -> String {
-        String(localized: .init(key), locale: locale)
+        localizedBundleString(key)
     }
     
     private enum Plan: String, CaseIterable {
@@ -125,7 +153,7 @@ struct PaywallView: View {
                 Text("paywall.purchase_fail_default")
             }
         }
-        .id(locale.identifier)
+        .id(preferredLocale.identifier)
     }
     
     // MARK: - Components
@@ -338,7 +366,7 @@ struct PaywallView: View {
                 cardDark: cardDark,
                 checkmarkView: planCheckmark(plan: .annual),
                 badgeView: bestValueBadge,
-                yearlySubtitleKey: LocalizedStringKey("paywall.billing_yearly_format \(product.displayPrice)")
+                yearlySubtitle: String(format: locString("paywall.billing_yearly_format"), product.displayPrice)
             )
         }
         .buttonStyle(PlainButtonStyle())
@@ -351,7 +379,7 @@ struct PaywallView: View {
         let cardDark: Color
         let checkmarkView: Checkmark
         let badgeView: Badge
-        let yearlySubtitleKey: LocalizedStringKey
+        let yearlySubtitle: String
         
         var body: some View {
             ZStack(alignment: .top) {
@@ -360,7 +388,7 @@ struct PaywallView: View {
                         Text("ANNUAL")
                             .font(.system(size: 18, weight: .bold))
                             .foregroundColor(.white)
-                        Text(yearlySubtitleKey)
+                        Text(verbatim: yearlySubtitle)
                             .font(.system(size: 12))
                             .foregroundColor(.white.opacity(0.5))
                     }
@@ -368,14 +396,9 @@ struct PaywallView: View {
                     Spacer()
                     
                     VStack(alignment: .trailing, spacing: 0) {
-                        HStack(alignment: .firstTextBaseline, spacing: 2) {
-                            Text(calculateMonthlyPrice(for: product))
-                                .font(.system(size: 24, weight: .bold))
-                                .foregroundColor(.white)
-                            Text("/mo")
-                                .font(.system(size: 14))
-                                .foregroundColor(.white.opacity(0.6))
-                        }
+                        Text(verbatim: product.displayPrice)
+                            .font(.system(size: 24, weight: .bold))
+                            .foregroundColor(.white)
                     }
                     
                     checkmarkView
@@ -398,10 +421,7 @@ struct PaywallView: View {
             )
         }
         
-        private func calculateMonthlyPrice(for product: Product) -> String {
-            let monthlyPrice = (product.price as NSDecimalNumber).doubleValue / 12.0
-            return String(format: "%.2f", monthlyPrice)
-        }
+        // 연간 플랜은 월 환산 표시 제거
     }
     
     private var bestValueBadge: some View {
@@ -449,7 +469,7 @@ struct PaywallView: View {
                 
                 Spacer()
                 
-                Text(price)
+                Text(verbatim: price)
                     .font(.system(size: 24, weight: .bold))
                     .foregroundColor(selectedPlan == plan ? .white : .white.opacity(0.9))
                 
@@ -488,7 +508,7 @@ struct PaywallView: View {
                     }
                 }) {
                     HStack {
-                        Text(ctaTitle)
+                        Text(verbatim: ctaTitle)
                             .font(.system(size: 18, weight: .black))
                         
                         Image(systemName: "arrow.right")
@@ -541,32 +561,35 @@ struct PaywallView: View {
         }
     }
     
-    private var ctaTitle: LocalizedStringKey {
+    private var ctaTitle: String {
         guard let product = product(for: selectedPlan) else {
-            return "paywall.cta_start_pro"
+            return locString("paywall.cta_start_pro")
         }
         if selectedPlan == .lifetime {
-            return "paywall.cta_forever"
+            return locString("paywall.cta_forever")
         }
         if let intro = product.subscription?.introductoryOffer {
-            return LocalizedStringKey("paywall.cta_trial_format \(introPeriodText(intro.period))")
+            return String(
+                format: locString("paywall.cta_trial_format"),
+                introPeriodText(intro.period)
+            )
         }
-        return "paywall.cta_start_pro"
+        return locString("paywall.cta_start_pro")
     }
     
-    private func introPeriodText(_ period: Product.SubscriptionPeriod) -> LocalizedStringKey {
+    private func introPeriodText(_ period: Product.SubscriptionPeriod) -> String {
         let value = period.value
         switch period.unit {
         case .day:
-            return LocalizedStringKey("paywall.trial_day_format \(value)")
+            return String(format: locString("paywall.trial_day_format"), value)
         case .week:
-            return LocalizedStringKey("paywall.trial_week_format \(value)")
+            return String(format: locString("paywall.trial_week_format"), value)
         case .month:
-            return LocalizedStringKey("paywall.trial_month_format \(value)")
+            return String(format: locString("paywall.trial_month_format"), value)
         case .year:
-            return LocalizedStringKey("paywall.trial_year_format \(value)")
+            return String(format: locString("paywall.trial_year_format"), value)
         @unknown default:
-            return LocalizedStringKey("\(value)")
+            return "\(value)"
         }
     }
 }

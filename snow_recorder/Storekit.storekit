@@ -15,7 +15,7 @@
   ],
   "products" : [
     {
-      "displayPrice" : "199.99",
+      "displayPrice" : "200000",
       "familyShareable" : false,
       "internalID" : "SRL-LOCAL-LIFETIME",
       "localizations" : [
@@ -36,9 +36,9 @@
     "_billingIssuesEnabled" : false,
     "_disableDialogs" : false,
     "_failTransactionsEnabled" : false,
-    "_locale" : "en_US",
+    "_locale" : "ko_KR",
     "_renewalBillingIssuesEnabled" : false,
-    "_storefront" : "USA",
+    "_storefront" : "KOR",
     "_storeKitErrors" : [
 
     ],
@@ -63,7 +63,7 @@
           "codeOffers" : [
 
           ],
-          "displayPrice" : "59.99",
+          "displayPrice" : "25000",
           "familyShareable" : false,
           "groupNumber" : 1,
           "internalID" : "SRL-LOCAL-ANNUAL",
@@ -93,7 +93,7 @@
           "codeOffers" : [
 
           ],
-          "displayPrice" : "9.99",
+          "displayPrice" : "10000",
           "familyShareable" : false,
           "groupNumber" : 1,
           "internalID" : "SRL-LOCAL-MONTHLY",

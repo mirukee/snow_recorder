@@ -67,11 +67,46 @@ class RankingService: ObservableObject {
     // 리조트 키 매핑 (표시명 -> 저장 키)
     private let resortKeyByDisplayName: [String: String] = [
         "하이원": "high1",
+        "하이원 리조트": "high1",
         "용평": "yongpyong",
+        "용평 리조트": "yongpyong",
         "휘닉스": "phoenix",
-        "비발디": "vivaldi"
+        "휘닉스 파크": "phoenix",
+        "비발디": "vivaldi",
+        "비발디 파크": "vivaldi",
+        "알펜시아": "alpensia",
+        "알펜시아 리조트": "alpensia",
+        "오크밸리": "oakvalley",
+        "엘리시안 강촌": "gangchon",
+        "강촌": "gangchon",
+        "웰리힐리": "wellihilli",
+        "웰리힐리 파크": "wellihilli",
+        "무주": "muju",
+        "무주 덕유산 리조트": "muju",
+        "오투": "o2",
+        "오투 리조트": "o2",
+        "곤지암": "konjiam",
+        "곤지암 리조트": "konjiam",
+        "지산": "jisan",
+        "지산 포레스트 리조트": "jisan",
+        "에덴밸리": "edenvalley",
+        "에덴밸리 리조트": "edenvalley"
     ]
-    private let resortKeys: [String] = ["high1", "yongpyong", "phoenix", "vivaldi"]
+    private let resortKeys: [String] = [
+        "high1",
+        "yongpyong",
+        "phoenix",
+        "vivaldi",
+        "alpensia",
+        "oakvalley",
+        "gangchon",
+        "wellihilli",
+        "muju",
+        "o2",
+        "konjiam",
+        "jisan",
+        "edenvalley"
+    ]
     
     private init() {
         // 초기화 시 더미/로컬 데이터 로드
@@ -1030,6 +1065,33 @@ class RankingService: ObservableObject {
         }
         if lower.contains("비발디") || lower.contains("vivaldi") {
             return "vivaldi"
+        }
+        if lower.contains("알펜시아") || lower.contains("alpensia") {
+            return "alpensia"
+        }
+        if lower.contains("오크밸리") || lower.contains("oakvalley") || lower.contains("oak valley") {
+            return "oakvalley"
+        }
+        if lower.contains("강촌") || lower.contains("gangchon") || lower.contains("elysian") {
+            return "gangchon"
+        }
+        if lower.contains("웰리힐리") || lower.contains("wellihilli") {
+            return "wellihilli"
+        }
+        if lower.contains("무주") || lower.contains("muju") || lower.contains("deogyusan") {
+            return "muju"
+        }
+        if lower.contains("오투") || lower.contains("o2") {
+            return "o2"
+        }
+        if lower.contains("곤지암") || lower.contains("konjiam") {
+            return "konjiam"
+        }
+        if lower.contains("지산") || lower.contains("jisan") {
+            return "jisan"
+        }
+        if lower.contains("에덴밸리") || lower.contains("eden") {
+            return "edenvalley"
         }
         return nil
     }

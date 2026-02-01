@@ -5,13 +5,17 @@ SlopeDatabase.swift 파일을 파싱하여 모든 슬로프의 좌표를 추출�
 새로운 Swift 코드를 생성하는 스크립트입니다.
 """
 
-import re
-import requests
+import argparse
 import json
+import re
 import time
+
+import requests
 
 SWIFT_FILE_PATH = "snow_recorder/Models/SlopeDatabase.swift"
 OUTPUT_FILE_PATH = "snow_recorder/Models/SlopeDatabase_Updated.swift"
+DEFAULT_JSON_INPUT = "resources/yongpyong_slopes.json"
+DEFAULT_JSON_OUTPUT = "resources/yongpyong_slopes_with_elevation.json"
 
 def fetch_elevations_batch(locations):
     """Open-Elevation API: 50개씩 배치 처리"""
@@ -40,6 +44,45 @@ def fetch_elevations_batch(locations):
             results.extend([None] * len(chunk))
             
     return results
+
+def update_json_slopes_with_elevation(input_path, output_path):
+    """JSON 슬로프 데이터에 top/bottom 고도 정보 추가"""
+    with open(input_path, "r") as f:
+        slopes = json.load(f)
+
+    for slope in slopes:
+        name = slope.get("name", "Unknown")
+        polygon = slope.get("polygon", [])
+        if not polygon:
+            print(f"   ⚠️ [{name}] polygon 없음. 건너뜀.")
+            continue
+
+        locations = [(lat, lon) for lat, lon in polygon]
+        elevations = fetch_elevations_batch(locations)
+
+        if None in elevations:
+            print(f"   ⚠️ [{name}] 고도 조회 실패. 건너뜀.")
+            continue
+
+        points = []
+        for (lat, lon), alt in zip(locations, elevations):
+            points.append({"lat": lat, "lon": lon, "alt": alt})
+
+        sorted_points = sorted(points, key=lambda x: x["alt"], reverse=True)
+        top = sorted_points[0]
+        bottom = sorted_points[-1]
+
+        slope["topPoint"] = {"lat": top["lat"], "lon": top["lon"]}
+        slope["bottomPoint"] = {"lat": bottom["lat"], "lon": bottom["lon"]}
+        slope["topAltitude"] = round(top["alt"], 1)
+        slope["bottomAltitude"] = round(bottom["alt"], 1)
+
+        print(f"   ✅ [{name}] Top: {top['alt']}m, Bottom: {bottom['alt']}m")
+
+    with open(output_path, "w") as f:
+        json.dump(slopes, f, ensure_ascii=True, indent=2)
+
+    print(f"✨ JSON 업데이트 완료: {output_path}")
 
 def parse_slopes(content):
     # Regex 대신, 'Slope(' 문자를 기준으로 split하여 처리
@@ -176,66 +219,63 @@ def generate_slope_code(slope_data):
     return code
 
 def main():
+    parser = argparse.ArgumentParser(description="슬로프 고도/Top/Bottom 자동 계산 도구")
+    parser.add_argument("--mode", choices=["swift", "json"], default="swift")
+    parser.add_argument("--json-input", default=DEFAULT_JSON_INPUT)
+    parser.add_argument("--json-output", default=DEFAULT_JSON_OUTPUT)
+    args = parser.parse_args()
+
+    if args.mode == "json":
+        print("📂 JSON 슬로프 파일 읽는 중...")
+        update_json_slopes_with_elevation(args.json_input, args.json_output)
+        return
+
     print("📂 SlopeDatabase.swift 읽는 중...")
     with open(SWIFT_FILE_PATH, "r") as f:
         content = f.read()
-        
+
     slopes = parse_slopes(content)
     print(f"🧩 {len(slopes)}개의 슬로프 파싱 완료.")
-    
+
     updated_slopes_code = []
-    
+
     for slope in slopes:
         print(f"\n🏔️  [{slope['name']}] 처리 중...")
-        
+
         if not slope["boundary"]:
             print("   ⚠️ Boundary 데이터 없음. 건너뜀.")
             updated_slopes_code.append(generate_slope_code(slope))
             continue
-            
+
         # 고도 조회
         elevations = fetch_elevations_batch(slope["boundary"])
-        
+
         if None in elevations:
-             print("   ⚠️ 고도 데이터 조회 실패. 기존 데이터 유지 시도.")
-             # 실패 시 로직 생략
-             updated_slopes_code.append(generate_slope_code(slope))
-             continue
-             
+            print("   ⚠️ 고도 데이터 조회 실패. 기존 데이터 유지 시도.")
+            updated_slopes_code.append(generate_slope_code(slope))
+            continue
+
         # 데이터 결합 및 정렬
         points = []
-        for i, ((lat, lon), alt) in enumerate(zip(slope["boundary"], elevations)):
+        for (lat, lon), alt in zip(slope["boundary"], elevations):
             points.append({"lat": lat, "lon": lon, "alt": alt})
-            
+
         # 고도순 정렬 (내림차순)
         sorted_points = sorted(points, key=lambda x: x["alt"], reverse=True)
-        
+
         slope["topPoint"] = sorted_points[0]
         slope["bottomPoint"] = sorted_points[-1]
-        
+
         print(f"   ✅ Top: {slope['topPoint']['alt']}m, Bottom: {slope['bottomPoint']['alt']}m")
-        
+
         updated_slopes_code.append(generate_slope_code(slope))
 
     # 최종 파일 생성
     print("\n💾 새로운 Swift 코드 생성 중...")
-    
-    # slopes 배열 부분만 교체하는 건 복잡하므로,
-    # 템플릿 형태로 전체 파일을 다시 쓰는 방식보다는
-    # "slopes: [ ... ]" 내부를 교체하는 방식을 권장하지만,
-    # 여기서는 전체 파일을 읽어서 Regex로 slopes 배열 부분을 찾아서 교체하겠습니다.
-    
-    # 배열 시작 찾기
-    start_marker = "let slopes: [Slope] = ["
-    end_marker = "    ]" # 배열 끝 (들여쓰기 주의) -> 정확히 매칭하기 어려울 수 있음.
-    
-    # 하지만 Python 스크립트에서 직접 작성하기보다, 
-    # 생성된 슬로프 코드 블록들을 별도 파일로 저장하면 
-    # Agent가 'replace_file_content'로 안전하게 교체하는 것이 낫습니다.
-    
+
     with open("new_slopes_array.swift", "w") as f:
         f.write("\n".join(updated_slopes_code))
-        
+
     print("✨ new_slopes_array.swift 생성 완료!")
 
 if __name__ == "__main__":

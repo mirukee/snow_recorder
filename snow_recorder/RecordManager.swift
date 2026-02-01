@@ -351,22 +351,6 @@ class RecordManager: ObservableObject {
     
     // MARK: - 리조트 감지 (세션 종료 시점)
     
-    private struct ResortBoundingBox {
-        let key: String
-        let displayName: String
-        let minLat: Double
-        let maxLat: Double
-        let minLon: Double
-        let maxLon: Double
-        
-        func contains(_ coordinate: CLLocationCoordinate2D) -> Bool {
-            return coordinate.latitude >= minLat &&
-                coordinate.latitude <= maxLat &&
-                coordinate.longitude >= minLon &&
-                coordinate.longitude <= maxLon
-        }
-    }
-    
     private func detectResortName(from routeCoordinates: [[Double]]) -> String? {
         let samples = sampleRouteCoordinates(routeCoordinates, maxSamples: 200)
         guard !samples.isEmpty else { return nil }
@@ -376,26 +360,18 @@ class RecordManager: ObservableObject {
             return "하이원 리조트"
         }
         
-        // 2) 기타 리조트: 대략 바운딩 박스 기반 (향후 폴리곤으로 고도화)
-        let resortBoxes: [ResortBoundingBox] = [
-            // 좌표는 대략 범위 (운영 중 보정 필요)
-            .init(key: "yongpyong", displayName: "용평 리조트",
-                  minLat: 37.60, maxLat: 37.69, minLon: 128.62, maxLon: 128.76),
-            .init(key: "phoenix", displayName: "휘닉스 파크",
-                  minLat: 37.54, maxLat: 37.63, minLon: 128.28, maxLon: 128.42),
-            .init(key: "vivaldi", displayName: "비발디 파크",
-                  minLat: 37.58, maxLat: 37.70, minLon: 127.62, maxLon: 127.78)
-        ]
-        
+        // 2) 기타 리조트: 리조트 중심 반경 기반 (슬로프 데이터에 맞춰 확장)
+        let regions = ResortRegion.domesticResorts
         var hitCounts: [String: Int] = [:]
         var displayNameByKey: [String: String] = [:]
-        for box in resortBoxes {
-            displayNameByKey[box.key] = box.displayName
+        for region in regions {
+            displayNameByKey[region.key] = region.displayName
         }
         
         for coord in samples {
-            for box in resortBoxes where box.contains(coord) {
-                hitCounts[box.key, default: 0] += 1
+            let location = CLLocation(latitude: coord.latitude, longitude: coord.longitude)
+            for region in regions where region.contains(location) {
+                hitCounts[region.key, default: 0] += 1
             }
         }
         

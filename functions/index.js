@@ -23,8 +23,22 @@ const MAX_WEEKLY_RUNCOUNT = 300;
 const MAX_SEASON_RUNCOUNT = 2000;
 const MAX_SCORE = 1000;
 
-// 리조트 키 (추후 확장 시 여기에 추가)
-const RESORT_KEYS = ["high1", "yongpyong", "phoenix", "vivaldi"];
+// 리조트 키 (슬로프 데이터 기준)
+const RESORT_KEYS = [
+  "high1",
+  "yongpyong",
+  "phoenix",
+  "vivaldi",
+  "alpensia",
+  "oakvalley",
+  "gangchon",
+  "wellihilli",
+  "muju",
+  "o2",
+  "konjiam",
+  "jisan",
+  "edenvalley"
+];
 
 // 메트릭 정의
 const METRICS = ["runCount", "distance_m", "edge", "flow"];

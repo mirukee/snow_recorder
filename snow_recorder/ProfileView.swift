@@ -1,7 +1,6 @@
 import SwiftUI
 import SwiftData
 import AuthenticationServices
-import GoogleSignIn
 
 /// 마이페이지 뷰 (Tab 3) - Gamified Profile Design
 struct ProfileView: View {
@@ -102,6 +101,7 @@ struct ProfileView: View {
                                 ProUpgradeBanner()
                             }
                             .buttonStyle(PlainButtonStyle())
+                            #if DEBUG
                             .onLongPressGesture {
                                 showForceNonProAlert = true
                             }
@@ -116,6 +116,11 @@ struct ProfileView: View {
                             } message: {
                                 Text(storeManager.forceNonPro ? "현재 비구독 상태가 강제로 적용되어 있습니다." : "구독 여부와 상관없이 비구독 상태로 강제 전환합니다.")
                             }
+                            #else
+                            .sheet(isPresented: $showPaywall) {
+                                PaywallView()
+                            }
+                            #endif
                             
                             // [Hero Status Card] Dynamic Tier
                             ZStack {
@@ -316,16 +321,7 @@ struct ProfileView: View {
                                 }
                             }
                             
-                            // Logout for Logged-in User
-                            Button(action: {
-                                authManager.signOut()
-                            }) {
-                                Text("Sign Out")
-                                    .font(.system(size: 14, weight: .semibold))
-                                    .foregroundColor(.red.opacity(0.8))
-                                    .padding(.top, 20)
-                                    .padding(.bottom, 100)
-                            }
+                            Spacer().frame(height: 80)
                         }
                     }
                 }
@@ -597,6 +593,7 @@ struct GridPattern: Shape {
         @Query(sort: \RunSession.startTime, order: .reverse) private var sessions: [RunSession]
         @AppStorage("preferred_language") private var preferredLanguage: String = "system"
         @EnvironmentObject private var storeManager: StoreManager
+        @ObservedObject private var authManager = AuthenticationManager.shared
         @Environment(\.locale) private var locale
         
         @State private var isWorking: Bool = false
@@ -604,6 +601,10 @@ struct GridPattern: Shape {
         @State private var lastBackupDetail: String? = nil
         @State private var errorMessage: String? = nil
         @State private var showRestoreConfirm: Bool = false
+        @State private var showSignOutConfirm: Bool = false
+        @State private var showDeleteConfirm: Bool = false
+        @State private var isDeletingAccount: Bool = false
+        @State private var accountErrorMessage: String? = nil
         private let isBackupEnabled: Bool = false
 
         private func locString(_ key: String) -> String {
@@ -698,12 +699,44 @@ struct GridPattern: Shape {
                                 .foregroundColor(.gray)
                         }
                     }
+
+                    Section(header: Text("settings.section_account")) {
+                        Button(action: { showSignOutConfirm = true }) {
+                            HStack {
+                                Text("settings.sign_out")
+                                Spacer()
+                                Image(systemName: "arrow.right.square")
+                            }
+                        }
+                        .foregroundColor(.white)
+                        .disabled(authManager.isGuest)
+
+                        Button(role: .destructive, action: { showDeleteConfirm = true }) {
+                            HStack {
+                                Text("settings.delete_account")
+                                Spacer()
+                                if isDeletingAccount {
+                                    ProgressView()
+                                } else {
+                                    Image(systemName: "trash")
+                                }
+                            }
+                        }
+                        .disabled(authManager.isGuest || isDeletingAccount)
+
+                        if let accountErrorMessage {
+                            Text(accountErrorMessage)
+                                .font(.caption)
+                                .foregroundColor(.red)
+                        }
+                    }
                     
                     Section(header: Text("settings.legal")) {
                         Link("paywall.terms", destination: URL(string: "https://actually-hamster-aa2.notion.site/Snow-Record-Terms-of-Service-2f95e95d9ec180c4848adb22faecef63")!)
                         Link("paywall.privacy", destination: URL(string: "https://actually-hamster-aa2.notion.site/Snow-Record-Privacy-Policy-2f95e95d9ec180a795c2e7620227c213")!)
                     }
 
+                    #if DEBUG
                     Section(header: Text("settings.section_debug")) {
                         Toggle(isOn: Binding(
                             get: { storeManager.forceNonPro },
@@ -719,6 +752,7 @@ struct GridPattern: Shape {
                         }
                         .tint(Color(red: 107/255, green: 249/255, blue: 6/255))
                     }
+                    #endif
                 }
                 .navigationTitle("settings.title")
                 .navigationBarTitleDisplayMode(.inline)
@@ -744,6 +778,22 @@ struct GridPattern: Shape {
                 }
             } message: {
                 Text("profile.restore_message")
+            }
+            .alert("settings.sign_out_title", isPresented: $showSignOutConfirm) {
+                Button("settings.sign_out_cancel", role: .cancel) { }
+                Button("settings.sign_out_confirm", role: .destructive) {
+                    authManager.signOut()
+                }
+            } message: {
+                Text("settings.sign_out_message")
+            }
+            .alert("settings.delete_account_title", isPresented: $showDeleteConfirm) {
+                Button("settings.delete_account_cancel", role: .cancel) { }
+                Button("settings.delete_account_confirm", role: .destructive) {
+                    handleDeleteAccount()
+                }
+            } message: {
+                Text("settings.delete_account_message")
             }
         }
         
@@ -814,6 +864,24 @@ struct GridPattern: Shape {
                 errorMessage = locString("profile.restore_fail")
             }
         }
+
+        private func handleDeleteAccount() {
+            guard !authManager.isGuest else { return }
+            guard !isDeletingAccount else { return }
+            isDeletingAccount = true
+            accountErrorMessage = nil
+            authManager.deleteAccount { result in
+                DispatchQueue.main.async {
+                    self.isDeletingAccount = false
+                    switch result {
+                    case .success:
+                        self.dismiss()
+                    case .failure(let error):
+                        self.accountErrorMessage = error.localizedDescription
+                    }
+                }
+            }
+        }
     }
 
 struct GuestProfileView: View {
@@ -848,21 +916,8 @@ struct GuestProfileView: View {
             // Auth Buttons
             VStack(spacing: 16) {
                 // Google Sign In
-                Button(action: {
+                GoogleLoginButton(titleKey: "login.google") {
                     authManager.signInWithGoogle()
-                }) {
-                    HStack {
-                        Image(systemName: "g.circle.fill") // Placeholder
-                            .resizable()
-                            .frame(width: 20, height: 20)
-                        Text("Sign in with Google")
-                            .font(.headline)
-                    }
-                    .foregroundColor(.black)
-                    .frame(maxWidth: .infinity)
-                    .padding()
-                    .background(Color.white)
-                    .cornerRadius(12)
                 }
                 
                 // Apple Sign In
@@ -885,8 +940,7 @@ struct GuestProfileView: View {
                     }
                 )
                 .signInWithAppleButtonStyle(.white)
-                .frame(height: 50)
-                .cornerRadius(12)
+                .frame(width: 312, height: 48)
             }
             .padding(.horizontal, 40)
             

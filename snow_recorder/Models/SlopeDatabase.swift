@@ -106,6 +106,8 @@ struct Slope: Identifiable {
     var bottomPoint: CLLocationCoordinate2D?    // 하단 지점 (자동 산출)
     var topAltitude: Double?                    // 정상 해발고도 (m)
     var bottomAltitude: Double?                 // 하단 해발고도 (m)
+    var startLine: SlopeLine? = nil             // 출발선(라인크로싱용)
+    var finishLine: SlopeLine? = nil            // 도착선(라인크로싱용)
 
     var displayName: String {
         preferredName(ko: koreanName, en: name)
@@ -151,31 +153,9 @@ struct Slope: Identifiable {
     }
 }
 
-/// 리프트 정보
-struct LiftLine: Identifiable {
-    let id = UUID()
-    let name: String                            // 리프트 이름
-    let koreanName: String                      // 한글 이름
-    var path: [CLLocationCoordinate2D]          // 리프트 경로 좌표들 (TODO: 좌표 입력 필요)
-    let bufferRadius: CLLocationDistance = 30.0 // 리프트 라인으로 인식할 반경 (m)
-
-    var displayName: String {
-        preferredName(ko: koreanName, en: name)
-    }
-    
-    /// 주어진 좌표가 리프트 라인 근처인지 확인
-    func isNear(_ coordinate: CLLocationCoordinate2D) -> Bool {
-        guard !path.isEmpty else { return false }
-        let location = CLLocation(latitude: coordinate.latitude, longitude: coordinate.longitude)
-        
-        for point in path {
-            let pathLocation = CLLocation(latitude: point.latitude, longitude: point.longitude)
-            if location.distance(from: pathLocation) <= bufferRadius {
-                return true
-            }
-        }
-        return false
-    }
+struct SlopeLine {
+    let a: CLLocationCoordinate2D
+    let b: CLLocationCoordinate2D
 }
 
 /// 하이원 리조트 슬로프 데이터베이스
@@ -185,8 +165,14 @@ class SlopeDatabase {
     
     // MARK: - 슬로프 데이터 (하이원 리조트 공식 정보 기반)
     // TODO: 각 슬로프의 boundary, topPoint, bottomPoint 좌표 입력 필요
-    
-    let slopes: [Slope] = [
+
+    let slopes: [Slope]
+
+    init() {
+        slopes = Self.high1Slopes + Self.loadYongpyongSlopes()
+    }
+
+    private static let high1Slopes: [Slope] = [
         Slope(
             name: "ZEUS I",
             koreanName: "제우스 1",
@@ -905,19 +891,102 @@ class SlopeDatabase {
 
     ]
     
-    // MARK: - 리프트 데이터
-    // TODO: 리프트 경로 좌표 입력 필요 (구글 어스나 현장 데이터로 보강해야 함)
-    // 현재는 이름만 있고 경로가 비어있어 isNearLiftLine()이 항상 false를 반환함.
+    // MARK: - 용평 JSON 로더
     
-    let liftLines: [LiftLine] = [
-        LiftLine(name: "MOUNTAIN TOP EXPRESS", koreanName: "마운틴탑 익스프레스", path: []), // 곤돌라
-        LiftLine(name: "ZEUS EXPRESS", koreanName: "제우스 익스프레스", path: []), // 밸리 허브 -> 제우스 2 상단
-        LiftLine(name: "VICTORIA EXPRESS", koreanName: "빅토리아 익스프레스", path: []),
-        LiftLine(name: "APOLLO EXPRESS", koreanName: "아폴로 익스프레스", path: []),
-        LiftLine(name: "HERA EXPRESS", koreanName: "헤라 익스프레스", path: []), // 밸리 허브 -> 마운틴 탑
-        LiftLine(name: "VALLEY GONDOLA", koreanName: "밸리 곤돌라", path: []) // 스키하우스 -> 밸리 허브 -> 마운틴 탑
-    ]
+    private struct YongpyongSlopeJSON: Decodable {
+        let name: String
+        let difficulty: String
+        let distanceM: Double
+        let elevationDiffM: Double
+        let angleMaxDeg: Double
+        let angleMinDeg: Double
+        let angleAvgDeg: Double
+        let polygon: [[Double]]
+        let startLine: [[Double]]?
+        let finishLine: [[Double]]?
+        let topPoint: YongpyongPoint?
+        let bottomPoint: YongpyongPoint?
+        let topAltitude: Double?
+        let bottomAltitude: Double?
+    }
     
+    private struct YongpyongPoint: Decodable {
+        let lat: Double
+        let lon: Double
+    }
+    
+    private static func loadYongpyongSlopes() -> [Slope] {
+        guard let url = Bundle.main.url(forResource: "yongpyong_slopes_with_elevation", withExtension: "json")
+            ?? Bundle.main.url(forResource: "yongpyong_slopes", withExtension: "json") else {
+            return []
+        }
+        
+        do {
+            let data = try Data(contentsOf: url)
+            let decoded = try JSONDecoder().decode([YongpyongSlopeJSON].self, from: data)
+            return decoded.compactMap { item in
+                let difficulty = mapYongpyongDifficulty(item.difficulty)
+                let boundary = item.polygon.compactMap { point -> CLLocationCoordinate2D? in
+                    guard point.count >= 2 else { return nil }
+                    return CLLocationCoordinate2D(latitude: point[0], longitude: point[1])
+                }
+                let startLine = parseLine(item.startLine)
+                let finishLine = parseLine(item.finishLine)
+                let topPoint = item.topPoint.map {
+                    CLLocationCoordinate2D(latitude: $0.lat, longitude: $0.lon)
+                }
+                let bottomPoint = item.bottomPoint.map {
+                    CLLocationCoordinate2D(latitude: $0.lat, longitude: $0.lon)
+                }
+                
+                return Slope(
+                    name: item.name,
+                    koreanName: item.name,
+                    difficulty: difficulty,
+                    length: item.distanceM,
+                    avgGradient: item.angleAvgDeg,
+                    maxGradient: item.angleMaxDeg,
+                    status: .operating,
+                    boundary: boundary,
+                    topPoint: topPoint,
+                    bottomPoint: bottomPoint,
+                    topAltitude: item.topAltitude,
+                    bottomAltitude: item.bottomAltitude,
+                    startLine: startLine,
+                    finishLine: finishLine
+                )
+            }
+        } catch {
+            print("⚠️ 용평 JSON 로드 실패: \(error)")
+            return []
+        }
+    }
+    
+    private static func mapYongpyongDifficulty(_ value: String) -> SlopeDifficulty {
+        switch value {
+        case "beginner":
+            return .beginner
+        case "intermediate":
+            return .intermediate
+        case "advancedIntermediate":
+            return .advancedIntermediate
+        case "advanced":
+            return .advanced
+        case "expert":
+            return .expert
+        default:
+            return .beginner
+        }
+    }
+
+    private static func parseLine(_ raw: [[Double]]?) -> SlopeLine? {
+        guard let raw, raw.count == 2 else { return nil }
+        guard raw[0].count >= 2, raw[1].count >= 2 else { return nil }
+        let a = CLLocationCoordinate2D(latitude: raw[0][0], longitude: raw[0][1])
+        let b = CLLocationCoordinate2D(latitude: raw[1][0], longitude: raw[1][1])
+        return SlopeLine(a: a, b: b)
+    }
+
     // MARK: - 운영 중인 슬로프만 필터링
     
     var operatingSlopes: [Slope] {
@@ -938,12 +1007,6 @@ class SlopeDatabase {
     /// 현재 위치가 슬로프 내부인지 확인
     func isInsideAnySlope(_ location: CLLocation) -> Bool {
         return findSlope(at: location) != nil
-    }
-    
-    /// 현재 위치가 리프트 라인 근처인지 확인
-    func isNearLiftLine(_ location: CLLocation) -> Bool {
-        let coordinate = location.coordinate
-        return liftLines.contains { $0.isNear(coordinate) }
     }
     
     /// 난이도별 슬로프 필터링

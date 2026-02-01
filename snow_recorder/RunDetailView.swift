@@ -49,22 +49,24 @@ struct RunDetailView: View {
         
         var title: String {
             switch self {
-            case .edge: return "EDGE SCORE"
-            case .flow: return "FLOW SCORE"
+            case .edge:
+                return localizedString("run_detail.edge_title", fallback: "EDGE SCORE")
+            case .flow:
+                return localizedString("run_detail.flow_title", fallback: "FLOW SCORE")
             }
         }
         
         var description: String {
             switch self {
             case .edge:
-                return NSLocalizedString(
+                return localizedString(
                     "run_detail.edge_desc",
-                    comment: "런 디테일 엣지 스코어 설명"
+                    fallback: ""
                 )
             case .flow:
-                return NSLocalizedString(
+                return localizedString(
                     "run_detail.flow_desc",
-                    comment: "런 디테일 플로우 스코어 설명"
+                    fallback: ""
                 )
             }
         }
@@ -215,17 +217,20 @@ struct RunDetailView: View {
         .sheet(item: $gpxFileURL) { identifiableURL in
             ShareSheet(activityItems: [identifiableURL.url])
         }
+        #if DEBUG
         .sheet(item: $analysisFileURL) { identifiableURL in
             ShareSheet(activityItems: [identifiableURL.url])
         }
         .sheet(item: $baroLogFileURL) { identifiableURL in
             ShareSheet(activityItems: [identifiableURL.url])
         }
+        #endif
         .alert("GPX Export 불가", isPresented: $showNoDataAlert) {
             Button("확인", role: .cancel) {}
         } message: {
             Text("이 세션에는 GPS 경로 데이터가 없습니다.")
         }
+        #if DEBUG
         .alert("분석 데이터 없음", isPresented: $showNoAnalysisAlert) {
             Button("확인", role: .cancel) {}
         } message: {
@@ -241,6 +246,7 @@ struct RunDetailView: View {
         } message: {
             Text("해당 세션에 저장된 바리오 로그 파일이 없습니다.")
         }
+        #endif
 #if DEBUG
         .sheet(isPresented: $showDebugSheet) {
             AnalysisDebugView(session: session)
@@ -272,7 +278,7 @@ struct RunDetailView: View {
                 Spacer()
                 
                 HStack(spacing: 10) {
-#if DEBUG
+                    #if DEBUG
                     Button(action: { showDebugSheet = true }) {
                         Image(systemName: "ladybug")
                             .font(.system(size: 16, weight: .semibold))
@@ -281,7 +287,8 @@ struct RunDetailView: View {
                             .background(Color.white.opacity(0.08))
                             .clipShape(Circle())
                     }
-#endif
+                    #endif
+                    #if DEBUG
                     Button(action: { exportAnalysis() }) {
                         Image(systemName: "chart.bar.doc.horizontal")
                             .font(.system(size: 18, weight: .semibold))
@@ -309,6 +316,7 @@ struct RunDetailView: View {
                             )
                             .shadow(color: primaryColor.opacity(0.2), radius: 5)
                     }
+                    #endif
                     
                     Button(action: { exportGPX() }) {
                         Image(systemName: "arrow.down.doc")
@@ -346,10 +354,18 @@ struct RunDetailView: View {
     private var scoresSection: some View {
         HStack(spacing: 16) {
             // Edge Control
-            scoreCard(title: "EDGE SCORE", score: session.edgeScore, infoType: .edge)
+            scoreCard(
+                title: localizedString("run_detail.edge_title", fallback: "EDGE SCORE"),
+                score: session.edgeScore,
+                infoType: .edge
+            )
             
             // Flow
-            scoreCard(title: "FLOW SCORE", score: session.flowScore, infoType: .flow)
+            scoreCard(
+                title: localizedString("run_detail.flow_title", fallback: "FLOW SCORE"),
+                score: session.flowScore,
+                infoType: .flow
+            )
         }
         .padding(.horizontal)
     }
@@ -678,11 +694,33 @@ struct RunDetailView: View {
     private var displayTimelineEvents: [RunSession.TimelineEvent] {
         normalizeTimelineEvents(
             session.timelineEvents.map { event in
-                guard event.type == .pause else { return event }
                 var normalized = event
-                normalized.type = .rest
-                if normalized.detail.isEmpty {
-                    normalized.detail = "휴식"
+                if normalized.type == .pause {
+                    normalized.type = .rest
+                }
+                let trimmedDetail = normalized.detail.trimmingCharacters(in: .whitespacesAndNewlines)
+                let lowerDetail = trimmedDetail.lowercased()
+                if normalized.type == .rest {
+                    let restDefaults = ["휴식", "대기 중", "rest", "resting"]
+                    let shouldLocalize = trimmedDetail.isEmpty
+                        || restDefaults.contains(trimmedDetail)
+                        || lowerDetail == "rest"
+                        || lowerDetail == "resting"
+                    if shouldLocalize {
+                        normalized.detail = localizedString("timeline.rest", fallback: "휴식")
+                    }
+                }
+                if normalized.type == .lift {
+                    let liftDefaults = ["리프트 이동", "리프트", "리프트 탑승", "on lift", "lift", "lift ride"]
+                    let shouldLocalize = trimmedDetail.isEmpty
+                        || liftDefaults.contains(trimmedDetail)
+                        || lowerDetail == "lift"
+                        || lowerDetail == "on lift"
+                        || lowerDetail == "lift ride"
+                        || trimmedDetail.contains("리프트")
+                    if shouldLocalize {
+                        normalized.detail = localizedString("timeline.lift", fallback: "리프트 탑승")
+                    }
                 }
                 return normalized
             },
@@ -830,11 +868,11 @@ struct RunDetailView: View {
                     .background(Circle().fill(Color.white.opacity(0.06)))
                 
                 VStack(alignment: .leading, spacing: 4) {
-                    Text("COMPARE RUNS")
+                    Text("run_detail.compare_title")
                         .font(.system(size: 12, weight: .bold))
                         .tracking(1)
                         .foregroundColor(.white)
-                    Text("이번 런 vs 시즌 평균 비교")
+                    Text("run_detail.compare_desc")
                         .font(.system(size: 10, weight: .medium))
                         .foregroundColor(.gray)
                 }
@@ -897,7 +935,7 @@ struct RunDetailView: View {
                     .fill(primaryColor)
                     .frame(width: 6, height: 6)
                     .shadow(color: primaryColor, radius: 4)
-                Text("TIMELINE")
+                Text("run_detail.timeline_title")
                     .font(.system(size: 12, weight: .bold))
                     .foregroundColor(.white)
                     .tracking(2)
@@ -906,7 +944,7 @@ struct RunDetailView: View {
                 
                 Button(action: { withAnimation { isTimelineExpanded.toggle() } }) {
                     HStack(spacing: 4) {
-                        Text(isTimelineExpanded ? "COLLAPSE" : "VIEW ALL")
+                        Text(isTimelineExpanded ? "run_detail.timeline_collapse" : "run_detail.timeline_view_all")
                             .font(.system(size: 10, weight: .bold))
                         Image(systemName: "chevron.right")
                             .font(.system(size: 10, weight: .bold))
@@ -938,9 +976,9 @@ struct RunDetailView: View {
             
             // Legend
             HStack(spacing: 12) {
-                legendItem(color: primaryColor, label: "RIDE")
-                legendItem(color: Color.white.opacity(0.2), label: "LIFT")
-                legendItem(color: surfaceCard, isBorder: true, label: "REST")
+                legendItem(color: primaryColor, label: localizedString("run_detail.legend_ride", fallback: "RIDE"))
+                legendItem(color: Color.white.opacity(0.2), label: localizedString("run_detail.legend_lift", fallback: "LIFT"))
+                legendItem(color: surfaceCard, isBorder: true, label: localizedString("run_detail.legend_rest", fallback: "REST"))
             }
             .padding(.horizontal)
             
@@ -1129,7 +1167,7 @@ struct TimelineRowModern: View {
             // Content Card
             VStack(alignment: .leading, spacing: 4) {
                 HStack {
-                    Text(event.type.rawValue.uppercased())
+                    Text(verbatim: eventTypeLabel)
                         .font(.system(size: 10, weight: .bold))
                         .foregroundColor(titleColor)
                         .tracking(1)
@@ -1185,13 +1223,58 @@ struct TimelineRowModern: View {
         default: return .white.opacity(0.05)
         }
     }
+
+    var eventTypeLabel: String {
+        switch event.type {
+        case .riding:
+            return localizedString("run_detail.event_riding", fallback: "RIDE")
+        case .lift:
+            return localizedString("run_detail.event_lift", fallback: "LIFT")
+        case .rest:
+            return localizedString("run_detail.event_rest", fallback: "REST")
+        case .pause:
+            return localizedString("run_detail.event_pause", fallback: "PAUSE")
+        case .unknown:
+            return localizedString("run_detail.event_unknown", fallback: "UNKNOWN")
+        }
+    }
     
     func formatDuration(_ duration: TimeInterval) -> String {
         let formatter = DateComponentsFormatter()
         formatter.allowedUnits = [.minute]
         formatter.unitsStyle = .abbreviated
+        var calendar = Calendar(identifier: .gregorian)
+        calendar.locale = preferredLocale()
+        formatter.calendar = calendar
         return formatter.string(from: duration) ?? ""
     }
+}
+
+private func preferredLocale() -> Locale {
+    let preferred = UserDefaults.standard.string(forKey: "preferred_language") ?? "system"
+    switch preferred {
+    case "ko":
+        return Locale(identifier: "ko")
+    case "en":
+        return Locale(identifier: "en")
+    default:
+        return Locale.autoupdatingCurrent
+    }
+}
+
+private func localizedString(_ key: String, fallback: String) -> String {
+    let preferred = UserDefaults.standard.string(forKey: "preferred_language") ?? "system"
+    let bundle: Bundle
+    switch preferred {
+    case "ko":
+        bundle = Bundle(path: Bundle.main.path(forResource: "ko", ofType: "lproj") ?? "") ?? .main
+    case "en":
+        bundle = Bundle(path: Bundle.main.path(forResource: "en", ofType: "lproj") ?? "") ?? .main
+    default:
+        bundle = .main
+    }
+    let value = bundle.localizedString(forKey: key, value: fallback, table: nil)
+    return value.isEmpty ? fallback : value
 }
 
 // MARK: - Slope Card (Compact)
@@ -2590,7 +2673,7 @@ private struct AnalysisLockOverlay: View {
                     .font(.system(size: 14, weight: .bold))
                     .tracking(2)
                     .foregroundColor(.white)
-                Text("잠금 해제 후 상세 분석 확인")
+                Text("run_detail.analysis_lock_desc")
                     .font(.system(size: 12, weight: .medium))
                     .foregroundColor(.gray)
                 Button(action: onUnlock) {

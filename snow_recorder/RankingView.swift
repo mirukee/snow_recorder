@@ -28,8 +28,23 @@ struct RankingView: View {
     
     // MARK: - Models (Using RankingModels.swift)
     
-    // Mock Data (Resorts)
-    let resorts = ["전체", "하이원", "용평", "휘닉스", "비발디"]
+    // Resort Filter Labels (Mileage)
+    let resorts = [
+        "전체",
+        "하이원",
+        "용평",
+        "휘닉스",
+        "비발디",
+        "알펜시아",
+        "오크밸리",
+        "엘리시안 강촌",
+        "웰리힐리",
+        "무주",
+        "오투",
+        "곤지암",
+        "지산",
+        "에덴밸리"
+    ]
     
     @State private var showingScoreInfo = false
     @State private var selectedUser: LeaderboardEntry? = nil
@@ -206,24 +221,16 @@ struct RankingView: View {
     
     private var headerView: some View {
         VStack(spacing: 12) {
-            HStack {
-                Button(action: {}) {
-                    Image(systemName: "chevron.left")
+                HStack {
+                    Text("LEADERBOARD")
+                        .font(.system(size: 20, weight: .heavy))
+                        .tracking(4)
                         .foregroundColor(.white)
-                        .font(.system(size: 20, weight: .semibold))
-                }
-                
-                Spacer()
-                
-                Text("LEADERBOARD")
-                    .font(.system(size: 20, weight: .heavy))
-                    .tracking(4)
-                    .foregroundColor(.white)
-                    .shadow(color: .white.opacity(0.5), radius: 10)
-                
-                Spacer()
-                
-                HStack(spacing: 12) {
+                        .shadow(color: .white.opacity(0.5), radius: 10)
+                    
+                    Spacer()
+                    
+                    HStack(spacing: 12) {
                     let remainingSync = rankingService.manualSyncRemainingCount()
                     let canSync = remainingSync > 0
                     Text("\(remainingSync)/2")
@@ -245,11 +252,12 @@ struct RankingView: View {
                     }
                     .opacity(canSync ? 1 : 0.4)
                     
-                    Button(action: {}) {
-                        Image(systemName: "gearshape") // Moved actual logic to ProfileView
-                            .foregroundColor(.white.opacity(0.3)) // Dimmed here
-                            .font(.system(size: 20, weight: .semibold))
+                    Button(action: { showSyncHelp = true }) {
+                        Image(systemName: "questionmark.circle")
+                            .foregroundColor(.white.opacity(0.5))
+                            .font(.system(size: 18, weight: .semibold))
                     }
+                
                 }
             }
             
@@ -746,21 +754,8 @@ struct RankingView: View {
                 }
                 Spacer()
                 VStack(spacing: 16) {
-                    Button(action: {
+                    GoogleLoginButton(titleKey: "login.google") {
                         authManager.signInWithGoogle()
-                    }) {
-                        HStack {
-                            Image(systemName: "g.circle.fill")
-                                .resizable()
-                                .frame(width: 20, height: 20)
-                            Text("Sign in with Google")
-                                .font(.headline)
-                        }
-                        .foregroundColor(.black)
-                        .frame(maxWidth: .infinity)
-                        .padding()
-                        .background(Color.white)
-                        .cornerRadius(12)
                     }
                     
                     SignInWithAppleButton(
@@ -779,8 +774,7 @@ struct RankingView: View {
                         }
                     )
                     .signInWithAppleButtonStyle(.white)
-                    .frame(height: 50)
-                    .cornerRadius(12)
+                    .frame(width: 312, height: 48)
                 }
                 .padding(.horizontal, 40)
                 Spacer()

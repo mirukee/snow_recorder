@@ -26,7 +26,11 @@ class StoreManager: ObservableObject {
     
     init() {
         // 테스트용 비구독 강제 플래그 로드
+        #if DEBUG
         forceNonPro = UserDefaults.standard.bool(forKey: "debug.force_non_pro")
+        #else
+        forceNonPro = false
+        #endif
         // Start listening for transaction updates
         updateListenerTask = listenForTransactions()
         let storeKitConfigPath = ProcessInfo.processInfo.environment["STOREKIT_CONFIGURATION_PATH"] ?? "nil"
@@ -123,9 +127,11 @@ class StoreManager: ObservableObject {
     // MARK: - Debug (Force Non-Pro)
     
     func setForceNonPro(_ enabled: Bool) {
+        #if DEBUG
         forceNonPro = enabled
         UserDefaults.standard.set(enabled, forKey: "debug.force_non_pro")
         Task { await updateCustomerProductStatus() }
+        #endif
     }
     
     // MARK: - Status Check

@@ -1,7 +1,7 @@
 # 프로젝트 정체성 (Project Identity)
 - 프로젝트명: Snow Record (스노우 레코드)
 - 핵심 가치: '감성(Vibe)'과 'Flex'. 사용자가 스키장에서 자신의 기록을 힙하게 확인하고 공유하는 도구.
-- AI Agent 답변은 항상 한국어로 작성할 것
+- AI의 답변은 항상 한국어로 작성할 것
 
 # 기술 스택 및 아키텍처 (Tech Stack)
 - 플랫폼: iOS Native (Target iOS 17.0 이상), SwiftUI.

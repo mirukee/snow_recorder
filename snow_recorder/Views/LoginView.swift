@@ -1,7 +1,5 @@
 import SwiftUI
 import AuthenticationServices
-import GoogleSignIn
-import GoogleSignInSwift
 
 struct LoginView: View {
     @StateObject private var authManager = AuthenticationManager.shared
@@ -39,21 +37,8 @@ struct LoginView: View {
                 // Buttons
                 VStack(spacing: 16) {
                     // Google Sign In
-                    Button(action: {
+                    GoogleLoginButton(titleKey: "login.google") {
                         authManager.signInWithGoogle()
-                    }) {
-                        HStack {
-                            Image(systemName: "g.circle.fill") // Custom Google Icon needed usually, using SF for now
-                                .resizable()
-                                .frame(width: 20, height: 20)
-                            Text("Sign in with Google")
-                                .font(.headline)
-                        }
-                        .foregroundColor(.black)
-                        .frame(maxWidth: .infinity)
-                        .padding()
-                        .background(Color.white)
-                        .cornerRadius(12)
                     }
                     
                     // Apple Sign In
@@ -73,8 +58,7 @@ struct LoginView: View {
                         }
                     )
                     .signInWithAppleButtonStyle(.white)
-                    .frame(height: 50)
-                    .cornerRadius(12)
+                    .frame(width: 312, height: 48)
                     
                     // Guest Mode
                     Button(action: {

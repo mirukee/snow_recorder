@@ -11,6 +11,7 @@ class MyPageViewModel: ObservableObject {
     
     private var cancellables = Set<AnyCancellable>()
     private var gamificationService = GamificationService.shared
+    private let rankingSnapshotKey = "ranking_last_sessions_signature"
     
     init() {
         // 초기값은 서비스의 현재 상태로 설정
@@ -30,7 +31,19 @@ class MyPageViewModel: ObservableObject {
     func updateStats(using sessions: [RunSession]) {
         // 서비스에 위임 (디바운스/백그라운드)
         gamificationService.scheduleUpdateProfile(from: sessions)
-        // 랭킹 서비스에도 로컬 데이터 동기화 요청 (리더보드 기준 통계 재계산 및 업로드)
+        // 세션 변경이 있을 때만 랭킹 동기화 요청 (불필요한 Sync Pending 방지)
+        let signature = sessionSignature(for: sessions)
+        let stored = UserDefaults.standard.string(forKey: rankingSnapshotKey)
+        guard stored != signature else { return }
+        UserDefaults.standard.set(signature, forKey: rankingSnapshotKey)
         RankingService.shared.syncAfterLocalChange(sessions: sessions)
+    }
+
+    private func sessionSignature(for sessions: [RunSession]) -> String {
+        let count = sessions.count
+        let latestEnd = sessions.map { $0.endTime.timeIntervalSince1970 }.max() ?? 0
+        let totalDistance = sessions.reduce(0.0) { $0 + $1.distance }
+        let totalRunCount = sessions.reduce(0) { $0 + $1.runCount }
+        return "\(count)|\(Int(latestEnd))|\(Int(totalDistance.rounded()))|\(totalRunCount)"
     }
 }

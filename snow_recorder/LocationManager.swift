@@ -37,6 +37,12 @@ class LocationManager: NSObject, ObservableObject, CLLocationManagerDelegate {
     @Published var runStartIndices: [Int] = [0] // 각 런 시작 인덱스
     @Published var timelineEvents: [RunSession.TimelineEvent] = [] // 타임라인 이벤트 목록
     private(set) var lastRunWasAccepted: Bool = true // 최근 런이 유효로 확정되었는지 여부
+
+    // 현재 위치 기반 리조트명 (대시보드 표시용)
+    var currentResortName: String? {
+        guard let location else { return nil }
+        return ResortRegion.match(for: location)?.displayName
+    }
     
     // MARK: - Private Properties
     private var lastLocation: CLLocation?
@@ -47,6 +53,9 @@ class LocationManager: NSObject, ObservableObject, CLLocationManagerDelegate {
     private var visitedSlopeCounts: [String: Int] = [:] // 현재 런에서 방문한 슬로프별 샘플 수 (Dwell Time)
     private var visitedSlopeStartHits: Set<String> = [] // 현재 런에서 시작점(Top)을 통과한 슬로프 이름
     private var visitedSlopeFinishHits: Set<String> = [] // 현재 런에서 종료점(Bottom)을 통과한 슬로프 이름
+    private var visitedSlopeStartHitTimes: [String: Date] = [:] // 시작점(Top) 최초 통과 시각
+    private var visitedSlopeFinishHitTimes: [String: Date] = [:] // 종료점(Bottom) 최초 통과 시각
+    private var completedSlopeTimes: [String: Date] = [:] // Start/Finish 모두 통과한 시각(완주 기준)
     private var altitudeHistory: [Double] = []          // 상태 판정 안정화를 위한 고도 기록 (최근 5~10초)
     private var outOfSlopeStartTime: Date?              // 슬로프 이탈 시점 기록
     private var currentTimelineEventStart: Date?        // 현재 이벤트 시작 시간
@@ -385,6 +394,9 @@ class LocationManager: NSObject, ObservableObject, CLLocationManagerDelegate {
         visitedSlopeCounts.removeAll()
         visitedSlopeStartHits.removeAll()
         visitedSlopeFinishHits.removeAll()
+        visitedSlopeStartHitTimes.removeAll()
+        visitedSlopeFinishHitTimes.removeAll()
+        completedSlopeTimes.removeAll()
         altitudeHistory.removeAll()
         outOfSlopeStartTime = nil
         sessionSlopeCounts.removeAll()
@@ -1407,8 +1419,10 @@ class LocationManager: NSObject, ObservableObject, CLLocationManagerDelegate {
                 for slopeName in onLiftStartCandidates {
                     if let slope = SlopeDatabase.shared.findSlope(byName: slopeName),
                        slope.contains(coordinate) {
-                        visitedSlopeStartHits.insert(slopeName)
-                        print("🚩 Start Point Merge(Boost): \(slopeName)")
+                        if !visitedSlopeStartHits.contains(slopeName) {
+                            registerSlopeStartHit(name: slopeName, time: currentLocation.timestamp)
+                            print("🚩 Start Point Merge(Boost): \(slopeName)")
+                        }
                     }
                 }
                 onLiftStartCandidates.removeAll()
@@ -1449,9 +1463,91 @@ class LocationManager: NSObject, ObservableObject, CLLocationManagerDelegate {
         avgSpeed = speedSamples.reduce(0, +) / Double(speedSamples.count)
     }
     
+    /// 라인 크로싱 여부 판정
+    private func didCrossLine(from start: CLLocationCoordinate2D, to end: CLLocationCoordinate2D, line: SlopeLine) -> Bool {
+        return segmentsIntersect(start, end, line.a, line.b)
+    }
+    
+    /// 선분 교차 판정 (평면 근사)
+    private func segmentsIntersect(
+        _ p1: CLLocationCoordinate2D,
+        _ p2: CLLocationCoordinate2D,
+        _ q1: CLLocationCoordinate2D,
+        _ q2: CLLocationCoordinate2D
+    ) -> Bool {
+        let o1 = orientation(p1, p2, q1)
+        let o2 = orientation(p1, p2, q2)
+        let o3 = orientation(q1, q2, p1)
+        let o4 = orientation(q1, q2, p2)
+        
+        if o1 != o2 && o3 != o4 { return true }
+        
+        if o1 == 0 && onSegment(p1, q1, p2) { return true }
+        if o2 == 0 && onSegment(p1, q2, p2) { return true }
+        if o3 == 0 && onSegment(q1, p1, q2) { return true }
+        if o4 == 0 && onSegment(q1, p2, q2) { return true }
+        
+        return false
+    }
+    
+    private func orientation(
+        _ p: CLLocationCoordinate2D,
+        _ q: CLLocationCoordinate2D,
+        _ r: CLLocationCoordinate2D
+    ) -> Int {
+        let val = (q.longitude - p.longitude) * (r.latitude - q.latitude)
+            - (q.latitude - p.latitude) * (r.longitude - q.longitude)
+        let epsilon = 1e-12
+        if abs(val) < epsilon { return 0 }
+        return val > 0 ? 1 : 2
+    }
+    
+    private func onSegment(
+        _ p: CLLocationCoordinate2D,
+        _ q: CLLocationCoordinate2D,
+        _ r: CLLocationCoordinate2D
+    ) -> Bool {
+        return q.latitude <= max(p.latitude, r.latitude)
+            && q.latitude >= min(p.latitude, r.latitude)
+            && q.longitude <= max(p.longitude, r.longitude)
+            && q.longitude >= min(p.longitude, r.longitude)
+    }
+    
+    /// 슬로프 Start Hit 기록
+    private func registerSlopeStartHit(name: String, time: Date) {
+        visitedSlopeStartHits.insert(name)
+        if visitedSlopeStartHitTimes[name] == nil {
+            visitedSlopeStartHitTimes[name] = time
+        }
+        updateCompletedSlopeTimeIfNeeded(for: name)
+    }
+    
+    /// 슬로프 Finish Hit 기록
+    private func registerSlopeFinishHit(name: String, time: Date) {
+        visitedSlopeFinishHits.insert(name)
+        if visitedSlopeFinishHitTimes[name] == nil {
+            visitedSlopeFinishHitTimes[name] = time
+        }
+        updateCompletedSlopeTimeIfNeeded(for: name)
+    }
+    
+    /// Start/Finish 모두 통과했을 때 최초 완주 시각 기록
+    private func updateCompletedSlopeTimeIfNeeded(for name: String) {
+        guard completedSlopeTimes[name] == nil else { return }
+        guard let startTime = visitedSlopeStartHitTimes[name],
+              let finishTime = visitedSlopeFinishHitTimes[name] else { return }
+        completedSlopeTimes[name] = max(startTime, finishTime)
+    }
+    
     /// 현재 런에서 가장 적합한 슬로프 반환 (Start/Finish 완주 > 난이도 > Dwell Time)
     private func calculateBestSlope() -> Slope? {
         guard !visitedSlopeCounts.isEmpty else { return currentSlope }
+        
+        // 완주 슬로프가 1개라면, 노이즈 필터(10%) 없이 바로 확정
+        let completedNames = visitedSlopeStartHits.intersection(visitedSlopeFinishHits)
+        if completedNames.count == 1, let name = completedNames.first {
+            return SlopeDatabase.shared.findSlope(byName: name) ?? currentSlope
+        }
         
         // 1. 후보군 추출 (최소 방문 횟수 필터링)
         let maxCount = visitedSlopeCounts.values.max() ?? 0
@@ -1467,15 +1563,17 @@ class LocationManager: NSObject, ObservableObject, CLLocationManagerDelegate {
         // 3. 우선순위 결정
         if !completedSlopes.isEmpty {
             // 완주한 슬로프가 있다면, 난이도가 높은 순서대로 우선순위 부여
-            return completedSlopes.sorted { $0.difficulty.priority > $1.difficulty.priority }.first
-        } else {
-            // 완주한 슬로프가 없다면, 기존 방식(면적이 작은 순서 -> 상세한 슬로프) 사용
-            return slopes.sorted {
-                if abs($0.polygonArea - $1.polygonArea) > 0.0000001 {
-                    return $0.polygonArea < $1.polygonArea
+            return completedSlopes.sorted { lhs, rhs in
+                if lhs.difficulty.priority != rhs.difficulty.priority {
+                    return lhs.difficulty.priority > rhs.difficulty.priority
                 }
-                return $0.difficulty.priority > $1.difficulty.priority
+                let lhsTime = completedSlopeTimes[lhs.name] ?? .distantFuture
+                let rhsTime = completedSlopeTimes[rhs.name] ?? .distantFuture
+                return lhsTime < rhsTime
             }.first
+        } else {
+            // 완주한 슬로프가 없다면, 면적 조건 없이 난이도 높은 순으로 우선순위 부여
+            return slopes.sorted { $0.difficulty.priority > $1.difficulty.priority }.first
         }
     }
     
@@ -1635,21 +1733,34 @@ class LocationManager: NSObject, ObservableObject, CLLocationManagerDelegate {
             // B. Start/Finish 지점 통과 감지
             let checkSlopes = SlopeDatabase.shared.operatingSlopes
             for slope in checkSlopes {
+                let prevCoordinate = lastLocation?.coordinate
                 // Start(Top) Check: Riding, Resting 모두 허용 (출발 전 대기 포함)
-                if let top = slope.topPoint,
-                   CLLocation(latitude: top.latitude, longitude: top.longitude).distance(from: newLocation) <= pointHitRadius {
+                if let startLine = slope.startLine, let prevCoordinate {
+                    if didCrossLine(from: prevCoordinate, to: newLocation.coordinate, line: startLine),
+                       !visitedSlopeStartHits.contains(slope.name) {
+                        print("🚩 Start Line Hit: \(slope.name) (State: \(currentState))")
+                        registerSlopeStartHit(name: slope.name, time: newLocation.timestamp)
+                    }
+                } else if let top = slope.topPoint,
+                          CLLocation(latitude: top.latitude, longitude: top.longitude).distance(from: newLocation) <= pointHitRadius {
                     if !visitedSlopeStartHits.contains(slope.name) {
                         print("🚩 Start Point Hit: \(slope.name) (State: \(currentState))")
-                        visitedSlopeStartHits.insert(slope.name)
+                        registerSlopeStartHit(name: slope.name, time: newLocation.timestamp)
                     }
                 }
                 // Finish(Bottom) Check: Riding 상태에서만 허용 (오탐지 방지)
                 if currentState == .riding {
-                    if let bottom = slope.bottomPoint,
-                       CLLocation(latitude: bottom.latitude, longitude: bottom.longitude).distance(from: newLocation) <= pointHitRadius {
+                    if let finishLine = slope.finishLine, let prevCoordinate {
+                        if didCrossLine(from: prevCoordinate, to: newLocation.coordinate, line: finishLine),
+                           !visitedSlopeFinishHits.contains(slope.name) {
+                            print("🏁 Finish Line Hit: \(slope.name)")
+                            registerSlopeFinishHit(name: slope.name, time: newLocation.timestamp)
+                        }
+                    } else if let bottom = slope.bottomPoint,
+                              CLLocation(latitude: bottom.latitude, longitude: bottom.longitude).distance(from: newLocation) <= pointHitRadius {
                         if !visitedSlopeFinishHits.contains(slope.name) {
                             print("🏁 Finish Point Hit: \(slope.name)")
-                            visitedSlopeFinishHits.insert(slope.name)
+                            registerSlopeFinishHit(name: slope.name, time: newLocation.timestamp)
                         }
                     }
                 }
@@ -1665,7 +1776,8 @@ class LocationManager: NSObject, ObservableObject, CLLocationManagerDelegate {
            shouldCheckSlope(at: newLocation) {
             let checkSlopes = SlopeDatabase.shared.operatingSlopes
             for slope in checkSlopes {
-                if let top = slope.topPoint,
+                if slope.startLine == nil,
+                   let top = slope.topPoint,
                    CLLocation(latitude: top.latitude, longitude: top.longitude).distance(from: newLocation) <= pointHitRadius {
                     if !onLiftStartCandidates.contains(slope.name) {
                         onLiftStartCandidates.insert(slope.name)
@@ -1704,6 +1816,9 @@ class LocationManager: NSObject, ObservableObject, CLLocationManagerDelegate {
             visitedSlopeCounts.removeAll()
             visitedSlopeStartHits.removeAll()
             visitedSlopeFinishHits.removeAll()
+            visitedSlopeStartHitTimes.removeAll()
+            visitedSlopeFinishHitTimes.removeAll()
+            completedSlopeTimes.removeAll()
             print("🚫 노이즈 런 제외: \(Int(duration))초, 하강 \(Int(drop))m")
             return
         }
@@ -1734,6 +1849,9 @@ class LocationManager: NSObject, ObservableObject, CLLocationManagerDelegate {
         visitedSlopeCounts.removeAll()
         visitedSlopeStartHits.removeAll()
         visitedSlopeFinishHits.removeAll()
+        visitedSlopeStartHitTimes.removeAll()
+        visitedSlopeFinishHitTimes.removeAll()
+        completedSlopeTimes.removeAll()
     }
     
     func locationManagerDidChangeAuthorization(_ manager: CLLocationManager) {

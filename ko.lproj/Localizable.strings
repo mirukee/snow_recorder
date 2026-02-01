@@ -1,11 +1,24 @@
 /* 게스트 모드(기록만 하기) */
 "login.guest_mode" = "게스트 모드(기록만 하기)";
+/* 구글로 로그인 */
+"login.google" = "Google로 로그인";
 
 /* 삭제하기 */
 "history.delete" = "삭제하기";
 
 /* 첫 런을 기다리는 중... */
 "dashboard.wait_first_run" = "첫 런을 기다리는 중...";
+/* 대시보드 리조트 표시 포맷 */
+"dashboard.resort_format" = "RESORT - %@";
+/* 대시보드 리조트 탐색 중 */
+"dashboard.resort_locating" = "RESORT - LOCATING...";
+
+/* 뱃지 상세 - 획득 상태 */
+"badge.detail.earned" = "EARNED";
+/* 뱃지 상세 - 잠김 상태 */
+"badge.detail.locked" = "LOCKED";
+/* 뱃지 상세 - 닫기 안내 */
+"badge.detail.tap_to_close" = "TAP TO CLOSE";
 
 /* 테크니컬 스코어 가이드 */
 "ranking.tech_guide_title" = "테크니컬 스코어 가이드";
@@ -61,6 +74,39 @@
 /* 앱 버전 라벨 */
 "settings.app_version" = "버전";
 
+/* 계정 섹션 타이틀 */
+"settings.section_account" = "계정";
+
+/* 로그아웃 */
+"settings.sign_out" = "로그아웃";
+
+/* 로그아웃 확인 타이틀 */
+"settings.sign_out_title" = "로그아웃할까요?";
+
+/* 로그아웃 안내 */
+"settings.sign_out_message" = "계정에서 로그아웃하고 게스트 모드로 전환합니다.";
+
+/* 로그아웃 취소 */
+"settings.sign_out_cancel" = "취소";
+
+/* 로그아웃 확인 */
+"settings.sign_out_confirm" = "로그아웃";
+
+/* 회원 탈퇴 */
+"settings.delete_account" = "회원 탈퇴";
+
+/* 회원 탈퇴 확인 타이틀 */
+"settings.delete_account_title" = "계정을 삭제할까요?";
+
+/* 회원 탈퇴 안내 */
+"settings.delete_account_message" = "이 작업은 되돌릴 수 없습니다. 계정과 랭킹 데이터가 삭제됩니다.";
+
+/* 회원 탈퇴 취소 */
+"settings.delete_account_cancel" = "취소";
+
+/* 회원 탈퇴 확인 */
+"settings.delete_account_confirm" = "삭제";
+
 /* 디버그 섹션 타이틀 */
 "settings.section_debug" = "디버그";
 
@@ -107,6 +153,11 @@
 "share.layout.rewind" = "리와인드";
 "share.layout.frost_glass" = "프로스트";
 
+/* 런 상세 */
+"run_detail.analysis_lock_desc" = "잠금 해제 후 상세 분석 확인";
+"timeline.rest" = "휴식";
+"timeline.lift" = "리프트 탑승";
+
 /* 동기화 대기 */
 "ranking.sync_pending" = "SYNC PENDING";
 
@@ -116,11 +167,11 @@
 /* 게스트 랭킹 설명 */
 "ranking.guest_body" = "로그인 후 리더보드에 참여할 수 있어요.";
 
-/* 동기화 도움말 타이틀 */
-"ranking.sync_help_title" = "SYNC HELP";
+/* 수동 동기화 도움말 타이틀 */
+"ranking.sync_help_title" = "MANUAL SYNC";
 
-/* 리더보드 동기화 도움말 */
-"ranking.sync_help_body" = "리더보드 수치는 서버 집계 및 동기화 타이밍에 따라 지연될 수 있습니다.\n세션 삭제/편집 후에는 로컬 수치가 먼저 반영되고, 서버 반영은 지연될 수 있어요.\nSYNC PENDING은 아직 서버에 반영되지 않은 변경이 있다는 뜻입니다.";
+/* 수동 동기화 도움말 */
+"ranking.sync_help_body" = "MANUAL SYNC는 내 기록을 서버에 업로드합니다.\n보통은 자동 업로드되지만, 즉시 반영이 필요할 때 사용하세요.\n일일 사용 횟수 제한이 있으며, 리더보드는 정각 배치로 갱신되므로 표시가 지연될 수 있습니다.";
 
 /* 동기화 도움말 확인 */
 "ranking.sync_help_ok" = "확인";
@@ -181,12 +232,69 @@
 
 /* 크래시 없이 10회 기록하세요. */
 "badge.desc.safe_rider" = "크래시 없이 10회 기록하세요.";
+/* 최고 속도 100km/h에 도달하세요. */
+"badge.desc.speed_hunter_100" = "최고 속도 100km/h에 도달하세요.";
+/* 총 300km를 주행하세요. */
+"badge.desc.distance_300" = "총 300km를 주행하세요.";
+/* 총 하강고도 50,000m를 달성하세요. */
+"badge.desc.vertical_50k" = "총 하강고도 50,000m를 달성하세요.";
+/* 총 주행 시간 6시간을 달성하세요. */
+"badge.desc.all_day" = "총 주행 시간 6시간을 달성하세요.";
+/* 엣지 스코어 900점을 돌파하세요. */
+"badge.desc.edge_elite" = "엣지 스코어 900점을 돌파하세요.";
+/* 플로우 스코어 900점을 돌파하세요. */
+"badge.desc.flow_elite" = "플로우 스코어 900점을 돌파하세요.";
 
 /* "얼마나 날카롭게 베고 나갔는가?"\n\n당신의 턴이 설면을 얼마나 견고하게 파고들었는지 분석한 '카빙(Carving) 완성도' 지표입니다.\n\n분석 기준: 턴의 깊이, 엣징 각도(G-Force), 슬립(미끄러짐) 최소화\n\nTip: 데크가 눈에 박히는 느낌에 집중하고, 과감하게 엣지를 세울수록 점수가 올라갑니다. */
 "run_detail.edge_desc" = "\"얼마나 날카롭게 베고 나갔는가?\"\n\n당신의 턴이 설면을 얼마나 견고하게 파고들었는지 분석한 '카빙(Carving) 완성도' 지표입니다.\n\n분석 기준: 턴의 깊이, 엣징 각도(G-Force), 슬립(미끄러짐) 최소화\n\nTip: 데크가 눈에 박히는 느낌에 집중하고, 과감하게 엣지를 세울수록 점수가 올라갑니다.";
 
 /* "얼마나 물 흐르듯 내려왔는가?"\n\n주행의 리듬과 속도 유지를 분석한 '주행 안정성(Smoothness)' 지표입니다.\n\n분석 기준: 속도 유지력, 턴 연결의 부드러움, 불필요한 급제동 여부\n\nTip: 턴과 턴 사이가 끊기지 않게 연결하고, 일정한 리듬을 유지할수록 점수가 올라갑니다. */
 "run_detail.flow_desc" = "\"얼마나 물 흐르듯 내려왔는가?\"\n\n주행의 리듬과 속도 유지를 분석한 '주행 안정성(Smoothness)' 지표입니다.\n\n분석 기준: 속도 유지력, 턴 연결의 부드러움, 불필요한 급제동 여부\n\nTip: 턴과 턴 사이가 끊기지 않게 연결하고, 일정한 리듬을 유지할수록 점수가 올라갑니다.";
+
+/* 런 디테일 엣지 스코어 타이틀 */
+"run_detail.edge_title" = "EDGE SCORE";
+
+/* 런 디테일 플로우 스코어 타이틀 */
+"run_detail.flow_title" = "FLOW SCORE";
+
+/* 런 디테일 타임라인 타이틀 */
+"run_detail.timeline_title" = "TIMELINE";
+
+/* 런 디테일 타임라인 모두 보기 */
+"run_detail.timeline_view_all" = "VIEW ALL";
+
+/* 런 디테일 타임라인 접기 */
+"run_detail.timeline_collapse" = "COLLAPSE";
+
+/* 런 디테일 타임라인 범례 라이딩 */
+"run_detail.legend_ride" = "RIDE";
+
+/* 런 디테일 타임라인 범례 리프트 */
+"run_detail.legend_lift" = "LIFT";
+
+/* 런 디테일 타임라인 범례 휴식 */
+"run_detail.legend_rest" = "REST";
+
+/* 런 디테일 타임라인 이벤트 라이딩 */
+"run_detail.event_riding" = "RIDE";
+
+/* 런 디테일 타임라인 이벤트 리프트 */
+"run_detail.event_lift" = "LIFT";
+
+/* 런 디테일 타임라인 이벤트 휴식 */
+"run_detail.event_rest" = "REST";
+
+/* 런 디테일 타임라인 이벤트 일시정지 */
+"run_detail.event_pause" = "PAUSE";
+
+/* 런 디테일 타임라인 이벤트 알 수 없음 */
+"run_detail.event_unknown" = "UNKNOWN";
+
+/* 런 비교 카드 타이틀 */
+"run_detail.compare_title" = "COMPARE RUNS";
+
+/* 런 비교 카드 설명 */
+"run_detail.compare_desc" = "이번 런 vs 시즌 평균 비교";
 
 /* PRO 시작: */
 "paywall.headline_go_pro" = "PRO 시작:";

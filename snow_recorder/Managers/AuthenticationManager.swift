@@ -150,6 +150,34 @@ class AuthenticationManager: ObservableObject {
         }
     }
 
+    func deleteAccount(completion: @escaping (Result<Void, Error>) -> Void) {
+        guard let user = Auth.auth().currentUser else {
+            completion(.failure(NSError(domain: "Auth", code: 401, userInfo: [NSLocalizedDescriptionKey: "No authenticated user."])))
+            return
+        }
+        let uid = user.uid
+        let db = Firestore.firestore()
+        let userRef = db.collection("rankings").document(uid)
+        
+        userRef.delete { [weak self] error in
+            if let error {
+                completion(.failure(error))
+                return
+            }
+            user.delete { error in
+                if let error {
+                    completion(.failure(error))
+                    return
+                }
+                self?.user = nil
+                self?.isGuest = true
+                self?.featuredBadgesUploadWorkItem?.cancel()
+                self?.featuredBadgesUploadWorkItem = nil
+                completion(.success(()))
+            }
+        }
+    }
+
     // MARK: - 닉네임 동기화
 
     func updateDisplayName(to name: String, completion: ((Bool) -> Void)? = nil) {

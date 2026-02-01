@@ -108,7 +108,7 @@ struct DashboardView: View {
                             .font(.system(size: 10, weight: .semibold, design: .monospaced))
                             .tracking(1.0)
                             .foregroundColor(.white.opacity(0.5))
-                        
+#if DEBUG
                         HStack(spacing: 6) {
                             Text("BARO")
                                 .font(.system(size: 9, weight: .bold, design: .monospaced))
@@ -127,6 +127,7 @@ struct DashboardView: View {
                                 .foregroundColor(.white.opacity(0.5))
                         }
                         .opacity((locationManager.barometerAvailable && !recordManager.isRecording) ? 1.0 : 0.35)
+#endif
                     }
                 }
                 .padding(.horizontal, 24)
@@ -189,13 +190,13 @@ struct DashboardView: View {
                         .font(.system(size: 14))
                         .foregroundColor(.black)
                     
-                    if let slope = locationManager.currentSlope {
-                        Text("HIGH1 RESORT - \(slope.name) (\(slope.difficulty.rawValue))")
+                    if let resortName = locationManager.currentResortName {
+                        Text(String(format: String(localized: "dashboard.resort_format"), resortName))
                             .font(.system(size: 12, weight: .bold))
                             .textCase(.uppercase)
                             .foregroundColor(.black)
                     } else {
-                        Text("HIGH1 RESORT - LOCATING...")
+                        Text(String(localized: "dashboard.resort_locating"))
                             .font(.system(size: 12, weight: .bold))
                             .textCase(.uppercase)
                             .foregroundColor(.black)
@@ -357,6 +358,8 @@ struct DashboardView: View {
                         VStack(spacing: 12) {
                             Button(action: {
                                 HapticManager.shared.notification(type: .success)
+                                locationManager.requestPermission()
+                                MotionPermissionManager.shared.requestIfNeeded()
                                 recordManager.startRecording()
                             }) {
                                 ZStack {
@@ -413,7 +416,6 @@ struct DashboardView: View {
             }
         }
         .onAppear {
-            locationManager.requestPermission()
             barometerEnabled = FeatureFlags.barometerEnabled
             
             // REC Blinking Animation

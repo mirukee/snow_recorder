@@ -31,6 +31,19 @@
 - Finish Point는 `RIDING`에서만 감지됩니다.
 - ON_LIFT에서는 기본적으로 Start/Finish 감지를 하지 않지만, **바리오 부스트 활성화 시 Start 후보를 버퍼링**하고 `RIDING` 시작 위치가 슬로프 폴리곤 내부일 때만 반영합니다.
 
+### D. 라인 크로싱 기반 Start/Finish 판정 (Line Crossing)
+- **목적:** 점 반경 방식의 오탐을 줄이고, 실제 “선 통과”를 기준으로 Start/Finish를 판정하기 위함.
+- **데이터 구조:**
+    - `startLine`, `finishLine`(각각 2개의 좌표점으로 구성)
+    - 값이 없으면 기존 `topPoint`/`bottomPoint` 반경 방식으로 자동 fallback
+- **판정 로직:**
+    1. 이전 좌표와 현재 좌표로 만든 **이동 선분**이 `startLine` 또는 `finishLine`과 **교차**하면 통과로 판정합니다.
+    2. `startLine`은 `RIDING`/`RESTING`에서 감지, `finishLine`은 `RIDING`에서만 감지합니다.
+    3. **ON_LIFT에서는 라인/포인트 모두 감지하지 않음**(기존 조건 유지).
+- **핵심 규칙:**
+    - 특정 슬로프에 라인이 없으면 **기존 점 반경 방식 그대로** 적용됩니다.
+    - 속도/방향 필터는 현재 적용하지 않습니다.
+
 ---
 
 ## 2. 케이스 스터디: 제우스 2 (ZEUS II) 개선 결과
