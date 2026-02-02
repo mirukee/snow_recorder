@@ -48,7 +48,8 @@ struct RankingView: View {
     
     @State private var showingScoreInfo = false
     @State private var selectedUser: LeaderboardEntry? = nil
-    @State private var showSyncHelp = false
+    @State private var showManualSyncHelp = false
+    @State private var showPendingSyncHelp = false
     
     var body: some View {
         Group {
@@ -181,7 +182,9 @@ struct RankingView: View {
         .onAppear {
             // 앱 시작 시 또는 뷰 진입 시 기존 데이터를 기반으로 랭킹 통계 재계산 및 로드
             guard isActive, !authManager.isGuest else { return }
+            print("ℹ️ RankingView onAppear: sessions=\(sessions.count), pending=\(rankingService.hasPendingUpload)")
             rankingService.scheduleRecalculateStats(from: sessions)
+            rankingService.restorePendingUploadIfNeeded(sessions: sessions)
             if rankingMode == .technical && (selectedMetric == .runCount || selectedMetric == .distance) {
                 selectedMetric = .edge
             }
@@ -189,6 +192,7 @@ struct RankingView: View {
         }
         .onChange(of: sessions) { _, newSessions in
             guard isActive, !authManager.isGuest else { return }
+            print("ℹ️ RankingView sessions 변경: sessions=\(newSessions.count), pending=\(rankingService.hasPendingUpload)")
             rankingService.scheduleRecalculateStats(from: newSessions)
         }
         .onChange(of: isActive) { _, active in
@@ -206,8 +210,11 @@ struct RankingView: View {
         .sheet(item: $selectedUser) { user in
             OtherUserProfileView(user: user)
         }
-        .sheet(isPresented: $showSyncHelp) {
-            syncHelpSheet
+        .sheet(isPresented: $showManualSyncHelp) {
+            manualSyncHelpSheet
+        }
+        .sheet(isPresented: $showPendingSyncHelp) {
+            pendingSyncHelpSheet
         }
         // .onChange(of: selectedScope) { _, _ in fetch() } // Removed
     }
@@ -252,7 +259,7 @@ struct RankingView: View {
                     }
                     .opacity(canSync ? 1 : 0.4)
                     
-                    Button(action: { showSyncHelp = true }) {
+                    Button(action: { showManualSyncHelp = true }) {
                         Image(systemName: "questionmark.circle")
                             .foregroundColor(.white.opacity(0.5))
                             .font(.system(size: 18, weight: .semibold))
@@ -602,20 +609,26 @@ struct RankingView: View {
                     .foregroundColor(neonGreen)
                 HStack(spacing: 6) {
                     if rankingService.hasPendingUpload {
-                        Text("ranking.sync_pending")
-                            .font(.system(size: 9, weight: .bold))
-                            .foregroundColor(neonGreen)
-                            .padding(.horizontal, 6)
-                            .padding(.vertical, 2)
-                            .background(neonGreen.opacity(0.15))
-                            .clipShape(Capsule())
+                        HStack(spacing: 4) {
+                            Button(action: { showPendingSyncHelp = true }) {
+                                Text("ranking.sync_pending")
+                                    .font(.system(size: 9, weight: .bold))
+                                    .foregroundColor(neonGreen)
+                                    .padding(.horizontal, 6)
+                                    .padding(.vertical, 2)
+                                    .background(neonGreen.opacity(0.15))
+                                    .clipShape(Capsule())
+                            }
+                            .buttonStyle(.plain)
+                            
+                            Button(action: { showPendingSyncHelp = true }) {
+                                Image(systemName: "questionmark.circle")
+                                    .font(.system(size: 10, weight: .bold))
+                                    .foregroundColor(neonGreen.opacity(0.8))
+                            }
+                            .buttonStyle(.plain)
+                        }
                     }
-                    Button(action: { showSyncHelp = true }) {
-                        Image(systemName: "questionmark.circle")
-                            .font(.system(size: 12, weight: .bold))
-                            .foregroundColor(.gray)
-                    }
-                    .buttonStyle(.plain)
                 }
             }
             
@@ -694,7 +707,7 @@ struct RankingView: View {
     
     // Enums are now in RankingModels.swift
 
-    private var syncHelpSheet: some View {
+    private var manualSyncHelpSheet: some View {
         ZStack {
             Color.black.ignoresSafeArea()
             VStack(spacing: 16) {
@@ -708,8 +721,46 @@ struct RankingView: View {
                     .multilineTextAlignment(.center)
                     .lineSpacing(4)
                     .padding(.horizontal, 20)
-                Button(action: { showSyncHelp = false }) {
+                Button(action: { showManualSyncHelp = false }) {
                     Text("ranking.sync_help_ok")
+                        .font(.system(size: 14, weight: .bold))
+                        .foregroundColor(.black)
+                        .padding(.horizontal, 24)
+                        .padding(.vertical, 10)
+                        .background(neonGreen)
+                        .clipShape(Capsule())
+                }
+                .buttonStyle(.plain)
+            }
+            .padding(.vertical, 24)
+            .padding(.horizontal, 20)
+            .background(Color.white.opacity(0.06))
+            .overlay(
+                RoundedRectangle(cornerRadius: 20)
+                    .stroke(neonGreen.opacity(0.4), lineWidth: 1)
+            )
+            .cornerRadius(20)
+            .padding(.horizontal, 24)
+        }
+        .presentationDetents([.medium])
+    }
+
+    private var pendingSyncHelpSheet: some View {
+        ZStack {
+            Color.black.ignoresSafeArea()
+            VStack(spacing: 16) {
+                Text("ranking.sync_pending_help_title")
+                    .font(.system(size: 18, weight: .heavy))
+                    .foregroundColor(.white)
+                    .tracking(2)
+                Text("ranking.sync_pending_help_body")
+                    .font(.system(size: 12, weight: .medium))
+                    .foregroundColor(.gray)
+                    .multilineTextAlignment(.center)
+                    .lineSpacing(4)
+                    .padding(.horizontal, 20)
+                Button(action: { showPendingSyncHelp = false }) {
+                    Text("ranking.sync_pending_help_ok")
                         .font(.system(size: 14, weight: .bold))
                         .foregroundColor(.black)
                         .padding(.horizontal, 24)

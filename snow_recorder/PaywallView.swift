@@ -49,7 +49,6 @@ struct PaywallView: View {
     }
     
     private enum Plan: String, CaseIterable {
-        case monthly
         case annual
         case lifetime
     }
@@ -160,17 +159,6 @@ struct PaywallView: View {
     
     private var headerView: some View {
         HStack {
-            Button(action: {
-                Task {
-                    await storeManager.restorePurchases()
-                }
-            }) {
-                Text("paywall.restore")
-                    .font(.system(size: 12, weight: .bold))
-                    .tracking(2)
-                    .foregroundColor(.white.opacity(0.7))
-            }
-            
             Spacer()
             
             Button(action: {
@@ -330,16 +318,6 @@ struct PaywallView: View {
     
     private var pricingSection: some View {
         VStack(spacing: 12) {
-            // 2. Monthly (Normal)
-            if let monthly = product(for: .monthly) {
-                pricingRow(
-                    title: "MONTHLY",
-                    subtitleKey: "paywall.billing_monthly",
-                    price: monthly.displayPrice,
-                    plan: .monthly
-                )
-            }
-            
             // 1. Annual (Hero)
             if let annual = product(for: .annual) {
                 annualPricingCard(annual)
@@ -348,8 +326,8 @@ struct PaywallView: View {
             // 3. Lifetime (Normal)
             if let lifetime = product(for: .lifetime) {
                 pricingRow(
-                    title: "LIFETIME",
-                    subtitleKey: "paywall.billing_lifetime",
+                    title: locString("paywall.plan_founders"),
+                    subtitleKey: "paywall.founders_subtitle",
                     price: lifetime.displayPrice,
                     plan: .lifetime
                 )
@@ -385,7 +363,7 @@ struct PaywallView: View {
             ZStack(alignment: .top) {
                 HStack {
                     VStack(alignment: .leading, spacing: 4) {
-                        Text("ANNUAL")
+                        Text("paywall.plan_annual")
                             .font(.system(size: 18, weight: .bold))
                             .foregroundColor(.white)
                         Text(verbatim: yearlySubtitle)
@@ -529,6 +507,17 @@ struct PaywallView: View {
                         .foregroundColor(.white.opacity(0.4))
                     
                     HStack(spacing: 16) {
+                        Button(action: {
+                            Task {
+                                await storeManager.restorePurchases()
+                            }
+                        }) {
+                            Text("paywall.restore")
+                                .font(.system(size: 10, weight: .bold))
+                                .foregroundColor(.white.opacity(0.5))
+                                .underline()
+                        }
+                        
                         Link("paywall.terms", destination: URL(string: "https://actually-hamster-aa2.notion.site/Snow-Record-Terms-of-Service-2f95e95d9ec180c4848adb22faecef63")!)
                             .font(.system(size: 10))
                             .foregroundColor(.white.opacity(0.3))
@@ -552,12 +541,10 @@ struct PaywallView: View {
     
     private func product(for plan: Plan) -> Product? {
         switch plan {
-        case .monthly:
-            return storeManager.products.first { $0.id == "com.snowrecord.pro.monthly" }
         case .annual:
-            return storeManager.products.first { $0.id == "com.snowrecord.pro.annual" }
+            return storeManager.products.first { $0.id == "com.mirukee.snowrecord.pro.annual" }
         case .lifetime:
-            return storeManager.products.first { $0.id == "com.snowrecord.pro.lifetime" }
+            return storeManager.products.first { $0.id == "com.mirukee.snowrecord.founderspack" }
         }
     }
     

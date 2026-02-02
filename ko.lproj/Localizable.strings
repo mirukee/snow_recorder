@@ -99,7 +99,7 @@
 "settings.delete_account_title" = "계정을 삭제할까요?";
 
 /* 회원 탈퇴 안내 */
-"settings.delete_account_message" = "이 작업은 되돌릴 수 없습니다. 계정과 랭킹 데이터가 삭제됩니다.";
+"settings.delete_account_message" = "이 작업은 되돌릴 수 없습니다. 계정과 랭킹 데이터가 삭제됩니다. 기기에 저장된 런 세션은 삭제되지 않습니다.";
 
 /* 회원 탈퇴 취소 */
 "settings.delete_account_cancel" = "취소";
@@ -158,8 +158,38 @@
 "timeline.rest" = "휴식";
 "timeline.lift" = "리프트 탑승";
 
+/* 플로우 리포트 브레이크다운 타이틀 */
+"flow_report.breakdown_title" = "FLOW BREAKDOWN";
+/* 플로우 리포트 베이스 점수 라벨 */
+"flow_report.breakdown_base" = "BASE SCORE";
+/* 플로우 리포트 정지 패널티 라벨 */
+"flow_report.breakdown_stop" = "STOP PENALTY";
+/* 플로우 리포트 브레이크 패널티 라벨 */
+"flow_report.breakdown_brake" = "BRAKE PENALTY";
+/* 플로우 리포트 채터 패널티 라벨 */
+"flow_report.breakdown_chatter" = "CHATTER PENALTY";
+/* 플로우 리포트 조용함 보너스 라벨 */
+"flow_report.breakdown_quiet" = "QUIET BONUS";
+/* 플로우 리포트 최종 점수 라벨 */
+"flow_report.breakdown_final" = "FINAL";
+/* 플로우 안정성 타임라인 타이틀 */
+"flow_report.stability_timeline_title" = "STABILITY TIMELINE";
+/* 플로우 안정성 데이터 없음 */
+"flow_report.stability_timeline_empty" = "NO STABILITY DATA";
+/* 플로우 안정성 최소값 포맷 */
+"flow_report.stability_min_format" = "%.0f%% MIN";
+/* 플로우 안정성 선택값 포맷 */
+"flow_report.stability_value_format" = "%.0f%% STABILITY";
+
 /* 동기화 대기 */
 "ranking.sync_pending" = "SYNC PENDING";
+
+/* 동기화 대기 도움말 타이틀 */
+"ranking.sync_pending_help_title" = "SYNC PENDING";
+/* 동기화 대기 도움말 본문 */
+"ranking.sync_pending_help_body" = "서버에 아직 반영되지 않은 변경이 있습니다.\n자동 업로드가 대기 중이거나, 리더보드 배치 갱신 전일 수 있어요.";
+/* 동기화 대기 도움말 확인 */
+"ranking.sync_pending_help_ok" = "확인";
 
 /* 게스트 랭킹 타이틀 */
 "ranking.guest_title" = "랭킹 잠김";
@@ -175,6 +205,15 @@
 
 /* 동기화 도움말 확인 */
 "ranking.sync_help_ok" = "확인";
+
+/* 준비중 타이틀 */
+"common.coming_soon_title" = "준비중";
+
+/* 준비중 설명 */
+"common.coming_soon_body" = "해당 기능은 준비중입니다.\n곧 업데이트할게요.";
+
+/* 준비중 확인 */
+"common.coming_soon_ok" = "확인";
 
 /* [EDGE SCORE]\n"얼마나 날카롭게 베고 나갔는가?"\n당신의 턴이 설면을 얼마나 견고하게 파고들었는지 분석한 '카빙(Carving) 완성도' 지표입니다.\n- 분석 기준: 턴의 깊이, 엣징 각도(G-Force), 슬립 최소화\n\n[FLOW SCORE]\n"얼마나 물 흐르듯 내려왔는가?"\n주행의 리듬과 속도 유지를 분석한 '주행 안정성(Smoothness)' 지표입니다.\n- 분석 기준: 속도 유지력, 턴 연결의 부드러움, 급제동 여부 */
 "ranking.tech_guide_body" = "[EDGE SCORE]\n\"얼마나 날카롭게 베고 나갔는가?\"\n당신의 턴이 설면을 얼마나 견고하게 파고들었는지 분석한 '카빙(Carving) 완성도' 지표입니다.\n- 분석 기준: 턴의 깊이, 엣징 각도(G-Force), 슬립 최소화\n\n[FLOW SCORE]\n\"얼마나 물 흐르듯 내려왔는가?\"\n주행의 리듬과 속도 유지를 분석한 '주행 안정성(Smoothness)' 지표입니다.\n- 분석 기준: 속도 유지력, 턴 연결의 부드러움, 급제동 여부";
@@ -244,6 +283,13 @@
 "badge.desc.edge_elite" = "엣지 스코어 900점을 돌파하세요.";
 /* 플로우 스코어 900점을 돌파하세요. */
 "badge.desc.flow_elite" = "플로우 스코어 900점을 돌파하세요.";
+
+/* 페이월 플랜 타이틀(연간) */
+"paywall.plan_annual" = "ANNUAL";
+/* 페이월 플랜 타이틀(파운더스 팩) */
+"paywall.plan_founders" = "FOUNDERS PACK";
+/* 페이월 파운더스팩 서브카피 */
+"paywall.founders_subtitle" = "런칭 한정 · 평생 이용";
 
 /* "얼마나 날카롭게 베고 나갔는가?"\n\n당신의 턴이 설면을 얼마나 견고하게 파고들었는지 분석한 '카빙(Carving) 완성도' 지표입니다.\n\n분석 기준: 턴의 깊이, 엣징 각도(G-Force), 슬립(미끄러짐) 최소화\n\nTip: 데크가 눈에 박히는 느낌에 집중하고, 과감하게 엣지를 세울수록 점수가 올라갑니다. */
 "run_detail.edge_desc" = "\"얼마나 날카롭게 베고 나갔는가?\"\n\n당신의 턴이 설면을 얼마나 견고하게 파고들었는지 분석한 '카빙(Carving) 완성도' 지표입니다.\n\n분석 기준: 턴의 깊이, 엣징 각도(G-Force), 슬립(미끄러짐) 최소화\n\nTip: 데크가 눈에 박히는 느낌에 집중하고, 과감하게 엣지를 세울수록 점수가 올라갑니다.";

@@ -1,126 +1,88 @@
 {
-  "appPolicies" : {
-    "eula" : "",
-    "policies" : [
+  "appPolicies": {
+    "eula": "",
+    "policies": [
       {
-        "locale" : "en_US",
-        "policyText" : "",
-        "policyURL" : ""
+        "locale": "en_US",
+        "policyText": "",
+        "policyURL": ""
       }
     ]
   },
-  "identifier" : "128D2AEC",
-  "nonRenewingSubscriptions" : [
-
-  ],
-  "products" : [
+  "identifier": "128D2AEC",
+  "nonRenewingSubscriptions": [],
+  "products": [
     {
-      "displayPrice" : "200000",
-      "familyShareable" : false,
-      "internalID" : "SRL-LOCAL-LIFETIME",
-      "localizations" : [
+      "displayPrice": "29000",
+      "familyShareable": false,
+      "internalID": "SRL-LOCAL-LIFETIME",
+      "localizations": [
         {
-          "description" : "Lifetime access to all Pro features.",
-          "displayName" : "Lifetime Pro",
-          "locale" : "en_US"
+          "description": "Launch-only lifetime access.",
+          "displayName": "Founders Pack",
+          "locale": "en_US"
         }
       ],
-      "productID" : "com.snowrecord.pro.lifetime",
-      "referenceName" : "Lifetime",
-      "type" : "NonConsumable"
+      "productID": "com.mirukee.snowrecord.founderspack",
+      "referenceName": "Founders Pack",
+      "type": "NonConsumable"
     }
   ],
-  "settings" : {
-    "_askToBuyEnabled" : false,
-    "_billingGracePeriodEnabled" : false,
-    "_billingIssuesEnabled" : false,
-    "_disableDialogs" : false,
-    "_failTransactionsEnabled" : false,
-    "_locale" : "ko_KR",
-    "_renewalBillingIssuesEnabled" : false,
-    "_storefront" : "KOR",
-    "_storeKitErrors" : [
-
-    ],
-    "_timeRate" : 0
+  "settings": {
+    "_askToBuyEnabled": false,
+    "_billingGracePeriodEnabled": false,
+    "_billingIssuesEnabled": false,
+    "_disableDialogs": false,
+    "_failTransactionsEnabled": false,
+    "_locale": "ko_KR",
+    "_renewalBillingIssuesEnabled": false,
+    "_storefront": "KOR",
+    "_storeKitErrors": [],
+    "_timeRate": 0
   },
-  "subscriptionGroups" : [
+  "subscriptionGroups": [
     {
-      "id" : "SRL-LOCAL-GROUP",
-      "localizations" : [
+      "id": "SRL-LOCAL-GROUP",
+      "localizations": [
         {
-          "description" : "Unlock all features",
-          "displayName" : "Pro Access",
-          "locale" : "en_US"
+          "description": "Unlock all features",
+          "displayName": "Pro Access",
+          "locale": "en_US"
         }
       ],
-      "name" : "Pro Access",
-      "subscriptions" : [
+      "name": "Pro Access",
+      "subscriptions": [
         {
-          "adHocOffers" : [
-
-          ],
-          "codeOffers" : [
-
-          ],
-          "displayPrice" : "25000",
-          "familyShareable" : false,
-          "groupNumber" : 1,
-          "internalID" : "SRL-LOCAL-ANNUAL",
-          "introductoryOffer" : {
-            "displayPrice" : "0.00",
-            "internalID" : "SRL-LOCAL-ANNUAL-TRIAL",
-            "paymentMode" : "free",
-            "subscriptionPeriod" : "P1W"
+          "adHocOffers": [],
+          "codeOffers": [],
+          "displayPrice": "22000",
+          "familyShareable": false,
+          "groupNumber": 1,
+          "internalID": "SRL-LOCAL-ANNUAL",
+          "introductoryOffer": {
+            "displayPrice": "0.00",
+            "internalID": "SRL-LOCAL-ANNUAL-TRIAL",
+            "paymentMode": "free",
+            "subscriptionPeriod": "P1W"
           },
-          "localizations" : [
+          "localizations": [
             {
-              "description" : "Annual access with 7-day free trial",
-              "displayName" : "Annual Pro",
-              "locale" : "en_US"
+              "description": "Annual access",
+              "displayName": "Annual Pro",
+              "locale": "en_US"
             }
           ],
-          "productID" : "com.snowrecord.pro.annual",
-          "recurringSubscriptionPeriod" : "P1Y",
-          "referenceName" : "Annual",
-          "subscriptionGroupID" : "SRL-LOCAL-GROUP",
-          "type" : "RecurringSubscription"
-        },
-        {
-          "adHocOffers" : [
-
-          ],
-          "codeOffers" : [
-
-          ],
-          "displayPrice" : "10000",
-          "familyShareable" : false,
-          "groupNumber" : 1,
-          "internalID" : "SRL-LOCAL-MONTHLY",
-          "introductoryOffer" : {
-            "displayPrice" : "0.00",
-            "internalID" : "SRL-LOCAL-MONTHLY-TRIAL",
-            "paymentMode" : "free",
-            "subscriptionPeriod" : "P1W"
-          },
-          "localizations" : [
-            {
-              "description" : "Monthly access",
-              "displayName" : "Monthly Pro",
-              "locale" : "en_US"
-            }
-          ],
-          "productID" : "com.snowrecord.pro.monthly",
-          "recurringSubscriptionPeriod" : "P1M",
-          "referenceName" : "Monthly",
-          "subscriptionGroupID" : "SRL-LOCAL-GROUP",
-          "type" : "RecurringSubscription"
+          "productID": "com.mirukee.snowrecord.pro.annual",
+          "recurringSubscriptionPeriod": "P1Y",
+          "referenceName": "Annual",
+          "subscriptionGroupID": "SRL-LOCAL-GROUP",
+          "type": "RecurringSubscription"
         }
       ]
     }
   ],
-  "version" : {
-    "major" : 4,
-    "minor" : 0
+  "version": {
+    "major": 4,
+    "minor": 0
   }
 }

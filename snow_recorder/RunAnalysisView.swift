@@ -10,14 +10,23 @@ struct RunAnalysisView: View {
     let telemetryPoints: [CLLocation]
     let speedChartPoints: [Point]
     let gForceChartPoints: [Point]
+    let stabilityPoints: [Point]
     let maxGPoint: Point?
     let avgGForce: Double
     let maxBankAngle: Double // New property
     
-    init(runMetric: RunSession.RunMetric, locationName: String, telemetryPoints: [CLLocation]? = nil, gForcePoints: [Point]? = nil) {
+    init(
+        runMetric: RunSession.RunMetric,
+        locationName: String,
+        telemetryPoints: [CLLocation]? = nil,
+        gForcePoints: [Point]? = nil,
+        lateralGPoints: [Point]? = nil,
+        stabilityPoints: [Point]? = nil
+    ) {
         self.runMetric = runMetric
         self.locationName = locationName
         self.telemetryPoints = telemetryPoints ?? []
+        self.stabilityPoints = stabilityPoints ?? []
         
         // 1. Process Speed Points (Sorted & Stable)
         let rawSpeedPoints = (telemetryPoints ?? [])
@@ -91,23 +100,34 @@ struct RunAnalysisView: View {
         if !processedGPoints.isEmpty {
             let total = processedGPoints.reduce(0) { $0 + $1.y }
             self.avgGForce = total / Double(processedGPoints.count)
-            
-            // Calculate Bank Angle (Top 10% Sustained G)
-            let sortedG = processedGPoints.map { $0.y }.sorted(by: >)
+        } else {
+            self.avgGForce = 0.0
+        }
+        
+        let lateralValues = (lateralGPoints ?? [])
+            .map { $0.y }
+            .filter { $0.isFinite && $0 > 0 }
+        let fallbackValues = processedGPoints.map { $0.y }
+        let bankSourceValues = lateralValues.isEmpty ? fallbackValues : lateralValues
+        let usesLateral = !lateralValues.isEmpty
+        
+        if !bankSourceValues.isEmpty {
+            let sortedG = bankSourceValues.sorted(by: >)
             let top10Count = max(1, Int(Double(sortedG.count) * 0.1))
             let top10Values = sortedG.prefix(top10Count)
             let sustainedMaxG = top10Values.reduce(0, +) / Double(top10Values.count)
             
-            // Physics: angle = acos(1 / G)
-            let clampedG = max(1.0, sustainedMaxG)
-            let radians = acos(1.0 / clampedG)
+            let radians: Double
+            if usesLateral {
+                radians = atan(sustainedMaxG)
+            } else {
+                let clampedG = max(1.0, sustainedMaxG)
+                radians = acos(1.0 / clampedG)
+            }
             var degrees = radians * 180.0 / .pi
-            
-            // Safety Clamp (e.g. max 80 degrees)
             if degrees > 80 { degrees = 80 }
             self.maxBankAngle = degrees
         } else {
-            self.avgGForce = 0.0
             self.maxBankAngle = 0.0
         }
     }
@@ -341,6 +361,8 @@ struct RunAnalysisView: View {
     
     private var flowContent: some View {
         VStack(spacing: 24) {
+            flowBreakdownCard
+
             // Stability Meter
             VStack(spacing: 12) {
                 HStack {
@@ -358,6 +380,8 @@ struct RunAnalysisView: View {
             }
             .padding(.horizontal, 20)
             
+            stabilityTimelineSection
+
             // Penalty Log (If any penalties exist)
             let hardBrakes = runMetric.flowBreakdown?.hardBrakeCount ?? 0
             let chatterEvents = runMetric.flowBreakdown?.chatterEventCount ?? 0
@@ -411,6 +435,193 @@ struct RunAnalysisView: View {
             }
         }
     }
+
+    private var flowBreakdownCard: some View {
+        let breakdown = runMetric.flowBreakdown
+        let baseScore = breakdown?.baseScore ?? 0.0
+        let stopPenalty = breakdown?.stopPenalty ?? 0.0
+        let brakePenalty = breakdown?.brakePenalty ?? 0.0
+        let chatterPenalty = breakdown?.chatterPenalty ?? 0.0
+        let quietBonus = breakdown?.quietBonus ?? 0.0
+        let finalScore = Double(breakdown?.finalScore ?? runMetric.flowScore)
+
+        return VStack(alignment: .leading, spacing: 12) {
+            HStack {
+                Text("flow_report.breakdown_title")
+                    .font(.system(size: 12, weight: .bold))
+                    .tracking(2)
+                    .foregroundColor(.gray)
+                Spacer()
+            }
+
+            VStack(spacing: 10) {
+                FlowBreakdownRow(
+                    titleKey: "flow_report.breakdown_base",
+                    valueText: formatScoreDelta(baseScore),
+                    valueColor: primaryColor
+                )
+                FlowBreakdownRow(
+                    titleKey: "flow_report.breakdown_stop",
+                    valueText: formatScoreDelta(-stopPenalty),
+                    valueColor: redColor
+                )
+                FlowBreakdownRow(
+                    titleKey: "flow_report.breakdown_brake",
+                    valueText: formatScoreDelta(-brakePenalty),
+                    valueColor: redColor
+                )
+                FlowBreakdownRow(
+                    titleKey: "flow_report.breakdown_chatter",
+                    valueText: formatScoreDelta(-chatterPenalty),
+                    valueColor: redColor
+                )
+                FlowBreakdownRow(
+                    titleKey: "flow_report.breakdown_quiet",
+                    valueText: formatScoreDelta(quietBonus),
+                    valueColor: primaryColor
+                )
+            }
+            .padding(12)
+            .background(Color.white.opacity(0.03))
+            .cornerRadius(12)
+            .overlay(
+                RoundedRectangle(cornerRadius: 12)
+                    .stroke(Color.white.opacity(0.08), lineWidth: 1)
+            )
+
+            HStack {
+                Text("flow_report.breakdown_final")
+                    .font(.system(size: 12, weight: .bold))
+                    .tracking(1)
+                    .foregroundColor(.white.opacity(0.7))
+                Spacer()
+                Text(formatScore(finalScore))
+                    .font(.system(size: 16, weight: .heavy, design: .rounded))
+                    .foregroundColor(primaryColor)
+            }
+            .padding(.horizontal, 4)
+        }
+        .padding(.horizontal, 20)
+    }
+
+    private var stabilityTimelineSection: some View {
+        let minStability = stabilityPoints.map { $0.y }.min() ?? 0.0
+        let unstablePoints = stabilityPoints.sorted { $0.y < $1.y }.prefix(3)
+
+        return VStack(spacing: 12) {
+            HStack {
+                Text("flow_report.stability_timeline_title")
+                    .font(.system(size: 12, weight: .bold))
+                    .tracking(2)
+                    .foregroundColor(.gray)
+                Spacer()
+                if let selectedValue = selectedStabilityValue {
+                    Text(String(format: String(localized: "flow_report.stability_value_format"), selectedValue * 100))
+                        .font(.system(size: 11, weight: .semibold, design: .monospaced))
+                        .foregroundColor(primaryColor)
+                } else {
+                    Text(String(format: String(localized: "flow_report.stability_min_format"), minStability * 100))
+                        .font(.system(size: 11, weight: .semibold, design: .monospaced))
+                        .foregroundColor(primaryColor)
+                }
+            }
+            
+            if stabilityPoints.isEmpty {
+                Text("flow_report.stability_timeline_empty")
+                    .font(.system(size: 12, weight: .medium))
+                    .foregroundColor(.gray)
+                    .frame(maxWidth: .infinity)
+                    .padding(.vertical, 24)
+            } else {
+                stabilityChartView(points: stabilityPoints, unstablePoints: Array(unstablePoints))
+            }
+        }
+        .padding(.horizontal, 20)
+    }
+
+    private func stabilityChartView(points: [Point], unstablePoints: [Point]) -> some View {
+        Chart {
+            ForEach(points) { point in
+                LineMark(
+                    x: .value("Time", point.x),
+                    y: .value("Stability", point.y)
+                )
+                .foregroundStyle(primaryColor)
+                .lineStyle(StrokeStyle(lineWidth: 2))
+                .interpolationMethod(.monotone)
+            }
+            
+            ForEach(unstablePoints) { point in
+                PointMark(
+                    x: .value("Low Time", point.x),
+                    y: .value("Low Stability", point.y)
+                )
+                .foregroundStyle(redColor)
+                .symbolSize(40)
+            }
+            
+            if let selDate = selectedStabilityDate, let selValue = selectedStabilityValue {
+                RuleMark(x: .value("Selected Time", selDate))
+                    .foregroundStyle(Color.white.opacity(0.5))
+                    .lineStyle(StrokeStyle(lineWidth: 1, dash: [2, 2]))
+                
+                PointMark(
+                    x: .value("Selected Time", selDate),
+                    y: .value("Selected Stability", selValue)
+                )
+                .foregroundStyle(primaryColor)
+                .symbolSize(45)
+            }
+        }
+        .chartLegend(.hidden)
+        .chartYScale(domain: 0...1)
+        .chartYAxis {
+            AxisMarks(values: [0.0, 0.5, 1.0]) { value in
+                AxisGridLine()
+                    .foregroundStyle(Color.white.opacity(0.08))
+                AxisValueLabel() {
+                    if let raw = value.as(Double.self) {
+                        Text("\(Int(raw * 100))%")
+                            .font(.system(size: 9, weight: .semibold))
+                            .foregroundColor(.gray)
+                    }
+                }
+            }
+        }
+        .chartXAxis {
+            AxisMarks(values: .automatic(desiredCount: 4)) {
+                AxisValueLabel(format: .dateTime.minute().second())
+                    .foregroundStyle(Color.gray)
+            }
+        }
+        .chartOverlay { proxy in
+            GeometryReader { _ in
+                Rectangle().fill(.clear).contentShape(Rectangle())
+                    .gesture(
+                        DragGesture()
+                            .onChanged { value in
+                                let location = value.location
+                                if let date: Date = proxy.value(atX: location.x) {
+                                    if let nearest = points.min(by: { abs($0.x.timeIntervalSince(date)) < abs($1.x.timeIntervalSince(date)) }) {
+                                        if self.selectedStabilityDate != nearest.x {
+                                            let impact = UISelectionFeedbackGenerator()
+                                            impact.selectionChanged()
+                                        }
+                                        self.selectedStabilityDate = nearest.x
+                                        self.selectedStabilityValue = nearest.y
+                                    }
+                                }
+                            }
+                            .onEnded { _ in
+                                self.selectedStabilityDate = nil
+                                self.selectedStabilityValue = nil
+                            }
+                    )
+            }
+        }
+        .frame(height: 160)
+        .padding(.horizontal, 10)
+    }
     
     private var edgeContent: some View {
         VStack(spacing: 24) {
@@ -454,6 +665,8 @@ struct RunAnalysisView: View {
     
     @State private var selectedDate: Date?
     @State private var selectedGValue: Double?
+    @State private var selectedStabilityDate: Date?
+    @State private var selectedStabilityValue: Double?
     
     // ... (existing properties)
 
@@ -605,6 +818,15 @@ struct RunAnalysisView: View {
         .frame(height: 200)
         .padding(.horizontal, 10)
     }
+
+    private func formatScore(_ value: Double) -> String {
+        "\(Int(value.rounded()))"
+    }
+    
+    private func formatScoreDelta(_ value: Double) -> String {
+        let rounded = Int(value.rounded())
+        return rounded >= 0 ? "+\(rounded)" : "\(rounded)"
+    }
     
     private func splitTelemetrySegments(_ points: [Point], gap: TimeInterval) -> [[Point]] {
         guard points.count > 1 else { return points.isEmpty ? [] : [points] }
@@ -745,6 +967,25 @@ struct GaugeView: View {
                 .padding(12)
         }
         .frame(height: 140)
+    }
+}
+
+struct FlowBreakdownRow: View {
+    let titleKey: String
+    let valueText: String
+    let valueColor: Color
+    
+    var body: some View {
+        HStack {
+            Text(LocalizedStringKey(titleKey))
+                .font(.system(size: 11, weight: .bold))
+                .tracking(1)
+                .foregroundColor(.white.opacity(0.7))
+            Spacer()
+            Text(valueText)
+                .font(.system(size: 12, weight: .heavy, design: .monospaced))
+                .foregroundColor(valueColor)
+        }
     }
 }
 

@@ -4,6 +4,7 @@ import FirebaseAuth
 
 struct OtherUserProfileView: View {
     @Environment(\.dismiss) var dismiss
+    @Environment(\.openURL) var openURL
     let initialUser: LeaderboardEntry
     @State private var fullUser: LeaderboardEntry?
     @State private var isLoading = false
@@ -50,7 +51,7 @@ struct OtherUserProfileView: View {
     var body: some View {
         ScrollView {
             VStack(spacing: 0) {
-                // Header (Back + Share)
+                // Header (Back)
                 HStack {
                     Button(action: { dismiss() }) {
                         Circle()
@@ -63,16 +64,6 @@ struct OtherUserProfileView: View {
                             )
                     }
                     Spacer()
-                    Button(action: { /* Share Logic Placeholder */ }) {
-                        Circle()
-                            .fill(glassEffect)
-                            .frame(width: 40, height: 40)
-                            .overlay(
-                                Image(systemName: "square.and.arrow.up")
-                                    .foregroundColor(.white)
-                                    .font(.system(size: 16, weight: .bold))
-                            )
-                    }
                 }
                 .padding(.horizontal, 24)
                 .padding(.top, 24)
@@ -136,7 +127,11 @@ struct OtherUserProfileView: View {
                     .padding(.top, 10)
                     
                     // Action Buttons (Instagram Only, Full Width)
-                    Button(action: { /* Instagram Logic Placeholder */ }) {
+                    Button(action: {
+                        if let url = instagramURL {
+                            openURL(url)
+                        }
+                    }) {
                         HStack(spacing: 8) {
                             Image(systemName: "camera.fill")
                                 .font(.system(size: 18))
@@ -152,6 +147,8 @@ struct OtherUserProfileView: View {
                                 .stroke(Color.white.opacity(0.3), lineWidth: 1)
                         )
                     }
+                    .disabled(instagramURL == nil)
+                    .opacity(instagramURL == nil ? 0.5 : 1.0)
                     .padding(.horizontal, 24)
                 }
                 
@@ -266,9 +263,9 @@ struct OtherUserProfileView: View {
                             ProfileBadgeItem(icon: "alarm.fill", title: "Early Bird", themeColor: .gray, bg: cardBackground)
                             
                             Spacer().frame(width: 8)
-                        }
-                    }
-                }
+            }
+        }
+    }
                 .padding(.top, 24)
                 .padding(.bottom, 60)
             }
@@ -286,6 +283,7 @@ struct OtherUserProfileView: View {
                 merged.seasonRunCount = fetched.seasonRunCount
                 merged.bestEdge = fetched.bestEdge
                 merged.bestFlow = fetched.bestFlow
+                merged.instagramId = fetched.instagramId
                 if isCurrentUser {
                     merged = mergeLocalStats(into: merged)
                 }
@@ -340,6 +338,9 @@ struct OtherUserProfileView: View {
     private func mergeLocalStats(into entry: LeaderboardEntry) -> LeaderboardEntry {
         let profile = GamificationService.shared.profile
         var updated = entry
+        if let instagramId = profile.instagramId, !instagramId.isEmpty {
+            updated.instagramId = instagramId
+        }
         if profile.stats.highestEdgeScore > 0 {
             updated.bestEdge = profile.stats.highestEdgeScore
         }
@@ -353,6 +354,23 @@ struct OtherUserProfileView: View {
             updated.seasonDistance = profile.stats.totalDistance * 1000.0
         }
         return updated
+    }
+
+    private var instagramURL: URL? {
+        guard let raw = user.instagramId?.trimmingCharacters(in: .whitespacesAndNewlines),
+              !raw.isEmpty else { return nil }
+        var value = raw
+        if value.hasPrefix("@") {
+            value.removeFirst()
+        }
+        let lower = value.lowercased()
+        if lower.hasPrefix("http://") || lower.hasPrefix("https://") {
+            return URL(string: value)
+        }
+        if lower.hasPrefix("instagram.com") || lower.hasPrefix("www.instagram.com") {
+            return URL(string: "https://\(value)")
+        }
+        return URL(string: "https://instagram.com/\(value)")
     }
 }
 

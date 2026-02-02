@@ -2527,11 +2527,20 @@ struct SharePreviewView: View {
     func shareToStory() {
         let renderer = ImageRenderer(content: exportView())
         renderer.scale = 1.0
-        guard let image = renderer.uiImage else { return }
-        
-        if let url = URL(string: "instagram-stories://share"),
+        guard let image = renderer.uiImage, let imageData = image.pngData() else { return }
+
+        let bundleId = Bundle.main.bundleIdentifier ?? ""
+        let urlString = "instagram-stories://share?source_application=\(bundleId)"
+
+        if let url = URL(string: urlString),
            UIApplication.shared.canOpenURL(url) {
-            UIPasteboard.general.setItems([["com.instagram.sharedSticker.backgroundImage": image.pngData()!]], options: [.expirationDate: Date().addingTimeInterval(300)])
+            let pasteboardItems: [[String: Any]] = [[
+                "com.instagram.sharedSticker.backgroundImage": imageData
+            ]]
+            UIPasteboard.general.setItems(
+                pasteboardItems,
+                options: [.expirationDate: Date().addingTimeInterval(300)]
+            )
             UIApplication.shared.open(url)
         } else {
             imageToShare = image

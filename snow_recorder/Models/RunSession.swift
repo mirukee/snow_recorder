@@ -248,6 +248,8 @@ final class RunSession {
         var speedStdDev: Double       // km/h
         var gAvg: Double              // G
         var gMax: Double              // G
+        var latAvg: Double?           // 횡가속 평균 G
+        var latMax: Double?           // 횡가속 최대 G
         var jerkPeak: Double          // G/s
     }
     

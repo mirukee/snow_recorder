@@ -178,7 +178,7 @@ struct ProfileView: View {
                                                 .foregroundColor(.white)
                                         }
                                         Spacer()
-                                        Button(action: {}) {
+                                        Button(action: { showPaywall = true }) {
                                             Text("VIEW BENEFITS")
                                                 .font(.system(size: 10, weight: .bold))
                                                 .foregroundColor(.white)
@@ -233,7 +233,6 @@ struct ProfileView: View {
                             
                             // [Stats Grid]
                             HStack(spacing: 12) {
-                                ProfileStatBox(icon: "globe", title: "GLOBAL RANK", value: "#\(viewModel.userProfile.stats.globalRanking)", subValue: "", neonGreen: neonGreen)
                                 ProfileStatBox(icon: "figure.snowboarding", title: "TOTAL DIST", value: "\(Int(viewModel.userProfile.stats.totalDistance))", subValue: "km", neonGreen: neonGreen)
                                 ProfileStatBox(icon: "speedometer", title: "MAX SPEED", value: "\(Int(viewModel.userProfile.stats.maxSpeed))", subValue: "km/h", neonGreen: neonGreen)
                             }
@@ -301,24 +300,6 @@ struct ProfileView: View {
                             }
                             .sheet(isPresented: $showBadgeList) {
                                 BadgeListView(badges: viewModel.userProfile.badges)
-                            }
-                            
-                            // [Leaderboard] (Mini)
-                            VStack(spacing: 16) {
-                                 HStack {
-                                    Text("TOP SQUAD")
-                                        .font(.system(size: 12, weight: .bold))
-                                        .tracking(1)
-                                        .foregroundColor(.gray)
-                                    Spacer()
-                                }
-                                .padding(.horizontal, 24)
-                                
-                                VStack(spacing: 12) {
-                                    LeaderboardRow(rank: 1, name: "Snow_Bunny", level: 28, xp: "3,200", neonGreen: neonGreen)
-                                    LeaderboardRow(rank: 2, name: viewModel.userProfile.nickname, level: viewModel.userProfile.level, xp: "\(viewModel.userProfile.currentXP)", isMe: true, neonGreen: neonGreen)
-                                    LeaderboardRow(rank: 3, name: "IceCold", level: 22, xp: "2,150", neonGreen: neonGreen)
-                                }
                             }
                             
                             Spacer().frame(height: 80)
@@ -695,7 +676,7 @@ struct GridPattern: Shape {
                         HStack {
                             Text("settings.app_version")
                             Spacer()
-                            Text("1.0.0 (Beta)")
+                            Text("1.0.0")
                                 .foregroundColor(.gray)
                         }
                     }

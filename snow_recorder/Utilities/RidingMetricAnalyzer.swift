@@ -200,6 +200,7 @@ final class RidingMetricAnalyzer: ObservableObject {
             totalAccelY * totalAccelY +
             totalAccelZ * totalAccelZ
         )
+        let lateralMagnitude = lateralG(from: motion)
         
         // 타임스탬프 업데이트 (첫 프레임 보호)
         guard let lastTimestamp = lastMotionTimestamp else {
@@ -246,7 +247,13 @@ final class RidingMetricAnalyzer: ObservableObject {
         
         // 1초 단위 샘플 누적
         if let elapsed = elapsedTime() {
-            updateAnalysisSample(elapsed: elapsed, g: smoothedMagnitude, jerk: jerk, speedMS: currentSpeedMS)
+            updateAnalysisSample(
+                elapsed: elapsed,
+                g: smoothedMagnitude,
+                lateralG: lateralMagnitude,
+                jerk: jerk,
+                speedMS: currentSpeedMS
+            )
         }
         
         // Flow Score 보정용 모션 샘플 전달
@@ -490,7 +497,7 @@ final class RidingMetricAnalyzer: ObservableObject {
         return ProcessInfo.processInfo.systemUptime - start
     }
     
-    private func updateAnalysisSample(elapsed: TimeInterval, g: Double, jerk: Double, speedMS: Double) {
+    private func updateAnalysisSample(elapsed: TimeInterval, g: Double, lateralG: Double, jerk: Double, speedMS: Double) {
         let sampleIndex = Int(elapsed / sampleInterval)
         if sampleIndex != currentSampleIndex {
             flushAnalysisSample()
@@ -513,6 +520,14 @@ final class RidingMetricAnalyzer: ObservableObject {
             sampleAccumulator.gMax = g
         }
         
+        if lateralG.isFinite {
+            sampleAccumulator.latSum += lateralG
+            sampleAccumulator.latCount += 1
+            if lateralG > sampleAccumulator.latMax {
+                sampleAccumulator.latMax = lateralG
+            }
+        }
+        
         // 저크 피크
         let jerkAbs = abs(jerk)
         if jerkAbs > sampleAccumulator.jerkPeak {
@@ -530,6 +545,10 @@ final class RidingMetricAnalyzer: ObservableObject {
         let speedStdDev = sqrt(speedVar)
         
         let gAvg = sampleAccumulator.gCount > 0 ? (sampleAccumulator.gSum / Double(sampleAccumulator.gCount)) : 0.0
+        let latAvg = sampleAccumulator.latCount > 0
+            ? (sampleAccumulator.latSum / Double(sampleAccumulator.latCount))
+            : nil
+        let latMax = sampleAccumulator.latCount > 0 ? sampleAccumulator.latMax : nil
         
         let t = Double(currentSampleIndex) * sampleInterval
         let sample = RunSession.AnalysisSample(
@@ -539,6 +558,8 @@ final class RidingMetricAnalyzer: ObservableObject {
             speedStdDev: speedStdDev,
             gAvg: gAvg,
             gMax: sampleAccumulator.gMax,
+            latAvg: latAvg,
+            latMax: latMax,
             jerkPeak: sampleAccumulator.jerkPeak
         )
         analysisSamples.append(sample)
@@ -559,6 +580,23 @@ final class RidingMetricAnalyzer: ObservableObject {
             latestScoreEvents
         }
     }
+
+    private func lateralG(from motion: CMDeviceMotion) -> Double {
+        let gravity = motion.gravity
+        let gMag = sqrt(gravity.x * gravity.x + gravity.y * gravity.y + gravity.z * gravity.z)
+        guard gMag > 0 else { return 0.0 }
+        let gHatX = gravity.x / gMag
+        let gHatY = gravity.y / gMag
+        let gHatZ = gravity.z / gMag
+        
+        let userAcc = motion.userAcceleration
+        let dot = userAcc.x * gHatX + userAcc.y * gHatY + userAcc.z * gHatZ
+        let lateralX = userAcc.x - dot * gHatX
+        let lateralY = userAcc.y - dot * gHatY
+        let lateralZ = userAcc.z - dot * gHatZ
+        let lateralMag = sqrt(lateralX * lateralX + lateralY * lateralY + lateralZ * lateralZ)
+        return lateralMag.isFinite ? lateralMag : 0.0
+    }
     
     private func setAnalyzing(_ isAnalyzing: Bool) {
         isAnalyzingInternal = isAnalyzing
@@ -578,6 +616,10 @@ private struct SampleAccumulator {
     var gSum: Double = 0.0
     var gCount: Int = 0
     var gMax: Double = 0.0
+    
+    var latSum: Double = 0.0
+    var latCount: Int = 0
+    var latMax: Double = 0.0
     
     var jerkPeak: Double = 0.0
 }

@@ -112,6 +112,10 @@ class RankingService: ObservableObject {
         // 초기화 시 더미/로컬 데이터 로드
         self.myProfile = RankingProfile(userId: Auth.auth().currentUser?.uid ?? "guest", userName: Auth.auth().currentUser?.displayName ?? "skier")
         self.hasPendingUpload = userDefaults.bool(forKey: pendingUploadFlagKey)
+        // 디버그: 앱 시작 시 pending 상태 로깅
+        let pendingSince = userDefaults.double(forKey: pendingUploadSinceKey)
+        let pendingSinceDate = pendingSince > 0 ? Date(timeIntervalSince1970: pendingSince) : nil
+        print("ℹ️ RankingService init: hasPendingUpload=\(hasPendingUpload), pendingSince=\(pendingSinceDate?.description ?? "nil")")
     }
 
     // MARK: - 닉네임 동기화
@@ -321,11 +325,13 @@ class RankingService: ObservableObject {
             }
             
             let userName = data["nickname"] as? String ?? "Unknown"
+            let instagramId = data["instagram_id"] as? String
             // We construct a temporary entry with full stats
             var entry = LeaderboardEntry(
                 userId: userId,
                 rank: 0, // Rank is context dependent, kept 0 or passed from view
                 userName: userName,
+                instagramId: instagramId,
                 crewName: nil,
                 mainResort: "All",
                 slopeName: nil,
@@ -374,6 +380,7 @@ class RankingService: ObservableObject {
         hasPendingUpload = true
         userDefaults.set(true, forKey: pendingUploadFlagKey)
         userDefaults.set(Date().timeIntervalSince1970, forKey: pendingUploadSinceKey)
+        print("⏳ PendingUpload 설정: now=\(Date())")
     }
     
     private func clearPendingUpload() {
@@ -382,6 +389,7 @@ class RankingService: ObservableObject {
         userDefaults.removeObject(forKey: pendingUploadSinceKey)
         pendingUploadWorkItem?.cancel()
         pendingUploadWorkItem = nil
+        print("✅ PendingUpload 해제: now=\(Date())")
     }
     
     private func consumeAutoUploadQuotaIfPossible() -> Bool {
@@ -392,8 +400,12 @@ class RankingService: ObservableObject {
             userDefaults.set(dayKey, forKey: autoUploadDayKey)
             count = 0
         }
-        guard count < autoUploadDailyLimit else { return false }
+        guard count < autoUploadDailyLimit else {
+            print("⚠️ 자동 업로드 쿼터 초과: dayKey=\(dayKey), count=\(count), limit=\(autoUploadDailyLimit)")
+            return false
+        }
         userDefaults.set(count + 1, forKey: autoUploadCountKey)
+        print("✅ 자동 업로드 쿼터 사용: dayKey=\(dayKey), count=\(count + 1)/\(autoUploadDailyLimit)")
         return true
     }
     
@@ -405,9 +417,11 @@ class RankingService: ObservableObject {
             guard let self else { return }
             guard self.hasPendingUpload else { return }
             guard self.consumeAutoUploadQuotaIfPossible() else { return }
+            print("🚀 지연 업로드 실행: delay=\(delay)s, allowEmpty=\(allowEmptyUpload), now=\(Date())")
             self.recalculateStats(from: sessions, uploadPolicy: .smart, forceUpload: false, allowEmptyUpload: allowEmptyUpload)
         }
         pendingUploadWorkItem = workItem
+        print("🕒 지연 업로드 예약: delay=\(delay)s, allowEmpty=\(allowEmptyUpload), now=\(Date())")
         statsQueue.asyncAfter(deadline: .now() + delay, execute: workItem)
     }
 
@@ -472,9 +486,29 @@ class RankingService: ObservableObject {
         scheduleRecalculateStats(from: snapshots, uploadPolicy: .none)
         let allowEmptyUpload = !hasValidSessions && loadLastUploadedSnapshot() != nil
         if hasValidSessions || allowEmptyUpload {
+            print("🧾 로컬 변경 감지: hasValidSessions=\(hasValidSessions), allowEmptyUpload=\(allowEmptyUpload)")
             markPendingUpload()
             scheduleDeferredUpload(sessions: sessions, allowEmptyUpload: allowEmptyUpload)
         }
+    }
+
+    /// 앱 재시작 이후 pending 업로드 복구 시도
+    func restorePendingUploadIfNeeded(sessions: [RunSession]) {
+        guard isRankingEnabled else { return }
+        guard Auth.auth().currentUser != nil else { return }
+        guard hasPendingUpload else {
+            print("ℹ️ pending 복구 스킵: hasPendingUpload=false")
+            return
+        }
+        let snapshots = makeSnapshotsSafely(from: sessions)
+        let hasValidSessions = snapshots.contains { isValidRun($0) && $0.isDomestic && isWithinSeason($0.startTime) }
+        let allowEmptyUpload = !hasValidSessions && loadLastUploadedSnapshot() != nil
+        guard hasValidSessions || allowEmptyUpload else {
+            print("⚠️ pending 복구 스킵: 유효 세션 없음, allowEmpty=\(allowEmptyUpload)")
+            return
+        }
+        print("🔁 pending 복구 예약: hasValidSessions=\(hasValidSessions), allowEmpty=\(allowEmptyUpload)")
+        scheduleDeferredUpload(sessions: sessions, allowEmptyUpload: allowEmptyUpload)
     }
 
     private func scheduleRecalculateStats(from snapshots: [RunSessionSnapshot], uploadPolicy: UploadPolicy = .none, forceUpload: Bool = false, allowEmptyUpload: Bool = false) {
@@ -490,6 +524,7 @@ class RankingService: ObservableObject {
         guard let user = Auth.auth().currentUser else { return }
         
         var newProfile = RankingProfile(userId: user.uid, userName: user.displayName ?? "skier")
+        newProfile.instagramId = GamificationService.shared.profile.instagramId
         print("🔄 Recalculating Stats for user: \(newProfile.userId)")
         
         let now = Date()
@@ -628,6 +663,7 @@ class RankingService: ObservableObject {
         guard isRankingEnabled, !profile.userId.isEmpty else { return }
         
         let docRef = db.collection("rankings").document(profile.userId)
+        print("⬆️ 랭킹 업로드 시작: userId=\(profile.userId), now=\(Date())")
         
         // Firestore Field Mapping
         var data: [String: Any] = [
@@ -649,6 +685,10 @@ class RankingService: ObservableObject {
             "weekly_runCount": profile.weeklyRunCount,
             "weekly_distance_m": profile.weeklyDistance
         ]
+        
+        if let instagramId = profile.instagramId, !instagramId.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty {
+            data["instagram_id"] = instagramId
+        }
         
         // Always upload technical stats for profile view
         data["season_edge"] = profile.seasonBestEdge

@@ -27,6 +27,7 @@ struct RunDetailView: View {
     @State private var selectedRunAnalysis: RunSession.RunMetric?
     @State private var showPaywall = false
     @State private var showAnalysisPaywall = false
+    @State private var showComingSoonAlert = false
     
     private let timelineNoiseThreshold: TimeInterval = 40.0
     private let timelineNoiseVerticalDrop: Double = 30.0
@@ -182,12 +183,29 @@ struct RunDetailView: View {
                 return RunAnalysisView.Point(x: absoluteDate, y: sample.gMax)
             }
             
+            let lateralPoints = session.analysisSamples.compactMap { sample -> RunAnalysisView.Point? in
+                guard let latAvg = sample.latAvg else { return nil }
+                let absoluteDate = session.startTime.addingTimeInterval(sample.t)
+                guard absoluteDate >= metric.startTime && absoluteDate <= metric.endTime else { return nil }
+                return RunAnalysisView.Point(x: absoluteDate, y: latAvg)
+            }
+            
+            let stabilityPoints = session.analysisSamples.compactMap { sample -> RunAnalysisView.Point? in
+                let absoluteDate = session.startTime.addingTimeInterval(sample.t)
+                guard absoluteDate >= metric.startTime && absoluteDate <= metric.endTime else { return nil }
+                let stdDevMS = sample.speedStdDev / 3.6
+                let stability = 1.0 / (1.0 + (stdDevMS / 3.5))
+                return RunAnalysisView.Point(x: absoluteDate, y: stability)
+            }
+            
             ZStack {
                 RunAnalysisView(
                     runMetric: metric, 
                     locationName: session.locationName, 
                     telemetryPoints: points,
-                    gForcePoints: gPoints
+                    gForcePoints: gPoints,
+                    lateralGPoints: lateralPoints,
+                    stabilityPoints: stabilityPoints
                 )
                 .blur(radius: storeManager.isPro ? 0 : 6)
                 
@@ -258,6 +276,11 @@ struct RunDetailView: View {
                 message: Text(info.description),
                 dismissButton: .default(Text("ranking.tech_guide_ok"))
             )
+        }
+        .alert("common.coming_soon_title", isPresented: $showComingSoonAlert) {
+            Button("common.coming_soon_ok", role: .cancel) { }
+        } message: {
+            Text("common.coming_soon_body")
         }
     }
     
@@ -2145,13 +2168,10 @@ struct FullScreenMapView: View {
     private var bottomHUD: some View {
         VStack(spacing: 20) {
             timelineScrubber
-            
-            HStack(spacing: 14) {
-                statusCard
-                proCard
-            }
-            .padding(.horizontal, 16)
-            .padding(.bottom, 24)
+
+            statusCard
+                .padding(.horizontal, 16)
+                .padding(.bottom, 24)
         }
         .padding(.top, 30)
         .background(
@@ -2348,41 +2368,6 @@ struct FullScreenMapView: View {
                 )
         )
         .shadow(color: neonGreen.opacity(0.3), radius: 12, x: 0, y: 6)
-    }
-    
-    private var proCard: some View {
-        VStack(spacing: 12) {
-            Image(systemName: "lock.fill")
-                .font(.system(size: 18, weight: .bold))
-                .foregroundColor(neonGreen)
-                .padding(10)
-                .background(Circle().fill(Color.white.opacity(0.08)))
-            Text("Unlock Pro Metrics")
-                .font(.system(size: 12, weight: .bold))
-                .foregroundColor(.white)
-            Button(action: {}) {
-                Text("GET PRO")
-                    .font(.system(size: 11, weight: .heavy))
-                    .tracking(2)
-                    .foregroundColor(.black)
-                    .padding(.horizontal, 20)
-                    .padding(.vertical, 10)
-                    .background(neonGreen)
-                    .clipShape(RoundedRectangle(cornerRadius: 12))
-                    .shadow(color: neonGreen.opacity(0.6), radius: 10)
-            }
-        }
-        .padding(20)
-        .frame(maxWidth: .infinity)
-        .background(
-            RoundedRectangle(cornerRadius: 20)
-                .fill(Color.black.opacity(0.7))
-        )
-        .overlay(
-            RoundedRectangle(cornerRadius: 20)
-                .stroke(style: StrokeStyle(lineWidth: 1, dash: [6, 6]))
-                .foregroundColor(.white.opacity(0.2))
-        )
     }
     
     private func formatTime(_ time: TimeInterval) -> String {

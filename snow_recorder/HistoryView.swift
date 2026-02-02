@@ -31,17 +31,6 @@ struct HistoryView: View {
                         
                         Spacer()
                         
-                        // Test Data Button (Debug)
-                        Button(action: {
-                            RunSession.createMockSession(context: modelContext)
-                            resetAndReload() // Reload after adding
-                        }) {
-                            Image(systemName: "plus.circle.fill")
-                            .font(.system(size: 24))
-                            .foregroundColor(.white.opacity(0.5))
-                        }
-                        .padding(.trailing, 16)
-                        
                         // Profile Image (Dummy)
                         Circle()
                             .fill(Color.gray)

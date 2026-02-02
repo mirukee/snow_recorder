@@ -99,7 +99,7 @@
 "settings.delete_account_title" = "Delete your account?";
 
 /* 회원 탈퇴 안내 */
-"settings.delete_account_message" = "This action cannot be undone. Your account and ranking data will be removed.";
+"settings.delete_account_message" = "This action cannot be undone. Your account and ranking data will be removed. Run sessions stored on this device will not be deleted.";
 
 /* 회원 탈퇴 취소 */
 "settings.delete_account_cancel" = "Cancel";
@@ -158,8 +158,38 @@
 "timeline.rest" = "Rest";
 "timeline.lift" = "Lift Ride";
 
+/* 플로우 리포트 브레이크다운 타이틀 */
+"flow_report.breakdown_title" = "FLOW BREAKDOWN";
+/* 플로우 리포트 베이스 점수 라벨 */
+"flow_report.breakdown_base" = "BASE SCORE";
+/* 플로우 리포트 정지 패널티 라벨 */
+"flow_report.breakdown_stop" = "STOP PENALTY";
+/* 플로우 리포트 브레이크 패널티 라벨 */
+"flow_report.breakdown_brake" = "BRAKE PENALTY";
+/* 플로우 리포트 채터 패널티 라벨 */
+"flow_report.breakdown_chatter" = "CHATTER PENALTY";
+/* 플로우 리포트 조용함 보너스 라벨 */
+"flow_report.breakdown_quiet" = "QUIET BONUS";
+/* 플로우 리포트 최종 점수 라벨 */
+"flow_report.breakdown_final" = "FINAL";
+/* 플로우 안정성 타임라인 타이틀 */
+"flow_report.stability_timeline_title" = "STABILITY TIMELINE";
+/* 플로우 안정성 데이터 없음 */
+"flow_report.stability_timeline_empty" = "NO STABILITY DATA";
+/* 플로우 안정성 최소값 포맷 */
+"flow_report.stability_min_format" = "%.0f%% MIN";
+/* 플로우 안정성 선택값 포맷 */
+"flow_report.stability_value_format" = "%.0f%% STABILITY";
+
 /* 동기화 대기 */
 "ranking.sync_pending" = "SYNC PENDING";
+
+/* 동기화 대기 도움말 타이틀 */
+"ranking.sync_pending_help_title" = "SYNC PENDING";
+/* 동기화 대기 도움말 본문 */
+"ranking.sync_pending_help_body" = "You have changes that haven't synced to the server yet.\nAn automatic upload may be queued, or the hourly leaderboard refresh may not have run.";
+/* 동기화 대기 도움말 확인 */
+"ranking.sync_pending_help_ok" = "OK";
 
 /* 게스트 랭킹 타이틀 */
 "ranking.guest_title" = "RANKING LOCKED";
@@ -244,6 +274,13 @@
 "badge.desc.edge_elite" = "Break 900 in Edge Score.";
 /* 플로우 스코어 900점을 돌파하세요. */
 "badge.desc.flow_elite" = "Break 900 in Flow Score.";
+
+/* 페이월 플랜 타이틀(연간) */
+"paywall.plan_annual" = "ANNUAL";
+/* 페이월 플랜 타이틀(파운더스 팩) */
+"paywall.plan_founders" = "FOUNDERS PACK";
+/* 페이월 파운더스팩 서브카피 */
+"paywall.founders_subtitle" = "Launch-only · Lifetime access";
 
 /* "얼마나 날카롭게 베고 나갔는가?"\n\n당신의 턴이 설면을 얼마나 견고하게 파고들었는지 분석한 '카빙(Carving) 완성도' 지표입니다.\n\n분석 기준: 턴의 깊이, 엣징 각도(G-Force), 슬립(미끄러짐) 최소화\n\nTip: 데크가 눈에 박히는 느낌에 집중하고, 과감하게 엣지를 세울수록 점수가 올라갑니다. */
 "run_detail.edge_desc" = "\"How sharply did you carve?\"\n\nA carving-completion metric that analyzes how firmly your turns cut into the snow.\n\nCriteria: turn depth, edge angle (G-Force), minimal slip\n\nTip: Focus on driving the edge into the snow; the more confidently you set the edge, the higher the score.";
@@ -406,3 +443,12 @@
 
 /* 연간 결제 %@ */
 "paywall.billing_yearly_format" = "Billed yearly %@";
+
+/* 준비중 타이틀 */
+"common.coming_soon_title" = "COMING SOON";
+
+/* 준비중 설명 */
+"common.coming_soon_body" = "This feature is coming soon.\nWe'll update it shortly.";
+
+/* 준비중 확인 */
+"common.coming_soon_ok" = "OK";

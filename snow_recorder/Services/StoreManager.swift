@@ -17,9 +17,8 @@ class StoreManager: ObservableObject {
     
     // Product IDs
     private let productDict: [String: String] = [
-        "com.snowrecord.pro.monthly": "Monthly",
-        "com.snowrecord.pro.annual": "Annual",
-        "com.snowrecord.pro.lifetime": "Lifetime"
+        "com.mirukee.snowrecord.pro.annual": "Annual",
+        "com.mirukee.snowrecord.founderspack": "Founders Pack"
     ]
     
     var updateListenerTask: Task<Void, Error>? = nil

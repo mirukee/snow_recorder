@@ -57,6 +57,7 @@ struct RankingProfile {
     var countryCode: String = "KR"
     var seasonId: String = "25_26"
     var weeklyWeekId: String = ""
+    var instagramId: String? = nil
     
     // Season Totals
     var seasonRunCount: Int = 0
@@ -126,6 +127,7 @@ struct LeaderboardEntry: Identifiable {
     let userId: String // Added for identification
     let rank: Int
     let userName: String
+    var instagramId: String? = nil
     let crewName: String?
     let mainResort: String // "All" or name
     let slopeName: String? // Optional specific slope
