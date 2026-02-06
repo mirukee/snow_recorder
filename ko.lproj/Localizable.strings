@@ -5,6 +5,36 @@
 
 /* 삭제하기 */
 "history.delete" = "삭제하기";
+/* 로딩 화면 시스템 상태 */
+"launch.system_online" = "SYSTEM ONLINE";
+/* 로딩 화면 타이틀 */
+"launch.title" = "SNOW\nRECORD";
+/* 로딩 모듈 라벨 */
+"launch.loading_modules" = "LOADING_MODULES";
+/* 로딩 프로 팁 라벨 */
+"launch.pro_tip" = "PRO TIP";
+/* 로딩 팁 1 */
+"launch.tip_1" = "체중을 앞쪽에 두시면 엣지 컨트롤이 더 안정적입니다.";
+/* 로딩 팁 2 */
+"launch.tip_2" = "부드러운 턴 연결이 플로우 스코어를 높여줍니다.";
+/* 로딩 팁 3 */
+"launch.tip_3" = "시선은 앞쪽으로 유지하시면 라인이 더 깨끗하고 안정적입니다.";
+/* 로딩 상태 - 동기화 */
+"launch.status_syncing" = "SYNCING RUN DATA...";
+/* 로딩 상태 - 캘리브레이션 */
+"launch.status_calibrating" = "CALIBRATING SENSORS...";
+/* 로딩 상태 - 워밍업 */
+"launch.status_warming" = "WARMING UP SYSTEMS...";
+/* 히스토리 정렬 라벨 */
+"history.sort" = "SORT";
+/* 히스토리 정렬 - 최신순 */
+"history.sort_latest" = "LATEST";
+/* 히스토리 정렬 - 거리순 */
+"history.sort_distance" = "DISTANCE";
+/* 히스토리 정렬 - 오래된순 */
+"history.sort_oldest" = "OLDEST";
+/* 즐겨찾기 필터 */
+"history.favorites_only" = "FAVORITES";
 
 /* 첫 런을 기다리는 중... */
 "dashboard.wait_first_run" = "첫 런을 기다리는 중...";
@@ -14,14 +44,18 @@
 "dashboard.resort_locating" = "RESORT - LOCATING...";
 
 /* 뱃지 상세 - 획득 상태 */
-"badge.detail.earned" = "EARNED";
+"badge.detail.earned" = "획득";
 /* 뱃지 상세 - 잠김 상태 */
-"badge.detail.locked" = "LOCKED";
+"badge.detail.locked" = "잠김";
 /* 뱃지 상세 - 닫기 안내 */
-"badge.detail.tap_to_close" = "TAP TO CLOSE";
+"badge.detail.tap_to_close" = "탭해서 닫기";
 
 /* 테크니컬 스코어 가이드 */
 "ranking.tech_guide_title" = "테크니컬 스코어 가이드";
+/* 해외 시즌 보기 */
+"ranking.overseas_toggle" = "OVERSEAS";
+/* 홈 시즌 보기 */
+"ranking.overseas_toggle_home" = "HOME";
 
 /* 법적 문서 섹션 */
 "settings.legal" = "법적 문서";
@@ -40,6 +74,8 @@
 
 /* 랭킹 업로드 설명 */
 "settings.ranking_participate_desc" = "주행 기록을 리더보드에 자동 업로드합니다.";
+/* 랭킹 참여 토글 제한 안내 */
+"settings.ranking_toggle_limit" = "하루에 한 번만 변경할 수 있습니다.";
 
 /* 백업 섹션 타이틀 */
 "settings.section_backup" = "백업 (iCloud)";
@@ -85,6 +121,12 @@
 
 /* 로그아웃 안내 */
 "settings.sign_out_message" = "계정에서 로그아웃하고 게스트 모드로 전환합니다.";
+
+/* 가입 연도 라벨 */
+"profile.chasing_powder_since" = "CHASING POWDER SINCE '%@";
+
+/* 뱃지 변경 반영 안내 토스트 */
+"profile.featured_badges_sync_toast" = "뱃지 변경은 다음 런 업로드 때 반영돼요.";
 
 /* 로그아웃 취소 */
 "settings.sign_out_cancel" = "취소";
@@ -168,6 +210,16 @@
 "flow_report.breakdown_brake" = "BRAKE PENALTY";
 /* 플로우 리포트 채터 패널티 라벨 */
 "flow_report.breakdown_chatter" = "CHATTER PENALTY";
+/* 런 분석 리포트 다운로드 버튼 */
+"analysis_report.download_button" = "DOWNLOAD REPORT";
+/* 런 분석 리포트 다운로드 실패 타이틀 */
+"analysis_report.download_error_title" = "리포트 다운로드 실패";
+/* 런 분석 리포트 다운로드 실패 메시지 */
+"analysis_report.download_error_message" = "리포트 이미지를 생성하지 못했습니다.";
+/* 런 분석 리포트 다운로드 완료 */
+"analysis_report.download_complete" = "저장 완료";
+/* 확인 */
+"common.ok" = "확인";
 /* 플로우 리포트 조용함 보너스 라벨 */
 "flow_report.breakdown_quiet" = "QUIET BONUS";
 /* 플로우 리포트 최종 점수 라벨 */
@@ -187,7 +239,7 @@
 /* 동기화 대기 도움말 타이틀 */
 "ranking.sync_pending_help_title" = "SYNC PENDING";
 /* 동기화 대기 도움말 본문 */
-"ranking.sync_pending_help_body" = "서버에 아직 반영되지 않은 변경이 있습니다.\n자동 업로드가 대기 중이거나, 리더보드 배치 갱신 전일 수 있어요.";
+"ranking.sync_pending_help_body" = "서버에 아직 반영되지 않은 변경이 있습니다.\n자동 업로드가 대기 중이거나, 리더보드 배치 처리 전일 수 있어요.";
 /* 동기화 대기 도움말 확인 */
 "ranking.sync_pending_help_ok" = "확인";
 
@@ -201,7 +253,7 @@
 "ranking.sync_help_title" = "MANUAL SYNC";
 
 /* 수동 동기화 도움말 */
-"ranking.sync_help_body" = "MANUAL SYNC는 내 기록을 서버에 업로드합니다.\n보통은 자동 업로드되지만, 즉시 반영이 필요할 때 사용하세요.\n일일 사용 횟수 제한이 있으며, 리더보드는 정각 배치로 갱신되므로 표시가 지연될 수 있습니다.";
+"ranking.sync_help_body" = "MANUAL SYNC는 내 기록을 서버에 업로드합니다.\n보통은 자동 업로드되지만, 즉시 반영이 필요할 때 사용하세요.\n일일 사용 횟수 제한이 있으며, 리더보드는 몇 분 단위 배치로 갱신되므로 표시가 지연될 수 있습니다.";
 
 /* 동기화 도움말 확인 */
 "ranking.sync_help_ok" = "확인";
@@ -289,7 +341,7 @@
 /* 페이월 플랜 타이틀(파운더스 팩) */
 "paywall.plan_founders" = "FOUNDERS PACK";
 /* 페이월 파운더스팩 서브카피 */
-"paywall.founders_subtitle" = "런칭 한정 · 평생 이용";
+"paywall.founders_subtitle" = "런칭 한정 · 평생 이용 · 1회 결제";
 
 /* "얼마나 날카롭게 베고 나갔는가?"\n\n당신의 턴이 설면을 얼마나 견고하게 파고들었는지 분석한 '카빙(Carving) 완성도' 지표입니다.\n\n분석 기준: 턴의 깊이, 엣징 각도(G-Force), 슬립(미끄러짐) 최소화\n\nTip: 데크가 눈에 박히는 느낌에 집중하고, 과감하게 엣지를 세울수록 점수가 올라갑니다. */
 "run_detail.edge_desc" = "\"얼마나 날카롭게 베고 나갔는가?\"\n\n당신의 턴이 설면을 얼마나 견고하게 파고들었는지 분석한 '카빙(Carving) 완성도' 지표입니다.\n\n분석 기준: 턴의 깊이, 엣징 각도(G-Force), 슬립(미끄러짐) 최소화\n\nTip: 데크가 눈에 박히는 느낌에 집중하고, 과감하게 엣지를 세울수록 점수가 올라갑니다.";
@@ -342,14 +394,90 @@
 /* 런 비교 카드 설명 */
 "run_detail.compare_desc" = "이번 런 vs 시즌 평균 비교";
 
-/* PRO 시작: */
-"paywall.headline_go_pro" = "PRO 시작:";
+/* 런 비교 - 런 선택 타이틀 */
+"compare.run_picker.title" = "SESSION ANALYSIS";
+/* 런 비교 - 런 선택 안내 */
+"compare.run_picker.subtitle" = "Select a run to compare";
+/* 런 비교 - 선택 개수 포맷 */
+"compare.run_picker.selected_count_format" = "%d SELECTED";
+/* 런 비교 - 비교 버튼 */
+"compare.run_picker.compare_button" = "COMPARE SELECTED";
+/* 런 비교 - 런 라벨 */
+"compare.run_picker.run_label" = "RUN";
+/* 런 비교 - 런 없음 */
+"compare.run_picker.empty" = "이번 세션에는 런이 없어요.";
+/* 런 비교 - 난이도 알 수 없음 */
+"compare.run_picker.difficulty_unknown" = "UNKNOWN";
 
-/* 잠재력 해제 */
-"paywall.headline_unlock_potential" = "잠재력 해제";
+/* 런 비교 상세 - 분석 라벨 */
+"compare.detail.analysis_label" = "ANALYSIS";
+/* 런 비교 상세 - 시즌 평균 라벨 */
+"compare.detail.season_avg_label" = "SEASON AVG";
+/* 런 비교 상세 - 런 ID 포맷 */
+"compare.detail.run_id_format" = "RUN_ID: %@";
+/* 런 비교 상세 - 시스템 상태 */
+"compare.detail.system_ready" = "SYSTEM_READY";
+/* 런 비교 상세 - 최대 속도 */
+"compare.detail.metric_max_speed" = "MAX SPEED";
+/* 런 비교 상세 - 평균 속도 */
+"compare.detail.metric_avg_speed" = "AVG SPEED";
+/* 런 비교 상세 - 거리 */
+"compare.detail.metric_distance" = "DISTANCE";
+/* 런 비교 상세 - 하강 고도 */
+"compare.detail.metric_vert_drop" = "VERT DROP";
+/* 런 비교 상세 - 시간 */
+"compare.detail.metric_duration" = "DURATION";
+/* 런 비교 상세 - 엣지 스코어 */
+"compare.detail.metric_edge_score" = "EDGE SCORE";
+/* 런 비교 상세 - 플로우 스코어 */
+"compare.detail.metric_flow_score" = "FLOW SCORE";
+/* 런 비교 상세 - 엣지 토글 라벨 */
+"compare.detail.edge_tab" = "EDGE";
+/* 런 비교 상세 - 플로우 토글 라벨 */
+"compare.detail.flow_tab" = "FLOW";
+/* 런 비교 상세 - 평균 비교 포맷 */
+"compare.detail.vs_avg_format" = "vs %@ avg";
+/* 런 비교 상세 - 평균 없음 */
+"compare.detail.vs_avg_missing" = "vs -- avg";
+/* 런 비교 상세 - 턴 대칭 */
+"compare.detail.turn_symmetry" = "TURN SYMMETRY";
+/* 런 비교 상세 - 밸런스 라벨 */
+"compare.detail.turn_balance_label" = "BALANCED";
+/* 런 비교 상세 - 왼쪽 라벨 */
+"compare.detail.turn_left_label" = "LEFT";
+/* 런 비교 상세 - 오른쪽 라벨 */
+"compare.detail.turn_right_label" = "RIGHT";
+/* 런 비교 상세 - 왼쪽 포맷 */
+"compare.detail.turn_left_format" = "LEFT %@";
+/* 런 비교 상세 - 오른쪽 포맷 */
+"compare.detail.turn_right_format" = "RIGHT %@";
+/* 런 비교 상세 - 턴 편향 메시지 */
+"compare.detail.turn_bias_format" = "%@ 턴이 %@ 더 많아요.";
+/* 런 비교 상세 - 턴 밸런스 메시지 */
+"compare.detail.turn_balanced_desc" = "턴 밸런스가 안정적이에요.";
+/* 런 비교 상세 - 푸터 시스템 ID */
+"compare.detail.footer_sys_id_format" = "SYS_ID: %@";
+/* 런 비교 상세 - 시즌 런 수 */
+"compare.detail.footer_total_runs_format" = "TOTAL SEASON RUNS: %d";
 
-/* 고급 텔레메트리, 무제한 동기화,\n프로급 분석 도구. */
-"paywall.subtitle" = "Edge/Flow 분해, 리플레이·히트맵,\n고급 공유와 런 비교.";
+/* 런 비교 - 저장 토스트 */
+"compare.save_toast" = "저장 완료";
+
+/* 런 비교 - 잠금 타이틀 */
+"compare.lock_title" = "PRO COMPARISON";
+/* 런 비교 - 잠금 설명 */
+"compare.lock_desc" = "런 비교는 PRO 전용 기능이에요.";
+/* 런 비교 - 잠금 CTA */
+"compare.lock_cta" = "UNLOCK PRO";
+
+/* PRO 시작하기 */
+"paywall.headline_go_pro" = "PRO 시작하기";
+
+/* 라이딩의 잠재력을 깨우다 */
+"paywall.headline_unlock_potential" = "라이딩의 잠재력을 깨우다";
+
+/* Edge/Flow 정밀 분석, 리플레이와 히트맵,\n프리미엄 공유 및 라이딩 비교. */
+"paywall.subtitle" = "Edge/Flow 정밀 분석, 리플레이와 히트맵,\n프리미엄 공유 및 라이딩 비교.";
 
 /* 결제 실패 */
 "paywall.purchase_fail_title" = "결제 실패";
@@ -416,6 +544,8 @@
 
 /* 10,000+ Pro 라이더 • 언제든 해지 가능 */
 "paywall.footer_social_proof" = "언제든 해지 가능 • 결제는 App Store에서 처리";
+/* 자동 갱신 구독 안내 */
+"paywall.footer_auto_renew" = "자동 갱신 구독 • 언제든 해지 가능";
 
 /* 이용약관 */
 "paywall.terms" = "이용약관";
@@ -452,3 +582,5 @@
 
 /* 연간 결제 %@ */
 "paywall.billing_yearly_format" = "연간 결제 %@";
+/* 연간 구독 기간 안내 */
+"paywall.subscription_length_yearly" = "1년 구독(자동 갱신)";

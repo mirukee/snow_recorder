@@ -5,6 +5,7 @@ import FirebaseAuth
 struct OtherUserProfileView: View {
     @Environment(\.dismiss) var dismiss
     @Environment(\.openURL) var openURL
+    @Environment(\.locale) private var locale
     let initialUser: LeaderboardEntry
     @State private var fullUser: LeaderboardEntry?
     @State private var isLoading = false
@@ -23,6 +24,49 @@ struct OtherUserProfileView: View {
     private var isCurrentUser: Bool {
         guard let uid = Auth.auth().currentUser?.uid else { return false }
         return uid == initialUser.userId
+    }
+
+    private var displayedTier: Tier? {
+        guard let raw = user.tierRaw else { return nil }
+        return Tier(rawValue: raw)
+    }
+
+    private var tierLabel: String {
+        (displayedTier?.rawValue ?? "Bronze").uppercased()
+    }
+
+    private var tierIconName: String {
+        displayedTier?.iconName ?? "shield.fill"
+    }
+
+    private var displayedJoinYear: Int? {
+        if let year = user.joinedYear {
+            return year
+        }
+        if isCurrentUser, let creationDate = Auth.auth().currentUser?.metadata.creationDate {
+            return Calendar.current.component(.year, from: creationDate)
+        }
+        return nil
+    }
+
+    private var joinYearText: String? {
+        guard let year = displayedJoinYear else { return nil }
+        return String(format: "%02d", year % 100)
+    }
+
+    private var chasingPowderText: String? {
+        guard let yearText = joinYearText else { return nil }
+        return String(format: locString("profile.chasing_powder_since"), yearText)
+    }
+
+    private var featuredBadges: [Badge] {
+        let titles = user.featuredBadgeTitles
+        guard !titles.isEmpty else { return [] }
+        return Array(titles.compactMap { GamificationService.shared.badgeDefinition(forTitle: $0) }.prefix(3))
+    }
+
+    private func locString(_ key: String) -> String {
+        String(localized: .init(key), locale: locale)
     }
     
     // Display Logic
@@ -96,10 +140,10 @@ struct OtherUserProfileView: View {
                         
                         // Tier Badge
                         HStack(spacing: 4) {
-                            Image(systemName: "diamond.fill")
+                            Image(systemName: tierIconName)
                                 .font(.system(size: 12))
                                 .foregroundColor(primaryGreen)
-                            Text("DIAMOND TIER") // Placeholder for rank-based tier
+                            Text("\(tierLabel) TIER")
                                 .font(.system(size: 10, weight: .bold))
                                 .tracking(1)
                                 .foregroundColor(primaryGreen)
@@ -120,9 +164,11 @@ struct OtherUserProfileView: View {
                             .foregroundColor(.white)
                             .tracking(-1)
                         
-                        Text("Chasing powder since '98") // Mock Bio
-                            .font(.system(size: 14, weight: .medium))
-                            .foregroundColor(.gray)
+                        if let chasingPowderText {
+                            Text(chasingPowderText)
+                                .font(.system(size: 14, weight: .medium))
+                                .foregroundColor(.gray)
+                        }
                     }
                     .padding(.top, 10)
                     
@@ -196,58 +242,11 @@ struct OtherUserProfileView: View {
                     .padding(24)
                 }
                 
-                // Highlights Section (Best Run)
-                VStack(spacing: 16) {
-                    ZStack(alignment: .bottomLeading) {
-                        // Background Image
-                        AsyncImage(url: URL(string: "https://lh3.googleusercontent.com/aida-public/AB6AXuCSXpsiWszQbcckBonwMb3t2rJI6N59kSt9I6PefWB3y76Fjh3dG9DsMHvGa1h-JqymY0PpyoTFq4W3oPbYiukb_HljkqOZc0PQpX_Rj4Ftzq8BJ8Vnf4kdXMWXPsts0S9zndo_zJ-qc2VU0_ak9sAtyUqNGVYjaghn1eJvug8LGzSq9k3tiiGY-Yxocz2-IGRJ4Fsg9GMT0tUEzhN9AY7KZujMZuV7-x3ciOzHBvbnG-SdwuUJlfggzYlC2Qki5vfhrcym6dBfIBo")) { phase in
-                            if let image = phase.image {
-                                image
-                                    .resizable()
-                                    .aspectRatio(contentMode: .fill)
-                            } else {
-                                Color.gray.opacity(0.3)
-                            }
-                        }
-                        .frame(height: 160)
-                        .clipped()
-                        .overlay(LinearGradient(colors: [.black.opacity(0.8), .clear], startPoint: .bottom, endPoint: .top))
-                        
-                        // Content
-                        VStack(alignment: .leading, spacing: 4) {
-                            HStack(spacing: 6) {
-                                Image(systemName: "trophy.fill")
-                                    .foregroundColor(primaryGreen)
-                                    .font(.system(size: 14))
-                                Text("BEST RUN HIGHLIGHT")
-                                    .font(.system(size: 10, weight: .bold))
-                                    .tracking(1)
-                                    .foregroundColor(primaryGreen)
-                            }
-                            
-                            Text("Apollo 6")
-                                .font(.system(size: 24, weight: .bold))
-                                .foregroundColor(.white)
-                            
-                            HStack(alignment: .firstTextBaseline, spacing: 4) {
-                                Text("92")
-                                    .font(.system(size: 18, weight: .bold))
-                                    .foregroundColor(primaryGreen)
-                                Text("km/h Top Speed")
-                                    .font(.system(size: 14, weight: .medium))
-                                    .foregroundColor(.white.opacity(0.9))
-                            }
-                        }
-                        .padding(20)
-                    }
-                    .cornerRadius(32)
-                    .clipped()
-                }
-                .padding(.horizontal, 24)
+                // 하이라이트 섹션은 임시로 비활성화
                 
-                // Earned Badges
+                // Featured Badges
                 VStack(alignment: .leading, spacing: 16) {
-                    Text("EARNED BADGES")
+                    Text("FEATURED BADGES")
                         .font(.system(size: 12, weight: .bold))
                         .tracking(1.5)
                         .foregroundColor(.gray)
@@ -257,15 +256,21 @@ struct OtherUserProfileView: View {
                         HStack(spacing: 16) {
                             Spacer().frame(width: 8)
                             
-                            ProfileBadgeItem(icon: "bolt.fill", title: "Speed Demon", primaryGreen: primaryGreen, bg: cardBackground)
-                            ProfileBadgeItem(icon: "mountain.2.fill", title: "Explorer", themeColor: .gray, bg: cardBackground)
-                            ProfileBadgeItem(icon: "snowflake", title: "Frostbite", themeColor: .gray, bg: cardBackground)
-                            ProfileBadgeItem(icon: "alarm.fill", title: "Early Bird", themeColor: .gray, bg: cardBackground)
+                            ForEach(featuredBadges) { badge in
+                                ProfileBadgeItem(icon: badge.iconName, title: badge.title, primaryGreen: primaryGreen, bg: cardBackground)
+                            }
+
+                            if featuredBadges.isEmpty {
+                                Text("No badges earned yet.")
+                                    .font(.system(size: 12))
+                                    .foregroundColor(.gray)
+                                    .padding(.leading, 16)
+                            }
                             
                             Spacer().frame(width: 8)
-            }
-        }
-    }
+                        }
+                    }
+                }
                 .padding(.top, 24)
                 .padding(.bottom, 60)
             }
@@ -284,6 +289,9 @@ struct OtherUserProfileView: View {
                 merged.bestEdge = fetched.bestEdge
                 merged.bestFlow = fetched.bestFlow
                 merged.instagramId = fetched.instagramId
+                merged.tierRaw = fetched.tierRaw
+                merged.featuredBadgeTitles = fetched.featuredBadgeTitles
+                merged.joinedYear = fetched.joinedYear
                 if isCurrentUser {
                     merged = mergeLocalStats(into: merged)
                 }
@@ -340,6 +348,11 @@ struct OtherUserProfileView: View {
         var updated = entry
         if let instagramId = profile.instagramId, !instagramId.isEmpty {
             updated.instagramId = instagramId
+        }
+        updated.tierRaw = profile.tier.rawValue
+        updated.featuredBadgeTitles = profile.featuredBadgeTitles
+        if let creationDate = Auth.auth().currentUser?.metadata.creationDate {
+            updated.joinedYear = Calendar.current.component(.year, from: creationDate)
         }
         if profile.stats.highestEdgeScore > 0 {
             updated.bestEdge = profile.stats.highestEdgeScore

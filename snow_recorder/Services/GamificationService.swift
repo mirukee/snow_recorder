@@ -21,23 +21,23 @@ class GamificationService: ObservableObject {
     
     // Badges Configuration
     private var allBadges: [Badge] = [
-        Badge(title: "First Steps", description: NSLocalizedString("badge.desc.first_steps", comment: "첫 번째 런을 완료하세요."), iconName: "figure.skiing.downhill", unlockCondition: { stats in stats.totalRuns >= 1 }),
-        Badge(title: "Marathoner", description: NSLocalizedString("badge.desc.marathoner", comment: "총 100km를 주행하세요."), iconName: "figure.walk", unlockCondition: { stats in stats.totalDistance >= 100.0 }),
-        Badge(title: "Speed Demon", description: NSLocalizedString("badge.desc.speed_demon", comment: "최고 속도 80km/h에 도달하세요."), iconName: "flame.fill", unlockCondition: { stats in stats.maxSpeed >= 80.0 }),
-        Badge(title: "Century Club", description: NSLocalizedString("badge.desc.century_club", comment: "100런을 완주하세요."), iconName: "100.square.fill", unlockCondition: { stats in stats.totalRuns >= 100 }),
-        Badge(title: "Everest", description: NSLocalizedString("badge.desc.everest", comment: "총 하강고도 8,848m를 달성하세요."), iconName: "mountain.2.fill", unlockCondition: { stats in stats.totalVerticalDrop >= 8848.0 }),
+        Badge(title: "First Steps", descriptionKey: "badge.desc.first_steps", iconName: "figure.skiing.downhill", unlockCondition: { stats in stats.totalRuns >= 1 }),
+        Badge(title: "Marathoner", descriptionKey: "badge.desc.marathoner", iconName: "figure.walk", unlockCondition: { stats in stats.totalDistance >= 100.0 }),
+        Badge(title: "Speed Demon", descriptionKey: "badge.desc.speed_demon", iconName: "flame.fill", unlockCondition: { stats in stats.maxSpeed >= 80.0 }),
+        Badge(title: "Century Club", descriptionKey: "badge.desc.century_club", iconName: "100.square.fill", unlockCondition: { stats in stats.totalRuns >= 100 }),
+        Badge(title: "Everest", descriptionKey: "badge.desc.everest", iconName: "mountain.2.fill", unlockCondition: { stats in stats.totalVerticalDrop >= 8848.0 }),
         
         // New Badges
-        Badge(title: "High Flyer", description: NSLocalizedString("badge.desc.high_flyer", comment: "총 하강고도 20,000m를 달성하세요."), iconName: "airplane.departure", unlockCondition: { stats in stats.totalVerticalDrop >= 20000.0 }),
-        Badge(title: "Early Bird", description: NSLocalizedString("badge.desc.early_bird", comment: "오전 9시 이전에 출발하세요."), iconName: "sunrise.fill", unlockCondition: { _ in false }), // Needs session time check logic
-        Badge(title: "Night Owl", description: NSLocalizedString("badge.desc.night_owl", comment: "오후 7시 이후에 주행하세요."), iconName: "moon.stars.fill", unlockCondition: { _ in false }), // Needs session time check logic
-        Badge(title: "Safe Rider", description: NSLocalizedString("badge.desc.safe_rider", comment: "크래시 없이 10회 기록하세요."), iconName: "checkmark.shield.fill", unlockCondition: { stats in stats.totalRuns >= 50 }), // Placeholder
-        Badge(title: "Speed Hunter", description: NSLocalizedString("badge.desc.speed_hunter_100", comment: "최고 속도 100km/h에 도달하세요."), iconName: "speedometer", unlockCondition: { stats in stats.maxSpeed >= 100.0 }),
-        Badge(title: "Ultra Distance", description: NSLocalizedString("badge.desc.distance_300", comment: "총 300km를 주행하세요."), iconName: "figure.walk.circle.fill", unlockCondition: { stats in stats.totalDistance >= 300.0 }),
-        Badge(title: "Vert King", description: NSLocalizedString("badge.desc.vertical_50k", comment: "총 하강고도 50,000m를 달성하세요."), iconName: "mountain.2.circle.fill", unlockCondition: { stats in stats.totalVerticalDrop >= 50000.0 }),
-        Badge(title: "All Day Rider", description: NSLocalizedString("badge.desc.all_day", comment: "총 주행 시간 6시간을 달성하세요."), iconName: "clock.badge.checkmark", unlockCondition: { stats in stats.totalDuration >= 21600 }),
-        Badge(title: "Edge Elite", description: NSLocalizedString("badge.desc.edge_elite", comment: "엣지 스코어 900점을 돌파하세요."), iconName: "bolt.circle.fill", unlockCondition: { stats in stats.highestEdgeScore >= 900 }),
-        Badge(title: "Flow Elite", description: NSLocalizedString("badge.desc.flow_elite", comment: "플로우 스코어 900점을 돌파하세요."), iconName: "waveform.path.ecg", unlockCondition: { stats in stats.highestFlowScore >= 900 })
+        Badge(title: "High Flyer", descriptionKey: "badge.desc.high_flyer", iconName: "airplane.departure", unlockCondition: { stats in stats.totalVerticalDrop >= 20000.0 }),
+        Badge(title: "Early Bird", descriptionKey: "badge.desc.early_bird", iconName: "sunrise.fill", unlockCondition: { _ in false }), // Needs session time check logic
+        Badge(title: "Night Owl", descriptionKey: "badge.desc.night_owl", iconName: "moon.stars.fill", unlockCondition: { _ in false }), // Needs session time check logic
+        Badge(title: "Safe Rider", descriptionKey: "badge.desc.safe_rider", iconName: "checkmark.shield.fill", unlockCondition: { stats in stats.totalRuns >= 50 }), // Placeholder
+        Badge(title: "Speed Hunter", descriptionKey: "badge.desc.speed_hunter_100", iconName: "speedometer", unlockCondition: { stats in stats.maxSpeed >= 100.0 }),
+        Badge(title: "Ultra Distance", descriptionKey: "badge.desc.distance_300", iconName: "figure.walk.circle.fill", unlockCondition: { stats in stats.totalDistance >= 300.0 }),
+        Badge(title: "Vert King", descriptionKey: "badge.desc.vertical_50k", iconName: "mountain.2.circle.fill", unlockCondition: { stats in stats.totalVerticalDrop >= 50000.0 }),
+        Badge(title: "All Day Rider", descriptionKey: "badge.desc.all_day", iconName: "clock.badge.checkmark", unlockCondition: { stats in stats.totalDuration >= 21600 }),
+        Badge(title: "Edge Elite", descriptionKey: "badge.desc.edge_elite", iconName: "bolt.circle.fill", unlockCondition: { stats in stats.highestEdgeScore >= 900 }),
+        Badge(title: "Flow Elite", descriptionKey: "badge.desc.flow_elite", iconName: "waveform.path.ecg", unlockCondition: { stats in stats.highestFlowScore >= 900 })
     ]
     
     private enum Keys {
@@ -154,6 +154,10 @@ class GamificationService: ObservableObject {
 
     func clearFeaturedBadgesUploadPending() {
         UserDefaults.standard.set(false, forKey: Keys.featuredBadgesPendingUpload)
+    }
+
+    func badgeDefinition(forTitle title: String) -> Badge? {
+        allBadges.first { $0.title == title }
     }
 
     @discardableResult

@@ -431,7 +431,7 @@ struct DashboardView: View {
                 metric: metric,
                 accentColor: neonGreen,
                 speedSeries: locationManager.completedRunSpeedSeries(for: metric.runNumber),
-                locationName: "HIGH1 RESORT"
+                locationName: "SKI RESORT"
             )
         }
     }

@@ -45,7 +45,7 @@ struct snow_recorderApp: App {
 
     var body: some Scene {
         WindowGroup {
-            ContentView()
+            LaunchContainerView()
                 .environmentObject(storeManager)
                 .environment(\.locale, appLocale)
         }

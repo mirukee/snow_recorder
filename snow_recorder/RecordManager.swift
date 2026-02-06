@@ -252,6 +252,7 @@ class RecordManager: ObservableObject {
                 let routeDistances = locationManager.routeDistances
                 let routeStates = locationManager.routeStates
                 let runStartIndices = locationManager.runStartIndices
+                let confirmedResortName = locationManager.confirmedResortName()
                 let detectedResortName = self.detectResortName(from: routeCoordinates)
                 
                 // 분석 리포트 데이터
@@ -288,7 +289,7 @@ class RecordManager: ObservableObject {
                     runCount: runCount,
                     slopeName: currentSlope,
                     riddenSlopes: sessionSlopes,
-                    locationName: detectedResortName ?? "HIGH1 RESORT",
+                    locationName: confirmedResortName ?? detectedResortName ?? "SKI RESORT",
                     countryCode: resolveCountryCode(from: routeCoordinates),
                     routeCoordinates: routeCoordinates,
                     routeSpeeds: routeSpeeds,

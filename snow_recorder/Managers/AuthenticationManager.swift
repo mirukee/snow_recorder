@@ -24,7 +24,6 @@ class AuthenticationManager: ObservableObject {
             self.isGuest = true
         }
         syncNicknameFromAuthIfNeeded()
-        scheduleFeaturedBadgesUploadIfNeeded()
     }
     
     // MARK: - Sign In with Google
@@ -58,7 +57,6 @@ class AuthenticationManager: ObservableObject {
                 self?.isGuest = false
                 self?.syncNicknameFromAuthIfNeeded()
                 self?.checkAndCreateFirestoreUser()
-                self?.scheduleFeaturedBadgesUploadIfNeeded()
                 // Link local sessions (Guest Data) to this user
                 self?.linkLocalSessionsToUser()
             }
@@ -114,17 +112,14 @@ class AuthenticationManager: ObservableObject {
                             self?.syncNicknameFromAuthIfNeeded()
                             // Sync with Firestore after profile update
                             self?.checkAndCreateFirestoreUser()
-                            self?.scheduleFeaturedBadgesUploadIfNeeded()
                         }
                     } else {
                         self?.syncNicknameFromAuthIfNeeded()
                         self?.checkAndCreateFirestoreUser()
-                        self?.scheduleFeaturedBadgesUploadIfNeeded()
                     }
                 } else {
                     self?.syncNicknameFromAuthIfNeeded()
                     self?.checkAndCreateFirestoreUser()
-                    self?.scheduleFeaturedBadgesUploadIfNeeded()
                 }
                 
                 // Link local sessions (Guest Data) to this user
@@ -225,12 +220,13 @@ class AuthenticationManager: ObservableObject {
 
     private func syncNicknameToRankingIfNeeded(displayName: String) {
         guard let user = user else { return }
+        guard RankingService.shared.isRankingEnabled else { return }
         let db = Firestore.firestore()
         let userRef = db.collection("rankings").document(user.uid)
         userRef.setData(["nickname": displayName], merge: true)
     }
 
-    private func scheduleFeaturedBadgesUploadIfNeeded() {
+    func scheduleFeaturedBadgesUploadIfNeeded() {
         guard let user = user else { return }
         guard GamificationService.shared.isFeaturedBadgesUploadPending else { return }
         featuredBadgesUploadWorkItem?.cancel()
@@ -250,26 +246,46 @@ class AuthenticationManager: ObservableObject {
         featuredBadgesUploadWorkItem = workItem
         DispatchQueue.main.asyncAfter(deadline: .now() + featuredBadgesUploadDelay, execute: workItem)
     }
+
+    private func currentJoinYear() -> Int {
+        if let creationDate = user?.metadata.creationDate {
+            return Calendar.current.component(.year, from: creationDate)
+        }
+        return Calendar.current.component(.year, from: Date())
+    }
     
     // MARK: - Firestore Sync
     private func checkAndCreateFirestoreUser() {
         guard let user = user else { return }
         let db = Firestore.firestore()
         let userRef = db.collection("rankings").document(user.uid)
+
+        guard RankingService.shared.isRankingEnabled else {
+            userRef.delete { error in
+                if let error {
+                    print("❌ 랭킹 비참여 상태 삭제 실패: \(error)")
+                }
+            }
+            return
+        }
         
         userRef.getDocument { document, error in
             if let document = document, document.exists {
                 let nickname = user.displayName ?? "skier"
+                let joinYear = self.currentJoinYear()
                 // 기존 유저: 마지막 로그인 + 닉네임 미러 동기화
                 userRef.updateData([
                     "lastLogin": FieldValue.serverTimestamp(),
-                    "nickname": nickname
+                    "nickname": nickname,
+                    "joined_year": joinYear
                 ])
             } else {
+                let joinYear = self.currentJoinYear()
                 // Create new user entry
                 let userData: [String: Any] = [
                     "nickname": user.displayName ?? "skier",
                     "createdAt": FieldValue.serverTimestamp(),
+                    "joined_year": joinYear,
                     "totalDistance": 0.0,
                     "maxSpeed": 0.0,
                     "runCount": 0,
@@ -277,6 +293,20 @@ class AuthenticationManager: ObservableObject {
                     "platform": "iOS"
                 ]
                 userRef.setData(userData)
+            }
+        }
+    }
+
+    /// 앱 시작 시 랭킹 비참여 상태면 서버 랭킹 문서를 정리
+    func ensureRankingOptOutCleanup() {
+        guard let user = user else { return }
+        guard !isGuest else { return }
+        guard !RankingService.shared.isRankingEnabled else { return }
+        let db = Firestore.firestore()
+        let userRef = db.collection("rankings").document(user.uid)
+        userRef.delete { error in
+            if let error {
+                print("❌ 랭킹 비참여 상태 정리 실패: \(error)")
             }
         }
     }

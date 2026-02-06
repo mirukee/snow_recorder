@@ -15,9 +15,10 @@ final class RunSession {
     var verticalDrop: Double = 0.0    // 총 하강 고도 (m)
     var runCount: Int = 0           // 런 횟수
     var userID: String?             // 소유자 ID (로그인 시 연동)
+    var isFavorite: Bool = false
     var slopeName: String?      // 주행한 슬로프 이름 (대표 슬로프)
     var riddenSlopes: [String: Int] = [:] // 세션 동안 탄 슬로프 목록 (이름: 횟수)
-    var locationName: String = "HIGH1 RESORT"    // 스키장 이름 (예: HIGH1 RESORT)
+    var locationName: String = "SKI RESORT"    // 스키장 이름 (예: SKI RESORT)
     var countryCode: String = "UNKNOWN"     // 국가 코드 (예: KR, JP)
     var routeCoordinates: [[Double]] = [] // GPS 경로 좌표 [[lat, lon], ...] - 지도 폴리라인용
     var routeSpeeds: [Double] = []   // GPS 경로별 속도 (km/h) - 히트맵용
@@ -52,7 +53,7 @@ final class RunSession {
     var flowBreakdown: FlowScoreBreakdown? = RunSession.FlowScoreBreakdown.empty
     var edgeBreakdown: EdgeScoreBreakdown? = RunSession.EdgeScoreBreakdown.empty
     
-    struct RunMetric: Codable, Identifiable {
+    struct RunMetric: Codable, Identifiable, Hashable {
         var id: UUID = UUID()
         var runNumber: Int
         var slopeName: String
@@ -175,6 +176,14 @@ final class RunSession {
             try container.encodeIfPresent(scoreEvents, forKey: .scoreEvents)
             try container.encodeIfPresent(edgeBreakdown, forKey: .edgeBreakdown)
             try container.encodeIfPresent(flowBreakdown, forKey: .flowBreakdown)
+        }
+        
+        static func == (lhs: RunMetric, rhs: RunMetric) -> Bool {
+            lhs.id == rhs.id
+        }
+        
+        func hash(into hasher: inout Hasher) {
+            hasher.combine(id)
         }
     }
     
@@ -367,7 +376,7 @@ final class RunSession {
         userID: String? = nil,
         slopeName: String? = nil,
         riddenSlopes: [String: Int] = [:],
-        locationName: String = "HIGH1 RESORT",
+        locationName: String = "SKI RESORT",
         countryCode: String = "UNKNOWN",
         routeCoordinates: [[Double]] = [],
         routeSpeeds: [Double] = [],

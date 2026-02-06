@@ -89,7 +89,7 @@ struct ProfileView: View {
                                 }
                             }
                             .sheet(isPresented: $showSettings) {
-                                SettingsView(isRankingEnabled: $rankingService.isRankingEnabled)
+                                SettingsView()
                             }
                             .padding(.horizontal, 24)
                             .padding(.top, 20)
@@ -570,7 +570,7 @@ struct GridPattern: Shape {
     struct SettingsView: View {
         @Environment(\.dismiss) var dismiss
         @Environment(\.modelContext) private var modelContext
-        @Binding var isRankingEnabled: Bool
+        @ObservedObject private var rankingService = RankingService.shared
         @Query(sort: \RunSession.startTime, order: .reverse) private var sessions: [RunSession]
         @AppStorage("preferred_language") private var preferredLanguage: String = "system"
         @EnvironmentObject private var storeManager: StoreManager
@@ -591,12 +591,25 @@ struct GridPattern: Shape {
         private func locString(_ key: String) -> String {
             String(localized: .init(key), locale: locale)
         }
+
+        private func appVersionString() -> String {
+            Bundle.main.infoDictionary?["CFBundleShortVersionString"] as? String ?? "unknown"
+        }
+
+        private var canToggleRanking: Bool {
+            rankingService.canToggleRankingToday
+        }
         
         var body: some View {
             NavigationView {
                 Form {
                     Section(header: Text("settings.section_privacy_competition")) {
-                        Toggle(isOn: $isRankingEnabled) {
+                        Toggle(isOn: Binding(
+                            get: { rankingService.isRankingEnabled },
+                            set: { newValue in
+                                rankingService.setRankingEnabled(newValue, sessions: sessions)
+                            }
+                        )) {
                             VStack(alignment: .leading) {
                                 Text("settings.ranking_participate_title")
                                     .font(.system(size: 16, weight: .bold))
@@ -606,6 +619,13 @@ struct GridPattern: Shape {
                             }
                         }
                         .tint(Color(red: 107/255, green: 249/255, blue: 6/255))
+                        .disabled(!canToggleRanking)
+
+                        if !canToggleRanking {
+                            Text("settings.ranking_toggle_limit")
+                                .font(.caption)
+                                .foregroundColor(.gray)
+                        }
                     }
                     
                     Section(header: Text("settings.section_backup")) {
@@ -676,7 +696,7 @@ struct GridPattern: Shape {
                         HStack {
                             Text("settings.app_version")
                             Spacer()
-                            Text("1.0.0")
+                            Text(appVersionString())
                                 .foregroundColor(.gray)
                         }
                     }

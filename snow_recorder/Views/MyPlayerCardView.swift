@@ -4,6 +4,7 @@ struct MyPlayerCardView: View {
     @Environment(\.dismiss) var dismiss
     @ObservedObject var gamificationService = GamificationService.shared
     @State private var showEditProfile = false
+    @State private var showBadgeSyncToast = false
     
     // Design Colors
     let primaryGreen = Color(red: 107/255, green: 249/255, blue: 6/255) // #6bf906
@@ -157,55 +158,6 @@ struct MyPlayerCardView: View {
                 }
                 .padding(24)
                 
-                // Highlights Section (Best Run - Mock Logic for UI consistency)
-                VStack(spacing: 16) {
-                    ZStack(alignment: .bottomLeading) {
-                        // Background Image
-                        AsyncImage(url: URL(string: "https://lh3.googleusercontent.com/aida-public/AB6AXuCSXpsiWszQbcckBonwMb3t2rJI6N59kSt9I6PefWB3y76Fjh3dG9DsMHvGa1h-JqymY0PpyoTFq4W3oPbYiukb_HljkqOZc0PQpX_Rj4Ftzq8BJ8Vnf4kdXMWXPsts0S9zndo_zJ-qc2VU0_ak9sAtyUqNGVYjaghn1eJvug8LGzSq9k3tiiGY-Yxocz2-IGRJ4Fsg9GMT0tUEzhN9AY7KZujMZuV7-x3ciOzHBvbnG-SdwuUJlfggzYlC2Qki5vfhrcym6dBfIBo")) { phase in
-                            if let image = phase.image {
-                                image
-                                    .resizable()
-                                    .aspectRatio(contentMode: .fill)
-                            } else {
-                                Color.gray.opacity(0.3)
-                            }
-                        }
-                        .frame(height: 160)
-                        .clipped()
-                        .overlay(LinearGradient(colors: [.black.opacity(0.8), .clear], startPoint: .bottom, endPoint: .top))
-                        
-                        // Content
-                        VStack(alignment: .leading, spacing: 4) {
-                            HStack(spacing: 6) {
-                                Image(systemName: "trophy.fill")
-                                    .foregroundColor(primaryGreen)
-                                    .font(.system(size: 14))
-                                Text("MY BEST RUN")
-                                    .font(.system(size: 10, weight: .bold))
-                                    .tracking(1)
-                                    .foregroundColor(primaryGreen)
-                            }
-                            
-                            Text("High1 Apollo") // Mock
-                                .font(.system(size: 24, weight: .bold))
-                                .foregroundColor(.white)
-                            
-                            HStack(alignment: .firstTextBaseline, spacing: 4) {
-                                Text("\(Int(profile.stats.maxSpeed))")
-                                    .font(.system(size: 18, weight: .bold))
-                                    .foregroundColor(primaryGreen)
-                                Text("km/h Top Speed")
-                                    .font(.system(size: 14, weight: .medium))
-                                    .foregroundColor(.white.opacity(0.9))
-                            }
-                        }
-                        .padding(20)
-                    }
-                    .cornerRadius(32)
-                    .clipped()
-                }
-                .padding(.horizontal, 24)
-                
                 // Featured Badges
                 VStack(alignment: .leading, spacing: 16) {
                     Text("FEATURED BADGES")
@@ -245,8 +197,34 @@ struct MyPlayerCardView: View {
             }
         }
         .background(backgroundDark.ignoresSafeArea())
+        .overlay(alignment: .bottom) {
+            if showBadgeSyncToast {
+                Text("profile.featured_badges_sync_toast")
+                    .font(.system(size: 12, weight: .bold))
+                    .foregroundColor(.white)
+                    .padding(.horizontal, 16)
+                    .padding(.vertical, 10)
+                    .background(Color.black.opacity(0.85))
+                    .overlay(
+                        RoundedRectangle(cornerRadius: 16)
+                            .stroke(primaryGreen.opacity(0.35), lineWidth: 1)
+                    )
+                    .cornerRadius(16)
+                    .padding(.bottom, 28)
+                    .transition(.move(edge: .bottom).combined(with: .opacity))
+                    .allowsHitTesting(false)
+            }
+        }
         .sheet(isPresented: $showEditProfile) {
-            EditProfileView(isPresented: $showEditProfile)
+            EditProfileView(isPresented: $showEditProfile, showBadgeSyncToast: $showBadgeSyncToast)
+        }
+        .onChange(of: showBadgeSyncToast) { _, newValue in
+            guard newValue else { return }
+            DispatchQueue.main.asyncAfter(deadline: .now() + 3.0) {
+                withAnimation(.easeOut(duration: 0.2)) {
+                    showBadgeSyncToast = false
+                }
+            }
         }
     }
     

@@ -55,9 +55,12 @@ struct RankingProfile {
     var userId: String
     var userName: String
     var countryCode: String = "KR"
-    var seasonId: String = "25_26"
+    var seasonId: String = "NH_25_26"
     var weeklyWeekId: String = ""
     var instagramId: String? = nil
+    var tierRaw: String = "Bronze"
+    var featuredBadgeTitles: [String] = []
+    var joinedYear: Int? = nil
     
     // Season Totals
     var seasonRunCount: Int = 0
@@ -128,6 +131,9 @@ struct LeaderboardEntry: Identifiable {
     let rank: Int
     let userName: String
     var instagramId: String? = nil
+    var tierRaw: String? = nil
+    var featuredBadgeTitles: [String] = []
+    var joinedYear: Int? = nil
     let crewName: String?
     let mainResort: String // "All" or name
     let slopeName: String? // Optional specific slope

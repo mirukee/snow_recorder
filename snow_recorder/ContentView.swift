@@ -22,6 +22,7 @@ struct ContentView: View {
                     .onAppear {
                         // Inject context
                         authManager.modelContext = modelContext
+                        authManager.ensureRankingOptOutCleanup()
                     }
             } else {
                 LoginView()

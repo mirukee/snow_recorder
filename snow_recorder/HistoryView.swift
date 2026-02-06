@@ -13,7 +13,28 @@ struct HistoryView: View {
     @State private var offset: Int = 0
     @State private var hasMoreData: Bool = true
     @State private var isLoading: Bool = false
+    @State private var sortOption: SortOption = .latest
+    @State private var favoritesOnly: Bool = false
     private let pageSize = 10
+    
+    private enum SortOption: String, CaseIterable, Identifiable {
+        case latest
+        case distance
+        case oldest
+        
+        var id: String { rawValue }
+        
+        var titleKey: LocalizedStringKey {
+            switch self {
+            case .latest:
+                return "history.sort_latest"
+            case .distance:
+                return "history.sort_distance"
+            case .oldest:
+                return "history.sort_oldest"
+            }
+        }
+    }
     
     var body: some View {
         NavigationStack {
@@ -44,6 +65,9 @@ struct HistoryView: View {
                     .padding(.bottom, 20)
                     .background(Color.black.opacity(0.8)) // 헤더 배경
                     
+                    sortFilterBar
+                        .background(Color.black.opacity(0.8))
+                    
                     // [Feed List]
                     List {
                         if sessions.isEmpty && !isLoading {
@@ -72,7 +96,11 @@ struct HistoryView: View {
                                     HistoryCard(
                                         session: session,
                                         rotation: Double((index % 3) - 1) * 2.0, // -2, 0, 2 rotation
-                                        neonGreen: neonGreen
+                                        neonGreen: neonGreen,
+                                        isFavorite: session.isFavorite,
+                                        onToggleFavorite: {
+                                            toggleFavorite(session)
+                                        }
                                     )
                                     .onAppear {
                                         // Load more if near end
@@ -146,6 +174,7 @@ struct HistoryView: View {
         sessions.removeAll()
         offset = 0
         hasMoreData = true
+        isLoading = false
         loadMoreData()
     }
     
@@ -155,16 +184,12 @@ struct HistoryView: View {
         
         // Delayed fetch to prevent ui stutter
         DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) {
-            let descriptor = FetchDescriptor<RunSession>(
-                sortBy: [SortDescriptor(\.startTime, order: .reverse)]
-            )
-            // SwiftData usually fetches all, but we emulate pagination by fetching counts?
-            // Actually SwiftData DOES support fetchLimit and fetchOffset.
-            // But we need to define descriptor inside.
-            
             var fetchDescriptor = FetchDescriptor<RunSession>(
-                sortBy: [SortDescriptor(\.startTime, order: .reverse)]
+                sortBy: sortDescriptors(for: sortOption)
             )
+            if favoritesOnly {
+                fetchDescriptor.predicate = #Predicate { $0.isFavorite == true }
+            }
             fetchDescriptor.fetchLimit = pageSize
             fetchDescriptor.fetchOffset = offset
             
@@ -186,6 +211,40 @@ struct HistoryView: View {
         }
     }
     
+    private func sortDescriptors(for option: SortOption) -> [SortDescriptor<RunSession>] {
+        switch option {
+        case .latest:
+            return [SortDescriptor(\.startTime, order: .reverse)]
+        case .distance:
+            return [
+                SortDescriptor(\.distance, order: .reverse),
+                SortDescriptor(\.startTime, order: .reverse)
+            ]
+        case .oldest:
+            return [SortDescriptor(\.startTime, order: .forward)]
+        }
+    }
+    
+    private func toggleFavorite(_ session: RunSession) {
+        session.isFavorite.toggle()
+        do {
+            try modelContext.save()
+        } catch {
+            print("❌ 즐겨찾기 저장 실패: \(error)")
+        }
+        
+        if let index = sessions.firstIndex(where: { $0.id == session.id }) {
+            if favoritesOnly && !session.isFavorite {
+                sessions.remove(at: index)
+                if hasMoreData {
+                    loadMoreData()
+                }
+            } else {
+                sessions[index] = session
+            }
+        }
+    }
+    
     // 삭제 함수
     private func deleteSession(_ session: RunSession) {
         withAnimation {
@@ -204,6 +263,68 @@ struct HistoryView: View {
             GamificationService.shared.scheduleUpdateProfile(from: sessions)
         }
     }
+    
+    private var sortFilterBar: some View {
+        HStack(spacing: 12) {
+            Menu {
+                ForEach(SortOption.allCases) { option in
+                    Button {
+                        sortOption = option
+                        resetAndReload()
+                    } label: {
+                        Text(option.titleKey)
+                    }
+                }
+            } label: {
+                HStack(spacing: 8) {
+                    Text("history.sort")
+                        .font(.system(size: 10, weight: .bold))
+                        .foregroundColor(.white.opacity(0.6))
+                    Text(sortOption.titleKey)
+                        .font(.system(size: 12, weight: .black))
+                        .foregroundColor(.white)
+                    Image(systemName: "chevron.down")
+                        .font(.system(size: 10, weight: .bold))
+                        .foregroundColor(.white.opacity(0.6))
+                }
+                .padding(.horizontal, 14)
+                .padding(.vertical, 10)
+                .background(Color.white.opacity(0.05))
+                .clipShape(Capsule())
+                .overlay(
+                    Capsule()
+                        .stroke(Color.white.opacity(0.12), lineWidth: 1)
+                )
+            }
+            
+            Button(action: {
+                favoritesOnly.toggle()
+                resetAndReload()
+            }) {
+                HStack(spacing: 6) {
+                    Image(systemName: favoritesOnly ? "heart.fill" : "heart")
+                        .font(.system(size: 12, weight: .bold))
+                        .foregroundColor(favoritesOnly ? neonGreen : .white.opacity(0.7))
+                    Text("history.favorites_only")
+                        .font(.system(size: 12, weight: .black))
+                        .foregroundColor(.white)
+                }
+                .padding(.horizontal, 14)
+                .padding(.vertical, 10)
+                .background(favoritesOnly ? neonGreen.opacity(0.15) : Color.white.opacity(0.05))
+                .clipShape(Capsule())
+                .overlay(
+                    Capsule()
+                        .stroke(favoritesOnly ? neonGreen.opacity(0.6) : Color.white.opacity(0.12), lineWidth: 1)
+                )
+            }
+            .buttonStyle(PlainButtonStyle())
+            
+            Spacer()
+        }
+        .padding(.horizontal, 24)
+        .padding(.bottom, 12)
+    }
 }
 
 /// 개별 라이딩 기록 카드
@@ -211,6 +332,8 @@ struct HistoryCard: View {
     let session: RunSession
     let rotation: Double
     let neonGreen: Color
+    let isFavorite: Bool
+    let onToggleFavorite: () -> Void
     
     @State private var snapshotImage: UIImage? = nil
     @State private var isGenerating: Bool = false
@@ -270,7 +393,11 @@ struct HistoryCard: View {
                     
                     // Action Buttons
                     VStack(spacing: 12) {
-                        CircleButton(icon: "heart.fill")
+                        FavoriteButton(
+                            isFavorite: isFavorite,
+                            neonGreen: neonGreen,
+                            action: onToggleFavorite
+                        )
                         CircleButton(icon: "arrow.right")
                     }
                 }
@@ -363,6 +490,30 @@ struct CircleButton: View {
             .overlay(
                 Circle().stroke(Color.white.opacity(0.1), lineWidth: 1)
             )
+    }
+}
+
+struct FavoriteButton: View {
+    let isFavorite: Bool
+    let neonGreen: Color
+    let action: () -> Void
+    
+    var body: some View {
+        Button(action: action) {
+            Circle()
+                .fill(.ultraThinMaterial)
+                .frame(width: 40, height: 40)
+                .overlay(
+                    Image(systemName: isFavorite ? "heart.fill" : "heart")
+                        .font(.system(size: 16, weight: .bold))
+                        .foregroundColor(isFavorite ? neonGreen : .white)
+                )
+                .overlay(
+                    Circle()
+                        .stroke(isFavorite ? neonGreen.opacity(0.7) : Color.white.opacity(0.1), lineWidth: 1)
+                )
+        }
+        .buttonStyle(PlainButtonStyle())
     }
 }
 

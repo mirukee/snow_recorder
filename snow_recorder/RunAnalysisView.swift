@@ -2,6 +2,7 @@ import SwiftUI
 import Charts
 import SwiftData
 import CoreLocation
+import UIKit
 
 struct RunAnalysisView: View {
     @Environment(\.dismiss) var dismiss
@@ -143,6 +144,8 @@ struct RunAnalysisView: View {
     // State
     @State private var selectedTab: AnalysisTab = .edge
     @State private var selectedTime: Date?
+    @State private var showReportExportError = false
+    @State private var showDownloadToast = false
     
     enum AnalysisTab {
         case flow, edge
@@ -176,7 +179,7 @@ struct RunAnalysisView: View {
             
             VStack(spacing: 0) {
                 // Header
-                headerView
+                headerView(showClose: true)
                 
                 ScrollView(showsIndicators: false) {
                     VStack(spacing: 24) {
@@ -207,11 +210,28 @@ struct RunAnalysisView: View {
             }
         }
         .navigationBarHidden(true)
+        .overlay(alignment: .center) {
+            if showDownloadToast {
+                Text("analysis_report.download_complete")
+                    .font(.system(size: 12, weight: .bold))
+                    .foregroundColor(.white)
+                    .padding(.horizontal, 12)
+                    .padding(.vertical, 6)
+                    .background(Color.black.opacity(0.7))
+                    .cornerRadius(8)
+                    .transition(.opacity)
+            }
+        }
+        .alert("analysis_report.download_error_title", isPresented: $showReportExportError) {
+            Button("common.ok", role: .cancel) {}
+        } message: {
+            Text("analysis_report.download_error_message")
+        }
     }
     
     // MARK: - Components
     
-    private var headerView: some View {
+    private func headerView(showClose: Bool) -> some View {
         HStack {
             VStack(alignment: .leading, spacing: 4) {
                 HStack(spacing: 8) {
@@ -260,15 +280,17 @@ struct RunAnalysisView: View {
             .shadow(color: primaryColor.opacity(0.2), radius: 8)
             
             // Close Button
-            Button(action: { dismiss() }) {
-                Image(systemName: "xmark")
-                    .font(.system(size: 16, weight: .bold))
-                    .foregroundColor(.white)
-                    .frame(width: 32, height: 32)
-                    .background(Color.white.opacity(0.1))
-                    .clipShape(Circle())
+            if showClose {
+                Button(action: { dismiss() }) {
+                    Image(systemName: "xmark")
+                        .font(.system(size: 16, weight: .bold))
+                        .foregroundColor(.white)
+                        .frame(width: 32, height: 32)
+                        .background(Color.white.opacity(0.1))
+                        .clipShape(Circle())
+                }
+                .padding(.leading, 8)
             }
-            .padding(.leading, 8)
         }
         .padding(.horizontal, 20)
         .padding(.vertical, 16)
@@ -877,15 +899,50 @@ struct RunAnalysisView: View {
         
         return max(minGap, median * multiplier)
     }
+
+    private var reportExportView: some View {
+        VStack(spacing: 24) {
+            headerView(showClose: false)
+            gaugesSection
+            menuControl
+            if selectedTab == .edge {
+                edgeContent
+            } else {
+                flowContent
+            }
+        }
+        .padding(.vertical, 24)
+        .background(backgroundDark)
+        .frame(width: 1080, alignment: .top)
+    }
+
+    @MainActor
+    private func downloadReportImage() {
+        let renderer = ImageRenderer(content: reportExportView)
+        renderer.scale = UIScreen.main.scale
+        if let image = renderer.uiImage {
+            UIImageWriteToSavedPhotosAlbum(image, nil, nil, nil)
+            withAnimation(.easeOut(duration: 0.2)) {
+                showDownloadToast = true
+            }
+            DispatchQueue.main.asyncAfter(deadline: .now() + 1.8) {
+                withAnimation(.easeOut(duration: 0.2)) {
+                    showDownloadToast = false
+                }
+            }
+        } else {
+            showReportExportError = true
+        }
+    }
     
     private var shareButton: some View {
         Button(action: {
-            // Share Action
+            downloadReportImage()
         }) {
             HStack(spacing: 12) {
-                Image(systemName: "square.and.arrow.up")
+                Image(systemName: "arrow.down.to.line")
                     .font(.system(size: 16, weight: .bold))
-                Text("SHARE REPORT")
+                Text("analysis_report.download_button")
                     .font(.system(size: 14, weight: .bold))
                     .tracking(2)
             }
@@ -1338,23 +1395,21 @@ struct BankAngleCard: View {
         HStack(spacing: 24) {
              // Icon & Visual
              ZStack {
+                let iconOffset: CGFloat = 6
                  // Background Arc
                  Circle()
                     .trim(from: 0.5, to: 1.0)
                     .stroke(Color.white.opacity(0.1), style: StrokeStyle(lineWidth: 4, lineCap: .round))
                     .frame(width: 80, height: 80)
                     .rotationEffect(.degrees(90)) // Make it look like a slope or horizon
-                    .offset(y: 10)
+                    .offset(y: iconOffset)
                  
                  // Skier Icon
                  Image(systemName: "figure.skiing.downhill")
                     .font(.system(size: 32))
                     .foregroundColor(primaryColor)
                     .shadow(color: primaryColor.opacity(0.5), radius: 10)
-                    .mask(
-                        // Mask to keep it inside the "card" area if needed, but visually open is fine
-                        Rectangle().frame(width: 100, height: 100)
-                    )
+                    .offset(y: iconOffset)
              }
              .frame(width: 80, height: 80)
              

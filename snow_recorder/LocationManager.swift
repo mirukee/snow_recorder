@@ -342,6 +342,34 @@ class LocationManager: NSObject, ObservableObject, CLLocationManagerDelegate {
         return completedRunSlopeNames[index]
     }
     
+    /// 확정된 런 기준으로 리조트명 추론 (최소 1개 런 확정 시)
+    func confirmedResortName() -> String? {
+        guard !sessionSlopeCounts.isEmpty else { return nil }
+        
+        var resortCounts: [String: Int] = [:]
+        for (slopeName, count) in sessionSlopeCounts {
+            guard let resortName = SlopeDatabase.shared.resortName(for: slopeName) else { continue }
+            resortCounts[resortName, default: 0] += count
+        }
+        
+        guard !resortCounts.isEmpty else { return nil }
+        let maxCount = resortCounts.values.max() ?? 0
+        let candidates = resortCounts.filter { $0.value == maxCount }.map(\.key)
+        if candidates.count == 1 {
+            return candidates[0]
+        }
+        
+        // 동률이면 최근 확정 런의 리조트를 우선
+        for slopeName in completedRunSlopeNames.reversed() {
+            if let resortName = SlopeDatabase.shared.resortName(for: slopeName),
+               candidates.contains(resortName) {
+                return resortName
+            }
+        }
+        
+        return candidates.first
+    }
+    
     var completedRunCount: Int {
         completedRunDistances.count
     }
@@ -1541,10 +1569,23 @@ class LocationManager: NSObject, ObservableObject, CLLocationManagerDelegate {
     
     /// 현재 런에서 가장 적합한 슬로프 반환 (Start/Finish 완주 > 난이도 > Dwell Time)
     private func calculateBestSlope() -> Slope? {
-        guard !visitedSlopeCounts.isEmpty else { return currentSlope }
+        let completedNames = visitedSlopeStartHits.intersection(visitedSlopeFinishHits)
+        
+        if visitedSlopeCounts.isEmpty {
+            guard !completedNames.isEmpty else { return currentSlope }
+            let completedSlopes = completedNames.compactMap { SlopeDatabase.shared.findSlope(byName: $0) }
+            guard !completedSlopes.isEmpty else { return currentSlope }
+            return completedSlopes.sorted { lhs, rhs in
+                if lhs.difficulty.priority != rhs.difficulty.priority {
+                    return lhs.difficulty.priority > rhs.difficulty.priority
+                }
+                let lhsTime = completedSlopeTimes[lhs.name] ?? .distantFuture
+                let rhsTime = completedSlopeTimes[rhs.name] ?? .distantFuture
+                return lhsTime < rhsTime
+            }.first
+        }
         
         // 완주 슬로프가 1개라면, 노이즈 필터(10%) 없이 바로 확정
-        let completedNames = visitedSlopeStartHits.intersection(visitedSlopeFinishHits)
         if completedNames.count == 1, let name = completedNames.first {
             return SlopeDatabase.shared.findSlope(byName: name) ?? currentSlope
         }

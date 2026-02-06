@@ -2,6 +2,7 @@ import SwiftUI
 
 struct EditProfileView: View {
     @Binding var isPresented: Bool
+    @Binding var showBadgeSyncToast: Bool
     
     // Form State
     @State private var nickname: String = ""
@@ -357,6 +358,7 @@ struct EditProfileView: View {
         let normalized = trimmed.isEmpty ? "skier" : trimmed
         let originalTrimmed = originalNickname.trimmingCharacters(in: .whitespacesAndNewlines)
         let isNicknameChanged = normalized != originalTrimmed
+        var didUpdateFeaturedBadges = false
         
         if isNicknameChanged && !canEditNicknameNow {
             showNicknameCooldownAlert = true
@@ -380,6 +382,13 @@ struct EditProfileView: View {
             } else {
                 _ = GamificationService.shared.updateFeaturedBadges(selectedBadgeTitles)
                 originalBadgeTitles = selectedBadgeTitles
+                didUpdateFeaturedBadges = true
+            }
+        }
+        if didUpdateFeaturedBadges {
+            showBadgeSyncToast = false
+            DispatchQueue.main.async {
+                showBadgeSyncToast = true
             }
         }
         isPresented = false
@@ -453,5 +462,5 @@ struct EditProfileView: View {
 }
 
 #Preview {
-    EditProfileView(isPresented: .constant(true))
+    EditProfileView(isPresented: .constant(true), showBadgeSyncToast: .constant(false))
 }

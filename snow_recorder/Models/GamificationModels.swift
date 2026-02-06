@@ -90,19 +90,19 @@ enum Tier: String, Codable, CaseIterable {
 struct Badge: Identifiable {
     var id: String { title }
     let title: String
-    let description: String
+    let descriptionKey: String
     let iconName: String
     var isEarned: Bool
     let unlockCondition: (UserStats) -> Bool
     
     // CodingKeys to exclude closure from Codable
     enum CodingKeys: String, CodingKey {
-        case title, description, iconName, isEarned
+        case title, descriptionKey, iconName, isEarned
     }
     
-    init(title: String, description: String, iconName: String, isEarned: Bool = false, unlockCondition: @escaping (UserStats) -> Bool) {
+    init(title: String, descriptionKey: String, iconName: String, isEarned: Bool = false, unlockCondition: @escaping (UserStats) -> Bool) {
         self.title = title
-        self.description = description
+        self.descriptionKey = descriptionKey
         self.iconName = iconName
         self.isEarned = isEarned
         self.unlockCondition = unlockCondition

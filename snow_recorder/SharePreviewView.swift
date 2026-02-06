@@ -245,7 +245,7 @@ struct SharePreviewView: View {
                         .disabled(selectedLayout.isPro && !storeManager.isPro)
                         .opacity(selectedLayout.isPro && !storeManager.isPro ? 0.4 : 1.0)
                     }
-                    .padding(.bottom, 50)
+                    .padding(.bottom, 30)
                 }
             }
         }
@@ -816,7 +816,7 @@ struct SharePreviewView: View {
                     
                     ZStack {
                         // Shadow/Glow Background
-                        Text("POWDER\nDAY")
+                        Text("DAILY\nLOG")
                             .font(.system(size: 90, weight: .black)) // Slightly smaller to fit phone
                             .italic()
                             .multilineTextAlignment(.center)
@@ -826,14 +826,14 @@ struct SharePreviewView: View {
                             .minimumScaleFactor(0.5)
                         
                         // Stroke Effect (Front)
-                         Text("POWDER\nDAY")
+                         Text("DAILY\nLOG")
                             .font(.system(size: 90, weight: .black))
                             .italic()
                             .multilineTextAlignment(.center)
                             .lineSpacing(-20)
                             .foregroundColor(.clear)
                             .overlay(
-                                Text("POWDER\nDAY")
+                                Text("DAILY\nLOG")
                                     .font(.system(size: 90, weight: .black))
                                     .italic()
                                     .multilineTextAlignment(.center)
@@ -846,6 +846,7 @@ struct SharePreviewView: View {
                     }
                 }
                 .padding(.top, 20)
+                .offset(y: -8)
                 
                 Spacer()
                 
@@ -924,7 +925,7 @@ struct SharePreviewView: View {
                         .shadow(color: .black.opacity(0.4), radius: 10, x: 5, y: 10)
                         .rotationEffect(.degrees(-6))
                     }
-                    .padding(.bottom, 120) // Space for button
+                    .padding(.bottom, 140) // Space for button
                     .padding(.trailing, 20)
                 }
             }
@@ -1808,7 +1809,7 @@ struct SharePreviewView: View {
                     
                     ZStack {
                         // Shadow/Glow Background
-                        Text("POWDER\nDAY")
+                        Text("DAILY\nLOG")
                             .font(.system(size: 90 * s, weight: .black))
                             .italic()
                             .multilineTextAlignment(.center)
@@ -1818,14 +1819,14 @@ struct SharePreviewView: View {
                             .minimumScaleFactor(0.5)
                         
                         // Stroke Effect
-                         Text("POWDER\nDAY")
+                         Text("DAILY\nLOG")
                             .font(.system(size: 90 * s, weight: .black))
                             .italic()
                             .multilineTextAlignment(.center)
                             .lineSpacing(-20 * s)
                             .foregroundColor(.clear)
                             .overlay(
-                                Text("POWDER\nDAY")
+                                Text("DAILY\nLOG")
                                     .font(.system(size: 90 * s, weight: .black))
                                     .italic()
                                     .multilineTextAlignment(.center)
@@ -1837,6 +1838,7 @@ struct SharePreviewView: View {
                     }
                 }
                 .padding(.top, 20 * s)
+                .offset(y: -8 * s)
                 
                 Spacer()
                 
@@ -1915,7 +1917,7 @@ struct SharePreviewView: View {
                         .shadow(color: .black.opacity(0.4), radius: 10 * s, x: 5 * s, y: 10 * s)
                         .rotationEffect(.degrees(-6))
                     }
-                    .padding(.bottom, 120 * s) // Space for button
+                    .padding(.bottom, 140 * s) // Space for button
                     .padding(.trailing, 20 * s)
                 }
             }

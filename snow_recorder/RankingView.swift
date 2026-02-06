@@ -50,6 +50,7 @@ struct RankingView: View {
     @State private var selectedUser: LeaderboardEntry? = nil
     @State private var showManualSyncHelp = false
     @State private var showPendingSyncHelp = false
+    @State private var showOverseasBoard = false
     
     var body: some View {
         Group {
@@ -104,13 +105,6 @@ struct RankingView: View {
                                         if rankingMode == .mileage {
                                             resortFilterScroll
                                                 .transition(.move(edge: .top).combined(with: .opacity))
-                                            
-                                            if let updatedAt = rankingService.lastLeaderboardUpdatedAt {
-                                                Text("UPDATED \(formattedUpdateTime(updatedAt))")
-                                                    .font(.system(size: 9, weight: .bold))
-                                                    .foregroundColor(.gray)
-                                            }
-                                            
                                         } else {
                                             // Technical Mode: Show Global Label or nothing (clean look)
                                             VStack(spacing: 4) {
@@ -118,14 +112,14 @@ struct RankingView: View {
                                                     .font(.system(size: 10, weight: .bold))
                                                     .tracking(2)
                                                     .foregroundColor(neonGreen.opacity(0.7))
-                                                
-                                                if let updatedAt = rankingService.lastLeaderboardUpdatedAt {
-                                                    Text("UPDATED \(formattedUpdateTime(updatedAt))")
-                                                        .font(.system(size: 9, weight: .bold))
-                                                        .foregroundColor(.gray)
-                                                }
                                             }
                                             .padding(.bottom, 8)
+                                        }
+
+                                        if let updatedAt = rankingService.lastLeaderboardUpdatedAt {
+                                            Text("UPDATED \(formattedUpdateTime(updatedAt))")
+                                                .font(.system(size: 9, weight: .bold))
+                                                .foregroundColor(.gray)
                                         }
                                         
                                         metricTabs
@@ -188,7 +182,7 @@ struct RankingView: View {
             if rankingMode == .technical && (selectedMetric == .runCount || selectedMetric == .distance) {
                 selectedMetric = .edge
             }
-            rankingService.fetchLeaderboard(cycle: selectedCycle, metric: selectedMetric, scope: selectedScope, resortKey: selectedResortKey)
+            fetch()
         }
         .onChange(of: sessions) { _, newSessions in
             guard isActive, !authManager.isGuest else { return }
@@ -201,12 +195,14 @@ struct RankingView: View {
             if rankingMode == .technical && (selectedMetric == .runCount || selectedMetric == .distance) {
                 selectedMetric = .edge
             }
-            rankingService.fetchLeaderboard(cycle: selectedCycle, metric: selectedMetric, scope: selectedScope, resortKey: selectedResortKey)
+            fetch()
         }
         // Filters Change Trigger
         .onChange(of: selectedCycle) { _, _ in fetch() }
         .onChange(of: selectedMetric) { _, _ in fetch() }
         .onChange(of: selectedResort) { _, _ in fetch() }
+        .onChange(of: rankingService.myProfile.seasonId) { _, _ in fetch() }
+        .onChange(of: rankingService.myProfile.weeklyWeekId) { _, _ in fetch() }
         .sheet(item: $selectedUser) { user in
             OtherUserProfileView(user: user)
         }
@@ -221,7 +217,19 @@ struct RankingView: View {
     
     private func fetch() {
         guard isActive, !authManager.isGuest else { return }
-        rankingService.fetchLeaderboard(cycle: selectedCycle, metric: selectedMetric, scope: selectedScope, resortKey: selectedResortKey)
+        if showOverseasBoard && overseasReferenceDate == nil {
+            showOverseasBoard = false
+        }
+        let seasonOverride = showOverseasBoard ? overseasSeasonId : nil
+        let weekOverride = showOverseasBoard ? overseasWeekId : nil
+        rankingService.fetchLeaderboard(
+            cycle: selectedCycle,
+            metric: selectedMetric,
+            scope: selectedScope,
+            resortKey: selectedResortKey,
+            seasonIdOverride: seasonOverride,
+            weekIdOverride: weekOverride
+        )
     }
     
     // MARK: - Subviews
@@ -250,7 +258,9 @@ struct RankingView: View {
                             cycle: selectedCycle,
                             metric: selectedMetric,
                             scope: selectedScope,
-                            resortKey: selectedResortKey
+                            resortKey: selectedResortKey,
+                            seasonIdOverride: showOverseasBoard ? overseasSeasonId : nil,
+                            weekIdOverride: showOverseasBoard ? overseasWeekId : nil
                         )
                     }) {
                         Image(systemName: "arrow.triangle.2.circlepath")
@@ -272,7 +282,7 @@ struct RankingView: View {
             HStack(spacing: 0) {
                 ForEach(RankingCycle.allCases) { cycle in
                     Button(action: { withAnimation { selectedCycle = cycle } }) {
-                        Text(cycle.displayName)
+                        Text(displayName(for: cycle))
                             .font(.system(size: 12, weight: .bold))
                             .foregroundColor(selectedCycle == cycle ? .black : .gray)
                             .padding(.vertical, 6)
@@ -607,6 +617,21 @@ struct RankingView: View {
                 Text(rankingService.getMyRankString())
                     .font(.system(size: 10, weight: .bold))
                     .foregroundColor(neonGreen)
+                if shouldShowOverseasButton {
+                    Button(action: {
+                        showOverseasBoard.toggle()
+                        fetch()
+                    }) {
+                        Text(showOverseasBoard ? "ranking.overseas_toggle_home" : "ranking.overseas_toggle")
+                            .font(.system(size: 9, weight: .bold))
+                            .foregroundColor(neonGreen)
+                            .padding(.horizontal, 8)
+                            .padding(.vertical, 3)
+                            .background(neonGreen.opacity(0.15))
+                            .clipShape(Capsule())
+                    }
+                    .buttonStyle(.plain)
+                }
                 HStack(spacing: 6) {
                     if rankingService.hasPendingUpload {
                         HStack(spacing: 4) {
@@ -665,9 +690,112 @@ struct RankingView: View {
     private var selectedResortKey: String? {
         rankingService.resortKey(forDisplayName: selectedResort)
     }
+
+    private var homeHemisphere: String {
+        rankingService.myProfile.seasonId.split(separator: "_").first.map(String.init) ?? "NH"
+    }
+
+    private var overseasHemisphere: String {
+        homeHemisphere == "NH" ? "SH" : "NH"
+    }
+
+    private var overseasReferenceDate: Date? {
+        let candidates = sessions.filter { isValidSession($0) && hemisphereTag(for: $0) == overseasHemisphere }
+        return candidates.sorted { $0.startTime > $1.startTime }.first?.startTime
+    }
+
+    private var shouldShowOverseasButton: Bool {
+        overseasReferenceDate != nil
+    }
+
+    private func isValidSession(_ session: RunSession) -> Bool {
+        session.distance >= 100.0 && session.duration >= 30.0
+    }
+
+    private func hemisphereTag(for session: RunSession) -> String {
+        for coord in session.routeCoordinates {
+            guard coord.count >= 2 else { continue }
+            return coord[0] < 0 ? "SH" : "NH"
+        }
+        if session.countryCode == "KR" {
+            return "NH"
+        }
+        return "NH"
+    }
+
+    private var kstCalendar: Calendar {
+        var calendar = Calendar(identifier: .gregorian)
+        calendar.timeZone = TimeZone(identifier: "Asia/Seoul") ?? .current
+        calendar.locale = Locale(identifier: "ko_KR")
+        calendar.firstWeekday = 2
+        return calendar
+    }
+
+    private func seasonStartYear(for referenceDate: Date) -> Int {
+        let year = kstCalendar.component(.year, from: referenceDate)
+        let seasonStart = makeDate(year: year, month: 6, day: 1)
+        return referenceDate >= seasonStart ? year : (year - 1)
+    }
+
+    private func makeDate(year: Int, month: Int, day: Int) -> Date {
+        var components = DateComponents()
+        components.year = year
+        components.month = month
+        components.day = day
+        components.hour = 0
+        components.minute = 0
+        components.second = 0
+        components.timeZone = TimeZone(identifier: "Asia/Seoul")
+        return kstCalendar.date(from: components) ?? Date()
+    }
+
+    private func seasonId(for hemisphere: String, referenceDate: Date) -> String {
+        let startYear = seasonStartYear(for: referenceDate)
+        if hemisphere == "NH" {
+            let startYY = startYear % 100
+            let endYY = (startYear + 1) % 100
+            return String(format: "NH_%02d_%02d", startYY, endYY)
+        }
+        return "SH_\(startYear)"
+    }
+
+    private func weekId(for hemisphere: String, referenceDate: Date) -> String {
+        let year = kstCalendar.component(.yearForWeekOfYear, from: referenceDate)
+        let week = kstCalendar.component(.weekOfYear, from: referenceDate)
+        return String(format: "%@_%04d-W%02d", hemisphere, year, week)
+    }
+
+    private var overseasSeasonId: String {
+        seasonId(for: overseasHemisphere, referenceDate: overseasReferenceDate ?? Date())
+    }
+
+    private var overseasWeekId: String {
+        weekId(for: overseasHemisphere, referenceDate: overseasReferenceDate ?? Date())
+    }
     
     // MARK: - Format Helpers
-    
+
+    private func displayName(for cycle: RankingCycle) -> String {
+        switch cycle {
+        case .season:
+            let seasonId = showOverseasBoard ? overseasSeasonId : rankingService.myProfile.seasonId
+            return seasonDisplayName(from: seasonId)
+        case .weekly:
+            return "THIS WEEK"
+        }
+    }
+
+    private func seasonDisplayName(from seasonId: String) -> String {
+        let parts = seasonId.split(separator: "_").map(String.init)
+        if parts.count == 3, parts[0] == "NH" {
+            return "\(parts[1])/\(parts[2]) SEASON"
+        }
+        if parts.count >= 2, parts[0] == "SH" {
+            return "\(parts[1]) SEASON"
+        }
+        return "SEASON"
+    }
+
     private func formattedUpdateTime(_ date: Date) -> String {
         let formatter = DateFormatter()
         formatter.locale = Locale(identifier: "ko_KR")

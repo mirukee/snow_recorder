@@ -6,10 +6,16 @@ service cloud.firestore {
       allow read: if true;
       allow write: if false;
     }
-    
+
+    // 랭킹 프로필: 로그인 사용자만 읽기, 본인 문서만 쓰기/삭제
+    match /rankings/{userId} {
+      allow read: if request.auth != null;
+      allow create, update, delete: if request.auth != null && request.auth.uid == userId;
+    }
+
+    // 그 외 모든 경로는 기본 차단
     match /{document=**} {
-      // 인증된 사용자만 읽기/쓰기 허용
-      allow read, write: if request.auth != null;
+      allow read, write: if false;
     }
   }
 }

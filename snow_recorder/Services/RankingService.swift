@@ -18,8 +18,12 @@ class RankingService: ObservableObject {
         case smart
     }
     
-    // User Settings (Privacy) - 추후 AppStorage나 UserDefaults로 영구 저장 필요
-    @Published var isRankingEnabled: Bool = true
+    // User Settings (Privacy)
+    @Published var isRankingEnabled: Bool {
+        didSet {
+            userDefaults.set(isRankingEnabled, forKey: rankingEnabledKey)
+        }
+    }
     
     // Local Cache
     @Published var myProfile: RankingProfile
@@ -31,7 +35,6 @@ class RankingService: ObservableObject {
     
     private let db = Firestore.firestore()
     private let kstTimeZone = TimeZone(identifier: "Asia/Seoul")!
-    private let seasonId = "25_26"
     private let userDefaults = UserDefaults.standard
     private let statsQueue = DispatchQueue(label: "com.snowrecord.ranking.stats", qos: .userInitiated)
     private var pendingRecalcWorkItem: DispatchWorkItem?
@@ -53,6 +56,9 @@ class RankingService: ObservableObject {
     private let autoUploadDayKey = "ranking_auto_upload_day"
     private let pendingUploadFlagKey = "ranking_pending_upload"
     private let pendingUploadSinceKey = "ranking_pending_upload_since"
+    private let rankingEnabledKey = "ranking_enabled"
+    private let rankingToggleDayKey = "ranking_toggle_day"
+    private let rankingToggleLimitEnabled: Bool = false // 임시: 랭킹 토글 1회 제한 해제
     private var pendingUploadWorkItem: DispatchWorkItem?
     
     // 마지막으로 요청한 리더보드 필터(업로드 직후 동일 조건으로 갱신하기 위함)
@@ -60,6 +66,8 @@ class RankingService: ObservableObject {
     private var lastFetchMetric: RankingMetric?
     private var lastFetchScope: RankingScope?
     private var lastFetchResortKey: String?
+    private var lastFetchSeasonIdOverride: String?
+    private var lastFetchWeekIdOverride: String?
     private var lastLeaderboardBoardId: String?
     private var boardFetchStates: [String: BoardFetchState] = [:]
     private var boardLeaderboardCache: [String: BoardLeaderboardCache] = [:]
@@ -110,7 +118,19 @@ class RankingService: ObservableObject {
     
     private init() {
         // 초기화 시 더미/로컬 데이터 로드
-        self.myProfile = RankingProfile(userId: Auth.auth().currentUser?.uid ?? "guest", userName: Auth.auth().currentUser?.displayName ?? "skier")
+        if userDefaults.object(forKey: rankingEnabledKey) == nil {
+            userDefaults.set(true, forKey: rankingEnabledKey)
+        }
+        self.isRankingEnabled = userDefaults.bool(forKey: rankingEnabledKey)
+        let defaultHemisphere: Hemisphere = .north
+        let defaultSeasonId = Self.seasonId(for: defaultHemisphere, referenceDate: Date())
+        let defaultWeekId = Self.currentWeekId(for: Date(), hemisphere: defaultHemisphere)
+        self.myProfile = RankingProfile(
+            userId: Auth.auth().currentUser?.uid ?? "guest",
+            userName: Auth.auth().currentUser?.displayName ?? "skier",
+            seasonId: defaultSeasonId,
+            weeklyWeekId: defaultWeekId
+        )
         self.hasPendingUpload = userDefaults.bool(forKey: pendingUploadFlagKey)
         // 디버그: 앱 시작 시 pending 상태 로깅
         let pendingSince = userDefaults.double(forKey: pendingUploadSinceKey)
@@ -129,6 +149,27 @@ class RankingService: ObservableObject {
         myProfile = updated
     }
 
+    func setRankingEnabled(_ enabled: Bool, sessions: [RunSession]) {
+        guard enabled != isRankingEnabled else { return }
+        guard canToggleRankingToday else { return }
+        
+        if enabled {
+            isRankingEnabled = true
+            clearPendingUpload()
+            syncAfterLocalChange(sessions: sessions)
+        } else {
+            clearPendingUpload()
+            clearProfileOnServer()
+            isRankingEnabled = false
+        }
+        registerRankingToggle()
+    }
+
+    private enum Hemisphere: String {
+        case north = "NH"
+        case south = "SH"
+    }
+
     private struct RunSessionSnapshot {
         let startTime: Date
         let distance: Double
@@ -138,6 +179,7 @@ class RankingService: ObservableObject {
         let flowScores: [Int]
         let locationName: String
         let isDomestic: Bool
+        let hemisphere: Hemisphere
     }
     
     private struct BoardFetchState {
@@ -173,10 +215,18 @@ class RankingService: ObservableObject {
         scope: RankingScope,
         resortKey: String? = nil,
         force: Bool = false,
+        seasonIdOverride: String? = nil,
+        weekIdOverride: String? = nil,
         completion: ((Bool) -> Void)? = nil
     ) {
         // Scope가 Crew인 경우 등 별도 로직 필요하지만 일단 Individual 기준 구현
-        let boardId = makeBoardId(cycle: cycle, metric: metric, resortKey: resortKey)
+        let boardId = makeBoardId(
+            cycle: cycle,
+            metric: metric,
+            resortKey: resortKey,
+            seasonIdOverride: seasonIdOverride,
+            weekIdOverride: weekIdOverride
+        )
         let now = Date()
         if lastLeaderboardBoardId != boardId {
             lastLeaderboardBoardId = boardId
@@ -205,6 +255,8 @@ class RankingService: ObservableObject {
         lastFetchMetric = metric
         lastFetchScope = scope
         lastFetchResortKey = resortKey
+        lastFetchSeasonIdOverride = seasonIdOverride
+        lastFetchWeekIdOverride = weekIdOverride
         
         let boardRef = db.collection("leaderboards").document(boardId)
         
@@ -323,15 +375,31 @@ class RankingService: ObservableObject {
                 if let value = any as? Int { return Double(value) }
                 return nil
             }
+
+            func intValue(_ any: Any?) -> Int? {
+                if let number = any as? NSNumber { return number.intValue }
+                if let value = any as? Int { return value }
+                if let value = any as? Double { return Int(value) }
+                return nil
+            }
             
             let userName = data["nickname"] as? String ?? "Unknown"
             let instagramId = data["instagram_id"] as? String
+            let tierRaw = data["tier"] as? String
+            let featuredBadges = data["featured_badges"] as? [String] ?? []
+            var joinedYear = intValue(data["joined_year"])
+            if joinedYear == nil, let createdAt = data["createdAt"] as? Timestamp {
+                joinedYear = Calendar.current.component(.year, from: createdAt.dateValue())
+            }
             // We construct a temporary entry with full stats
             var entry = LeaderboardEntry(
                 userId: userId,
                 rank: 0, // Rank is context dependent, kept 0 or passed from view
                 userName: userName,
                 instagramId: instagramId,
+                tierRaw: tierRaw,
+                featuredBadgeTitles: featuredBadges,
+                joinedYear: joinedYear,
                 crewName: nil,
                 mainResort: "All",
                 slopeName: nil,
@@ -431,7 +499,9 @@ class RankingService: ObservableObject {
         cycle: RankingCycle,
         metric: RankingMetric,
         scope: RankingScope,
-        resortKey: String? = nil
+        resortKey: String? = nil,
+        seasonIdOverride: String? = nil,
+        weekIdOverride: String? = nil
     ) -> Bool {
         guard consumeManualSyncQuotaIfPossible() else { return false }
         
@@ -444,6 +514,8 @@ class RankingService: ObservableObject {
                     metric: metric,
                     scope: scope,
                     resortKey: resortKey,
+                    seasonIdOverride: seasonIdOverride,
+                    weekIdOverride: weekIdOverride,
                     retryRemaining: 1
                 )
             }
@@ -482,7 +554,14 @@ class RankingService: ObservableObject {
         guard isRankingEnabled else { return }
         guard Auth.auth().currentUser != nil else { return }
         let snapshots = makeSnapshotsSafely(from: sessions)
-        let hasValidSessions = snapshots.contains { isValidRun($0) && $0.isDomestic && isWithinSeason($0.startTime) }
+        let referenceDate = Date()
+        let targetHemisphere = resolveHemisphere(from: snapshots)
+        let hasValidSessions = snapshots.contains {
+            isValidRun($0)
+                && $0.isDomestic
+                && $0.hemisphere == targetHemisphere
+                && isWithinSeason($0.startTime, referenceDate: referenceDate)
+        }
         scheduleRecalculateStats(from: snapshots, uploadPolicy: .none)
         let allowEmptyUpload = !hasValidSessions && loadLastUploadedSnapshot() != nil
         if hasValidSessions || allowEmptyUpload {
@@ -501,7 +580,14 @@ class RankingService: ObservableObject {
             return
         }
         let snapshots = makeSnapshotsSafely(from: sessions)
-        let hasValidSessions = snapshots.contains { isValidRun($0) && $0.isDomestic && isWithinSeason($0.startTime) }
+        let referenceDate = Date()
+        let targetHemisphere = resolveHemisphere(from: snapshots)
+        let hasValidSessions = snapshots.contains {
+            isValidRun($0)
+                && $0.isDomestic
+                && $0.hemisphere == targetHemisphere
+                && isWithinSeason($0.startTime, referenceDate: referenceDate)
+        }
         let allowEmptyUpload = !hasValidSessions && loadLastUploadedSnapshot() != nil
         guard hasValidSessions || allowEmptyUpload else {
             print("⚠️ pending 복구 스킵: 유효 세션 없음, allowEmpty=\(allowEmptyUpload)")
@@ -524,12 +610,17 @@ class RankingService: ObservableObject {
         guard let user = Auth.auth().currentUser else { return }
         
         var newProfile = RankingProfile(userId: user.uid, userName: user.displayName ?? "skier")
-        newProfile.instagramId = GamificationService.shared.profile.instagramId
+        let gamificationProfile = GamificationService.shared.profile
+        newProfile.instagramId = gamificationProfile.instagramId
+        newProfile.tierRaw = gamificationProfile.tier.rawValue
+        newProfile.featuredBadgeTitles = gamificationProfile.featuredBadgeTitles
+        newProfile.joinedYear = currentJoinYear()
         print("🔄 Recalculating Stats for user: \(newProfile.userId)")
         
         let now = Date()
         let calendar = kstCalendar
-        let weekId = currentWeekId(for: now)
+        let targetHemisphere = resolveHemisphere(from: snapshots)
+        let weekId = currentWeekId(for: now, hemisphere: targetHemisphere)
         
         // Top3 평균 계산 헬퍼
         func calculateTop3Average(_ scores: [Int]) -> Double {
@@ -553,24 +644,26 @@ class RankingService: ObservableObject {
             return (edgeScores, flowScores)
         }
         
-        let validSessions = snapshots.filter { isValidRun($0) && $0.isDomestic && isWithinSeason($0.startTime) }
+        let validSessions = snapshots.filter { isValidRun($0) && $0.isDomestic }
+        let hemisphereSessions = validSessions.filter { $0.hemisphere == targetHemisphere }
+        let seasonSessions = hemisphereSessions.filter { isWithinSeason($0.startTime, referenceDate: now) }
         let weekInterval = calendar.dateInterval(of: .weekOfYear, for: now)
         
         // 1. Season Data
-        let seasonSessions = validSessions
-        newProfile.seasonRunCount = seasonSessions.reduce(0) { $0 + $1.runCount }
-        newProfile.seasonDistance = seasonSessions.reduce(0) { $0 + $1.distance }
-        let seasonResortMetrics = aggregateResortMetrics(from: seasonSessions)
+        let seasonSessionsLocal = seasonSessions
+        newProfile.seasonRunCount = seasonSessionsLocal.reduce(0) { $0 + $1.runCount }
+        newProfile.seasonDistance = seasonSessionsLocal.reduce(0) { $0 + $1.distance }
+        let seasonResortMetrics = aggregateResortMetrics(from: seasonSessionsLocal)
         newProfile.seasonRunCountByResort = seasonResortMetrics.runCount
         newProfile.seasonDistanceByResort = seasonResortMetrics.distance
         
-        let seasonRunScores = collectRunScores(from: seasonSessions)
+        let seasonRunScores = collectRunScores(from: seasonSessionsLocal)
         
         newProfile.seasonBestEdge = calculateTop3Average(seasonRunScores.edge)
         newProfile.seasonBestFlow = calculateTop3Average(seasonRunScores.flow)
             
         // 2. Weekly Data
-        let weeklySessions = validSessions.filter { session in
+        let weeklySessions = seasonSessionsLocal.filter { session in
             guard let weekInterval = weekInterval else { return false }
             return session.startTime >= weekInterval.start && session.startTime < weekInterval.end
         }
@@ -585,8 +678,8 @@ class RankingService: ObservableObject {
         newProfile.weeklyBestEdge = calculateTop3Average(weeklyRunScores.edge)
         newProfile.weeklyBestFlow = calculateTop3Average(weeklyRunScores.flow)
         
-        newProfile.countryCode = validSessions.isEmpty ? "UNKNOWN" : "KR"
-        newProfile.seasonId = seasonId
+        newProfile.countryCode = seasonSessionsLocal.isEmpty ? "UNKNOWN" : "KR"
+        newProfile.seasonId = seasonId(for: targetHemisphere, referenceDate: now)
         newProfile.weeklyWeekId = weekId
         
         DispatchQueue.main.async {
@@ -672,6 +765,8 @@ class RankingService: ObservableObject {
             "seasonId": profile.seasonId,
             "weekly_weekId": profile.weeklyWeekId,
             "updatedAt": FieldValue.serverTimestamp(),
+            "tier": profile.tierRaw,
+            "featured_badges": profile.featuredBadgeTitles,
             
             // Season
             "season_runCount": profile.seasonRunCount,
@@ -685,6 +780,10 @@ class RankingService: ObservableObject {
             "weekly_runCount": profile.weeklyRunCount,
             "weekly_distance_m": profile.weeklyDistance
         ]
+
+        if let joinedYear = profile.joinedYear {
+            data["joined_year"] = joinedYear
+        }
         
         if let instagramId = profile.instagramId, !instagramId.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty {
             data["instagram_id"] = instagramId
@@ -726,7 +825,14 @@ class RankingService: ObservableObject {
                     if let cycle = self?.lastFetchCycle,
                        let metric = self?.lastFetchMetric,
                        let scope = self?.lastFetchScope {
-                        self?.fetchLeaderboard(cycle: cycle, metric: metric, scope: scope, resortKey: self?.lastFetchResortKey)
+                        self?.fetchLeaderboard(
+                            cycle: cycle,
+                            metric: metric,
+                            scope: scope,
+                            resortKey: self?.lastFetchResortKey,
+                            seasonIdOverride: self?.lastFetchSeasonIdOverride,
+                            weekIdOverride: self?.lastFetchWeekIdOverride
+                        )
                     }
                 }
             }
@@ -752,7 +858,13 @@ class RankingService: ObservableObject {
         }
     }
     
-    private func makeBoardId(cycle: RankingCycle, metric: RankingMetric, resortKey: String?) -> String {
+    private func makeBoardId(
+        cycle: RankingCycle,
+        metric: RankingMetric,
+        resortKey: String?,
+        seasonIdOverride: String? = nil,
+        weekIdOverride: String? = nil
+    ) -> String {
         let cycleKey = cycle == .season ? "season" : "weekly"
         let metricKey: String
         
@@ -768,7 +880,26 @@ class RankingService: ObservableObject {
         }
         
         let scopeKey = resortKey?.isEmpty == false ? (resortKey ?? "all") : "all"
-        return "\(cycleKey)_\(metricKey)_\(scopeKey)"
+        let suffix: String
+        switch cycle {
+        case .season:
+            if let seasonIdOverride, !seasonIdOverride.isEmpty {
+                suffix = seasonIdOverride
+            } else {
+                suffix = myProfile.seasonId.isEmpty
+                    ? seasonId(for: .north, referenceDate: Date())
+                    : myProfile.seasonId
+            }
+        case .weekly:
+            if let weekIdOverride, !weekIdOverride.isEmpty {
+                suffix = weekIdOverride
+            } else {
+                suffix = myProfile.weeklyWeekId.isEmpty
+                    ? currentWeekId(for: Date(), hemisphere: .north)
+                    : myProfile.weeklyWeekId
+            }
+        }
+        return "\(cycleKey)_\(metricKey)_\(scopeKey)_\(suffix)"
     }
 
     private func nextAllowedFetchTime(from updatedAt: Date) -> Date {
@@ -807,9 +938,19 @@ class RankingService: ObservableObject {
         metric: RankingMetric,
         scope: RankingScope,
         resortKey: String?,
+        seasonIdOverride: String?,
+        weekIdOverride: String?,
         retryRemaining: Int
     ) {
-        fetchLeaderboard(cycle: cycle, metric: metric, scope: scope, resortKey: resortKey, force: true) { [weak self] success in
+        fetchLeaderboard(
+            cycle: cycle,
+            metric: metric,
+            scope: scope,
+            resortKey: resortKey,
+            force: true,
+            seasonIdOverride: seasonIdOverride,
+            weekIdOverride: weekIdOverride
+        ) { [weak self] success in
             guard let self else { return }
             guard !success, retryRemaining > 0 else { return }
             DispatchQueue.main.asyncAfter(deadline: .now() + self.manualSyncRetryDelay) {
@@ -818,6 +959,8 @@ class RankingService: ObservableObject {
                     metric: metric,
                     scope: scope,
                     resortKey: resortKey,
+                    seasonIdOverride: seasonIdOverride,
+                    weekIdOverride: weekIdOverride,
                     retryRemaining: retryRemaining - 1
                 )
             }
@@ -830,6 +973,18 @@ class RankingService: ObservableObject {
         formatter.locale = Locale(identifier: "ko_KR")
         formatter.dateFormat = "yyyy-MM-dd"
         return formatter.string(from: Date())
+    }
+
+    var canToggleRankingToday: Bool {
+        guard rankingToggleLimitEnabled else { return true }
+        let dayKey = currentKSTDayKey()
+        let storedDay = userDefaults.string(forKey: rankingToggleDayKey)
+        return storedDay != dayKey
+    }
+
+    private func registerRankingToggle() {
+        guard rankingToggleLimitEnabled else { return }
+        userDefaults.set(currentKSTDayKey(), forKey: rankingToggleDayKey)
     }
 
     private func consumeManualSyncQuotaIfPossible() -> Bool {
@@ -848,14 +1003,18 @@ class RankingService: ObservableObject {
     // MARK: - 국내/시즌/주차 계산
     
     private var kstCalendar: Calendar {
+        Self.makeKSTCalendar()
+    }
+
+    private static func makeKSTCalendar() -> Calendar {
         var calendar = Calendar(identifier: .gregorian)
-        calendar.timeZone = kstTimeZone
+        calendar.timeZone = TimeZone(identifier: "Asia/Seoul") ?? .current
         calendar.locale = Locale(identifier: "ko_KR")
         calendar.firstWeekday = 2 // 월요일 시작
         return calendar
     }
     
-    private func makeKSTDate(year: Int, month: Int, day: Int, hour: Int, minute: Int, second: Int) -> Date {
+    private static func makeKSTDate(year: Int, month: Int, day: Int, hour: Int, minute: Int, second: Int) -> Date {
         var components = DateComponents()
         components.year = year
         components.month = month
@@ -863,27 +1022,85 @@ class RankingService: ObservableObject {
         components.hour = hour
         components.minute = minute
         components.second = second
-        components.timeZone = kstTimeZone
-        return kstCalendar.date(from: components) ?? Date()
+        components.timeZone = TimeZone(identifier: "Asia/Seoul")
+        return makeKSTCalendar().date(from: components) ?? Date()
     }
-    
-    private var seasonStartDate: Date {
-        makeKSTDate(year: 2025, month: 11, day: 1, hour: 0, minute: 0, second: 0)
+
+    private func resolveHemisphere(from snapshots: [RunSessionSnapshot]) -> Hemisphere {
+        let candidates = snapshots.filter { isValidRun($0) }
+        let sorted = (candidates.isEmpty ? snapshots : candidates).sorted { $0.startTime > $1.startTime }
+        return sorted.first?.hemisphere ?? .north
     }
-    
-    private var seasonEndDate: Date {
-        makeKSTDate(year: 2026, month: 3, day: 31, hour: 23, minute: 59, second: 59)
+
+    private func hemisphere(for session: RunSession) -> Hemisphere {
+        for coord in session.routeCoordinates {
+            guard coord.count >= 2 else { continue }
+            let lat = coord[0]
+            return lat < 0 ? .south : .north
+        }
+        if session.countryCode == "KR" {
+            return .north
+        }
+        return .north
     }
-    
-    private func isWithinSeason(_ date: Date) -> Bool {
-        return date >= seasonStartDate && date <= seasonEndDate
+
+    private func seasonStartYear(for referenceDate: Date) -> Int {
+        let year = kstCalendar.component(.year, from: referenceDate)
+        let seasonStart = Self.makeKSTDate(year: year, month: 6, day: 1, hour: 0, minute: 0, second: 0)
+        return referenceDate >= seasonStart ? year : (year - 1)
     }
-    
-    private func currentWeekId(for date: Date) -> String {
+
+    private func seasonRange(for referenceDate: Date) -> DateInterval {
+        let startYear = seasonStartYear(for: referenceDate)
+        let start = Self.makeKSTDate(year: startYear, month: 6, day: 1, hour: 0, minute: 0, second: 0)
+        let end = Self.makeKSTDate(year: startYear + 1, month: 5, day: 31, hour: 23, minute: 59, second: 59)
+        return DateInterval(start: start, end: end)
+    }
+
+    private func isWithinSeason(_ date: Date, referenceDate: Date) -> Bool {
+        let range = seasonRange(for: referenceDate)
+        return date >= range.start && date <= range.end
+    }
+
+    private func seasonId(for hemisphere: Hemisphere, referenceDate: Date) -> String {
+        let startYear = seasonStartYear(for: referenceDate)
+        switch hemisphere {
+        case .north:
+            let startYY = startYear % 100
+            let endYY = (startYear + 1) % 100
+            return String(format: "NH_%02d_%02d", startYY, endYY)
+        case .south:
+            return "SH_\(startYear)"
+        }
+    }
+
+    private func currentWeekId(for date: Date, hemisphere: Hemisphere) -> String {
         let calendar = kstCalendar
         let year = calendar.component(.yearForWeekOfYear, from: date)
         let week = calendar.component(.weekOfYear, from: date)
-        return String(format: "%04d-W%02d", year, week)
+        return String(format: "%@_%04d-W%02d", hemisphere.rawValue, year, week)
+    }
+
+    private static func seasonId(for hemisphere: Hemisphere, referenceDate: Date) -> String {
+        let calendar = makeKSTCalendar()
+        let year = calendar.component(.year, from: referenceDate)
+        let seasonStart = makeKSTDate(year: year, month: 6, day: 1, hour: 0, minute: 0, second: 0)
+        let startYear = referenceDate >= seasonStart ? year : (year - 1)
+        switch hemisphere {
+        case .north:
+            let startYY = startYear % 100
+            let endYY = (startYear + 1) % 100
+            return String(format: "NH_%02d_%02d", startYY, endYY)
+        case .south:
+            return "SH_\(startYear)"
+        }
+    }
+
+    private static func currentWeekId(for date: Date, hemisphere: Hemisphere) -> String {
+        let calendar = makeKSTCalendar()
+        let year = calendar.component(.yearForWeekOfYear, from: date)
+        let week = calendar.component(.weekOfYear, from: date)
+        return String(format: "%@_%04d-W%02d", hemisphere.rawValue, year, week)
     }
     
     private func isDomesticSession(countryCode: String, routeCoordinates: [[Double]]) -> Bool {
@@ -986,6 +1203,9 @@ class RankingService: ObservableObject {
         let countryCode: String
         let seasonId: String
         let weeklyWeekId: String
+        let tierRaw: String?
+        let featuredBadgeTitles: [String]?
+        let joinedYear: Int?
         let seasonRunCount: Int
         let seasonDistance: Double
         let seasonBestEdge: Double
@@ -1002,11 +1222,14 @@ class RankingService: ObservableObject {
 
     private func makeUploadSnapshot(from profile: RankingProfile) -> UploadSnapshot {
         return UploadSnapshot(
-            schemaVersion: 1,
+            schemaVersion: 2,
             userName: profile.userName,
             countryCode: profile.countryCode,
             seasonId: profile.seasonId,
             weeklyWeekId: profile.weeklyWeekId,
+            tierRaw: profile.tierRaw,
+            featuredBadgeTitles: profile.featuredBadgeTitles,
+            joinedYear: profile.joinedYear,
             seasonRunCount: profile.seasonRunCount,
             seasonDistance: profile.seasonDistance,
             seasonBestEdge: profile.seasonBestEdge,
@@ -1038,6 +1261,9 @@ class RankingService: ObservableObject {
         guard lhs.countryCode == rhs.countryCode else { return false }
         guard lhs.seasonId == rhs.seasonId else { return false }
         guard lhs.weeklyWeekId == rhs.weeklyWeekId else { return false }
+        guard lhs.tierRaw == rhs.tierRaw else { return false }
+        guard (lhs.featuredBadgeTitles ?? []) == (rhs.featuredBadgeTitles ?? []) else { return false }
+        guard lhs.joinedYear == rhs.joinedYear else { return false }
         guard lhs.seasonRunCount == rhs.seasonRunCount else { return false }
         guard nearlyEqual(lhs.seasonDistance, rhs.seasonDistance, epsilon: distanceEpsilon) else { return false }
         guard nearlyEqual(lhs.seasonBestEdge, rhs.seasonBestEdge, epsilon: scoreEpsilon) else { return false }
@@ -1084,6 +1310,13 @@ class RankingService: ObservableObject {
 
     private func clearLastUploadedSnapshot() {
         userDefaults.removeObject(forKey: uploadSnapshotKey)
+    }
+
+    private func currentJoinYear() -> Int? {
+        guard let creationDate = Auth.auth().currentUser?.metadata.creationDate else {
+            return nil
+        }
+        return Calendar.current.component(.year, from: creationDate)
     }
     
     // MARK: - 리조트 매핑/집계
@@ -1177,6 +1410,7 @@ class RankingService: ObservableObject {
                 countryCode: session.countryCode,
                 routeCoordinates: session.routeCoordinates
             )
+            let hemisphere = hemisphere(for: session)
             
             return RunSessionSnapshot(
                 startTime: session.startTime,
@@ -1186,13 +1420,14 @@ class RankingService: ObservableObject {
                 edgeScores: runScores.edge,
                 flowScores: runScores.flow,
                 locationName: session.locationName,
-                isDomestic: isDomestic
+                isDomestic: isDomestic,
+                hemisphere: hemisphere
             )
         }
     }
 
     private func clearProfileOnServer() {
-        guard isRankingEnabled, let user = Auth.auth().currentUser else { return }
+        guard let user = Auth.auth().currentUser else { return }
         
         let docRef = db.collection("rankings").document(user.uid)
         docRef.delete { [weak self] error in

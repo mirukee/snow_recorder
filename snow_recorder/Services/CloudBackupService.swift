@@ -130,6 +130,7 @@ final class CloudBackupService {
             verticalDrop: session.verticalDrop,
             runCount: session.runCount,
             userID: session.userID,
+            isFavorite: session.isFavorite,
             slopeName: session.slopeName,
             riddenSlopes: session.riddenSlopes,
             locationName: session.locationName,
@@ -201,6 +202,7 @@ final class CloudBackupService {
             edgeBreakdown: payload.edgeBreakdown ?? .empty
         )
         session.id = payload.id
+        session.isFavorite = payload.isFavorite ?? false
         session.runMetrics = payload.runMetrics
         return session
     }
@@ -267,6 +269,7 @@ private struct RunSessionPayload: Codable {
     let verticalDrop: Double
     let runCount: Int
     let userID: String?
+    let isFavorite: Bool?
     let slopeName: String?
     let riddenSlopes: [String: Int]
     let locationName: String

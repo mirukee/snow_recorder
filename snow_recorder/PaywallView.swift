@@ -329,7 +329,8 @@ struct PaywallView: View {
                     title: locString("paywall.plan_founders"),
                     subtitleKey: "paywall.founders_subtitle",
                     price: lifetime.displayPrice,
-                    plan: .lifetime
+                    plan: .lifetime,
+                    showsBestValueBadge: true
                 )
             }
         }
@@ -343,7 +344,7 @@ struct PaywallView: View {
                 neonGreen: neonGreen,
                 cardDark: cardDark,
                 checkmarkView: planCheckmark(plan: .annual),
-                badgeView: bestValueBadge,
+                badgeView: EmptyView(),
                 yearlySubtitle: String(format: locString("paywall.billing_yearly_format"), product.displayPrice)
             )
         }
@@ -366,6 +367,9 @@ struct PaywallView: View {
                         Text("paywall.plan_annual")
                             .font(.system(size: 18, weight: .bold))
                             .foregroundColor(.white)
+                        Text("paywall.subscription_length_yearly")
+                            .font(.system(size: 11, weight: .medium))
+                            .foregroundColor(.white.opacity(0.45))
                         Text(verbatim: yearlySubtitle)
                             .font(.system(size: 12))
                             .foregroundColor(.white.opacity(0.5))
@@ -433,34 +437,41 @@ struct PaywallView: View {
         }
     }
     
-    private func pricingRow(title: String, subtitleKey: LocalizedStringKey, price: String, plan: Plan) -> some View {
+    private func pricingRow(title: String, subtitleKey: LocalizedStringKey, price: String, plan: Plan, showsBestValueBadge: Bool = false) -> some View {
         Button(action: { selectedPlan = plan }) {
-            HStack {
-                VStack(alignment: .leading, spacing: 4) {
-                    Text(title)
-                        .font(.system(size: 18, weight: .bold))
+            ZStack(alignment: .top) {
+                HStack {
+                    VStack(alignment: .leading, spacing: 4) {
+                        Text(title)
+                            .font(.system(size: 18, weight: .bold))
+                            .foregroundColor(selectedPlan == plan ? .white : .white.opacity(0.9))
+                        Text(subtitleKey)
+                            .font(.system(size: 12))
+                            .foregroundColor(selectedPlan == plan ? .white.opacity(0.5) : .white.opacity(0.4))
+                    }
+                    
+                    Spacer()
+                    
+                    Text(verbatim: price)
+                        .font(.system(size: 24, weight: .bold))
                         .foregroundColor(selectedPlan == plan ? .white : .white.opacity(0.9))
-                    Text(subtitleKey)
-                        .font(.system(size: 12))
-                        .foregroundColor(selectedPlan == plan ? .white.opacity(0.5) : .white.opacity(0.4))
+                    
+                    
+                    planCheckmark(plan: plan)
                 }
+                .padding(16)
+                .background(Color.white.opacity(0.05))
+                .cornerRadius(16)
+                .overlay(
+                    RoundedRectangle(cornerRadius: 16)
+                        .stroke(selectedPlan == plan ? Color.white.opacity(0.6) : Color.white.opacity(0.1), lineWidth: 1)
+                )
                 
-                Spacer()
-                
-                Text(verbatim: price)
-                    .font(.system(size: 24, weight: .bold))
-                    .foregroundColor(selectedPlan == plan ? .white : .white.opacity(0.9))
-                
-                
-                planCheckmark(plan: plan)
+                if showsBestValueBadge {
+                    bestValueBadge
+                }
             }
-            .padding(16)
-            .background(Color.white.opacity(0.05))
-            .cornerRadius(16)
-            .overlay(
-                RoundedRectangle(cornerRadius: 16)
-                    .stroke(selectedPlan == plan ? Color.white.opacity(0.6) : Color.white.opacity(0.1), lineWidth: 1)
-            )
+            .padding(.top, showsBestValueBadge ? 8 : 0)
         }
         .buttonStyle(PlainButtonStyle())
     }
@@ -505,6 +516,12 @@ struct PaywallView: View {
                     Text("paywall.footer_social_proof")
                         .font(.system(size: 12, weight: .medium))
                         .foregroundColor(.white.opacity(0.4))
+                    
+                    if selectedPlan == .annual {
+                        Text("paywall.footer_auto_renew")
+                            .font(.system(size: 11, weight: .medium))
+                            .foregroundColor(.white.opacity(0.35))
+                    }
                     
                     HStack(spacing: 16) {
                         Button(action: {

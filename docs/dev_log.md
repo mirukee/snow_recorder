@@ -1,5 +1,24 @@
 # 개발 일지 (Field Test / Bugfix)
 
+## 2026-02-06
+- 파이어스토어 보안 규칙 강화: `rankings/{uid}` 본인 문서만 쓰기/삭제 허용, `leaderboards` 읽기만 허용, 그 외 경로 차단.
+- 시즌/주차 ID 반구 분리: `NH_25_26`, `SH_2026`, `NH_YYYY-Www` 형식으로 생성 및 서버/클라이언트 반영.
+- 리더보드 보드 ID에 시즌/주차 suffix 포함: `season_distance_m_all_NH_25_26` 같은 구조로 분리.
+- 리더보드 갱신 방식 변경: 변경 이벤트 → 큐 적재 → 스케줄러(10분 간격) 배치 처리로 전환.
+- 랭킹 도움말 문구 업데이트: “정각 배치” → “몇 분 단위 배치”로 UX 안내 문구 갱신.
+- 랭킹 UI: “UPDATED HH:mm” 표시를 보드/필터 영역에 복원(스크롤 헤더에서 보이도록).
+- 해외 리더보드 표시 UX 추가: HOME/OVERSEAS 토글로 시즌 표기만 교체, 북반구 기본 노출 유지.
+
+### 분포 요약(히스토그램) 계획
+- 목표: 상위 1000 밖 유저에게 **정확 순위 대신 상위 % 근사치** 제공.
+- 저장 구조: `leaderboard_stats/{boardId}` 문서에 `total`, `buckets`, `updatedAt` 저장.
+- 생성 타이밍: 리더보드 큐 처리 시 `rankings` 전체를 스캔하여 버킷 카운트 산출 후 함께 업데이트.
+- 버킷 설계(1차):
+  - `edge/flow`: 0~1000 고정 40~50버킷.
+  - `distance/runCount`: 로그 스케일 버킷(분포 쏠림 완화).
+- UI 사용: TOP 1000 안이면 정확 랭크, 밖이면 `TOP XX%` 표기.
+- 향후 개선: 분포 변화가 큰 구간은 **quantile 버킷**으로 정밀도 향상.
+
 ## 2026-01-31
 - StoreKit 로컬 테스트 이슈: 실기기/시뮬레이터 모두 `StoreKit config path: nil`로 로컬 StoreKit 주입 실패, `Product.products(for:)` 결과 빈 배열.
 - 확인 로그: `Env keys (filtered)`에 StoreKit 관련 키 없음, 번들 ID는 `com.mirukee.snow-recorder` 정상 출력.

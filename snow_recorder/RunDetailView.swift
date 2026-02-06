@@ -28,6 +28,7 @@ struct RunDetailView: View {
     @State private var showPaywall = false
     @State private var showAnalysisPaywall = false
     @State private var showComingSoonAlert = false
+    @State private var showComparePicker = false
     
     private let timelineNoiseThreshold: TimeInterval = 40.0
     private let timelineNoiseVerticalDrop: Double = 30.0
@@ -105,6 +106,9 @@ struct RunDetailView: View {
                         if !session.runMetrics.isEmpty {
                             runMetricsSection
                         }
+                        
+                        compareRunsCard
+                            .padding(.horizontal)
                         
                         // 6. Timeline
                         if !session.timelineEvents.isEmpty {
@@ -231,6 +235,9 @@ struct RunDetailView: View {
         }
         .sheet(isPresented: $showPaywall) {
             PaywallView()
+        }
+        .sheet(isPresented: $showComparePicker) {
+            CompareRunPickerView(session: session)
         }
         .sheet(item: $gpxFileURL) { identifiableURL in
             ShareSheet(activityItems: [identifiableURL.url])
@@ -882,7 +889,13 @@ struct RunDetailView: View {
     }
     
     private var compareRunsCard: some View {
-        Button(action: { showPaywall = true }) {
+        Button(action: {
+            if storeManager.isPro {
+                showComparePicker = true
+            } else {
+                showPaywall = true
+            }
+        }) {
             HStack(spacing: 12) {
                 Image(systemName: "chart.xyaxis.line")
                     .font(.system(size: 18, weight: .bold))
@@ -902,9 +915,9 @@ struct RunDetailView: View {
                 
                 Spacer()
                 
-                Image(systemName: "lock.fill")
+                Image(systemName: storeManager.isPro ? "chevron.right" : "lock.fill")
                     .font(.system(size: 12, weight: .bold))
-                    .foregroundColor(.yellow)
+                    .foregroundColor(storeManager.isPro ? .white.opacity(0.6) : .yellow)
             }
             .padding(14)
             .background(surfaceCard)
@@ -1024,10 +1037,6 @@ struct RunDetailView: View {
             }
             .padding(.horizontal)
             
-            if !storeManager.isPro {
-                compareRunsCard
-                    .padding(.horizontal)
-            }
         }
     }
     
@@ -1964,7 +1973,7 @@ struct FullScreenMapView: View {
                         .clipShape(RoundedRectangle(cornerRadius: 14))
                 }
             }
-            .padding(.horizontal, 16)
+            .padding(.horizontal, 12)
             .padding(.top, 8)
             .padding(.bottom, 10)
             .background(
@@ -1975,7 +1984,7 @@ struct FullScreenMapView: View {
                             .stroke(Color.white.opacity(0.08), lineWidth: 1)
                     )
             )
-            .padding(.horizontal, 16)
+            .padding(.horizontal, 8)
         }
     }
     

@@ -134,7 +134,7 @@ private struct BadgeItem: View {
                         .frame(height: 30, alignment: .top) // Fixed height for alignment
                     
                     if !badge.isEarned {
-                        Text(String(localized: "badge.detail.locked"))
+                        Text("badge.detail.locked")
                             .font(.system(size: 8, weight: .bold))
                             .foregroundColor(.gray.opacity(0.5))
                             .padding(.horizontal, 6)
@@ -160,7 +160,7 @@ private struct BadgeDetailCard: View {
     var body: some View {
         VStack(spacing: 16) {
             HStack {
-                Text(badge.isEarned ? String(localized: "badge.detail.earned") : String(localized: "badge.detail.locked"))
+                Text(LocalizedStringKey(badge.isEarned ? "badge.detail.earned" : "badge.detail.locked"))
                     .font(.system(size: 10, weight: .bold, design: .monospaced))
                     .tracking(1.0)
                     .foregroundColor(badge.isEarned ? neonGreen : .gray)
@@ -194,14 +194,14 @@ private struct BadgeDetailCard: View {
                     .foregroundColor(.white)
                     .multilineTextAlignment(.center)
                 
-                Text(badge.description)
+                Text(LocalizedStringKey(badge.descriptionKey))
                     .font(.system(size: 13, weight: .medium))
                     .foregroundColor(.white.opacity(0.75))
                     .multilineTextAlignment(.center)
                     .lineSpacing(4)
             }
             
-            Text(String(localized: "badge.detail.tap_to_close"))
+            Text("badge.detail.tap_to_close")
                 .font(.system(size: 10, weight: .medium, design: .monospaced))
                 .tracking(1.0)
                 .foregroundColor(.white.opacity(0.4))
@@ -221,8 +221,8 @@ private struct BadgeDetailCard: View {
 
 #Preview {
     BadgeListView(badges: [
-        Badge(title: "First Run", description: "Desc", iconName: "figure.skiing.downhill", isEarned: true, unlockCondition: { _ in true }),
-        Badge(title: "Marathoner", description: "Desc", iconName: "figure.walk", isEarned: false, unlockCondition: { _ in false })
+        Badge(title: "First Run", descriptionKey: "badge.desc.first_steps", iconName: "figure.skiing.downhill", isEarned: true, unlockCondition: { _ in true }),
+        Badge(title: "Marathoner", descriptionKey: "badge.desc.marathoner", iconName: "figure.walk", isEarned: false, unlockCondition: { _ in false })
     ])
     .preferredColorScheme(.dark)
 }

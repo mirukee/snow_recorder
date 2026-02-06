@@ -5,6 +5,36 @@
 
 /* 삭제하기 */
 "history.delete" = "Delete";
+/* 로딩 화면 시스템 상태 */
+"launch.system_online" = "SYSTEM ONLINE";
+/* 로딩 화면 타이틀 */
+"launch.title" = "SNOW\nRECORD";
+/* 로딩 모듈 라벨 */
+"launch.loading_modules" = "LOADING_MODULES";
+/* 로딩 프로 팁 라벨 */
+"launch.pro_tip" = "PRO TIP";
+/* 로딩 팁 1 */
+"launch.tip_1" = "Keep your weight forward for better edge control.";
+/* 로딩 팁 2 */
+"launch.tip_2" = "Smooth turns build a higher flow score.";
+/* 로딩 팁 3 */
+"launch.tip_3" = "Look ahead to keep your line clean and stable.";
+/* 로딩 상태 - 동기화 */
+"launch.status_syncing" = "SYNCING RUN DATA...";
+/* 로딩 상태 - 캘리브레이션 */
+"launch.status_calibrating" = "CALIBRATING SENSORS...";
+/* 로딩 상태 - 워밍업 */
+"launch.status_warming" = "WARMING UP SYSTEMS...";
+/* 히스토리 정렬 라벨 */
+"history.sort" = "SORT";
+/* 히스토리 정렬 - 최신순 */
+"history.sort_latest" = "LATEST";
+/* 히스토리 정렬 - 거리순 */
+"history.sort_distance" = "DISTANCE";
+/* 히스토리 정렬 - 오래된순 */
+"history.sort_oldest" = "OLDEST";
+/* 즐겨찾기 필터 */
+"history.favorites_only" = "FAVORITES";
 
 /* 첫 런을 기다리는 중... */
 "dashboard.wait_first_run" = "Waiting for your first run...";
@@ -22,6 +52,10 @@
 
 /* 테크니컬 스코어 가이드 */
 "ranking.tech_guide_title" = "Technical Score Guide";
+/* 해외 시즌 보기 */
+"ranking.overseas_toggle" = "OVERSEAS";
+/* 홈 시즌 보기 */
+"ranking.overseas_toggle_home" = "HOME";
 
 /* 법적 문서 섹션 */
 "settings.legal" = "LEGAL";
@@ -40,6 +74,8 @@
 
 /* 랭킹 업로드 설명 */
 "settings.ranking_participate_desc" = "Upload your runs to the leaderboard automatically.";
+/* 랭킹 참여 토글 제한 안내 */
+"settings.ranking_toggle_limit" = "You can change this once per day.";
 
 /* 백업 섹션 타이틀 */
 "settings.section_backup" = "BACKUP (ICLOUD)";
@@ -85,6 +121,12 @@
 
 /* 로그아웃 안내 */
 "settings.sign_out_message" = "You will be signed out and switched to guest mode.";
+
+/* 가입 연도 라벨 */
+"profile.chasing_powder_since" = "CHASING POWDER SINCE '%@";
+
+/* 뱃지 변경 반영 안내 토스트 */
+"profile.featured_badges_sync_toast" = "BADGE UPDATE WILL SYNC AFTER YOUR NEXT RUN UPLOAD.";
 
 /* 로그아웃 취소 */
 "settings.sign_out_cancel" = "Cancel";
@@ -168,6 +210,16 @@
 "flow_report.breakdown_brake" = "BRAKE PENALTY";
 /* 플로우 리포트 채터 패널티 라벨 */
 "flow_report.breakdown_chatter" = "CHATTER PENALTY";
+/* 런 분석 리포트 다운로드 버튼 */
+"analysis_report.download_button" = "DOWNLOAD REPORT";
+/* 런 분석 리포트 다운로드 실패 타이틀 */
+"analysis_report.download_error_title" = "Report Download Failed";
+/* 런 분석 리포트 다운로드 실패 메시지 */
+"analysis_report.download_error_message" = "Failed to generate the report image.";
+/* 런 분석 리포트 다운로드 완료 */
+"analysis_report.download_complete" = "SAVED";
+/* 확인 */
+"common.ok" = "OK";
 /* 플로우 리포트 조용함 보너스 라벨 */
 "flow_report.breakdown_quiet" = "QUIET BONUS";
 /* 플로우 리포트 최종 점수 라벨 */
@@ -187,7 +239,7 @@
 /* 동기화 대기 도움말 타이틀 */
 "ranking.sync_pending_help_title" = "SYNC PENDING";
 /* 동기화 대기 도움말 본문 */
-"ranking.sync_pending_help_body" = "You have changes that haven't synced to the server yet.\nAn automatic upload may be queued, or the hourly leaderboard refresh may not have run.";
+"ranking.sync_pending_help_body" = "You have changes that haven't synced to the server yet.\nAn automatic upload may be queued, or the leaderboard batch may not have processed yet.";
 /* 동기화 대기 도움말 확인 */
 "ranking.sync_pending_help_ok" = "OK";
 
@@ -201,7 +253,7 @@
 "ranking.sync_help_title" = "MANUAL SYNC";
 
 /* 리더보드 동기화 도움말 */
-"ranking.sync_help_body" = "MANUAL SYNC uploads your stats to the server.\nUploads are usually automatic—use this when you need an immediate push.\nDaily usage is limited, and leaderboards refresh on the hour so updates may appear later.";
+"ranking.sync_help_body" = "MANUAL SYNC uploads your stats to the server.\nUploads are usually automatic—use this when you need an immediate push.\nDaily usage is limited, and leaderboards refresh in batches every few minutes, so updates may appear later.";
 
 /* 동기화 도움말 확인 */
 "ranking.sync_help_ok" = "OK";
@@ -280,7 +332,7 @@
 /* 페이월 플랜 타이틀(파운더스 팩) */
 "paywall.plan_founders" = "FOUNDERS PACK";
 /* 페이월 파운더스팩 서브카피 */
-"paywall.founders_subtitle" = "Launch-only · Lifetime access";
+"paywall.founders_subtitle" = "Launch-only · Lifetime access · One-time payment";
 
 /* "얼마나 날카롭게 베고 나갔는가?"\n\n당신의 턴이 설면을 얼마나 견고하게 파고들었는지 분석한 '카빙(Carving) 완성도' 지표입니다.\n\n분석 기준: 턴의 깊이, 엣징 각도(G-Force), 슬립(미끄러짐) 최소화\n\nTip: 데크가 눈에 박히는 느낌에 집중하고, 과감하게 엣지를 세울수록 점수가 올라갑니다. */
 "run_detail.edge_desc" = "\"How sharply did you carve?\"\n\nA carving-completion metric that analyzes how firmly your turns cut into the snow.\n\nCriteria: turn depth, edge angle (G-Force), minimal slip\n\nTip: Focus on driving the edge into the snow; the more confidently you set the edge, the higher the score.";
@@ -332,6 +384,82 @@
 
 /* 런 비교 카드 설명 */
 "run_detail.compare_desc" = "Compare this run vs season average";
+
+/* 런 비교 - 런 선택 타이틀 */
+"compare.run_picker.title" = "SESSION ANALYSIS";
+/* 런 비교 - 런 선택 안내 */
+"compare.run_picker.subtitle" = "Select a run to compare";
+/* 런 비교 - 선택 개수 포맷 */
+"compare.run_picker.selected_count_format" = "%d SELECTED";
+/* 런 비교 - 비교 버튼 */
+"compare.run_picker.compare_button" = "COMPARE SELECTED";
+/* 런 비교 - 런 라벨 */
+"compare.run_picker.run_label" = "RUN";
+/* 런 비교 - 런 없음 */
+"compare.run_picker.empty" = "No runs in this session";
+/* 런 비교 - 난이도 알 수 없음 */
+"compare.run_picker.difficulty_unknown" = "UNKNOWN";
+
+/* 런 비교 상세 - 분석 라벨 */
+"compare.detail.analysis_label" = "ANALYSIS";
+/* 런 비교 상세 - 시즌 평균 라벨 */
+"compare.detail.season_avg_label" = "SEASON AVG";
+/* 런 비교 상세 - 런 ID 포맷 */
+"compare.detail.run_id_format" = "RUN_ID: %@";
+/* 런 비교 상세 - 시스템 상태 */
+"compare.detail.system_ready" = "SYSTEM_READY";
+/* 런 비교 상세 - 최대 속도 */
+"compare.detail.metric_max_speed" = "MAX SPEED";
+/* 런 비교 상세 - 평균 속도 */
+"compare.detail.metric_avg_speed" = "AVG SPEED";
+/* 런 비교 상세 - 거리 */
+"compare.detail.metric_distance" = "DISTANCE";
+/* 런 비교 상세 - 하강 고도 */
+"compare.detail.metric_vert_drop" = "VERT DROP";
+/* 런 비교 상세 - 시간 */
+"compare.detail.metric_duration" = "DURATION";
+/* 런 비교 상세 - 엣지 스코어 */
+"compare.detail.metric_edge_score" = "EDGE SCORE";
+/* 런 비교 상세 - 플로우 스코어 */
+"compare.detail.metric_flow_score" = "FLOW SCORE";
+/* 런 비교 상세 - 엣지 토글 라벨 */
+"compare.detail.edge_tab" = "EDGE";
+/* 런 비교 상세 - 플로우 토글 라벨 */
+"compare.detail.flow_tab" = "FLOW";
+/* 런 비교 상세 - 평균 비교 포맷 */
+"compare.detail.vs_avg_format" = "vs %@ avg";
+/* 런 비교 상세 - 평균 없음 */
+"compare.detail.vs_avg_missing" = "vs -- avg";
+/* 런 비교 상세 - 턴 대칭 */
+"compare.detail.turn_symmetry" = "TURN SYMMETRY";
+/* 런 비교 상세 - 밸런스 라벨 */
+"compare.detail.turn_balance_label" = "BALANCED";
+/* 런 비교 상세 - 왼쪽 라벨 */
+"compare.detail.turn_left_label" = "LEFT";
+/* 런 비교 상세 - 오른쪽 라벨 */
+"compare.detail.turn_right_label" = "RIGHT";
+/* 런 비교 상세 - 왼쪽 포맷 */
+"compare.detail.turn_left_format" = "LEFT %@";
+/* 런 비교 상세 - 오른쪽 포맷 */
+"compare.detail.turn_right_format" = "RIGHT %@";
+/* 런 비교 상세 - 턴 편향 메시지 */
+"compare.detail.turn_bias_format" = "%@ turns are %@ higher.";
+/* 런 비교 상세 - 턴 밸런스 메시지 */
+"compare.detail.turn_balanced_desc" = "Balanced turns detected.";
+/* 런 비교 상세 - 푸터 시스템 ID */
+"compare.detail.footer_sys_id_format" = "SYS_ID: %@";
+/* 런 비교 상세 - 시즌 런 수 */
+"compare.detail.footer_total_runs_format" = "TOTAL SEASON RUNS: %d";
+
+/* 런 비교 - 저장 토스트 */
+"compare.save_toast" = "Saved to Photos";
+
+/* 런 비교 - 잠금 타이틀 */
+"compare.lock_title" = "PRO COMPARISON";
+/* 런 비교 - 잠금 설명 */
+"compare.lock_desc" = "Run comparison is a PRO-only feature.";
+/* 런 비교 - 잠금 CTA */
+"compare.lock_cta" = "UNLOCK PRO";
 
 /* PRO 시작: */
 "paywall.headline_go_pro" = "GO PRO:";
@@ -407,6 +535,8 @@
 
 /* 10,000+ Pro 라이더 • 언제든 해지 가능 */
 "paywall.footer_social_proof" = "Cancel anytime • Billed through the App Store";
+/* 자동 갱신 구독 안내 */
+"paywall.footer_auto_renew" = "Auto-renewable subscription • Cancel anytime";
 
 /* 이용약관 */
 "paywall.terms" = "Terms of Service";
@@ -443,6 +573,8 @@
 
 /* 연간 결제 %@ */
 "paywall.billing_yearly_format" = "Billed yearly %@";
+/* 연간 구독 기간 안내 */
+"paywall.subscription_length_yearly" = "1-year subscription (auto-renewing)";
 
 /* 준비중 타이틀 */
 "common.coming_soon_title" = "COMING SOON";

@@ -162,14 +162,68 @@ struct SlopeLine {
 /// 공식 데이터 기반 - 좌표는 추후 입력 필요
 class SlopeDatabase {
     static let shared = SlopeDatabase()
-    
+
     // MARK: - 슬로프 데이터 (하이원 리조트 공식 정보 기반)
     // TODO: 각 슬로프의 boundary, topPoint, bottomPoint 좌표 입력 필요
 
     let slopes: [Slope]
+    private let resortNameBySlopeName: [String: String]
 
     init() {
-        slopes = Self.high1Slopes + Self.loadYongpyongSlopes()
+        let high1Slopes = Self.high1Slopes
+        let yongpyongSlopes = Self.loadYongpyongSlopes()
+        let alpensiaSlopes = Self.loadGenericSlopes(resourceName: "alpensia_slopes", resortName: "알펜시아 리조트")
+        let edenvalleySlopes = Self.loadGenericSlopes(resourceName: "edenvalley_slopes", resortName: "에덴밸리")
+        let gangchonSlopes = Self.loadGenericSlopes(resourceName: "gangchon_slopes", resortName: "엘리시안 강촌")
+        let jisanSlopes = Self.loadGenericSlopes(resourceName: "jisan_slopes_with_elevation", resortName: "지산 포레스트 리조트")
+        let konjiamSlopes = Self.loadGenericSlopes(resourceName: "konjiam_slopes_with_elevation", resortName: "곤지암 리조트")
+        let mujuSlopes = Self.loadGenericSlopes(resourceName: "muju_slopes", resortName: "무주 덕유산 리조트")
+        let o2Slopes = Self.loadGenericSlopes(resourceName: "o2_slopes", resortName: "오투 리조트")
+        let oakvalleySlopes = Self.loadGenericSlopes(resourceName: "oakvalley_slopes", resortName: "오크밸리")
+        let phoenixSlopes = Self.loadGenericSlopes(resourceName: "phoenix_slopes", resortName: "휘닉스 파크")
+        let vivaldiSlopes = Self.loadGenericSlopes(resourceName: "vivaldi_slopes", resortName: "비발디 파크")
+        let wellihilliSlopes = Self.loadGenericSlopes(resourceName: "wellihilli_slopes", resortName: "웰리힐리 파크")
+        
+        slopes = high1Slopes
+            + yongpyongSlopes
+            + alpensiaSlopes
+            + edenvalleySlopes
+            + gangchonSlopes
+            + jisanSlopes
+            + konjiamSlopes
+            + mujuSlopes
+            + o2Slopes
+            + oakvalleySlopes
+            + phoenixSlopes
+            + vivaldiSlopes
+            + wellihilliSlopes
+        
+        var mapping: [String: String] = [:]
+        func map(_ slopes: [Slope], resortName: String) {
+            for slope in slopes {
+                if mapping[slope.name] == nil {
+                    mapping[slope.name] = resortName
+                }
+                if mapping[slope.koreanName] == nil {
+                    mapping[slope.koreanName] = resortName
+                }
+            }
+        }
+        
+        map(high1Slopes, resortName: "하이원 리조트")
+        map(yongpyongSlopes, resortName: "용평 리조트")
+        map(alpensiaSlopes, resortName: "알펜시아 리조트")
+        map(edenvalleySlopes, resortName: "에덴밸리")
+        map(gangchonSlopes, resortName: "엘리시안 강촌")
+        map(jisanSlopes, resortName: "지산 포레스트 리조트")
+        map(konjiamSlopes, resortName: "곤지암 리조트")
+        map(mujuSlopes, resortName: "무주 덕유산 리조트")
+        map(o2Slopes, resortName: "오투 리조트")
+        map(oakvalleySlopes, resortName: "오크밸리")
+        map(phoenixSlopes, resortName: "휘닉스 파크")
+        map(vivaldiSlopes, resortName: "비발디 파크")
+        map(wellihilliSlopes, resortName: "웰리힐리 파크")
+        resortNameBySlopeName = mapping
     }
 
     private static let high1Slopes: [Slope] = [
@@ -891,7 +945,12 @@ class SlopeDatabase {
 
     ]
     
-    // MARK: - 용평 JSON 로더
+    // MARK: - JSON 로더 공통
+
+    private struct SlopePoint: Decodable {
+        let lat: Double
+        let lon: Double
+    }
     
     private struct YongpyongSlopeJSON: Decodable {
         let name: String
@@ -904,20 +963,36 @@ class SlopeDatabase {
         let polygon: [[Double]]
         let startLine: [[Double]]?
         let finishLine: [[Double]]?
-        let topPoint: YongpyongPoint?
-        let bottomPoint: YongpyongPoint?
+        let topPoint: SlopePoint?
+        let bottomPoint: SlopePoint?
         let topAltitude: Double?
         let bottomAltitude: Double?
     }
     
-    private struct YongpyongPoint: Decodable {
-        let lat: Double
-        let lon: Double
+    private struct GenericSlopeJSON: Decodable {
+        let name: String
+        let difficulty: String?
+        let distanceM: Double?
+        let angleMaxDeg: Double?
+        let angleAvgDeg: Double?
+        let avgGradientDeg: Double?
+        let polygon: [[Double]]?
+        let startLine: [[Double]]?
+        let finishLine: [[Double]]?
+        let topPoint: SlopePoint?
+        let bottomPoint: SlopePoint?
+        let topAltitude: Double?
+        let bottomAltitude: Double?
+    }
+    
+    private static func bundleURL(forResource name: String) -> URL? {
+        Bundle.main.url(forResource: name, withExtension: "json")
+            ?? Bundle.main.url(forResource: name, withExtension: "json", subdirectory: "Resources")
     }
     
     private static func loadYongpyongSlopes() -> [Slope] {
-        guard let url = Bundle.main.url(forResource: "yongpyong_slopes_with_elevation", withExtension: "json")
-            ?? Bundle.main.url(forResource: "yongpyong_slopes", withExtension: "json") else {
+        guard let url = bundleURL(forResource: "yongpyong_slopes_with_elevation")
+            ?? bundleURL(forResource: "yongpyong_slopes") else {
             return []
         }
         
@@ -978,6 +1053,29 @@ class SlopeDatabase {
             return .beginner
         }
     }
+    
+    private static func mapGenericDifficulty(_ value: String?) -> SlopeDifficulty {
+        guard let value else { return .beginner }
+        let normalized = value.lowercased()
+            .replacingOccurrences(of: "-", with: "")
+            .replacingOccurrences(of: "_", with: "")
+            .replacingOccurrences(of: " ", with: "")
+        
+        switch normalized {
+        case "beginner":
+            return .beginner
+        case "intermediate":
+            return .intermediate
+        case "advancedintermediate":
+            return .advancedIntermediate
+        case "advanced":
+            return .advanced
+        case "expert":
+            return .expert
+        default:
+            return .beginner
+        }
+    }
 
     private static func parseLine(_ raw: [[Double]]?) -> SlopeLine? {
         guard let raw, raw.count == 2 else { return nil }
@@ -985,6 +1083,55 @@ class SlopeDatabase {
         let a = CLLocationCoordinate2D(latitude: raw[0][0], longitude: raw[0][1])
         let b = CLLocationCoordinate2D(latitude: raw[1][0], longitude: raw[1][1])
         return SlopeLine(a: a, b: b)
+    }
+    
+    private static func loadGenericSlopes(resourceName: String, resortName: String) -> [Slope] {
+        guard let url = bundleURL(forResource: resourceName) else {
+            return []
+        }
+        
+        do {
+            let data = try Data(contentsOf: url)
+            let decoded = try JSONDecoder().decode([GenericSlopeJSON].self, from: data)
+            return decoded.compactMap { item in
+                let difficulty = mapGenericDifficulty(item.difficulty)
+                let boundary = (item.polygon ?? []).compactMap { point -> CLLocationCoordinate2D? in
+                    guard point.count >= 2 else { return nil }
+                    return CLLocationCoordinate2D(latitude: point[0], longitude: point[1])
+                }
+                let startLine = parseLine(item.startLine)
+                let finishLine = parseLine(item.finishLine)
+                let topPoint = item.topPoint.map {
+                    CLLocationCoordinate2D(latitude: $0.lat, longitude: $0.lon)
+                }
+                let bottomPoint = item.bottomPoint.map {
+                    CLLocationCoordinate2D(latitude: $0.lat, longitude: $0.lon)
+                }
+                let avgGradient = item.avgGradientDeg ?? item.angleAvgDeg ?? 0.0
+                let maxGradient = item.angleMaxDeg ?? avgGradient
+                let length = item.distanceM ?? 0.0
+                
+                return Slope(
+                    name: item.name,
+                    koreanName: item.name,
+                    difficulty: difficulty,
+                    length: length,
+                    avgGradient: avgGradient,
+                    maxGradient: maxGradient,
+                    status: .operating,
+                    boundary: boundary,
+                    topPoint: topPoint,
+                    bottomPoint: bottomPoint,
+                    topAltitude: item.topAltitude,
+                    bottomAltitude: item.bottomAltitude,
+                    startLine: startLine,
+                    finishLine: finishLine
+                )
+            }
+        } catch {
+            print("⚠️ \(resortName) JSON 로드 실패: \(error)")
+            return []
+        }
     }
 
     // MARK: - 운영 중인 슬로프만 필터링
@@ -1017,5 +1164,10 @@ class SlopeDatabase {
     /// 슬로프 이름으로 검색
     func findSlope(byName name: String) -> Slope? {
         slopes.first { $0.name == name || $0.koreanName == name }
+    }
+    
+    /// 슬로프 이름으로 리조트명 반환
+    func resortName(for slopeName: String) -> String? {
+        resortNameBySlopeName[slopeName]
     }
 }
